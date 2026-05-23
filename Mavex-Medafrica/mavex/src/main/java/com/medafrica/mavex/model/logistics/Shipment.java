@@ -52,7 +52,7 @@ public class Shipment {
     private String portCode;
     
 
-    private String origin;////test
+
 
     /** DRAFT -> IMPORTED -> PROCESSING -> CLOSED */
     @Enumerated(EnumType.STRING)
