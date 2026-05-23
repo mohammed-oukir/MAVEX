@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mavex — Imports</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg:#F8F9FA; --panel:#FFFFFF; --border:#E5E7EB; --border2:#FED7AA;
+            --accent:#F97316; --accent2:#EA580C; --accent-soft:#FFF7ED;
+            --text:#111827; --muted:#6B7280;
+            --error:#EF4444; --success:#22C55E; --warning:#F59E0B; --info:#3B82F6;
+            --dup:#8B5CF6;
+            --sidebar:240px;
+        }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+        .sidebar { width:var(--sidebar);background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:2px 0 8px rgba(0,0,0,0.04); }
+        .sidebar-logo { padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px; }
+        .logo-mark { width:36px;height:36px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white;border-radius:10px; }
+        .logo-text { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
+        .logo-sub { font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase; }
+        .sidebar-nav { flex:1;padding:16px 10px;overflow-y:auto; }
+        .nav-section { font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;padding:0 10px;margin:16px 0 6px;font-weight:600; }
+        .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.15s;cursor:pointer;margin-bottom:2px; }
+        .nav-item:hover { background:var(--accent-soft);color:var(--accent); }
+        .nav-item.active { background:var(--accent-soft);color:var(--accent);font-weight:600; }
+        .sidebar-footer { padding:14px 10px;border-top:1px solid var(--border); }
+        .user-card { display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid var(--border2); }
+        .user-avatar { width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:white;flex-shrink:0; }
+        .user-name { font-size:13px;font-weight:600;color:var(--text); }
+        .user-role { font-size:11px;color:var(--muted); }
+        .btn-logout { margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;flex-shrink:0; }
+        .btn-logout:hover { color:var(--error); }
+
+        .main { margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh; }
+        .topbar { height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--panel);position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .topbar-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px; }
+        .content { padding:28px;flex:1; }
+
+        .section-title { font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px; }
+
+        .upload-card { background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .drop-zone { border:2px dashed var(--border2);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--accent-soft); }
+        .drop-zone.drag-over { border-color:var(--accent);background:#FEF3E8;transform:scale(1.01); }
+        .drop-zone.has-file  { border-color:var(--success);background:#F0FDF4;border-style:solid; }
+        .drop-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+        .drop-icon { font-size:36px;margin-bottom:12px; }
+        .drop-title { font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:4px; }
+        .drop-sub { font-size:13px;color:var(--muted); }
+        .drop-sub span { color:var(--accent);font-weight:600; }
+        .file-info { display:none;align-items:center;gap:12px;background:white;border:1px solid #BBF7D0;border-radius:10px;padding:12px 16px;margin-top:16px; }
+        .file-info.show { display:flex; }
+        .file-icon { width:36px;height:36px;background:#DCFCE7;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--success);flex-shrink:0; }
+        .file-name { font-weight:600;font-size:13px;color:var(--text); }
+        .file-size { font-size:12px;color:var(--muted); }
+        .btn-remove { margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;transition:color 0.15s; }
+        .btn-remove:hover { color:var(--error); }
+
+        .mode-row { display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap; }
+        .mode-label { font-size:13px;font-weight:600;color:var(--text); }
+        .toggle-group { display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px; }
+        .toggle-btn { padding:7px 16px;border-radius:6px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;color:var(--muted); }
+        .toggle-btn.active { background:var(--accent);color:white;font-weight:600;box-shadow:0 2px 6px rgba(249,115,22,0.3); }
+        .toggle-btn.strict.active { background:var(--error); box-shadow:0 2px 6px rgba(239,68,68,0.3); }
+        .mode-desc { font-size:12px;color:var(--muted);margin-top:4px; }
+
+        .stats-row { display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap; }
+        .stat-pill { background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .stat-pill-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+        .stat-pill-val { font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--text);line-height:1; }
+        .stat-pill-label { font-size:11px;color:var(--muted);margin-top:2px; }
+
+        .filter-tabs { display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap; }
+        .filter-tab { padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--panel);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;color:var(--muted); }
+        .filter-tab:hover { border-color:var(--accent);color:var(--accent); }
+        .filter-tab.active { background:var(--accent);color:white;border-color:var(--accent); }
+        .filter-tab .count { display:inline-block;background:rgba(255,255,255,0.25);border-radius:100px;padding:1px 6px;font-size:10px;margin-left:4px; }
+        .filter-tab:not(.active) .count { background:var(--bg);color:var(--muted); }
+
+        .preview-card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .preview-header { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px; }
+        .preview-title { font-family:'Syne',sans-serif;font-weight:700;font-size:14px; }
+        .preview-actions { display:flex;gap:8px; }
+
+        .table-wrap { overflow-x:auto;max-height:420px;overflow-y:auto; }
+        table { width:100%;border-collapse:collapse;font-size:12px; }
+        thead th { padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;position:sticky;top:0;z-index:1; }
+        tbody tr { border-bottom:1px solid #F9FAFB;transition:background 0.1s; }
+        tbody tr:hover { background:var(--accent-soft); }
+        tbody tr.row-error    { background:#FEF2F2; }
+        tbody tr.row-dup-file { background:#F5F3FF; }
+        tbody tr.row-dup-db   { background:#EFF6FF; }
+        tbody tr.row-ok       { background:#F0FDF4; }
+        tbody td { padding:9px 12px;color:var(--text);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis; }
+        .td-mono { font-family:monospace;font-size:11px; }
+
+        .row-badge { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;white-space:nowrap; }
+        .row-badge.ok       { background:#DCFCE7;color:#166534; }
+        .row-badge.error    { background:#FEE2E2;color:#991B1B; }
+        .row-badge.dup-file { background:#EDE9FE;color:#5B21B6; }
+        .row-badge.dup-db   { background:#DBEAFE;color:#1E40AF; }
+        .error-msg { font-size:10px;color:var(--error);margin-top:2px;max-width:200px;overflow:hidden;text-overflow:ellipsis; }
+
+        .btn-primary { display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:white;border:none;border-radius:9px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 10px rgba(249,115,22,0.3); }
+        .btn-primary:hover { background:var(--accent2);transform:translateY(-1px); }
+        .btn-primary:disabled { opacity:0.5;cursor:not-allowed;transform:none; }
+        .btn-secondary { display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s; }
+        .btn-secondary:hover { border-color:var(--accent);color:var(--accent); }
+        .btn-secondary:disabled { opacity:0.4;cursor:not-allowed; }
+        .btn-export { display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:9px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s; }
+        .btn-export:hover { background:#DCFCE7; }
+        .btn-export:disabled { opacity:0.4;cursor:not-allowed; }
+
+        /* ── BOUTON SUPPRIMER ── */
+        .btn-delete { display:inline-flex;align-items:center;gap:5px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s; }
+        .btn-delete:hover { background:#FEE2E2;border-color:#FCA5A5;transform:translateY(-1px); }
+        .btn-delete:disabled { opacity:0.4;cursor:not-allowed;transform:none; }
+
+        .result-card { display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .result-card.show { display:block; }
+        .result-header { display:flex;align-items:center;gap:12px;margin-bottom:16px; }
+        .result-icon { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px; }
+        .result-title { font-family:'Syne',sans-serif;font-weight:700;font-size:16px; }
+        .result-sub { font-size:13px;color:var(--muted); }
+        .result-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:12px; }
+        .result-item { background:var(--bg);border-radius:8px;padding:12px 14px; }
+        .result-val { font-family:'Syne',sans-serif;font-weight:800;font-size:22px;margin-bottom:2px; }
+        .result-label { font-size:11px;color:var(--muted); }
+
+        .history-card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .history-header { display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border); }
+        .history-title { font-family:'Syne',sans-serif;font-weight:700;font-size:14px; }
+
+        .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600; }
+        .badge::before { content:'';width:5px;height:5px;border-radius:50%; }
+        .badge-success { background:#F0FDF4;color:#22C55E; } .badge-success::before { background:#22C55E; }
+        .badge-partial { background:#FFF7ED;color:#F97316; } .badge-partial::before { background:#F97316; }
+        .badge-failed  { background:#FEF2F2;color:#EF4444; } .badge-failed::before  { background:#EF4444; }
+        .badge-created { background:#F3F4F6;color:#6B7280; } .badge-created::before { background:#6B7280; }
+
+        .spinner { width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .empty-state { padding:40px;text-align:center;color:var(--muted);font-size:13px; }
+
+        .loader-overlay { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.8);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px; }
+        .loader-overlay.show { display:flex; }
+        .loader-big { width:48px;height:48px;border:4px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite; }
+        .loader-text { font-family:'Syne',sans-serif;font-weight:600;font-size:14px;color:var(--accent); }
+
+        .strict-warning { display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:13px;color:#991B1B;margin-top:12px;align-items:center;gap:8px; }
+        .strict-warning.show { display:flex; }
+        .action-bar { display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px; }
+
+        /* ── MODAL CONFIRMATION SUPPRESSION ── */
+        .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:center;justify-content:center; }
+        .modal-overlay.show { display:flex; }
+        .modal { background:white;border-radius:16px;padding:28px;width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+        .modal-icon { width:52px;height:52px;background:#FEF2F2;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px; }
+        .modal-title { font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px;color:var(--text); }
+        .modal-desc { font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px; }
+        .modal-file { background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#DC2626;margin-bottom:20px;word-break:break-all; }
+        .modal-warning { background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:20px;line-height:1.5; }
+        .modal-actions { display:flex;gap:10px;justify-content:flex-end; }
+        .btn-cancel-modal { padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:white;font-size:13px;font-weight:600;cursor:pointer;color:var(--text);transition:all 0.15s; }
+        .btn-cancel-modal:hover { background:var(--bg); }
+        .btn-confirm-delete { padding:10px 20px;border-radius:8px;border:none;background:#DC2626;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px; }
+        .btn-confirm-delete:hover { background:#B91C1C; }
+        .btn-confirm-delete:disabled { opacity:0.5;cursor:not-allowed; }
+        .delete-spinner { width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
+
+        @media(max-width:768px) { .sidebar{display:none;} .main{margin-left:0;} .result-grid{grid-template-columns:repeat(2,1fr);} }
+    </style>
+</head>
+<body>
+
+<!-- MODAL CONFIRMATION SUPPRESSION -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+        <div class="modal-icon">🗑️</div>
+        <div class="modal-title">Supprimer cet import ?</div>
+        <div class="modal-desc">Cette action supprimera définitivement l'import et toutes les données associées :</div>
+        <div class="modal-file" id="modalFileName">—</div>
+        <div class="modal-warning">
+            ⚠️ Seront supprimés : les orders importés, les shipments sans autres orders, les clients sans autres orders, et le log d'import.<br/>
+            <strong>Cette action est irréversible.</strong>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel-modal" onclick="closeDeleteModal()">Annuler</button>
+            <button class="btn-confirm-delete" id="btnConfirmDelete" onclick="confirmDelete()">
+                <span id="deleteModalText">🗑️ Supprimer définitivement</span>
+                <div class="delete-spinner" id="deleteSpinner"></div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-mark">M</div>
+        <div><div class="logo-text">MAVEX</div><div class="logo-sub">Med Africa</div></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Principal</div>
+        <a class="nav-item" href="/dashboard">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+        </a>
+        <a class="nav-item" href="/shipments">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments
+        </a>
+        <a class="nav-item" href="/orders">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
+        </a>
+        <div class="nav-section">Gestion</div>
+        <a class="nav-item" href="/clients">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients
+        </a>
+        <a class="nav-item" href="/shippers">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers
+        </a>
+        <a class="nav-item active" href="/imports">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports
+        </a>
+        <div class="nav-section" id="adminNav" style="display:none">Administration</div>
+        <a class="nav-item" href="/users" id="usersLink" style="display:none">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div style="min-width:0"><div class="user-name" id="userName">...</div><div class="user-role" id="userRole">...</div></div>
+            <button class="btn-logout" onclick="doLogout()">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<!-- LOADER OVERLAY -->
+<div class="loader-overlay" id="loaderOverlay">
+    <div class="loader-big"></div>
+    <div class="loader-text" id="loaderText">Import en cours...</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title">Import Manifest Excel</div>
+    </div>
+
+    <div class="content">
+
+        <!-- 1. UPLOAD -->
+        <div class="upload-card">
+            <div class="section-title">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                Upload du fichier manifest
+            </div>
+            <div class="drop-zone" id="dropZone">
+                <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="onFileSelected(event)"/>
+                <div class="drop-icon">📊</div>
+                <div class="drop-title">Glissez votre fichier Excel ici</div>
+                <div class="drop-sub">ou <span>parcourez</span> depuis votre ordinateur</div>
+                <div class="drop-sub" style="margin-top:6px;font-size:12px">Formats acceptés : .xlsx, .xls — Taille max : 10 MB</div>
+            </div>
+            <div class="file-info" id="fileInfo">
+                <div class="file-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div>
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+                <button class="btn-remove" onclick="removeFile()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="mode-row" id="modeRow" style="display:none">
+                <div class="mode-label">Mode d'import :</div>
+                <div class="toggle-group">
+                    <button class="toggle-btn active" id="btnPartial" onclick="setMode('PARTIAL')">⚡ Partiel</button>
+                    <button class="toggle-btn strict" id="btnStrict" onclick="setMode('STRICT')">🔒 Strict</button>
+                </div>
+                <div class="mode-desc" id="modeDesc">Importer seulement les lignes valides, ignorer les erreurs</div>
+            </div>
+            <div class="strict-warning" id="strictWarning">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Mode STRICT activé — l'import sera bloqué si des erreurs sont détectées.
+            </div>
+        </div>
+
+        <!-- 2. STATS -->
+        <div id="statsSection" style="display:none">
+            <div class="stats-row">
+                <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--muted)"></div><div><div class="stat-pill-val" id="statTotal">0</div><div class="stat-pill-label">Total lignes</div></div></div>
+                <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--success)"></div><div><div class="stat-pill-val" id="statOk" style="color:var(--success)">0</div><div class="stat-pill-label">Valides ✅</div></div></div>
+                <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--error)"></div><div><div class="stat-pill-val" id="statErrors" style="color:var(--error)">0</div><div class="stat-pill-label">Erreurs ❌</div></div></div>
+                <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--dup)"></div><div><div class="stat-pill-val" id="statDupFile" style="color:var(--dup)">0</div><div class="stat-pill-label">Doublons fichier ⚠️</div></div></div>
+                <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--info)"></div><div><div class="stat-pill-val" id="statDupDb" style="color:var(--info)">0</div><div class="stat-pill-label">Doublons BDD 🔵</div></div></div>
+            </div>
+        </div>
+
+        <!-- 3. RÉSULTAT IMPORT -->
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <div class="result-icon" id="resultIcon"></div>
+                <div><div class="result-title" id="resultTitle"></div><div class="result-sub" id="resultSub"></div></div>
+            </div>
+            <div class="result-grid">
+                <div class="result-item"><div class="result-val" id="rTotal">—</div><div class="result-label">Total lignes</div></div>
+                <div class="result-item"><div class="result-val" id="rSuccess" style="color:var(--success)">—</div><div class="result-label">✅ Importées</div></div>
+                <div class="result-item"><div class="result-val" id="rSkipped" style="color:var(--warning)">—</div><div class="result-label">⚠️ Ignorées</div></div>
+                <div class="result-item"><div class="result-val" id="rFailed" style="color:var(--error)">—</div><div class="result-label">❌ Échouées</div></div>
+            </div>
+        </div>
+
+        <!-- 4. PRÉVISUALISATION -->
+        <div class="preview-card" id="previewSection" style="display:none">
+            <div class="preview-header">
+                <div class="preview-title">Prévisualisation <span id="previewCount" style="font-size:12px;color:var(--muted);font-weight:400;margin-left:6px"></span></div>
+                <div class="preview-actions">
+                    <button class="btn-export" id="btnExportErrors" onclick="exportErrors()" disabled>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Exporter erreurs (.xlsx)
+                    </button>
+                </div>
+            </div>
+            <div style="padding:12px 18px;border-bottom:1px solid var(--border)">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterRows('all')" id="tab-all">Tous <span class="count" id="cnt-all">0</span></button>
+                    <button class="filter-tab" onclick="filterRows('ok')" id="tab-ok">✅ OK <span class="count" id="cnt-ok">0</span></button>
+                    <button class="filter-tab" onclick="filterRows('error')" id="tab-error">❌ Erreurs <span class="count" id="cnt-error">0</span></button>
+                    <button class="filter-tab" onclick="filterRows('dup-file')" id="tab-dup-file">⚠️ Doublon fichier <span class="count" id="cnt-dup-file">0</span></button>
+                    <button class="filter-tab" onclick="filterRows('dup-db')" id="tab-dup-db">🔵 Doublon BDD <span class="count" id="cnt-dup-db">0</span></button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>#</th><th>Statut</th><th>MAWB</th><th>HAWB</th><th>Sender</th><th>Receiver</th><th>Country</th><th>Email</th><th>Phone</th><th>Items</th><th>Description</th><th>Weight</th><th>Customs Value</th><th>Currency</th><th>Erreur</th></tr></thead>
+                    <tbody id="previewBody"></tbody>
+                </table>
+            </div>
+            <div class="action-bar" style="padding:16px 18px;border-top:1px solid var(--border)">
+                <button class="btn-primary" id="btnImport" onclick="doImport()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                    <span id="btnImportText">🚀 Lancer l'import</span>
+                    <div class="spinner" id="importSpinner"></div>
+                </button>
+                <button class="btn-secondary" onclick="removeFile()">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Nouveau fichier
+                </button>
+                <div id="strictBlockMsg" style="font-size:13px;color:var(--error);display:none">🔒 Import bloqué — corrigez les erreurs ou passez en mode Partiel</div>
+            </div>
+        </div>
+
+        <!-- 5. HISTORIQUE -->
+        <div class="history-card">
+            <div class="history-header">
+                <div class="history-title">🕓 Historique des imports</div>
+                <button class="btn-secondary" style="font-size:12px;padding:6px 12px" onclick="loadHistory()">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Actualiser
+                </button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fichier</th>
+                            <th>MAWB</th>
+                            <th>Total</th>
+                            <th>✅ Success</th>
+                            <th>⚠️ Ignorées</th>
+                            <th>❌ Échouées</th>
+                            <th>Statut</th>
+                            <th>Importé par</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="10" class="empty-state">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const Auth = {
+    getToken()        { return localStorage.getItem('accessToken'); },
+    getRefreshToken() { return localStorage.getItem('refreshToken'); },
+    requireAuth() { if (!this.getToken()) { window.location.href='/login'; return false; } return true; },
+    async logout() {
+        try { await fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:this.getRefreshToken()})}); } catch(e){}
+        localStorage.clear(); window.location.href='/login';
+    },
+    async fetchWithAuth(url, options={}) {
+        const token = this.getToken();
+        const res = await fetch(url,{...options,headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,...(options.headers||{})}});
+        if (res.status===401) { const r=await this.tryRefresh(); if(r) return this.fetchWithAuth(url,options); else { this.logout(); return null; } }
+        return res;
+    },
+    async tryRefresh() {
+        const rt=this.getRefreshToken(); if(!rt) return false;
+        try {
+            const res=await fetch('/api/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})});
+            if(!res.ok) return false;
+            const j=await res.json();
+            localStorage.setItem('accessToken',j.data.accessToken);
+            localStorage.setItem('refreshToken',j.data.refreshToken);
+            return true;
+        } catch(e){ return false; }
+    }
+};
+
+let selectedFile   = null;
+let parsedRows     = [];
+let enrichedRows   = [];
+let existingHawbs  = new Set();
+let importMode     = 'PARTIAL';
+let activeFilter   = 'all';
+let currentUserRole = '';
+
+// ── DELETE STATE ──
+let pendingDeleteId       = null;
+let pendingDeleteFileName = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!Auth.requireAuth()) return;
+    const fullName = localStorage.getItem('userFullName') || '?';
+    const role     = localStorage.getItem('userRole') || '';
+    currentUserRole = role;
+    document.getElementById('userName').textContent   = fullName;
+    document.getElementById('userRole').textContent   = role;
+    document.getElementById('userAvatar').textContent = fullName.charAt(0).toUpperCase();
+    if (role==='ADMIN') {
+        document.getElementById('adminNav').style.display  = 'block';
+        document.getElementById('usersLink').style.display = 'flex';
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+
+    await Promise.all([ loadExistingHawbs(), loadHistory() ]);
+});
+
+async function loadExistingHawbs() {
+    try {
+        const res  = await Auth.fetchWithAuth('/api/orders');
+        if (!res || !res.ok) return;
+        const json = await res.json();
+        const list = Array.isArray(json) ? json : (json.data || json.content || []);
+        existingHawbs = new Set(list.map(o => o.hawb));
+    } catch(e) { console.warn('Impossible de charger les HAWBs:', e); }
+}
+
+function onFileSelected(e) { const f = e.target.files[0]; if (f) handleFile(f); }
+
+function handleFile(file) {
+    if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Format non supporté.'); return; }
+    if (file.size > 10*1024*1024) { alert('Fichier trop volumineux. Max 10 MB.'); return; }
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatSize(file.size);
+    document.getElementById('fileInfo').classList.add('show');
+    document.getElementById('dropZone').classList.add('has-file');
+    document.getElementById('modeRow').style.display = 'flex';
+    readExcel(file);
+}
+
+function removeFile() {
+    selectedFile = null; parsedRows = []; enrichedRows = [];
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileInfo').classList.remove('show');
+    document.getElementById('dropZone').classList.remove('has-file');
+    document.getElementById('modeRow').style.display    = 'none';
+    document.getElementById('statsSection').style.display   = 'none';
+    document.getElementById('previewSection').style.display = 'none';
+    document.getElementById('resultCard').classList.remove('show');
+    document.getElementById('strictWarning').classList.remove('show');
+}
+
+function readExcel(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data     = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet    = workbook.Sheets[workbook.SheetNames[0]];
+            const rows     = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+            if (rows.length < 2) { alert('Fichier vide.'); return; }
+            parsedRows = rows.slice(1).filter(r => r.some(c => c !== ''));
+            validateAndEnrich();
+        } catch(err) { alert('Erreur lecture Excel : ' + err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function validateAndEnrich() {
+    const seenHawbs = new Set();
+    enrichedRows = parsedRows.map((row, idx) => {
+        // Index corrigés selon l'en-tête réel du manifest
+        const mawb         = String(row[0]  || '').trim();
+        const hawb         = String(row[1]  || '').trim();
+        const senderName   = String(row[3]  || '').trim();
+        const receiverName = String(row[12] || '').trim();
+        const country      = String(row[13] || '').trim();
+        const address      = String(row[14] || '').trim();
+        const city         = String(row[15] || '').trim();
+        const state        = String(row[16] || '').trim();
+        const postcode     = String(row[17] || '').trim();
+        const phone        = String(row[19] || '').trim();
+        const email        = String(row[20] || '').trim();
+        const nbItems      = String(row[21] || '').trim();
+        const description  = String(row[22] || '').trim();
+        const weight       = String(row[23] || '').trim();
+        const customsVal   = String(row[24] || '').trim();
+        const currency     = String(row[25] || '').trim();
+
+        let status = 'ok', errorMsg = null;
+
+        if (!mawb)        { status = 'error'; errorMsg = 'MAWB manquant'; }
+        else if (!hawb)   { status = 'error'; errorMsg = 'HAWB manquant'; }
+        else if (!receiverName) { status = 'error'; errorMsg = 'Receiver Name manquant'; }
+        else if (!email)  { status = 'error'; errorMsg = 'Email manquant'; }
+        else if (!email.includes('@')) { status = 'error'; errorMsg = 'Email invalide'; }
+        else if (!customsVal || isNaN(parseFloat(customsVal)) || parseFloat(customsVal) <= 0) { status = 'error'; errorMsg = 'Customs Value invalide'; }
+        else if (!weight || isNaN(parseFloat(weight))) { status = 'error'; errorMsg = 'Poids invalide'; }
+        else if (!country || country.length !== 2) { status = 'error'; errorMsg = `Code pays invalide : "${country}"`; }
+        else if (seenHawbs.has(hawb)) { status = 'dup-file'; errorMsg = 'HAWB déjà présent dans ce fichier'; }
+        else if (existingHawbs.has(hawb)) { status = 'dup-db'; errorMsg = 'HAWB déjà en base de données'; }
+
+        if (status === 'ok') seenHawbs.add(hawb);
+        return { rowNum: idx+2, mawb, hawb, senderName, receiverName, country, email, phone, nbItems, description, weight, customsVal, currency, status, errorMsg };
+    });
+
+    updateStats(); renderPreview(); checkStrictMode();
+    document.getElementById('statsSection').style.display   = 'flex';
+    document.getElementById('previewSection').style.display = 'block';
+}
+
+function updateStats() {
+    const total   = enrichedRows.length;
+    const ok      = enrichedRows.filter(r => r.status==='ok').length;
+    const errors  = enrichedRows.filter(r => r.status==='error').length;
+    const dupFile = enrichedRows.filter(r => r.status==='dup-file').length;
+    const dupDb   = enrichedRows.filter(r => r.status==='dup-db').length;
+    document.getElementById('statTotal').textContent   = total;
+    document.getElementById('statOk').textContent      = ok;
+    document.getElementById('statErrors').textContent  = errors;
+    document.getElementById('statDupFile').textContent = dupFile;
+    document.getElementById('statDupDb').textContent   = dupDb;
+    document.getElementById('cnt-all').textContent      = total;
+    document.getElementById('cnt-ok').textContent       = ok;
+    document.getElementById('cnt-error').textContent    = errors;
+    document.getElementById('cnt-dup-file').textContent = dupFile;
+    document.getElementById('cnt-dup-db').textContent   = dupDb;
+    document.getElementById('btnExportErrors').disabled = errors === 0;
+}
+
+function filterRows(filter) {
+    activeFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`tab-${filter}`).classList.add('active');
+    renderPreview();
+}
+
+function renderPreview() {
+    const rows = activeFilter==='all' ? enrichedRows : enrichedRows.filter(r => r.status===activeFilter);
+    document.getElementById('previewCount').textContent = `(${rows.length} lignes)`;
+    const tbody = document.getElementById('previewBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="15" class="empty-state">Aucune ligne</td></tr>`; return; }
+    tbody.innerHTML = rows.map(r => `
+        <tr class="row-${r.status}">
+            <td>${r.rowNum}</td>
+            <td>${rowBadge(r.status)}</td>
+            <td class="td-mono">${esc(r.mawb)}</td>
+            <td class="td-mono"><strong>${esc(r.hawb)}</strong></td>
+            <td>${esc(r.senderName)}</td>
+            <td>${esc(r.receiverName)}</td>
+            <td>${esc(r.country)}</td>
+            <td>${esc(r.email)}</td>
+            <td>${esc(r.phone)}</td>
+            <td>${esc(r.nbItems)}</td>
+            <td title="${esc(r.description)}">${esc(r.description)}</td>
+            <td>${esc(r.weight)}</td>
+            <td>${esc(r.customsVal)}</td>
+            <td>${esc(r.currency)}</td>
+            <td>${r.errorMsg ? `<span class="error-msg">⚠ ${esc(r.errorMsg)}</span>` : ''}</td>
+        </tr>`).join('');
+}
+
+function setMode(mode) {
+    importMode = mode;
+    document.getElementById('btnPartial').classList.toggle('active', mode==='PARTIAL');
+    document.getElementById('btnStrict').classList.toggle('active', mode==='STRICT');
+    document.getElementById('modeDesc').textContent = mode==='PARTIAL'
+        ? 'Importer seulement les lignes valides, ignorer les erreurs'
+        : 'Bloquer l\'import si une seule erreur existe';
+    checkStrictMode();
+}
+
+function checkStrictMode() {
+    const hasErrors = enrichedRows.some(r => r.status==='error');
+    const isStrict  = importMode==='STRICT';
+    document.getElementById('strictWarning').classList.toggle('show', isStrict);
+    document.getElementById('btnImport').disabled = isStrict && hasErrors;
+    document.getElementById('strictBlockMsg').style.display = (isStrict && hasErrors) ? 'block' : 'none';
+}
+
+async function doImport() {
+    if (!selectedFile) return;
+    const btn=document.getElementById('btnImport'), spinner=document.getElementById('importSpinner'), btnText=document.getElementById('btnImportText');
+    btn.disabled=true; spinner.style.display='block'; btnText.style.display='none';
+    document.getElementById('loaderOverlay').classList.add('show');
+    document.getElementById('loaderText').textContent = 'Import en cours...';
+    try {
+        const fd = new FormData();
+        fd.append('file', selectedFile);
+        const res  = await fetch('/api/v1/imports/manifest', { method:'POST', headers:{'Authorization':`Bearer ${Auth.getToken()}`}, body:fd });
+        const json = await res.json();
+        const data = json.data || json;
+        showResult(data);
+        await Promise.all([ loadExistingHawbs(), loadHistory() ]);
+        if (parsedRows.length) validateAndEnrich();
+    } catch(e) {
+        showResult({ status:'FAILED', totalRows:0, successRows:0, skippedRows:0, failedRows:0 });
+    } finally {
+        btn.disabled=false; spinner.style.display='none'; btnText.style.display='inline';
+        document.getElementById('loaderOverlay').classList.remove('show');
+    }
+}
+
+function showResult(data) {
+    const card = document.getElementById('resultCard');
+    card.classList.add('show');
+    const configs = {
+        'SUCCESS': { icon:'✅', bg:'#F0FDF4', title:'Import réussi !',      sub:'Toutes les lignes ont été importées.' },
+        'PARTIAL': { icon:'⚠️', bg:'#FFF7ED', title:'Import partiel',       sub:'Certaines lignes ont été ignorées.' },
+        'FAILED':  { icon:'❌', bg:'#FEF2F2', title:'Import échoué',        sub:'Aucune ligne n\'a pu être importée.' },
+        'SKIPPED': { icon:'🔵', bg:'#EFF6FF', title:'Fichier déjà importé', sub:'Ce fichier a déjà été importé.' },
+    };
+    const cfg = configs[data.status] || configs['FAILED'];
+    document.getElementById('resultIcon').textContent  = cfg.icon;
+    document.getElementById('resultIcon').style.background = cfg.bg;
+    document.getElementById('resultTitle').textContent = cfg.title;
+    document.getElementById('resultSub').textContent   = cfg.sub;
+    document.getElementById('rTotal').textContent   = data.totalRows   ?? 0;
+    document.getElementById('rSuccess').textContent = data.successRows ?? 0;
+    document.getElementById('rSkipped').textContent = data.skippedRows ?? 0;
+    document.getElementById('rFailed').textContent  = data.failedRows  ?? 0;
+    card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function exportErrors() {
+    const errors = enrichedRows.filter(r => r.status==='error');
+    if (!errors.length) return;
+    const wsData = [
+        ['#Ligne','MAWB','HAWB','Sender','Receiver','Country','Email','Phone','Items','Description','Weight','Customs Value','Currency','Erreur'],
+        ...errors.map(r => [r.rowNum,r.mawb,r.hawb,r.senderName,r.receiverName,r.country,r.email,r.phone,r.nbItems,r.description,r.weight,r.customsVal,r.currency,r.errorMsg])
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Erreurs');
+    XLSX.writeFile(wb, `erreurs_import_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ══ HISTORIQUE ══
+async function loadHistory() {
+    const tbody = document.getElementById('historyBody');
+    try {
+        const res  = await Auth.fetchWithAuth('/api/v1/imports?size=20&sort=importedAt,desc');
+        if (!res || !res.ok) { tbody.innerHTML = emptyRow(10,'Erreur de chargement'); return; }
+        const json = await res.json();
+        const data = json.content || json.data || (Array.isArray(json) ? json : []);
+        if (!data.length) { tbody.innerHTML = emptyRow(10,'Aucun import effectué'); return; }
+
+        const isAdmin = currentUserRole === 'ADMIN';
+
+        tbody.innerHTML = data.map(h => `
+            <tr>
+                <td><strong>${esc(h.fileName||'—')}</strong></td>
+                <td style="font-family:monospace;font-size:11px">${esc(h.mawb||'—')}</td>
+                <td>${h.totalRows??0}</td>
+                <td style="color:var(--success);font-weight:600">${h.successRows??0}</td>
+                <td style="color:var(--warning);font-weight:600">${h.skippedRows??0}</td>
+                <td style="color:var(--error);font-weight:600">${h.failedRows??0}</td>
+                <td>${historyBadge(h.status)}</td>
+                <td style="color:var(--muted);font-size:12px">${esc(h.importedBy||'—')}</td>
+                <td style="color:var(--muted);font-size:12px">${formatDate(h.importedAt)}</td>
+                <td>
+                    ${isAdmin ? `
+                  <button class="btn-delete" data-id="${h.id}" onclick="openDeleteModal(this)" title="Supprimer cet import complètement">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        Supprimer
+                    </button>` : '<span style="color:var(--muted);font-size:11px">—</span>'}
+                </td>
+            </tr>`).join('');
+    } catch(e) { tbody.innerHTML = emptyRow(10,'Erreur de chargement'); }
+}
+
+// ══ DELETE FLOW ══
+// APRÈS
+function openDeleteModal(btn) {
+    pendingDeleteId = parseInt(btn.getAttribute('data-id'));
+    // récupère le nom depuis la cellule de la ligne
+    const row = btn.closest('tr');
+    const fileName = row ? row.cells[0].textContent.trim() : 'Import #' + pendingDeleteId;
+    pendingDeleteFileName = fileName;
+    document.getElementById('modalFileName').textContent = fileName;
+    document.getElementById('deleteModal').classList.add('show');
+}
+
+function closeDeleteModal() {
+    pendingDeleteId = null; pendingDeleteFileName = null;
+    document.getElementById('deleteModal').classList.remove('show');
+    document.getElementById('btnConfirmDelete').disabled = false;
+    document.getElementById('deleteModalText').style.display = 'inline';
+    document.getElementById('deleteSpinner').style.display   = 'none';
+}
+
+async function confirmDelete() {
+    if (!pendingDeleteId) return;
+
+    const btn     = document.getElementById('btnConfirmDelete');
+    const text    = document.getElementById('deleteModalText');
+    const spinner = document.getElementById('deleteSpinner');
+
+    btn.disabled          = true;
+    text.style.display    = 'none';
+    spinner.style.display = 'block';
+
+    try {
+        const res = await Auth.fetchWithAuth(`/api/v1/imports/${pendingDeleteId}`, { method: 'DELETE' });
+
+        if (res && res.ok) {
+            closeDeleteModal();
+            // Recharger tout
+            await Promise.all([ loadHistory(), loadExistingHawbs() ]);
+            if (parsedRows.length) validateAndEnrich();
+            // Feedback visuel temporaire
+            showToast('✅ Import supprimé avec succès');
+        } else {
+            const err = await res?.text();
+            alert('Erreur lors de la suppression : ' + (err || 'Erreur inconnue'));
+            closeDeleteModal();
+        }
+    } catch(e) {
+        alert('Erreur : ' + e.message);
+        closeDeleteModal();
+    }
+}
+
+// ══ TOAST NOTIFICATION ══
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed;bottom:24px;right:24px;z-index:500;
+        background:#0a0f1e;color:white;padding:12px 20px;
+        border-radius:10px;font-size:13px;font-weight:600;
+        box-shadow:0 4px 20px rgba(0,0,0,0.3);
+        animation:slideIn 0.3s ease;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// ══ HELPERS ══
+function rowBadge(s) {
+    const m = { ok:'<span class="row-badge ok">✅ OK</span>', error:'<span class="row-badge error">❌ ERROR</span>', 'dup-file':'<span class="row-badge dup-file">⚠️ DUP_FILE</span>', 'dup-db':'<span class="row-badge dup-db">🔵 DUP_DB</span>' };
+    return m[s] || '';
+}
+function historyBadge(s) {
+    const m = { SUCCESS:'badge-success', PARTIAL:'badge-partial', FAILED:'badge-failed', SKIPPED:'badge-created' };
+    return `<span class="badge ${m[s]||'badge-created'}">${s||'—'}</span>`;
+}
+function formatSize(b) { if(b<1024) return b+' B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(1)+' MB'; }
+function formatDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function emptyRow(cols, msg) { return `<tr><td colspan="${cols}" class="empty-state">${msg}</td></tr>`; }
+function esc(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+async function doLogout() { await Auth.logout(); }
+</script>
+</body>
+</html>

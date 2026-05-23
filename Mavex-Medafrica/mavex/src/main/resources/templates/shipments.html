@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mavex — Shipments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg:#F8F9FA; --panel:#FFFFFF; --panel2:#FFF7ED;
+            --border:#E5E7EB; --border2:#FED7AA;
+            --accent:#F97316; --accent2:#EA580C; --accent-soft:#FFF7ED;
+            --text:#111827; --muted:#6B7280;
+            --error:#EF4444; --success:#22C55E; --warning:#F59E0B; --info:#3B82F6;
+            --sidebar:240px;
+        }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
+
+        /* ══ SIDEBAR ══ */
+        .sidebar { width:var(--sidebar); background:var(--panel); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:100; box-shadow:2px 0 8px rgba(0,0,0,0.04); }
+        .sidebar-logo { padding:24px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+        .logo-mark { width:36px;height:36px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white;border-radius:10px; }
+        .logo-text { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
+        .logo-sub { font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase; }
+        .sidebar-nav { flex:1;padding:16px 10px;overflow-y:auto; }
+        .nav-section { font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;padding:0 10px;margin:16px 0 6px;font-weight:600; }
+        .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.15s;cursor:pointer;margin-bottom:2px; }
+        .nav-item:hover { background:var(--accent-soft);color:var(--accent); }
+        .nav-item.active { background:var(--accent-soft);color:var(--accent);font-weight:600; }
+        .sidebar-footer { padding:14px 10px;border-top:1px solid var(--border); }
+        .user-card { display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid var(--border2); }
+        .user-avatar { width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:white;flex-shrink:0; }
+        .user-name { font-size:13px;font-weight:600;color:var(--text); }
+        .user-role { font-size:11px;color:var(--muted); }
+        .btn-logout { margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;transition:color 0.2s;flex-shrink:0; }
+        .btn-logout:hover { color:var(--error); }
+
+        /* ══ MAIN ══ */
+        .main { margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh; }
+        .topbar { height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--panel);position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .topbar-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
+        .topbar-right { display:flex;align-items:center;gap:12px; }
+        .content { padding:28px;flex:1; }
+
+        /* ══ TOOLBAR ══ */
+        .toolbar { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap; }
+        .toolbar-left { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+
+        .search-wrap { position:relative; }
+        .search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none; }
+        .search-input { padding:9px 12px 9px 36px;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border);border-radius:9px;outline:none;color:var(--text);background:var(--panel);width:260px;transition:all 0.2s; }
+        .search-input:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1); }
+        .search-input::placeholder { color:var(--muted); }
+
+        .filter-select { padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border);border-radius:9px;outline:none;color:var(--text);background:var(--panel);cursor:pointer;transition:border-color 0.2s; }
+        .filter-select:focus { border-color:var(--accent); }
+
+        .btn-primary { display:flex;align-items:center;gap:7px;background:var(--accent);color:white;border:none;border-radius:9px;padding:9px 18px;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(249,115,22,0.25); }
+        .btn-primary:hover { background:var(--accent2);transform:translateY(-1px); }
+
+        .btn-secondary { display:flex;align-items:center;gap:7px;background:var(--panel);color:var(--text);border:1.5px solid var(--border);border-radius:9px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all 0.2s; }
+        .btn-secondary:hover { border-color:var(--accent);color:var(--accent); }
+
+        /* ══ TABLE CARD ══ */
+        .card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .card-header { display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border); }
+        .card-title { font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text); }
+        .card-count { font-size:12px;color:var(--muted); }
+
+        .table-wrap { overflow-x:auto; }
+        table { width:100%;border-collapse:collapse;font-size:13px; }
+        thead th { padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap; }
+        tbody tr { border-bottom:1px solid #F3F4F6;transition:background 0.15s;cursor:pointer; }
+        tbody tr:hover { background:var(--accent-soft); }
+        tbody tr:last-child { border-bottom:none; }
+        tbody td { padding:13px 14px;color:var(--text);white-space:nowrap; }
+        .td-muted { color:var(--muted);font-size:12px; }
+        .td-bold { font-weight:600; }
+
+        /* ══ BADGES ══ */
+        .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600; }
+        .badge::before { content:'';width:5px;height:5px;border-radius:50%; }
+        .badge-draft     { background:#F3F4F6;color:#6B7280; } .badge-draft::before     { background:#6B7280; }
+        .badge-imported  { background:#EFF6FF;color:#3B82F6; } .badge-imported::before  { background:#3B82F6; }
+        .badge-paid      { background:#F0FDF4;color:#22C55E; } .badge-paid::before      { background:#22C55E; }
+        .badge-pending   { background:#FFFBEB;color:#F59E0B; } .badge-pending::before   { background:#F59E0B; }
+        .badge-delivered { background:#F0FDF4;color:#22C55E; } .badge-delivered::before { background:#22C55E; }
+        .badge-failed    { background:#FEF2F2;color:#EF4444; } .badge-failed::before    { background:#EF4444; }
+        .badge-created   { background:#F3F4F6;color:#6B7280; } .badge-created::before   { background:#6B7280; }
+        .badge-partial   { background:#FFF7ED;color:#F97316; } .badge-partial::before   { background:#F97316; }
+
+        /* ══ EMPTY / LOADING ══ */
+        .empty-state { padding:48px;text-align:center;color:var(--muted); }
+        .empty-state svg { margin-bottom:12px;color:var(--border); }
+        .empty-state p { font-size:14px;margin-bottom:4px; }
+        .empty-state small { font-size:12px; }
+
+        /* ══ PAGINATION ══ */
+        .pagination { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border);font-size:13px; }
+        .pagination-info { color:var(--muted); }
+        .pagination-btns { display:flex;gap:6px; }
+        .page-btn { padding:6px 12px;border:1.5px solid var(--border);border-radius:7px;background:var(--panel);color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s; }
+        .page-btn:hover { border-color:var(--accent);color:var(--accent); }
+        .page-btn.active { background:var(--accent);color:white;border-color:var(--accent); }
+        .page-btn:disabled { opacity:0.4;cursor:not-allowed; }
+
+        /* ══ MODAL ══ */
+        .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal { background:var(--panel);border:1px solid var(--border);border-radius:16px;width:520px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:fadeUp 0.2s ease;max-height:90vh;overflow-y:auto; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        .modal-header { padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel); }
+        .modal-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
+        .modal-close { background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s; }
+        .modal-close:hover { background:var(--bg);color:var(--text); }
+        .modal-body { padding:22px; }
+        .modal-footer { padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end; }
+
+        /* ══ FORM ══ */
+        .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+        .form-grid.full { grid-template-columns:1fr; }
+        .field { display:flex;flex-direction:column;gap:6px; }
+        .field label { font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase; }
+        .field input, .field select {
+            padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;
+            border:1.5px solid var(--border);border-radius:9px;outline:none;
+            color:var(--text);background:var(--panel);transition:all 0.2s;
+        }
+        .field input:focus, .field select:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1); }
+        .field input::placeholder { color:var(--muted); }
+
+        .alert { padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none; }
+        .alert.error   { background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;display:block; }
+        .alert.success { background:#F0FDF4;border:1px solid #BBF7D0;color:#15803D;display:block; }
+
+        .btn-save { background:var(--accent);color:white;border:none;border-radius:9px;padding:10px 22px;font-family:'Syne',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(249,115,22,0.25); }
+        .btn-save:hover { background:var(--accent2); }
+        .btn-save:disabled { opacity:0.6;cursor:not-allowed; }
+        .btn-outline { background:var(--bg);color:var(--muted);border:1.5px solid var(--border);border-radius:9px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all 0.2s; }
+        .btn-outline:hover { border-color:var(--muted);color:var(--text); }
+        .btn-danger { background:#FEF2F2;color:var(--error);border:1.5px solid #FECACA;border-radius:9px;padding:10px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all 0.2s; }
+        .btn-danger:hover { background:#FEE2E2; }
+
+        /* ══ DETAIL PANEL ══ */
+        .detail-section { margin-bottom:20px; }
+        .detail-section-title { font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border); }
+        .detail-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+        .detail-item { display:flex;flex-direction:column;gap:2px; }
+        .detail-label { font-size:11px;color:var(--muted); }
+        .detail-value { font-size:13px;font-weight:500;color:var(--text); }
+
+        /* Actions in table */
+        .action-btns { display:flex;gap:6px;opacity:0;transition:opacity 0.15s; }
+        tbody tr:hover .action-btns { opacity:1; }
+        .action-btn { background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);transition:all 0.15s;display:flex;align-items:center;gap:4px; }
+        .action-btn:hover { border-color:var(--accent);color:var(--accent); }
+        .action-btn.danger:hover { border-color:var(--error);color:var(--error); }
+
+        .spinner { width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        @media(max-width:768px) { .sidebar{display:none;} .main{margin-left:0;} .form-grid{grid-template-columns:1fr;} }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-mark">M</div>
+        <div><div class="logo-text">MAVEX</div><div class="logo-sub">Med Africa</div></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Principal</div>
+        <a class="nav-item" href="/dashboard">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+        </a>
+        <a class="nav-item active" href="/shipments">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments
+        </a>
+        <a class="nav-item" href="/orders">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
+        </a>
+        <div class="nav-section">Gestion</div>
+        <a class="nav-item" href="/clients">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients
+        </a>
+        <a class="nav-item" href="/shippers">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers
+        </a>
+        <a class="nav-item" href="/imports">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports
+        </a>
+        <div class="nav-section" id="adminNav" style="display:none">Administration</div>
+        <a class="nav-item" href="/users" id="usersLink" style="display:none">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="user-card">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <div style="min-width:0"><div class="user-name" id="userName">...</div><div class="user-role" id="userRole">...</div></div>
+            <button class="btn-logout" onclick="doLogout()" title="Déconnexion">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title">Shipments</div>
+        <div class="topbar-right">
+            <button class="btn-primary" onclick="openCreateModal()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nouveau shipment
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Rechercher par MAWB..." oninput="onSearch()"/>
+                </div>
+                <select class="filter-select" id="statusFilter" onchange="onFilter()">
+                    <option value="">Tous les statuts</option>
+                    <option value="DRAFT">DRAFT</option>
+                    <option value="IMPORTED">IMPORTED</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                </select>
+            </div>
+            <button class="btn-secondary" onclick="loadShipments()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Actualiser
+            </button>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Liste des shipments</div>
+                <div class="card-count" id="totalCount">—</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MAWB</th>
+                            <th>Shipper</th>
+                            <th>Date export</th>
+                            <th>Date import</th>
+                            <th>Transporteur</th>
+                            <th>Orders</th>
+                            <th>Statut</th>
+                            <th>Créé par</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shipmentsTable">
+                        <tr><td colspan="9" class="empty-state">Chargement...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination" style="display:none">
+                <div class="pagination-info" id="paginationInfo"></div>
+                <div class="pagination-btns" id="paginationBtns"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL CRÉER / MODIFIER ══ -->
+<div class="modal-overlay" id="formModal" onclick="closeModalOutside(event,'formModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="formModalTitle">Nouveau shipment</div>
+            <button class="modal-close" onclick="closeModal('formModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="alert" id="formAlert"></div>
+            <div class="form-grid">
+                <div class="field" style="grid-column:1/-1">
+                    <label>MAWB *</label>
+                    <input type="text" id="fieldMawb" placeholder="ex: 123-45678901"/>
+                </div>
+                <div class="field">
+                    <label>Date export</label>
+                    <input type="date" id="fieldExportDate"/>
+                </div>
+                <div class="field">
+                    <label>Date import</label>
+                    <input type="date" id="fieldImportDate"/>
+                </div>
+                <div class="field">
+                    <label>Transporteur</label>
+                    <input type="text" id="fieldCarrier" placeholder="ex: Royal Air Maroc"/>
+                </div>
+                <div class="field">
+                    <label>Mode de transport</label>
+                    <input type="text" id="fieldMode" placeholder="ex: AIR, SEA"/>
+                </div>
+                <div class="field">
+                    <label>Code port</label>
+                    <input type="text" id="fieldPort" placeholder="ex: CMN"/>
+                </div>
+                <div class="field">
+                    <label>Shipper ID</label>
+                    <input type="number" id="fieldShipper" placeholder="ID du shipper (optionnel)"/>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal('formModal')">Annuler</button>
+            <button class="btn-save" id="btnSave" onclick="saveShipment()">
+                <span id="btnSaveText">Enregistrer</span>
+                <span class="spinner" id="btnSaveSpinner"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL DÉTAIL ══ -->
+<div class="modal-overlay" id="detailModal" onclick="closeModalOutside(event,'detailModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="detailMawb">Détail shipment</div>
+            <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+        </div>
+        <div class="modal-body" id="detailBody">
+            Chargement...
+        </div>
+        <div class="modal-footer">
+            <button class="btn-danger" id="btnDelete" onclick="confirmDelete()">Supprimer</button>
+            <button class="btn-outline" onclick="closeModal('detailModal')">Fermer</button>
+            <button class="btn-save" onclick="openEditFromDetail()">Modifier</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL CONFIRMATION SUPPRESSION ══ -->
+<div class="modal-overlay" id="deleteModal" onclick="closeModalOutside(event,'deleteModal')">
+    <div class="modal" style="width:400px">
+        <div class="modal-header">
+            <div class="modal-title">Confirmer la suppression</div>
+            <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:14px;color:var(--muted);line-height:1.6">
+                Êtes-vous sûr de vouloir supprimer le shipment <strong id="deleteMawb"></strong> ?
+                Cette action est irréversible et supprimera tous les orders associés.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" onclick="closeModal('deleteModal')">Annuler</button>
+            <button class="btn-danger" onclick="deleteShipment()" id="btnConfirmDelete">Supprimer définitivement</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ══ AUTH ══
+const Auth = {
+    getToken()        { return localStorage.getItem('accessToken'); },
+    getRefreshToken() { return localStorage.getItem('refreshToken'); },
+    requireAuth() { if (!this.getToken()) { window.location.href='/login'; return false; } return true; },
+    async logout() {
+        try { await fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:this.getRefreshToken()})}); } catch(e){}
+        localStorage.clear(); window.location.href='/login';
+    },
+    async fetchWithAuth(url, options={}) {
+        const token = this.getToken();
+        const res = await fetch(url,{...options,headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,...(options.headers||{})}});
+        if (res.status===401) {
+            const r = await this.tryRefresh();
+            if (r) return this.fetchWithAuth(url,options);
+            else { this.logout(); return null; }
+        }
+        return res;
+    },
+    async tryRefresh() {
+        const rt = this.getRefreshToken(); if(!rt) return false;
+        try {
+            const res = await fetch('/api/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:rt})});
+            if(!res.ok) return false;
+            const j = await res.json();
+            localStorage.setItem('accessToken',j.data.accessToken);
+            localStorage.setItem('refreshToken',j.data.refreshToken);
+            return true;
+        } catch(e){ return false; }
+    }
+};
+
+// ══ STATE ══
+let allShipments = [];
+let filtered     = [];
+let currentPage  = 0;
+const pageSize   = 15;
+let editingId    = null;
+let detailShipment = null;
+
+// ══ INIT ══
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!Auth.requireAuth()) return;
+    const fullName = localStorage.getItem('userFullName') || localStorage.getItem('userEmail') || '?';
+    const role     = localStorage.getItem('userRole') || '';
+    document.getElementById('userName').textContent   = fullName;
+    document.getElementById('userRole').textContent   = role;
+    document.getElementById('userAvatar').textContent = fullName.charAt(0).toUpperCase();
+    if (role==='ADMIN') {
+        document.getElementById('adminNav').style.display  = 'block';
+        document.getElementById('usersLink').style.display = 'flex';
+    }
+    await loadShipments();
+});
+
+// ══ LOAD ══
+async function loadShipments() {
+    const tbody = document.getElementById('shipmentsTable');
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Chargement...</td></tr>`;
+    try {
+        const res = await Auth.fetchWithAuth('/api/shipments');
+        if (!res || !res.ok) { tbody.innerHTML = emptyRow(9,'Erreur de chargement'); return; }
+        const json = await res.json();
+        allShipments = json.content || json.data || (Array.isArray(json) ? json : []);
+        applyFilters();
+    } catch(e) {
+        tbody.innerHTML = emptyRow(9,'Erreur de chargement');
+    }
+}
+
+function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const status = document.getElementById('statusFilter').value;
+    filtered = allShipments.filter(s => {
+        const matchSearch = !search || (s.mawb||'').toLowerCase().includes(search)
+            || (s.shipper?.companyName||'').toLowerCase().includes(search);
+        const matchStatus = !status || s.status === status;
+        return matchSearch && matchStatus;
+    });
+    currentPage = 0;
+    renderTable();
+}
+
+function onSearch() { applyFilters(); }
+function onFilter() { applyFilters(); }
+
+function renderTable() {
+    const tbody = document.getElementById('shipmentsTable');
+    document.getElementById('totalCount').textContent = `${filtered.length} shipment(s)`;
+
+    if (!filtered.length) {
+        tbody.innerHTML = `
+            <tr><td colspan="9" class="empty-state">
+                <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <p>Aucun shipment trouvé</p>
+                <small>Importez un manifest Excel ou créez un shipment manuellement</small>
+            </td></tr>`;
+        document.getElementById('pagination').style.display = 'none';
+        return;
+    }
+
+    const start = currentPage * pageSize;
+    const page  = filtered.slice(start, start + pageSize);
+
+    tbody.innerHTML = page.map(s => `
+        <tr onclick="openDetail(${s.id})">
+            <td class="td-bold">${esc(s.mawb||'—')}</td>
+            <td class="td-muted">${esc(s.shipper?.companyName||'—')}</td>
+            <td class="td-muted">${s.exportDate||'—'}</td>
+            <td class="td-muted">${s.importDate||'—'}</td>
+            <td class="td-muted">${esc(s.importingCarrier||'—')}</td>
+            <td><span style="background:#FFF7ED;color:#F97316;padding:2px 8px;border-radius:100px;font-size:12px;font-weight:600">${s.totalOrders??0}</span></td>
+            <td>${badge(s.status)}</td>
+            <td class="td-muted">${esc(s.createdBy||'—')}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="action-btn" onclick="event.stopPropagation(); openEdit(${s.id})">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Modifier
+                    </button>
+                    <button class="action-btn danger" onclick="event.stopPropagation(); openDeleteConfirm(${s.id}, '${esc(s.mawb)}')">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                        Supprimer
+                    </button>
+                </div>
+            </td>
+        </tr>`).join('');
+
+    renderPagination();
+}
+
+function renderPagination() {
+    const total = filtered.length;
+    const pages = Math.ceil(total / pageSize);
+    const pag   = document.getElementById('pagination');
+
+    if (pages <= 1) { pag.style.display = 'none'; return; }
+    pag.style.display = 'flex';
+
+    const start = currentPage * pageSize + 1;
+    const end   = Math.min((currentPage + 1) * pageSize, total);
+    document.getElementById('paginationInfo').textContent = `${start}–${end} sur ${total}`;
+
+    let btns = `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===0?'disabled':''}>←</button>`;
+    for (let i = 0; i < pages; i++) {
+        btns += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i+1}</button>`;
+    }
+    btns += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages-1?'disabled':''}>→</button>`;
+    document.getElementById('paginationBtns').innerHTML = btns;
+}
+
+function goPage(p) { currentPage = p; renderTable(); }
+
+// ══ DETAIL ══
+function openDetail(id) {
+    const s = allShipments.find(x => x.id === id);
+    if (!s) return;
+    detailShipment = s;
+    document.getElementById('detailMawb').textContent = s.mawb || 'Détail shipment';
+    document.getElementById('detailBody').innerHTML = `
+        <div class="detail-section">
+            <div class="detail-section-title">Informations générales</div>
+            <div class="detail-grid">
+                <div class="detail-item"><span class="detail-label">MAWB</span><span class="detail-value">${esc(s.mawb||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Statut</span><span class="detail-value">${badge(s.status)}</span></div>
+                <div class="detail-item"><span class="detail-label">Date export</span><span class="detail-value">${s.exportDate||'—'}</span></div>
+                <div class="detail-item"><span class="detail-label">Date import</span><span class="detail-value">${s.importDate||'—'}</span></div>
+                <div class="detail-item"><span class="detail-label">Transporteur</span><span class="detail-value">${esc(s.importingCarrier||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Mode transport</span><span class="detail-value">${esc(s.modeOfTransport||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Code port</span><span class="detail-value">${esc(s.portCode||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Total orders</span><span class="detail-value">${s.totalOrders??0}</span></div>
+            </div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-section-title">Shipper</div>
+            <div class="detail-grid">
+                <div class="detail-item"><span class="detail-label">Société</span><span class="detail-value">${esc(s.shipper?.companyName||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${esc(s.shipper?.email||'—')}</span></div>
+            </div>
+        </div>
+        <div class="detail-section">
+            <div class="detail-section-title">Audit</div>
+            <div class="detail-grid">
+                <div class="detail-item"><span class="detail-label">Créé par</span><span class="detail-value">${esc(s.createdBy||'—')}</span></div>
+                <div class="detail-item"><span class="detail-label">Créé le</span><span class="detail-value">${formatDate(s.createdAt)}</span></div>
+                <div class="detail-item"><span class="detail-label">Modifié le</span><span class="detail-value">${formatDate(s.updatedAt)}</span></div>
+            </div>
+        </div>`;
+    openModal('detailModal');
+}
+
+function openEditFromDetail() {
+    closeModal('detailModal');
+    if (detailShipment) openEdit(detailShipment.id);
+}
+
+// ══ CRÉER / MODIFIER ══
+function openCreateModal() {
+    editingId = null;
+    document.getElementById('formModalTitle').textContent = 'Nouveau shipment';
+    document.getElementById('btnSaveText').textContent    = 'Enregistrer';
+    document.getElementById('formAlert').className        = 'alert';
+    clearForm();
+    openModal('formModal');
+}
+
+function openEdit(id) {
+    const s = allShipments.find(x => x.id === id);
+    if (!s) return;
+    editingId = id;
+    document.getElementById('formModalTitle').textContent = 'Modifier le shipment';
+    document.getElementById('btnSaveText').textContent    = 'Mettre à jour';
+    document.getElementById('formAlert').className        = 'alert';
+    document.getElementById('fieldMawb').value        = s.mawb || '';
+    document.getElementById('fieldExportDate').value  = s.exportDate || '';
+    document.getElementById('fieldImportDate').value  = s.importDate || '';
+    document.getElementById('fieldCarrier').value     = s.importingCarrier || '';
+    document.getElementById('fieldMode').value        = s.modeOfTransport || '';
+    document.getElementById('fieldPort').value        = s.portCode || '';
+    document.getElementById('fieldShipper').value     = s.shipper?.id || '';
+    openModal('formModal');
+}
+
+function clearForm() {
+    ['fieldMawb','fieldExportDate','fieldImportDate','fieldCarrier','fieldMode','fieldPort','fieldShipper']
+        .forEach(id => document.getElementById(id).value = '');
+}
+
+async function saveShipment() {
+    const mawb = document.getElementById('fieldMawb').value.trim();
+    if (!mawb) { showFormAlert('Le MAWB est obligatoire.', 'error'); return; }
+
+    const btn     = document.getElementById('btnSave');
+    const spinner = document.getElementById('btnSaveSpinner');
+    const btnText = document.getElementById('btnSaveText');
+    btn.disabled = true; spinner.style.display = 'inline-block'; btnText.style.display = 'none';
+
+    const payload = {
+        mawb,
+        exportDate:       document.getElementById('fieldExportDate').value || null,
+        importDate:       document.getElementById('fieldImportDate').value || null,
+        importingCarrier: document.getElementById('fieldCarrier').value.trim() || null,
+        modeOfTransport:  document.getElementById('fieldMode').value.trim() || null,
+        portCode:         document.getElementById('fieldPort').value.trim() || null,
+        shipperId:        document.getElementById('fieldShipper').value ? parseInt(document.getElementById('fieldShipper').value) : null,
+    };
+
+    try {
+        const url    = editingId ? `/api/shipments/${editingId}` : '/api/shipments';
+        const method = editingId ? 'PUT' : 'POST';
+        const res    = await Auth.fetchWithAuth(url, { method, body: JSON.stringify(payload) });
+        const json   = await res.json();
+
+        if (!res.ok) { showFormAlert(json.message || 'Erreur lors de l\'enregistrement.', 'error'); return; }
+
+        closeModal('formModal');
+        await loadShipments();
+    } catch(e) {
+        showFormAlert('Erreur de connexion.', 'error');
+    } finally {
+        btn.disabled = false; spinner.style.display = 'none'; btnText.style.display = 'inline';
+    }
+}
+
+// ══ SUPPRIMER ══
+let deleteId = null;
+
+function openDeleteConfirm(id, mawb) {
+    deleteId = id;
+    document.getElementById('deleteMawb').textContent = mawb;
+    openModal('deleteModal');
+}
+
+function confirmDelete() {
+    if (!detailShipment) return;
+    openDeleteConfirm(detailShipment.id, detailShipment.mawb);
+    closeModal('detailModal');
+}
+
+async function deleteShipment() {
+    if (!deleteId) return;
+    const btn = document.getElementById('btnConfirmDelete');
+    btn.disabled = true; btn.textContent = 'Suppression...';
+    try {
+        const res = await Auth.fetchWithAuth(`/api/shipments/${deleteId}`, { method: 'DELETE' });
+        if (res && (res.ok || res.status === 204)) {
+            closeModal('deleteModal');
+            await loadShipments();
+        } else {
+            alert('Erreur lors de la suppression.');
+        }
+    } catch(e) { alert('Erreur de connexion.'); }
+    finally { btn.disabled = false; btn.textContent = 'Supprimer définitivement'; }
+}
+
+// ══ LOGOUT ══
+async function doLogout() { await Auth.logout(); }
+
+// ══ MODAL HELPERS ══
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+function showFormAlert(msg, type) {
+    const el = document.getElementById('formAlert');
+    el.textContent = msg;
+    el.className   = `alert ${type}`;
+}
+
+// ══ HELPERS ══
+function badge(status) {
+    if (!status) return '<span class="badge badge-created">—</span>';
+    const map={'CREATED':'badge-created','DRAFT':'badge-draft','IMPORTED':'badge-imported','PENDING_PAYMENT':'badge-pending','PAID':'badge-paid','IN_DELIVERY':'badge-pending','DELIVERED':'badge-delivered','SUCCESS':'badge-success','PARTIAL':'badge-partial','FAILED':'badge-failed'};
+    return `<span class="badge ${map[status]||'badge-created'}">${status}</span>`;
+}
+function emptyRow(cols, msg) { return `<tr><td colspan="${cols}" class="empty-state">${msg}</td></tr>`; }
+function esc(str) { if(!str) return '—'; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+</script>
+</body>
+</html>

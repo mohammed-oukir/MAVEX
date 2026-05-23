@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mavex — Connexion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #0a0f1e;
+            --panel:    #0f1628;
+            --border:   rgba(255,255,255,0.07);
+            --accent:   #e8c97e;
+            --accent2:  #c9a84c;
+            --text:     #f0ece0;
+            --muted:    #7a8099;
+            --error:    #e07070;
+            --success:  #70c9a0;
+            --input-bg: rgba(255,255,255,0.04);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── LEFT ── */
+        .left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 56px;
+            position: relative;
+            overflow: hidden;
+        }
+        .left::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 50%, rgba(232,201,126,0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 80% at 80% 20%, rgba(100,120,200,0.06) 0%, transparent 60%);
+        }
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .logo-mark {
+            width: 40px; height: 40px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--bg);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        .logo-name { font-family:'Syne',sans-serif; font-weight:700; font-size:22px; letter-spacing:0.08em; }
+        .logo-sub  { font-size:11px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; }
+
+        .hero { position: relative; z-index: 1; }
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(232,201,126,0.1);
+            border: 1px solid rgba(232,201,126,0.2);
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .hero-label::before {
+            content:''; width:6px; height:6px;
+            background:var(--accent); border-radius:50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+        .hero h1 {
+            font-family:'Syne',sans-serif; font-weight:800;
+            font-size: clamp(36px,4vw,56px); line-height:1.1; margin-bottom:20px;
+        }
+        .hero h1 span { color: var(--accent); }
+        .hero p { color:var(--muted); font-size:16px; line-height:1.7; max-width:400px; }
+
+        .stats { display:flex; gap:40px; position:relative; z-index:1; }
+        .stat-item { border-left:2px solid var(--accent); padding-left:16px; }
+        .stat-value { font-family:'Syne',sans-serif; font-weight:700; font-size:28px; color:var(--accent); }
+        .stat-label { font-size:12px; color:var(--muted); margin-top:2px; }
+
+        /* ── RIGHT ── */
+        .right {
+            width: 480px;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px;
+            position: relative;
+        }
+        .right::before {
+            content:''; position:absolute;
+            top:0; left:0; right:0; height:3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .form-container { width:100%; max-width:360px; animation: fadeUp .5s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+        .form-header { margin-bottom:32px; }
+        .form-header h2 { font-family:'Syne',sans-serif; font-weight:700; font-size:28px; margin-bottom:8px; }
+        .form-header p  { color:var(--muted); font-size:14px; }
+
+        /* ── TABS ── */
+        .tabs {
+            display:flex;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius:10px;
+            padding:4px;
+            margin-bottom:28px;
+        }
+        .tab {
+            flex:1; padding:10px; text-align:center;
+            font-size:13px; font-weight:500; color:var(--muted);
+            cursor:pointer; border-radius:7px;
+            transition:all .2s; border:none; background:none;
+        }
+        .tab.active { background:var(--accent); color:var(--bg); font-weight:600; }
+
+        /* ── STEP INDICATOR ── */
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .step-num {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .step.active .step-num { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+        .step.active { color: var(--text); }
+        .step.done .step-num { background: var(--success); border-color: var(--success); color: var(--bg); }
+        .step-line { flex:1; height:1px; background:var(--border); }
+
+        /* ── FORM SECTIONS ── */
+        .form-section { display:none; }
+        .form-section.active { display:block; }
+
+        .field { margin-bottom:18px; }
+        .field label {
+            display:block; font-size:12px; font-weight:500;
+            color:var(--muted); letter-spacing:.08em;
+            text-transform:uppercase; margin-bottom:8px;
+        }
+
+        .input-wrap { position:relative; }
+        .input-wrap svg {
+            position:absolute; left:14px; top:50%;
+            transform:translateY(-50%); color:var(--muted); pointer-events:none;
+        }
+        .input-wrap input {
+            width:100%;
+            background:var(--input-bg);
+            border:1px solid var(--border);
+            border-radius:10px;
+            padding:13px 14px 13px 42px;
+            color:var(--text);
+            font-family:'DM Sans',sans-serif;
+            font-size:14px;
+            transition:all .2s;
+            outline:none;
+        }
+        .input-wrap input:focus { border-color:var(--accent); background:rgba(232,201,126,0.04); }
+        .input-wrap input::placeholder { color:var(--muted); }
+        .toggle-password {
+            position:absolute; right:14px; top:50%;
+            transform:translateY(-50%);
+            background:none; border:none; color:var(--muted); cursor:pointer;
+        }
+
+        /* ── OTP INPUT ── */
+        .otp-wrap {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .otp-wrap input {
+            width: 48px; height: 56px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: all .2s;
+        }
+        .otp-wrap input:focus { border-color: var(--accent); background: rgba(232,201,126,0.04); }
+
+        .otp-hint { font-size:12px; color:var(--muted); text-align:center; margin-bottom:20px; }
+        .otp-hint span { color:var(--accent); cursor:pointer; }
+        .otp-hint span:hover { text-decoration:underline; }
+
+        /* ── ALERT ── */
+        .alert {
+            display:none; padding:12px 16px; border-radius:8px;
+            font-size:13px; margin-bottom:18px; align-items:center; gap:10px;
+        }
+        .alert.error   { display:flex; background:rgba(224,112,112,.1); border:1px solid rgba(224,112,112,.3); color:var(--error); }
+        .alert.success { display:flex; background:rgba(112,201,160,.1); border:1px solid rgba(112,201,160,.3); color:var(--success); }
+
+        /* ── BUTTONS ── */
+        .btn-primary {
+            width:100%; padding:14px;
+            background:var(--accent); color:var(--bg);
+            border:none; border-radius:10px;
+            font-family:'Syne',sans-serif; font-weight:700; font-size:15px;
+            letter-spacing:.05em; cursor:pointer; transition:all .2s;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-primary:hover { background:var(--accent2); transform:translateY(-1px); }
+        .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+        .btn-ghost {
+            width:100%; padding:13px;
+            background:transparent; color:var(--text);
+            border:1px solid var(--border); border-radius:10px;
+            font-family:'DM Sans',sans-serif; font-weight:500; font-size:14px;
+            cursor:pointer; transition:all .2s; margin-top:12px;
+        }
+        .btn-ghost:hover { border-color:var(--muted); }
+
+        .forgot-link {
+            display:block; text-align:right; font-size:12px;
+            color:var(--accent); text-decoration:none;
+            margin-top:-10px; margin-bottom:22px; cursor:pointer;
+        }
+        .forgot-link:hover { text-decoration:underline; }
+
+        .divider {
+            display:flex; align-items:center; gap:12px;
+            margin:20px 0; color:var(--muted); font-size:12px;
+        }
+        .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+        /* ── SPINNER ── */
+        .spinner {
+            width:18px; height:18px;
+            border:2px solid rgba(10,15,30,.3);
+            border-top-color:var(--bg);
+            border-radius:50%;
+            animation:spin .7s linear infinite;
+            display:none;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        @media (max-width:900px) { .left { display:none; } .right { width:100%; } }
+    </style>
+</head>
+<body>
+
+<!-- ── LEFT ── -->
+<div class="left">
+    <div class="grid-lines"></div>
+    <div class="logo">
+        <div class="logo-mark">M</div>
+        <div>
+            <div class="logo-name">MAVEX</div>
+            <div class="logo-sub">Med Africa Logistics</div>
+        </div>
+    </div>
+    <div class="hero">
+        <div class="hero-label">Système de gestion</div>
+        <h1>Gérez vos<br/><span>expéditions</span><br/>en toute simplicité</h1>
+        <p>Importez vos manifests, suivez les paiements et gérez les livraisons depuis une seule plateforme.</p>
+    </div>
+    <div class="stats">
+        <div class="stat-item"><div class="stat-value">100%</div><div class="stat-label">Traçabilité</div></div>
+        <div class="stat-item"><div class="stat-value">Auto</div><div class="stat-label">Import Excel</div></div>
+        <div class="stat-item"><div class="stat-value">24/7</div><div class="stat-label">Disponibilité</div></div>
+    </div>
+</div>
+
+<!-- ── RIGHT ── -->
+<div class="right">
+    <div class="form-container">
+
+        <div class="form-header">
+            <h2 id="formTitle">Bienvenue</h2>
+            <p  id="formSubtitle">Connectez-vous à votre espace</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs" id="mainTabs">
+            <button class="tab active" onclick="showSection('login')">Connexion</button>
+            <button class="tab"        onclick="showSection('forgot-email')">Mot de passe oublié</button>
+        </div>
+
+        <!-- ALERT -->
+        <div class="alert" id="globalAlert"></div>
+
+        <!-- ══════════════════════════════════════
+             SECTION 1 — LOGIN
+        ══════════════════════════════════════ -->
+        <div class="form-section active" id="loginSection">
+            <div class="field">
+                <label>Adresse email</label>
+                <div class="input-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+                    <input type="email" id="loginEmail" placeholder="agent@mavex.com" autocomplete="email"/>
+                </div>
+            </div>
+            <div class="field">
+                <label>Mot de passe</label>
+                <div class="input-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password"/>
+                    <button class="toggle-password" type="button" onclick="togglePwd('loginPassword')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+            <a class="forgot-link" onclick="showSection('forgot-email')">Mot de passe oublié ?</a>
+            <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+                <span id="loginText">Se connecter</span>
+                <div class="spinner" id="loginSpinner"></div>
+            </button>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             SECTION 2 — FORGOT : saisie email
+        ══════════════════════════════════════ -->
+        <div class="form-section" id="forgotEmailSection">
+            <div class="steps">
+                <div class="step active" id="step1">
+                    <div class="step-num">1</div>
+                    <span>Email</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step2">
+                    <div class="step-num">2</div>
+                    <span>Code OTP</span>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" id="step3">
+                    <div class="step-num">3</div>
+                    <span>Nouveau mot de passe</span>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Adresse email</label>
+                <div class="input-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+                    <input type="email" id="forgotEmail" placeholder="agent@mavex.com"/>
+                </div>
+            </div>
+            <button class="btn-primary" id="forgotBtn" onclick="doForgotPassword()">
+                <span id="forgotText">Envoyer le code OTP</span>
+                <div class="spinner" id="forgotSpinner"></div>
+            </button>
+            <button class="btn-ghost" onclick="showSection('login')">Retour à la connexion</button>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             SECTION 3 — FORGOT : saisie OTP
+        ══════════════════════════════════════ -->
+        <div class="form-section" id="forgotOtpSection">
+            <div class="steps">
+                <div class="step done"   id="step1b"><div class="step-num">✓</div><span>Email</span></div>
+                <div class="step-line"></div>
+                <div class="step active" id="step2b"><div class="step-num">2</div><span>Code OTP</span></div>
+                <div class="step-line"></div>
+                <div class="step"        id="step3b"><div class="step-num">3</div><span>Nouveau mot de passe</span></div>
+            </div>
+
+            <div class="field">
+                <label style="text-align:center;display:block">Entrez le code reçu par email</label>
+                <div class="otp-wrap">
+                    <input type="text" maxlength="1" class="otp-digit" id="otp1" oninput="otpNext(this,'otp2')" onkeydown="otpBack(event,this,'')"/>
+                    <input type="text" maxlength="1" class="otp-digit" id="otp2" oninput="otpNext(this,'otp3')" onkeydown="otpBack(event,this,'otp1')"/>
+                    <input type="text" maxlength="1" class="otp-digit" id="otp3" oninput="otpNext(this,'otp4')" onkeydown="otpBack(event,this,'otp2')"/>
+                    <input type="text" maxlength="1" class="otp-digit" id="otp4" oninput="otpNext(this,'otp5')" onkeydown="otpBack(event,this,'otp3')"/>
+                    <input type="text" maxlength="1" class="otp-digit" id="otp5" oninput="otpNext(this,'otp6')" onkeydown="otpBack(event,this,'otp4')"/>
+                    <input type="text" maxlength="1" class="otp-digit" id="otp6" oninput="otpNext(this,'')"     onkeydown="otpBack(event,this,'otp5')"/>
+                </div>
+                <div class="otp-hint">
+                    Code valide 15 minutes.
+                    <span onclick="doForgotPassword()">Renvoyer le code</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="otpBtn" onclick="doVerifyOtp()">
+                <span id="otpText">Vérifier le code</span>
+                <div class="spinner" id="otpSpinner"></div>
+            </button>
+            <button class="btn-ghost" onclick="showSection('forgot-email')">Modifier l'email</button>
+        </div>
+
+        <!-- ══════════════════════════════════════
+             SECTION 4 — RESET PASSWORD
+        ══════════════════════════════════════ -->
+        <div class="form-section" id="resetSection">
+            <div class="steps">
+                <div class="step done"><div class="step-num">✓</div><span>Email</span></div>
+                <div class="step-line"></div>
+                <div class="step done"><div class="step-num">✓</div><span>Code OTP</span></div>
+                <div class="step-line"></div>
+                <div class="step active"><div class="step-num">3</div><span>Nouveau mot de passe</span></div>
+            </div>
+
+            <div class="field">
+                <label>Nouveau mot de passe</label>
+                <div class="input-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="newPassword" placeholder="••••••••"/>
+                    <button class="toggle-password" type="button" onclick="togglePwd('newPassword')">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="field">
+                <label>Confirmer le mot de passe</label>
+                <div class="input-wrap">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="confirmPassword" placeholder="••••••••"/>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="resetBtn" onclick="doResetPassword()">
+                <span id="resetText">Réinitialiser le mot de passe</span>
+                <div class="spinner" id="resetSpinner"></div>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ── État global
+    let currentEmail = '';
+    let currentOtp   = '';
+
+    // ── Navigation entre sections
+    function showSection(section) {
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+        hideAlert();
+
+        const tabs = document.getElementById('mainTabs');
+
+        if (section === 'login') {
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('formTitle').textContent    = 'Bienvenue';
+            document.getElementById('formSubtitle').textContent = 'Connectez-vous à votre espace';
+            tabs.style.display = 'flex';
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.remove('active');
+
+        } else if (section === 'forgot-email') {
+            document.getElementById('forgotEmailSection').classList.add('active');
+            document.getElementById('formTitle').textContent    = 'Mot de passe oublié';
+            document.getElementById('formSubtitle').textContent = 'Entrez votre email pour recevoir un code';
+            tabs.style.display = 'flex';
+            document.querySelectorAll('.tab')[0].classList.remove('active');
+            document.querySelectorAll('.tab')[1].classList.add('active');
+
+        } else if (section === 'forgot-otp') {
+            document.getElementById('forgotOtpSection').classList.add('active');
+            document.getElementById('formTitle').textContent    = 'Vérification';
+            document.getElementById('formSubtitle').textContent = `Code envoyé à ${currentEmail}`;
+            tabs.style.display = 'none';
+            setTimeout(() => document.getElementById('otp1').focus(), 100);
+
+        } else if (section === 'reset') {
+            document.getElementById('resetSection').classList.add('active');
+            document.getElementById('formTitle').textContent    = 'Nouveau mot de passe';
+            document.getElementById('formSubtitle').textContent = 'Choisissez un mot de passe sécurisé';
+            tabs.style.display = 'none';
+        }
+    }
+
+    // ── OTP navigation automatique
+    function otpNext(input, nextId) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value && nextId) {
+            document.getElementById(nextId).focus();
+        }
+    }
+
+    function otpBack(e, input, prevId) {
+        if (e.key === 'Backspace' && !input.value && prevId) {
+            document.getElementById(prevId).focus();
+        }
+    }
+
+    function getOtpValue() {
+        return ['otp1','otp2','otp3','otp4','otp5','otp6']
+            .map(id => document.getElementById(id).value)
+            .join('');
+    }
+
+    // ── Afficher/cacher mot de passe
+    function togglePwd(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // ── Alerts
+    function showAlert(msg, type = 'error') {
+        const el = document.getElementById('globalAlert');
+        el.className = `alert ${type}`;
+        el.innerHTML = `
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                ${type === 'error'
+                    ? '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'
+                    : '<polyline points="20 6 9 17 4 12"/>'}
+            </svg>${msg}`;
+        el.style.display = 'flex';
+    }
+    function hideAlert() {
+        const el = document.getElementById('globalAlert');
+        el.style.display = 'none';
+        el.className = 'alert';
+    }
+
+    // ── Loading state
+    function setLoading(btnId, spinnerId, textId, on) {
+        document.getElementById(btnId).disabled          = on;
+        document.getElementById(spinnerId).style.display = on ? 'block' : 'none';
+        document.getElementById(textId).style.display    = on ? 'none'  : 'inline';
+    }
+
+    // ══════════════════════════════════════
+    // LOGIN
+    // ══════════════════════════════════════
+    async function doLogin() {
+        hideAlert();
+        const email    = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!email || !password) { showAlert('Veuillez remplir tous les champs.'); return; }
+
+        setLoading('loginBtn','loginSpinner','loginText', true);
+        try {
+            const res  = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const json = await res.json();
+            if (!res.ok) { showAlert(json.message || 'Email ou mot de passe incorrect.'); return; }
+
+            localStorage.setItem('accessToken',  json.data.accessToken);
+            localStorage.setItem('refreshToken', json.data.refreshToken);
+            localStorage.setItem('userEmail',    json.data.email);
+            localStorage.setItem('userFullName', json.data.fullName);
+            localStorage.setItem('userRole',     json.data.role);
+
+            showAlert('Connexion réussie, redirection...', 'success');
+            setTimeout(() => window.location.href = '/dashboard', 1000);
+        } catch (e) {
+            showAlert('Erreur de connexion au serveur.');
+        } finally {
+            setLoading('loginBtn','loginSpinner','loginText', false);
+        }
+    }
+
+    // ══════════════════════════════════════
+    // FORGOT PASSWORD — étape 1 : envoyer OTP
+    // ══════════════════════════════════════
+    async function doForgotPassword() {
+        hideAlert();
+        const email = document.getElementById('forgotEmail').value.trim();
+        if (!email) { showAlert('Veuillez saisir votre adresse email.'); return; }
+
+        setLoading('forgotBtn','forgotSpinner','forgotText', true);
+        try {
+            const res  = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const json = await res.json();
+            if (!res.ok) { showAlert(json.message || 'Une erreur est survenue.'); return; }
+
+            currentEmail = email;
+            showSection('forgot-otp');
+            showAlert('Code envoyé ! Vérifiez votre boîte mail.', 'success');
+        } catch (e) {
+            showAlert('Erreur de connexion au serveur.');
+        } finally {
+            setLoading('forgotBtn','forgotSpinner','forgotText', false);
+        }
+    }
+
+    // ══════════════════════════════════════
+    // FORGOT PASSWORD — étape 2 : vérifier OTP
+    // (on passe juste à l'étape suivante, la vérif réelle se fait au reset)
+    // ══════════════════════════════════════
+    function doVerifyOtp() {
+        hideAlert();
+        const otp = getOtpValue();
+        if (otp.length < 6) { showAlert('Veuillez entrer le code complet à 6 chiffres.'); return; }
+        currentOtp = otp;
+        showSection('reset');
+    }
+
+    // ══════════════════════════════════════
+    // RESET PASSWORD — étape 3
+    // ══════════════════════════════════════
+    async function doResetPassword() {
+        hideAlert();
+        const newPassword     = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!newPassword || !confirmPassword) { showAlert('Veuillez remplir tous les champs.'); return; }
+        if (newPassword !== confirmPassword)   { showAlert('Les mots de passe ne correspondent pas.'); return; }
+        if (newPassword.length < 8)            { showAlert('Minimum 8 caractères requis.'); return; }
+
+        setLoading('resetBtn','resetSpinner','resetText', true);
+        try {
+            const res  = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email:       currentEmail,
+                    otp:         currentOtp,
+                    newPassword: newPassword
+                })
+            });
+            const json = await res.json();
+            if (!res.ok) { showAlert(json.message || 'Code OTP invalide ou expiré.'); return; }
+
+            showAlert('Mot de passe réinitialisé avec succès !', 'success');
+            setTimeout(() => showSection('login'), 2000);
+        } catch (e) {
+            showAlert('Erreur de connexion au serveur.');
+        } finally {
+            setLoading('resetBtn','resetSpinner','resetText', false);
+        }
+    }
+
+    // ── Touche Entrée
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Enter') return;
+        const active = document.querySelector('.form-section.active');
+        if (!active) return;
+        if (active.id === 'loginSection')      doLogin();
+        if (active.id === 'forgotEmailSection') doForgotPassword();
+        if (active.id === 'resetSection')       doResetPassword();
+    });
+</script>
+</body>
+</html>
