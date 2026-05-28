@@ -1,9 +1,9 @@
 package com.medafrica.mavex.controller;
 
 import com.medafrica.mavex.dto.imports.ImportLogResponse;
-import com.medafrica.mavex.service.ExcelImportService;
-import com.medafrica.mavex.service.ImportDeleteService;
-import com.medafrica.mavex.service.ImportLogService;
+import com.medafrica.mavex.service.interfaces.ExcelImportService;
+import com.medafrica.mavex.service.interfaces.ImportDeleteService;
+import com.medafrica.mavex.service.interfaces.ImportLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

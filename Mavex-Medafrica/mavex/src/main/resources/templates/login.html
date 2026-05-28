@@ -194,7 +194,7 @@
         }
 
         .input-wrap { position:relative; }
-        .input-wrap svg {
+        .input-wrap > svg {
             position:absolute; left:14px; top:50%;
             transform:translateY(-50%); color:var(--muted); pointer-events:none;
         }
@@ -213,9 +213,14 @@
         .input-wrap input:focus { border-color:var(--accent); background:rgba(232,201,126,0.04); }
         .input-wrap input::placeholder { color:var(--muted); }
         .toggle-password {
-            position:absolute; right:14px; top:50%;
+            position:absolute; right:12px; top:50%;
             transform:translateY(-50%);
             background:none; border:none; color:var(--muted); cursor:pointer;
+            padding:4px; line-height:0;
+        }
+        .toggle-password:hover { color:var(--accent); }
+        .input-wrap:has(.toggle-password) input {
+            padding-right: 42px;
         }
 
         /* ── OTP INPUT ── */
@@ -331,12 +336,6 @@
         <div class="form-header">
             <h2 id="formTitle">Bienvenue</h2>
             <p  id="formSubtitle">Connectez-vous à votre espace</p>
-        </div>
-
-        <!-- TABS -->
-        <div class="tabs" id="mainTabs">
-            <button class="tab active" onclick="showSection('login')">Connexion</button>
-            <button class="tab"        onclick="showSection('forgot-email')">Mot de passe oublié</button>
         </div>
 
         <!-- ALERT -->

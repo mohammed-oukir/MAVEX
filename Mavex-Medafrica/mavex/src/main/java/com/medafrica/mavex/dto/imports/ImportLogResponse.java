@@ -34,5 +34,6 @@ public class ImportLogResponse {
         private String receiverEmail;
         private ImportRowStatus status;
         private String reason;
+        private String warnings;
     }
 }

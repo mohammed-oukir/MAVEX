@@ -5,7 +5,7 @@ import com.medafrica.mavex.dto.order.OrderRequest;
 import com.medafrica.mavex.dto.order.OrderResponse;
 import com.medafrica.mavex.dto.order.OrderStatusUpdateRequest;
 import com.medafrica.mavex.model.enums.OrderStatus;
-import com.medafrica.mavex.service.OrderService;
+import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

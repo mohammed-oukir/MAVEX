@@ -4,7 +4,7 @@ import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
-import com.medafrica.mavex.service.ShipmentService;
+import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

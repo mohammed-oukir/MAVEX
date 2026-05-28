@@ -14,6 +14,7 @@ import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
 import com.medafrica.mavex.repository.ShipmentRepository;
+import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,15 +27,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService {
+public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository            orderRepository;
+    private final OrderRepository              orderRepository;
     private final OrderStatusHistoryRepository historyRepository;
-    private final ShipmentRepository         shipmentRepository;
-    private final ClientRepository           clientRepository;
+    private final ShipmentRepository           shipmentRepository;
+    private final ClientRepository             clientRepository;
 
     // ───────────────────────────── CREATE ─────────────────────────────
 
+    @Override
     @Transactional
     public OrderResponse create(OrderRequest request) {
 
@@ -68,8 +70,6 @@ public class OrderService {
                 .build();
 
         Order saved = orderRepository.save(order);
-
-        // Enregistrer la création dans l'historique
         recordHistory(saved, null, OrderStatus.CREATED, "Création de l'order", getCurrentUser());
 
         return toResponse(saved);
@@ -77,11 +77,13 @@ public class OrderService {
 
     // ───────────────────────────── READ ───────────────────────────────
 
+    @Override
     @Transactional(readOnly = true)
     public OrderResponse getById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public OrderResponse getByHawb(String hawb) {
         Order order = orderRepository.findByHawb(hawb)
@@ -89,6 +91,7 @@ public class OrderService {
         return toResponse(order);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getAll() {
         return orderRepository.findAll().stream()
@@ -96,6 +99,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getByShipment(Long shipmentId) {
         return orderRepository.findByShipmentId(shipmentId).stream()
@@ -103,6 +107,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getByClient(Long clientId) {
         return orderRepository.findByClientId(clientId).stream()
@@ -110,6 +115,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getByStatus(OrderStatus status) {
         return orderRepository.findByStatus(status).stream()
@@ -119,11 +125,11 @@ public class OrderService {
 
     // ───────────────────────────── UPDATE ─────────────────────────────
 
+    @Override
     @Transactional
     public OrderResponse update(Long id, OrderRequest request) {
         Order order = findOrThrow(id);
 
-        // Vérifier unicité HAWB uniquement si modifié
         if (!order.getHawb().equals(request.getHawb()) && orderRepository.existsByHawb(request.getHawb())) {
             throw new IllegalArgumentException("Un order avec le HAWB '" + request.getHawb() + "' existe déjà.");
         }
@@ -153,21 +159,20 @@ public class OrderService {
         return toResponse(orderRepository.save(order));
     }
 
-    // ─────────────────────── PATCH (mise à jour partielle) ────────────
+    // ─────────────────────── PATCH ────────────────────────────────────
 
+    @Override
     @Transactional
     public OrderResponse patch(Long id, OrderPatchRequest request) {
         Order order = findOrThrow(id);
 
-        // Vérifier unicité HAWB uniquement si hawb est fourni et différent
         if (request.getHawb() != null
                 && !request.getHawb().equals(order.getHawb())
                 && orderRepository.existsByHawb(request.getHawb())) {
             throw new IllegalArgumentException("Un order avec le HAWB '" + request.getHawb() + "' existe déjà.");
         }
 
-        // On ne modifie que les champs non-null envoyés dans la requête
-        if (request.getHawb()            != null) order.setHawb(request.getHawb());
+        if (request.getHawb()             != null) order.setHawb(request.getHawb());
         if (request.getGoodsDescription() != null) order.setGoodsDescription(request.getGoodsDescription());
         if (request.getHtsusCode()        != null) order.setHtsusCode(request.getHtsusCode());
         if (request.getNumberOfItems()    != null) order.setNumberOfItems(request.getNumberOfItems());
@@ -181,7 +186,6 @@ public class OrderService {
         if (request.getBankCharges()      != null) order.setBankCharges(request.getBankCharges());
         if (request.getEnteredValue()     != null) order.setEnteredValue(request.getEnteredValue());
 
-        // Relations : on ne change que si l'ID est fourni
         if (request.getShipmentId() != null) {
             Shipment shipment = shipmentRepository.findById(request.getShipmentId())
                     .orElseThrow(() -> new EntityNotFoundException("Shipment introuvable id=" + request.getShipmentId()));
@@ -199,9 +203,7 @@ public class OrderService {
 
     // ─────────────────────── CHANGEMENT DE STATUT ─────────────────────
 
-    /**
-     * Appelé par un AGENT via API (changement manuel).
-     */
+    @Override
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatusUpdateRequest request) {
         Order order = findOrThrow(id);
@@ -212,10 +214,7 @@ public class OrderService {
         return toResponse(order);
     }
 
-    /**
-     * Appelé automatiquement par le système (webhook / scheduler).
-     * changedBy = null car aucun utilisateur n'est impliqué.
-     */
+    @Override
     @Transactional
     public void updateStatusSystem(Long orderId, OrderStatus newStatus, String note) {
         Order order = findOrThrow(orderId);
@@ -227,6 +226,7 @@ public class OrderService {
 
     // ─────────────────────── TOKEN DE PAIEMENT ─────────────────────────
 
+    @Override
     @Transactional
     public OrderResponse generatePaymentToken(Long id) {
         Order order = findOrThrow(id);
@@ -234,6 +234,7 @@ public class OrderService {
         return toResponse(orderRepository.save(order));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public OrderResponse getByPaymentToken(String token) {
         Order order = orderRepository.findByPaymentToken(token)
@@ -246,6 +247,7 @@ public class OrderService {
 
     // ───────────────────────────── DELETE ─────────────────────────────
 
+    @Override
     @Transactional
     public void delete(Long id) {
         if (!orderRepository.existsById(id)) {
@@ -263,7 +265,7 @@ public class OrderService {
 
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return (principal instanceof User) ? (User) principal : null;
+        return (principal instanceof User u) ? u : null;
     }
 
     private void recordHistory(Order order, OrderStatus from, OrderStatus to, String note, User changedBy) {
@@ -279,53 +281,38 @@ public class OrderService {
 
     // ─────────────────────────── MAPPING ──────────────────────────────
 
-/*private OrderResponse toResponse(Order o) {
+    private OrderResponse toResponse(Order o) {
+
         String clientFullName = null;
+        String clientEmail    = null;
+        String clientPhone    = null;
+        String clientAddress  = null;
+        String clientCity     = null;
+        String clientState    = null;
+        String clientZipCode  = null;
+        String clientCountry  = null;
+
         if (o.getClient() != null) {
-            clientFullName = o.getClient().getFullName() ;
+            Client c    = o.getClient();
+            clientFullName = c.getFullName();
+            clientEmail    = c.getEmail();
+            clientPhone    = c.getPhone();
+            clientAddress  = c.getAddress();
+            clientCity     = c.getCity();
+            clientState    = c.getState();
+            clientZipCode  = c.getZipCode();
+            clientCountry  = c.getCountry() != null ? c.getCountry().getCode() : null;
         }
 
-        String mawb = null;
+        String mawb        = null;
+        String companyName = null;
+
         if (o.getShipment() != null) {
             mawb = o.getShipment().getMawb();
-        }*/
-
-            private OrderResponse toResponse(Order o) {
-
-
-
-    String clientFullName = null;
-    String clientEmail    = null;
-    String clientPhone    = null;
-    String clientAddress  = null;
-    String clientCity     = null;
-    String clientState    = null;
-    String clientZipCode  = null;
-    String clientCountry  = null;
-
-    if (o.getClient() != null) {
-        Client c      = o.getClient();
-        clientFullName = c.getFullName();
-        clientEmail    = c.getEmail();
-        clientPhone    = c.getPhone();
-        clientAddress  = c.getAddress();
-        clientCity     = c.getCity();
-        clientState    = c.getState();
-        clientZipCode  = c.getZipCode();
-        clientCountry  = c.getCountry() != null ? c.getCountry().getCode() : null;
-    }
-    //String mawb = o.getShipment() != null ? o.getShipment().getMawb() : null;
-    
-String mawb        = null;  // ← ajouter = null
-String companyName = null;   // ← au lieu de shipperName
-
-if (o.getShipment() != null) {
-    mawb = o.getShipment().getMawb();
-    if (o.getShipment().getShipper() != null) {
-        companyName = o.getShipment().getShipper().getCompanyName();
-    }
-}
-
+            if (o.getShipment().getShipper() != null) {
+                companyName = o.getShipment().getShipper().getCompanyName();
+            }
+        }
 
         return OrderResponse.builder()
                 .id(o.getId())
@@ -352,15 +339,14 @@ if (o.getShipment() != null) {
                 .mawb(mawb)
                 .clientId(o.getClient() != null ? o.getClient().getId() : null)
                 .clientFullName(clientFullName)
-                 .clientEmail(clientEmail)       // ← nouveau
-            .clientPhone(clientPhone)       // ← nouveau
-            .clientAddress(clientAddress)   // ← nouveau
-            .clientCity(clientCity)         // ← nouveau
-            .clientState(clientState)       // ← nouveau
-            .clientZipCode(clientZipCode)   // ← nouveau
-            .clientCountry(clientCountry)   // ← nouveau
-           
-            .companyName(companyName)  // ← ajouter ici
+                .clientEmail(clientEmail)
+                .clientPhone(clientPhone)
+                .clientAddress(clientAddress)
+                .clientCity(clientCity)
+                .clientState(clientState)
+                .clientZipCode(clientZipCode)
+                .clientCountry(clientCountry)
+                .companyName(companyName)
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

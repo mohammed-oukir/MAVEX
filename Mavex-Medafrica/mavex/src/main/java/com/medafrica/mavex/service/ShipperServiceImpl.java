@@ -4,6 +4,7 @@ import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
 import com.medafrica.mavex.model.actor.Shipper;
 import com.medafrica.mavex.repository.ShipperRepository;
+import com.medafrica.mavex.service.interfaces.ShipperService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,14 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ShipperService {
+public class ShipperServiceImpl implements ShipperService {
 
     private final ShipperRepository shipperRepository;
 
-    // ---------------------------------------------------------------
-    // CREATE
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional
     public ShipperResponseDTO create(ShipperRequestDTO req) {
 
@@ -41,28 +39,19 @@ public class ShipperService {
         return toResponse(shipperRepository.save(shipper));
     }
 
-    // ---------------------------------------------------------------
-    // READ - détail
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional(readOnly = true)
     public ShipperResponseDTO getById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
-    // ---------------------------------------------------------------
-    // READ - liste paginée (actifs uniquement)
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional(readOnly = true)
     public Page<ShipperResponseDTO> list(Pageable pageable) {
-       return shipperRepository.findAll(pageable).map(this::toResponse);
+        return shipperRepository.findAll(pageable).map(this::toResponse);
     }
 
-    // ---------------------------------------------------------------
-    // UPDATE PUT - mise à jour complète
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional
     public ShipperResponseDTO update(Long id, ShipperRequestDTO req) {
 
@@ -85,11 +74,7 @@ public class ShipperService {
         return toResponse(shipperRepository.save(shipper));
     }
 
-    // ---------------------------------------------------------------
-    // PATCH - mise à jour partielle
-    // null = champ non envoyé = pas touché
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional
     public ShipperResponseDTO patch(Long id, ShipperRequestDTO req) {
 
@@ -112,10 +97,7 @@ public class ShipperService {
         return toResponse(shipperRepository.save(shipper));
     }
 
-    // ---------------------------------------------------------------
-    // SOFT DELETE — archive sans supprimer (préserve les orders liés)
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional
     public void deactivate(Long id) {
         Shipper shipper = findOrThrow(id);
@@ -123,32 +105,19 @@ public class ShipperService {
         shipperRepository.save(shipper);
     }
 
-// ---------------------------------------------------------------
-// ACTIVATE — réactive un shipper désactivé
-// ---------------------------------------------------------------
+    @Override
+    @Transactional
+    public void activate(Long id) {
+        Shipper shipper = findOrThrow(id);
+        shipper.setActive(true);
+        shipperRepository.save(shipper);
+    }
 
-@Transactional
-public void activate(Long id) {
-    Shipper shipper = findOrThrow(id);
-    shipper.setActive(true);
-    shipperRepository.save(shipper);
-}
-
-
-    // ---------------------------------------------------------------
-    // HARD DELETE — ADMIN seulement
-    // ---------------------------------------------------------------
-
+    @Override
     @Transactional
     public void delete(Long id) {
         shipperRepository.delete(findOrThrow(id));
     }
-
-
-
-    // ---------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------
 
     private Shipper findOrThrow(Long id) {
         return shipperRepository.findById(id)

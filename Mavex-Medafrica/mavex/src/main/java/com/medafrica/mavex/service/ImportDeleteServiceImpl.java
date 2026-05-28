@@ -3,8 +3,8 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.model.imports.ImportLog;
 import com.medafrica.mavex.model.imports.ImportRowLog;
 import com.medafrica.mavex.model.logistics.Order;
-import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.repository.*;
+import com.medafrica.mavex.service.interfaces.ImportDeleteService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,34 +18,25 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImportDeleteService {
+public class ImportDeleteServiceImpl implements ImportDeleteService {
 
-    private final ImportLogRepository    importLogRepository;
-    private final ImportRowLogRepository importRowLogRepository;
-    private final OrderRepository        orderRepository;
-    private final ShipmentRepository     shipmentRepository;
-    private final ClientRepository       clientRepository;
+    private final ImportLogRepository          importLogRepository;
+    private final ImportRowLogRepository       importRowLogRepository;
+    private final OrderRepository              orderRepository;
+    private final ShipmentRepository           shipmentRepository;
+    private final ClientRepository             clientRepository;
+    private final EmailLogRepository           emailLogRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
 
-    /**
-     * Supprime un import COMPLÈTEMENT :
-     * - Les ImportRowLogs
-     * - Les Orders créés par cet import (via HAWB)
-     * - Les Shipments qui n'ont plus d'orders
-     * - Les Clients qui n'ont plus d'orders
-     * - L'ImportLog lui-même
-     *
-     * Résultat : comme si l'import n'avait jamais eu lieu.
-     */
+    @Override
     @Transactional
     public void deleteImport(Long importLogId) {
 
-        // 1. Récupérer le log
         ImportLog importLog = importLogRepository.findById(importLogId)
             .orElseThrow(() -> new EntityNotFoundException("Import introuvable id=" + importLogId));
 
         log.info("Suppression de l'import {} ({})", importLogId, importLog.getFileName());
 
-        // 2. Récupérer les HAWBs importés depuis les row logs
         List<String> importedHawbs = importLog.getRowLogs().stream()
             .filter(r -> r.getStatus() != null &&
                          r.getStatus().name().equals("IMPORTED"))
@@ -55,10 +46,8 @@ public class ImportDeleteService {
 
         log.info("HAWBs à supprimer : {}", importedHawbs);
 
-        // 3. Récupérer les orders concernés
         List<Order> ordersToDelete = orderRepository.findAllByHawbIn(importedHawbs);
 
-        // 4. Collecter les shipment IDs et client IDs AVANT suppression
         Set<Long> shipmentIds = ordersToDelete.stream()
             .filter(o -> o.getShipment() != null)
             .map(o -> o.getShipment().getId())
@@ -69,13 +58,15 @@ public class ImportDeleteService {
             .map(o -> o.getClient().getId())
             .collect(Collectors.toSet());
 
-        // 5. Supprimer les orders
         if (!ordersToDelete.isEmpty()) {
+            for (Order order : ordersToDelete) {
+                emailLogRepository.deleteByOrderId(order.getId());
+                orderStatusHistoryRepository.deleteByOrderId(order.getId());
+            }
             orderRepository.deleteAll(ordersToDelete);
             log.info("{} orders supprimés", ordersToDelete.size());
         }
 
-        // 6. Supprimer les shipments qui n'ont plus d'orders
         for (Long shipmentId : shipmentIds) {
             long remaining = orderRepository.countByShipmentId(shipmentId);
             if (remaining == 0) {
@@ -86,7 +77,6 @@ public class ImportDeleteService {
             }
         }
 
-        // 7. Supprimer les clients qui n'ont plus d'orders
         for (Long clientId : clientIds) {
             long remaining = orderRepository.countByClientId(clientId);
             if (remaining == 0) {
@@ -97,7 +87,6 @@ public class ImportDeleteService {
             }
         }
 
-        // 8. Supprimer les row logs puis le log principal
         importRowLogRepository.deleteAll(importLog.getRowLogs());
         importLogRepository.delete(importLog);
 

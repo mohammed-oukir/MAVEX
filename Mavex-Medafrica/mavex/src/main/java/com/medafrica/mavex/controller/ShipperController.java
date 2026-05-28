@@ -3,7 +3,7 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.ApiResponse;
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
-import com.medafrica.mavex.service.ShipperService;
+import com.medafrica.mavex.service.interfaces.ShipperService;
 import org.springframework.data.domain.Sort;
 
 import jakarta.validation.Valid;

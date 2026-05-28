@@ -9,6 +9,7 @@ import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.*;
+import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +24,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ShipmentService {
-    
+public class ShipmentServiceImpl implements ShipmentService {
 
     private final ShipmentRepository           shipmentRepository;
     private final ShipperRepository            shipperRepository;
@@ -32,9 +32,7 @@ public class ShipmentService {
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final EmailLogRepository           emailLogRepository;
 
-    // ---------------------------------------------------------------
-    // CREATE
-    // ---------------------------------------------------------------
+    @Override
     @Transactional
     public ShipmentResponseDTO create(ShipmentRequestDTO req) {
         if (shipmentRepository.existsByMawb(req.getMawb())) {
@@ -56,27 +54,25 @@ public class ShipmentService {
         return toResponse(shipmentRepository.save(shipment));
     }
 
-    // ---------------------------------------------------------------
-    // READ
-    // ---------------------------------------------------------------
+    @Override
     @Transactional(readOnly = true)
     public ShipmentResponseDTO getById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> list(Pageable pageable) {
         return shipmentRepository.findAll(pageable).map(this::toResponse);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> listByStatus(ShipmentStatus status, Pageable pageable) {
         return shipmentRepository.findByStatus(status, pageable).map(this::toResponse);
     }
 
-    // ---------------------------------------------------------------
-    // UPDATE - PATCH
-    // ---------------------------------------------------------------
+    @Override
     @Transactional
     public ShipmentResponseDTO update(Long id, ShipmentRequestDTO req) {
         Shipment shipment = findOrThrow(id);
@@ -97,9 +93,7 @@ public class ShipmentService {
         return toResponse(shipmentRepository.save(shipment));
     }
 
-    // ---------------------------------------------------------------
-    // UPDATE - statut
-    // ---------------------------------------------------------------
+    @Override
     @Transactional
     public ShipmentResponseDTO updateStatus(Long id, ShipmentStatusUpdateDTO req) {
         Shipment shipment = findOrThrow(id);
@@ -107,9 +101,7 @@ public class ShipmentService {
         return toResponse(shipmentRepository.save(shipment));
     }
 
-    // ---------------------------------------------------------------
-    // UPDATE - PUT
-    // ---------------------------------------------------------------
+    @Override
     @Transactional
     public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
         Shipment shipment = findOrThrow(id);
@@ -130,39 +122,25 @@ public class ShipmentService {
         return toResponse(shipmentRepository.save(shipment));
     }
 
-    // ---------------------------------------------------------------
-    // DELETE — supprime le shipment ET tous ses orders liés
-    // ---------------------------------------------------------------
+    @Override
     @Transactional
     public void delete(Long id) {
         Shipment shipment = findOrThrow(id);
 
-        // 1. Récupérer tous les orders de ce shipment
         List<Order> orders = orderRepository.findByShipmentId(id);
         log.info("Suppression shipment {} ({}) — {} orders liés", id, shipment.getMawb(), orders.size());
 
         for (Order order : orders) {
-            // 2a. Supprimer les email logs liés à cet order
-              emailLogRepository.deleteByOrderId(order.getId());
-
-              //paymentTransactionRepository.deleteByOrderId(order.getId());
-
-            // 2b. Supprimer l'historique des statuts
-          orderStatusHistoryRepository.deleteByOrderId(order.getId()); // ← corrigé
+            emailLogRepository.deleteByOrderId(order.getId());
+            orderStatusHistoryRepository.deleteByOrderId(order.getId());
         }
 
-        // 3. Supprimer tous les orders
         orderRepository.deleteAll(orders);
-
-        // 4. Supprimer le shipment
         shipmentRepository.delete(shipment);
 
         log.info("Shipment {} supprimé avec {} orders", shipment.getMawb(), orders.size());
     }
 
-    // ---------------------------------------------------------------
-    // Helpers
-    // ---------------------------------------------------------------
     private Shipment findOrThrow(Long id) {
         return shipmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Shipment introuvable : " + id));

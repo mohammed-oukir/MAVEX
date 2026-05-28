@@ -3,6 +3,7 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.dto.order.OrderStatusHistoryResponse;
 import com.medafrica.mavex.model.logistics.OrderStatusHistory;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
+import com.medafrica.mavex.service.interfaces.OrderStatusHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +13,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class OrderStatusHistoryService {
+public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService {
 
     private final OrderStatusHistoryRepository historyRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderStatusHistoryResponse> getHistoryByOrder(Long orderId) {
         return historyRepository.findByOrderIdOrderByChangedAtDesc(orderId)
@@ -24,6 +26,7 @@ public class OrderStatusHistoryService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderStatusHistoryResponse> getHistoryByUser(Long userId) {
         return historyRepository.findByChangedByIdOrderByChangedAtDesc(userId)
@@ -31,8 +34,6 @@ public class OrderStatusHistoryService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
-
-    // ─────────────────────────── MAPPING ──────────────────────────────
 
     private OrderStatusHistoryResponse toResponse(OrderStatusHistory h) {
         return OrderStatusHistoryResponse.builder()

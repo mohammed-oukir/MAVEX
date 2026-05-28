@@ -13,6 +13,7 @@ import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.*;
+import com.medafrica.mavex.service.interfaces.ExcelImportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -25,14 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.HexFormat;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ExcelImportService {
+public class ExcelImportServiceImpl implements ExcelImportService {
 
     private final ImportLogRepository    importLogRepository;
     private final ImportRowLogRepository importRowLogRepository;
@@ -43,35 +42,8 @@ public class ExcelImportService {
     private final CountryRepository      countryRepository;
 
     // ---------------------------------------------------------------
-    // COLONNES EXCEL — index 0-based
-    //  0  Mawb #
-    //  1  Connote #
-    //  2  Alternate Reference
-    //  3  Sender Name
-    //  4  Sender Country
-    //  5  Sender Address 1
-    //  6  Sender Location Name
-    //  7  Sender State
-    //  8  Sender Postcode
-    //  9  Sender Contact
-    // 10  Sender Phone
-    // 11  Sender Email
-    // 12  Receiver Name
-    // 13  Receiver Country
-    // 14  Receiver Address 1
-    // 15  Receiver Location Name
-    // 16  Receiver State
-    // 17  Receiver Postcode
-    // 18  Receiver Contact
-    // 19  Receiver Phone
-    // 20  Receiver Email
-    // 21  Number of Items
-    // 22  Goods Description
-    // 23  Shipment Weight
-    // 24  Customs Value
-    // 25  Customs Currency Code
+    // INDEX LOGIQUES — constantes utilisées comme clés dans cols[]
     // ---------------------------------------------------------------
-
     private static final int COL_MAWB               = 0;
     private static final int COL_HAWB               = 1;
     private static final int COL_ALTERNATE_REF      = 2;
@@ -99,7 +71,41 @@ public class ExcelImportService {
     private static final int COL_CUSTOMS_VALUE      = 24;
     private static final int COL_CURRENCY           = 25;
 
-    // Taille max autorisée par ligne (champs texte)
+    // Noms attendus dans la ligne d'en-tête, dans le même ordre que les constantes ci-dessus
+    private static final String[] COL_HEADERS = {
+        "Mawb #",                 // 0
+        "Connote #",              // 1
+        "Alternate Reference",    // 2
+        "Sender Name",            // 3
+        "Sender Country",         // 4
+        "Sender Address 1",       // 5
+        "Sender Location Name",   // 6
+        "Sender State",           // 7
+        "Sender Postcode",        // 8
+        "Sender Contact",         // 9
+        "Sender Phone",           // 10
+        "Sender Email",           // 11
+        "Receiver Name",          // 12
+        "Receiver Country",       // 13
+        "Receiver Address 1",     // 14
+        "Receiver Location Name", // 15
+        "Receiver State",         // 16
+        "Receiver Postcode",      // 17
+        "Receiver Contact",       // 18
+        "Receiver Phone",         // 19
+        "Receiver Email",         // 20
+        "Number of Items",        // 21
+        "Goods Description",      // 22
+        "Shipment Weight",        // 23
+        "Customs Value",          // 24
+        "Customs Currency Code"   // 25
+    };
+
+    // Colonnes obligatoires : leur absence bloque tout l'import au niveau fichier
+    private static final Set<Integer> REQUIRED_COLS = Set.of(
+        COL_MAWB, COL_HAWB, COL_RECEIVER_NAME, COL_EMAIL, COL_CUSTOMS_VALUE, COL_WEIGHT
+    );
+
     private static final int MAX_EMAIL_LENGTH        = 255;
     private static final int MAX_NAME_LENGTH         = 200;
     private static final int MAX_HAWB_LENGTH         = 100;
@@ -112,24 +118,19 @@ public class ExcelImportService {
     // POINT D'ENTRÉE
     // ---------------------------------------------------------------
 
+    @Override
     @Transactional
     public ImportLogResponse importManifest(MultipartFile file) throws Exception {
 
-        // ── CAS 1 : Fichier vide
-        if (file == null || file.isEmpty()) {
+        if (file == null || file.isEmpty())
             throw new IllegalArgumentException("Le fichier est vide ou absent.");
-        }
 
-        // ── CAS 2 : Extension non autorisée
         String filename = file.getOriginalFilename();
-        if (filename == null || (!filename.toLowerCase().endsWith(".xlsx") && !filename.toLowerCase().endsWith(".xls"))) {
+        if (filename == null || (!filename.toLowerCase().endsWith(".xlsx") && !filename.toLowerCase().endsWith(".xls")))
             throw new IllegalArgumentException("Format non supporté. Utilisez .xlsx ou .xls");
-        }
 
-        // ── CAS 3 : Taille fichier > 10 MB
-        if (file.getSize() > 10L * 1024 * 1024) {
+        if (file.getSize() > 10L * 1024 * 1024)
             throw new IllegalArgumentException("Fichier trop volumineux. Maximum 10 MB autorisé.");
-        }
 
         byte[] fileBytes;
         try {
@@ -138,7 +139,6 @@ public class ExcelImportService {
             throw new IllegalArgumentException("Impossible de lire le fichier : " + e.getMessage());
         }
 
-        // ── CAS 4 : Fichier déjà importé (hash MD5)
         String fileHash = computeMd5(fileBytes);
         if (importLogRepository.existsByFileHash(fileHash)) {
             ImportLog existing = importLogRepository.findByFileHash(fileHash).get();
@@ -166,7 +166,6 @@ public class ExcelImportService {
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            // ── CAS 5 : Feuille Excel vide
             if (sheet.getLastRowNum() < 1) {
                 importLog.setStatus(ImportStatus.FAILED);
                 importLog.setTotalRows(0);
@@ -177,77 +176,100 @@ public class ExcelImportService {
                 throw new IllegalArgumentException("Le fichier Excel est vide ou ne contient que l'en-tête.");
             }
 
-            // ── CAS 6 : Vérifier que les en-têtes sont présents (ligne 0)
             Row headerRow = sheet.getRow(0);
             if (headerRow == null) {
+                importLog.setStatus(ImportStatus.FAILED);
+                importLogRepository.save(importLog);
                 throw new IllegalArgumentException("La ligne d'en-tête est absente du fichier Excel.");
             }
 
+            // ── Résolution dynamique : on cherche chaque colonne par son nom dans l'en-tête ──
+            int[] cols;
+            try {
+                cols = buildColMap(headerRow);
+            } catch (IllegalArgumentException e) {
+                importLog.setStatus(ImportStatus.FAILED);
+                importLog.setTotalRows(0);
+                importLogRepository.save(importLog);
+                throw e;
+            }
+
+            log.info("Mapping colonnes résolu pour '{}' — positions réelles : {}", filename, describeColMap(cols));
+
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-
-                // ── CAS 7 : Ligne physiquement null ou vide → ignorer silencieusement
-                if (row == null || isRowEmpty(row)) continue;
+                if (row == null || isRowEmpty(row, cols)) continue;
 
                 totalRows++;
                 int rowNumber = i + 1;
 
-                String mawb          = getCellString(row, COL_MAWB);
-                String hawb          = getCellString(row, COL_HAWB);
-                String receiverEmail = getCellString(row, COL_EMAIL);
+                String mawb          = getCellString(row, cols[COL_MAWB]);
+                String hawb          = getCellString(row, cols[COL_HAWB]);
+                String receiverEmail = getCellString(row, cols[COL_EMAIL]);
 
-                // ── Validation complète de la ligne
-                String validationError = validateRow(row, mawb, hawb, receiverEmail);
+                String validationError = validateRow(row, mawb, hawb, receiverEmail, cols);
                 if (validationError != null) {
                     log.warn("Ligne {} rejetée — HAWB={} : {}", rowNumber, hawb, validationError);
                     rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
-                            ImportRowStatus.FAILED, validationError));
+                            ImportRowStatus.FAILED, validationError, null));
                     failedRows++;
                     continue;
                 }
 
                 if (mawbFound == null) mawbFound = mawb;
 
-                // ── CAS 8 : HAWB déjà en base (doublon DB)
-                if (orderRepository.existsByHawb(hawb)) {
-                    log.info("Ligne {} ignorée (doublon DB) — HAWB={}", rowNumber, hawb);
+                if (orderRepository.existsByHawbAndShipmentMawb(hawb, mawb)) {
+                    log.info("Ligne {} ignorée (doublon MAWB+HAWB) — MAWB={} HAWB={}", rowNumber, mawb, hawb);
                     rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
-                            ImportRowStatus.SKIPPED, "HAWB déjà existant en base de données"));
+                            ImportRowStatus.SKIPPED,
+                            "Doublon détecté : HAWB=" + hawb + " déjà importé sous le MAWB=" + mawb, null));
                     skippedRows++;
                     continue;
                 }
 
-                // ── Traitement
+                if (orderRepository.existsByHawb(hawb)) {
+                    log.info("Ligne {} ignorée (HAWB sous autre MAWB) — HAWB={}", rowNumber, hawb);
+                    rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
+                            ImportRowStatus.SKIPPED,
+                            "HAWB=" + hawb + " déjà existant dans la base sous un autre MAWB", null));
+                    skippedRows++;
+                    continue;
+                }
+
                 try {
+                    List<String> warnings = new ArrayList<>();
+
                     Shipment shipment = findOrCreateShipment(mawb, currentUser);
-                    Shipper shipper = findOrCreateShipper(row);
+                    Shipper  shipper  = findOrCreateShipper(row, cols, warnings);
 
                     if (shipment.getShipper() == null) {
                         shipment.setShipper(shipper);
                         shipmentRepository.save(shipment);
                     }
 
-                    Client client = findOrCreateClient(row);
-                    createOrder(row, hawb, shipment, client);
+                    Client client = findOrCreateClient(row, cols, warnings);
+                    createOrder(row, hawb, shipment, client, cols, warnings);
 
+                    String warningText = warnings.isEmpty() ? null : String.join(" | ", warnings);
                     rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
-                            ImportRowStatus.IMPORTED, null));
+                            ImportRowStatus.IMPORTED, null, warningText));
                     successRows++;
-                    log.info("Ligne {} importée ✓ — HAWB={}", rowNumber, hawb);
+                    if (warningText != null)
+                        log.info("Ligne {} importée avec avertissements — HAWB={} : {}", rowNumber, hawb, warningText);
+                    else
+                        log.info("Ligne {} importée ✓ — HAWB={}", rowNumber, hawb);
 
                 } catch (Exception e) {
                     log.error("Erreur ligne {} HAWB={} : {}", rowNumber, hawb, e.getMessage(), e);
                     rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
-                            ImportRowStatus.FAILED, "Erreur traitement : " + e.getMessage()));
+                            ImportRowStatus.FAILED, "Erreur traitement : " + e.getMessage(), null));
                     failedRows++;
                 }
             }
 
         } catch (IllegalArgumentException e) {
-            // Re-throw les erreurs de validation fichier
             throw e;
         } catch (Exception e) {
-            // ── CAS 9 : Fichier Excel corrompu / illisible
             log.error("Erreur lecture fichier Excel '{}' : {}", filename, e.getMessage(), e);
             importLog.setStatus(ImportStatus.FAILED);
             importLog.setTotalRows(0);
@@ -273,6 +295,64 @@ public class ExcelImportService {
     }
 
     // ---------------------------------------------------------------
+    // RÉSOLUTION DYNAMIQUE DES COLONNES DEPUIS L'EN-TÊTE
+    // ---------------------------------------------------------------
+
+    /**
+     * Lit la ligne d'en-tête et construit un tableau cols[] tel que :
+     *   cols[COL_MAWB] = index réel de la colonne "Mawb #" dans le fichier
+     *   cols[i] = -1 si la colonne est absente (autorisé pour les optionnelles)
+     * Lève IllegalArgumentException si une colonne obligatoire est absente.
+     */
+    private int[] buildColMap(Row headerRow) {
+        // Construire la map : nom_en_tête_minuscule → index_réel
+        Map<String, Integer> headerMap = new HashMap<>();
+        for (int c = 0; c <= headerRow.getLastCellNum(); c++) {
+            Cell cell = headerRow.getCell(c);
+            if (cell == null) continue;
+            String text = null;
+            if (cell.getCellType() == CellType.STRING) {
+                text = cell.getStringCellValue().trim();
+            } else if (cell.getCellType() == CellType.NUMERIC) {
+                text = String.valueOf((long) cell.getNumericCellValue()).trim();
+            }
+            if (text != null && !text.isEmpty()) {
+                headerMap.put(text.toLowerCase(), c);
+            }
+        }
+
+        int[] cols = new int[COL_HEADERS.length];
+        List<String> missing = new ArrayList<>();
+
+        for (int i = 0; i < COL_HEADERS.length; i++) {
+            Integer found = headerMap.get(COL_HEADERS[i].toLowerCase());
+            cols[i] = (found != null) ? found : -1;
+            if (found == null && REQUIRED_COLS.contains(i)) {
+                missing.add("\"" + COL_HEADERS[i] + "\"");
+            }
+        }
+
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Structure du fichier invalide — colonnes obligatoires introuvables dans l'en-tête : "
+                + String.join(", ", missing)
+                + ". Vérifiez que vous utilisez le bon template Excel."
+            );
+        }
+
+        return cols;
+    }
+
+    private String describeColMap(int[] cols) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cols.length; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(COL_HEADERS[i]).append("=").append(cols[i] < 0 ? "absent" : "col" + cols[i]);
+        }
+        return sb.toString();
+    }
+
+    // ---------------------------------------------------------------
     // TROUVER OU CRÉER Shipment
     // ---------------------------------------------------------------
 
@@ -290,138 +370,135 @@ public class ExcelImportService {
     // TROUVER OU CRÉER Shipper
     // ---------------------------------------------------------------
 
-   private Shipper findOrCreateShipper(Row row) {
-    String companyName = getCellString(row, COL_SENDER_NAME);
-    if (companyName == null || companyName.isBlank()) companyName = "Unknown Shipper";
-    final String name = companyName;
-
-    // Résoudre le pays du shipper
-    String senderCountryCode = getCellString(row, COL_SENDER_COUNTRY);
-    Country senderCountry    = resolveCountry(senderCountryCode);
-
-    // State : tronquer à 10 chars max
-    String state = getCellString(row, COL_SENDER_STATE);
-    if (state != null && state.length() > 10) state = state.substring(0, 10);
-    final String finalState = state;
-
-    return shipperRepository.findByCompanyNameIgnoreCase(name).map(existing -> {
-        // ── Shipper existe → mettre à jour ses champs depuis le manifest
-        existing.setContactName(getCellString(row, COL_SENDER_CONTACT));
-        existing.setPhone(getCellString(row, COL_SENDER_PHONE));
-        existing.setAddress(getCellString(row, COL_SENDER_ADDRESS));
-        existing.setCity(getCellString(row, COL_SENDER_CITY));
-        existing.setLocationName(getCellString(row, COL_SENDER_CITY));
-        existing.setState(finalState);
-        existing.setZipCode(getCellString(row, COL_SENDER_POSTCODE));
-        if (senderCountry != null) existing.setCountry(senderCountry);
-
-        String senderEmail = getCellString(row, COL_SENDER_EMAIL);
-        if (senderEmail != null && !senderEmail.isBlank()) {
-            existing.setEmail(senderEmail);
+    private Shipper findOrCreateShipper(Row row, int[] cols, List<String> warnings) {
+        String companyName = getCellString(row, cols[COL_SENDER_NAME]);
+        if (companyName == null || companyName.isBlank()) {
+            companyName = "Unknown Shipper";
+            warnings.add("Sender name manquant → remplacé par 'Unknown Shipper'");
         }
+        final String name = companyName;
 
-        return shipperRepository.save(existing);
+        String senderCountryCode = getCellString(row, cols[COL_SENDER_COUNTRY]);
+        Country senderCountry = resolveCountry(senderCountryCode);
+        if (senderCountryCode != null && !senderCountryCode.isBlank() && senderCountry == null)
+            warnings.add("Pays expéditeur '" + senderCountryCode + "' introuvable → ignoré");
 
-    }).orElseGet(() -> {
-        // ── Shipper nouveau → créer
-        Shipper s = Shipper.builder()
-                .companyName(name)
-                .contactName(getCellString(row, COL_SENDER_CONTACT))
-                .email(
-                    getCellString(row, COL_SENDER_EMAIL) != null
-                        ? getCellString(row, COL_SENDER_EMAIL)
-                        : name.toLowerCase().replaceAll("[^a-z0-9]", ".") + "@unknown.com"
-                )
-                .phone(getCellString(row, COL_SENDER_PHONE))
-                .address(getCellString(row, COL_SENDER_ADDRESS))
-                .city(getCellString(row, COL_SENDER_CITY))
-                .locationName(getCellString(row, COL_SENDER_CITY))
-                .state(finalState)
-                .zipCode(getCellString(row, COL_SENDER_POSTCODE))
-                .country(senderCountry)
-                .build();
+        String rawState = getCellString(row, cols[COL_SENDER_STATE]);
+        String state = rawState;
+        if (state != null && state.length() > 10) {
+            state = state.substring(0, 10);
+            warnings.add("Sender state tronqué à 10 chars : '" + rawState + "' → '" + state + "'");
+        }
+        final String finalState = state;
 
-        return shipperRepository.save(s);
-    });
-}
- 
+        return shipperRepository.findByCompanyNameIgnoreCase(name).map(existing -> {
+            existing.setContactName(getCellString(row, cols[COL_SENDER_CONTACT]));
+            existing.setPhone(getCellString(row, cols[COL_SENDER_PHONE]));
+            existing.setAddress(getCellString(row, cols[COL_SENDER_ADDRESS]));
+            existing.setCity(getCellString(row, cols[COL_SENDER_CITY]));
+            existing.setLocationName(getCellString(row, cols[COL_SENDER_CITY]));
+            existing.setState(finalState);
+            existing.setZipCode(getCellString(row, cols[COL_SENDER_POSTCODE]));
+            if (senderCountry != null) existing.setCountry(senderCountry);
+
+            String senderEmail = getCellString(row, cols[COL_SENDER_EMAIL]);
+            if (senderEmail != null && !senderEmail.isBlank()) existing.setEmail(senderEmail);
+
+            return shipperRepository.save(existing);
+
+        }).orElseGet(() -> {
+            String email = getCellString(row, cols[COL_SENDER_EMAIL]);
+            if (email == null || email.isBlank()) {
+                email = name.toLowerCase().replaceAll("[^a-z0-9]", ".") + "@unknown.com";
+                warnings.add("Sender email manquant → email généré : '" + email + "'");
+            }
+            final String resolvedEmail = email;
+            Shipper s = Shipper.builder()
+                    .companyName(name)
+                    .contactName(getCellString(row, cols[COL_SENDER_CONTACT]))
+                    .email(resolvedEmail)
+                    .phone(getCellString(row, cols[COL_SENDER_PHONE]))
+                    .address(getCellString(row, cols[COL_SENDER_ADDRESS]))
+                    .city(getCellString(row, cols[COL_SENDER_CITY]))
+                    .locationName(getCellString(row, cols[COL_SENDER_CITY]))
+                    .state(finalState)
+                    .zipCode(getCellString(row, cols[COL_SENDER_POSTCODE]))
+                    .country(senderCountry)
+                    .build();
+            return shipperRepository.save(s);
+        });
+    }
 
     // ---------------------------------------------------------------
     // TROUVER OU CRÉER Client
     // ---------------------------------------------------------------
 
-    private Client findOrCreateClient(Row row) {
-    String email    = getCellString(row, COL_EMAIL);
-    String fullName = getCellString(row, COL_RECEIVER_NAME);
+    private Client findOrCreateClient(Row row, int[] cols, List<String> warnings) {
+        String email    = getCellString(row, cols[COL_EMAIL]);
+        String fullName = getCellString(row, cols[COL_RECEIVER_NAME]);
 
-    // Résoudre le pays UNE FOIS ici
-    String countryCode = getCellString(row, COL_RECEIVER_COUNTRY);
-    Country country    = resolveCountry(countryCode);
+        String receiverCountryCode = getCellString(row, cols[COL_RECEIVER_COUNTRY]);
+        Country country = resolveCountry(receiverCountryCode);
+        if (receiverCountryCode != null && !receiverCountryCode.isBlank() && country == null)
+            warnings.add("Pays destinataire '" + receiverCountryCode + "' introuvable → ignoré");
 
-    // State : tronquer à 2 chars max
-    String state = getCellString(row, COL_RECEIVER_STATE);
-    if (state != null && state.length() > 2) state = state.substring(0, 2).toUpperCase();
-    final String finalState = state;
+        String rawState = getCellString(row, cols[COL_RECEIVER_STATE]);
+        String state = rawState;
+        if (state != null && state.length() > 2) {
+            state = state.substring(0, 2).toUpperCase();
+            warnings.add("Receiver state tronqué à 2 chars : '" + rawState + "' → '" + state + "'");
+        }
+        final String finalState = state;
 
-    return clientRepository.findByEmail(email).map(existing -> {
-        // ── Client existe → mettre à jour depuis le manifest
-        existing.setFullName(fullName);
-        existing.setPhone(getCellString(row, COL_RECEIVER_PHONE));
-        existing.setAddress(getCellString(row, COL_RECEIVER_ADDRESS));
-        existing.setCity(getCellString(row, COL_RECEIVER_CITY));
-        existing.setState(finalState);
-        existing.setZipCode(getCellString(row, COL_RECEIVER_POSTCODE));
-        existing.setContactName(getCellString(row, COL_RECEIVER_CONTACT));
-        if (country != null) existing.setCountry(country);
+        return clientRepository.findByEmail(email).map(existing -> {
+            existing.setFullName(fullName);
+            existing.setPhone(getCellString(row, cols[COL_RECEIVER_PHONE]));
+            existing.setAddress(getCellString(row, cols[COL_RECEIVER_ADDRESS]));
+            existing.setCity(getCellString(row, cols[COL_RECEIVER_CITY]));
+            existing.setState(finalState);
+            existing.setZipCode(getCellString(row, cols[COL_RECEIVER_POSTCODE]));
+            existing.setContactName(getCellString(row, cols[COL_RECEIVER_CONTACT]));
+            if (country != null) existing.setCountry(country);
+            return clientRepository.save(existing);
 
-        return clientRepository.save(existing);
-
-    }).orElseGet(() -> {
-        // ── Client nouveau → créer
-        Client c = Client.builder()
-                .fullName(fullName)
-                .email(email)
-                .phone(getCellString(row, COL_RECEIVER_PHONE))
-                .address(getCellString(row, COL_RECEIVER_ADDRESS))
-                .city(getCellString(row, COL_RECEIVER_CITY))
-                .state(finalState)
-                .zipCode(getCellString(row, COL_RECEIVER_POSTCODE))
-                .contactName(getCellString(row, COL_RECEIVER_CONTACT))
-                .country(country)
-                .build();
-        return clientRepository.save(c);
-    });
-}
+        }).orElseGet(() -> {
+            Client c = Client.builder()
+                    .fullName(fullName)
+                    .email(email)
+                    .phone(getCellString(row, cols[COL_RECEIVER_PHONE]))
+                    .address(getCellString(row, cols[COL_RECEIVER_ADDRESS]))
+                    .city(getCellString(row, cols[COL_RECEIVER_CITY]))
+                    .state(finalState)
+                    .zipCode(getCellString(row, cols[COL_RECEIVER_POSTCODE]))
+                    .contactName(getCellString(row, cols[COL_RECEIVER_CONTACT]))
+                    .country(country)
+                    .build();
+            return clientRepository.save(c);
+        });
+    }
 
     // ---------------------------------------------------------------
     // CRÉER Order
     // ---------------------------------------------------------------
 
-    private void createOrder(Row row, String hawb, Shipment shipment, Client client) {
-        String currency = getCellString(row, COL_CURRENCY);
+    private void createOrder(Row row, String hawb, Shipment shipment, Client client, int[] cols, List<String> warnings) {
+        String currency = getCellString(row, cols[COL_CURRENCY]);
 
-        // ── CAS currency manquante → USD par défaut
         if (currency == null || currency.isBlank()) {
+            warnings.add("Currency manquante → forcée à 'USD'");
             currency = "USD";
-            log.warn("Currency manquante pour HAWB={} — défaut : USD", hawb);
-        }
-
-        // ── CAS currency invalide (pas 3 lettres) → USD par défaut
-        if (!currency.matches("[A-Z]{3}")) {
-            log.warn("Currency invalide '{}' pour HAWB={} — défaut : USD", currency, hawb);
+        } else if (!currency.matches("[A-Z]{3}")) {
+            warnings.add("Currency invalide '" + currency + "' → forcée à 'USD'");
             currency = "USD";
         }
-
-        BigDecimal customs = getCellDecimal(row, COL_CUSTOMS_VALUE);
-        BigDecimal weight  = getCellDecimal(row, COL_WEIGHT);
 
         Order order = Order.builder()
                 .hawb(hawb)
-                .alternateReference(getCellString(row, COL_ALTERNATE_REF))
-                .goodsDescription(getCellString(row, COL_GOODS_DESC))
-                .numberOfItems(getCellInteger(row, COL_NB_ITEMS))
-                .shipmentWeight(weight)
-                .customsValue(customs)
+                .alternateReference(getCellString(row, cols[COL_ALTERNATE_REF]))
+                .goodsDescription(getCellString(row, cols[COL_GOODS_DESC]))
+                .numberOfItems(getCellInteger(row, cols[COL_NB_ITEMS]))
+                .shipmentWeight(getCellDecimal(row, cols[COL_WEIGHT]))
+                .customsValue(getCellDecimal(row, cols[COL_CUSTOMS_VALUE]))
                 .customsCurrency(currency)
                 .shipment(shipment)
                 .client(client)
@@ -432,7 +509,7 @@ public class ExcelImportService {
     }
 
     // ---------------------------------------------------------------
-    // RÉSOLUTION DU PAYS — souple
+    // RÉSOLUTION DU PAYS
     // ---------------------------------------------------------------
 
     private Country resolveCountry(String countryCode) {
@@ -440,19 +517,12 @@ public class ExcelImportService {
             log.warn("Code pays manquant — client importé sans pays");
             return null;
         }
-
-        // Essai 1 : tel quel
         Country c = countryRepository.findById(countryCode.trim()).orElse(null);
         if (c != null) return c;
-
-        // Essai 2 : majuscules
         c = countryRepository.findById(countryCode.trim().toUpperCase()).orElse(null);
         if (c != null) return c;
-
-        // Essai 3 : recherche par nom complet
         c = countryRepository.findByNameIgnoreCase(countryCode.trim()).orElse(null);
         if (c != null) return c;
-
         log.warn("Pays '{}' introuvable — client importé sans pays lié", countryCode);
         return null;
     }
@@ -461,110 +531,75 @@ public class ExcelImportService {
     // VALIDATION COMPLÈTE D'UNE LIGNE
     // ---------------------------------------------------------------
 
-    private String validateRow(Row row, String mawb, String hawb, String receiverEmail) {
+    private String validateRow(Row row, String mawb, String hawb, String receiverEmail, int[] cols) {
 
-        // ── CHAMPS OBLIGATOIRES ──────────────────────────────────────
-
-        // CAS 10 : MAWB manquant
         if (mawb == null || mawb.isBlank())
             return "MAWB manquant";
 
-        // CAS 11 : HAWB (Connote #) manquant
         if (hawb == null || hawb.isBlank())
             return "Connote # (HAWB) manquant";
 
-        // CAS 12 : Receiver Name manquant
-        String receiverName = getCellString(row, COL_RECEIVER_NAME);
+        String receiverName = getCellString(row, cols[COL_RECEIVER_NAME]);
         if (receiverName == null || receiverName.isBlank())
             return "Nom du destinataire manquant";
 
-        // CAS 13 : Email manquant
         if (receiverEmail == null || receiverEmail.isBlank())
             return "Email du destinataire manquant";
 
-        // CAS 14 : Customs Value manquante ou invalide
-        BigDecimal customs = getCellDecimal(row, COL_CUSTOMS_VALUE);
+        BigDecimal customs = getCellDecimal(row, cols[COL_CUSTOMS_VALUE]);
         if (customs == null)
             return "Valeur douanière manquante";
         if (customs.compareTo(BigDecimal.ZERO) <= 0)
             return "Valeur douanière doit être > 0 (valeur actuelle : " + customs + ")";
 
-        // ── VALIDATIONS FORMAT ───────────────────────────────────────
-
-        // CAS 15 : Format email invalide
         if (!receiverEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
             return "Format email invalide : " + receiverEmail;
 
-        // CAS 16 : Email trop long
         if (receiverEmail.length() > MAX_EMAIL_LENGTH)
             return "Email trop long (" + receiverEmail.length() + " chars, max " + MAX_EMAIL_LENGTH + ")";
 
-        // CAS 17 : HAWB trop long
         if (hawb.length() > MAX_HAWB_LENGTH)
             return "HAWB trop long (" + hawb.length() + " chars, max " + MAX_HAWB_LENGTH + ")";
 
-        // CAS 18 : MAWB trop long
         if (mawb.length() > MAX_MAWB_LENGTH)
             return "MAWB trop long (" + mawb.length() + " chars, max " + MAX_MAWB_LENGTH + ")";
 
-        // CAS 19 : Receiver Name trop long
         if (receiverName.length() > MAX_NAME_LENGTH)
             return "Nom destinataire trop long (" + receiverName.length() + " chars, max " + MAX_NAME_LENGTH + ")";
 
-        // ── VALIDATIONS NUMÉRIQUES ───────────────────────────────────
-
-        // CAS 20 : Customs Value trop grande
         if (customs.compareTo(MAX_CUSTOMS_VALUE) > 0)
             return "Valeur douanière anormalement élevée : " + customs + " (max " + MAX_CUSTOMS_VALUE + ")";
 
-        // CAS 21 : Poids manquant
-        BigDecimal weight = getCellDecimal(row, COL_WEIGHT);
+        BigDecimal weight = getCellDecimal(row, cols[COL_WEIGHT]);
         if (weight == null)
             return "Poids du colis manquant";
-
-        // CAS 22 : Poids négatif ou nul
         if (weight.compareTo(BigDecimal.ZERO) <= 0)
             return "Poids doit être > 0 (valeur actuelle : " + weight + ")";
-
-        // CAS 23 : Poids trop grand
         if (weight.compareTo(MAX_WEIGHT) > 0)
             return "Poids anormalement élevé : " + weight + " kg (max " + MAX_WEIGHT + ")";
 
-        // CAS 24 : Number of Items négatif ou nul
-        Integer nbItems = getCellInteger(row, COL_NB_ITEMS);
+        Integer nbItems = getCellInteger(row, cols[COL_NB_ITEMS]);
         if (nbItems != null && nbItems <= 0)
             return "Nombre d'articles doit être > 0 (valeur actuelle : " + nbItems + ")";
-
-        // CAS 25 : Number of Items anormalement grand
         if (nbItems != null && nbItems > 10000)
             return "Nombre d'articles anormalement élevé : " + nbItems;
 
-        // CAS 26 : Description trop longue
-        String description = getCellString(row, COL_GOODS_DESC);
+        String description = getCellString(row, cols[COL_GOODS_DESC]);
         if (description != null && description.length() > MAX_DESCRIPTION_LENGTH)
             return "Description trop longue (" + description.length() + " chars, max " + MAX_DESCRIPTION_LENGTH + ")";
 
-        // CAS 27 : Sender Name manquant → WARNING seulement (pas bloquant)
-        // On laisse passer avec "Unknown Shipper" dans findOrCreateShipper()
-
-        // CAS 28 : Currency présente mais format invalide → WARNING seulement
-        // On corrige dans createOrder() avec valeur par défaut USD
-
-        // CAS 29 : Code pays manquant ou invalide → WARNING seulement
-        // On laisse passer avec country = null dans resolveCountry()
-
-        // CAS 30 : Receiver State présent mais > 2 chars → on tronque dans findOrCreateClient()
-
-        return null; // ✅ Ligne valide
+        return null;
     }
 
     // ---------------------------------------------------------------
     // DÉTECTION LIGNE VIDE
     // ---------------------------------------------------------------
 
-    private boolean isRowEmpty(Row row) {
-        for (int col : new int[]{COL_MAWB, COL_HAWB, COL_EMAIL}) {
-            String val = getCellString(row, col);
+    private boolean isRowEmpty(Row row, int[] cols) {
+        for (int logicalCol : new int[]{COL_MAWB, COL_HAWB, COL_EMAIL}) {
+            int actual = cols[logicalCol];
+            if (actual < 0) continue;
+            String val = getCellString(row, actual);
             if (val != null && !val.isBlank()) return false;
         }
         return true;
@@ -587,6 +622,7 @@ public class ExcelImportService {
     // ---------------------------------------------------------------
 
     private String getCellString(Row row, int col) {
+        if (col < 0) return null;
         Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) return null;
         return switch (cell.getCellType()) {
@@ -613,6 +649,7 @@ public class ExcelImportService {
     }
 
     private BigDecimal getCellDecimal(Row row, int col) {
+        if (col < 0) return null;
         Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) return null;
         try {
@@ -629,7 +666,7 @@ public class ExcelImportService {
                 default -> null;
             };
         } catch (NumberFormatException e) {
-            log.warn("Valeur numérique invalide à la colonne {} : {}", col, e.getMessage());
+            log.warn("Valeur numérique invalide colonne {} : {}", col, e.getMessage());
             return null;
         }
     }
@@ -654,7 +691,7 @@ public class ExcelImportService {
     }
 
     private ImportRowLog buildRowLog(ImportLog importLog, int rowNumber, String hawb,
-                                     String email, ImportRowStatus status, String reason) {
+                                     String email, ImportRowStatus status, String reason, String warnings) {
         return ImportRowLog.builder()
                 .importLog(importLog)
                 .rowNumber(rowNumber)
@@ -662,6 +699,7 @@ public class ExcelImportService {
                 .receiverEmail(email)
                 .status(status)
                 .reason(reason)
+                .warnings(warnings)
                 .build();
     }
 
@@ -678,6 +716,7 @@ public class ExcelImportService {
                             .receiverEmail(r.getReceiverEmail())
                             .status(r.getStatus())
                             .reason(r.getReason())
+                            .warnings(r.getWarnings())
                             .build())
                     .toList()
                 : List.of();

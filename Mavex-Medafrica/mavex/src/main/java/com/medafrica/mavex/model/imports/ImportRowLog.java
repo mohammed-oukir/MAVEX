@@ -50,4 +50,8 @@ public class ImportRowLog {
      */
     @Column(length = 500)
     private String reason;
+
+    /** Corrections silencieuses appliquées sur cette ligne (séparées par " | ") */
+    @Column(name = "warnings", columnDefinition = "TEXT")
+    private String warnings;
 }

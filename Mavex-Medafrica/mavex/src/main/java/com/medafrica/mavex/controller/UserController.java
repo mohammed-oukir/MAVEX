@@ -3,7 +3,7 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.ApiResponse;
 import com.medafrica.mavex.dto.user.UserRequestDTO;
 import com.medafrica.mavex.dto.user.UserResponseDTO;
-import com.medafrica.mavex.service.UserService;
+import com.medafrica.mavex.service.interfaces.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.medafrica.mavex.controller;
  
 import com.medafrica.mavex.dto.email.SendEmailResponse;
-import com.medafrica.mavex.service.NotificationEmailService;
+import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

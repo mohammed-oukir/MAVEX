@@ -1,7 +1,7 @@
 package com.medafrica.mavex.controller;
 
 import com.medafrica.mavex.dto.order.OrderStatusHistoryResponse;
-import com.medafrica.mavex.service.OrderStatusHistoryService;
+import com.medafrica.mavex.service.interfaces.OrderStatusHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

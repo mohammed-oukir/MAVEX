@@ -17,6 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     boolean existsByHawb(String hawb);
 
+    boolean existsByHawbAndShipmentMawb(String hawb, String mawb);
+
     Optional<Order> findByPaymentToken(String paymentToken);
 
     List<Order> findByShipmentId(Long shipmentId);
