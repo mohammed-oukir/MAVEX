@@ -33,13 +33,11 @@ public class Shipment {
     @Column(unique = true, nullable = false)       
     private String mawb;
 
-    @Column(name = "export_date")
+    /*@Column(name = "export_date")
     private LocalDate exportDate;
 
     @Column(name = "import_date")
-    private LocalDate importDate;
-
-    /** Compagnie aerienne ex: AT (Air Transat) */
+    private LocalDate importDate;*/    /** Compagnie aerienne ex: AT (Air Transat) */
     @Column(name = "importing_carrier")
     private String importingCarrier;
 
@@ -71,7 +69,7 @@ public class Shipment {
     private User createdBy;
 
     /** Liste des Orders (HAWB) de ce shipment */
-    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY,  orphanRemoval = true)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
 

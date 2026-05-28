@@ -7,6 +7,7 @@ import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.country.Country;
 import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.repository.CountryRepository;
+import com.medafrica.mavex.service.interfaces.ClientService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,34 +20,34 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ClientService {
- 
+public class ClientServiceImpl implements ClientService {
+
     private final ClientRepository clientRepository;
     private final CountryRepository countryRepository;
- 
-    /** GET ALL */
+
+    @Override
     public List<ClientResponseDTO> findAll() {
         return clientRepository.findAll()
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
- 
-    /** GET BY ID */
+
+    @Override
     public ClientResponseDTO findById(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Client introuvable avec l'id : " + id));
         return toResponseDTO(client);
     }
- 
-    /** CREATE */
+
+    @Override
     @Transactional
     public ClientResponseDTO create(ClientRequestDTO dto) {
         if (clientRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Un client avec cet email existe déjà : " + dto.getEmail());
         }
-       Country country = countryRepository.findById(dto.getCountryCode())
-        .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
+        Country country = countryRepository.findById(dto.getCountryCode())
+                .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
         Client client = Client.builder()
                 .fullName(dto.getFullName())
                 .email(dto.getEmail())
@@ -57,23 +58,22 @@ public class ClientService {
                 .zipCode(dto.getZipCode())
                 .country(country)
                 .build();
- 
+
         return toResponseDTO(clientRepository.save(client));
     }
- 
-    /** UPDATE */
+
+    @Override
     @Transactional
     public ClientResponseDTO update(Long id, ClientRequestDTO dto) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Client introuvable avec l'id : " + id));
- 
-        // Vérifier email unique si changé
+
         if (!client.getEmail().equals(dto.getEmail()) && clientRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Un client avec cet email existe déjà : " + dto.getEmail());
         }
- 
+
         Country country = countryRepository.findById(dto.getCountryCode())
-        .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
+                .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
         client.setFullName(dto.getFullName());
         client.setEmail(dto.getEmail());
         client.setPhone(dto.getPhone());
@@ -82,24 +82,22 @@ public class ClientService {
         client.setState(dto.getState());
         client.setZipCode(dto.getZipCode());
         client.setCountry(country);
- 
+
         return toResponseDTO(clientRepository.save(client));
     }
- 
-/** UPDATE partiel - PATCH */
+
+    @Override
     @Transactional
     public ClientResponseDTO patch(Long id, ClientPatchRequest dto) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Client introuvable avec l'id : " + id));
- 
-        // Vérifier email unique uniquement si email est fourni et différent
+
         if (dto.getEmail() != null
                 && !client.getEmail().equals(dto.getEmail())
                 && clientRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Un client avec cet email existe déjà : " + dto.getEmail());
         }
- 
-        // On ne modifie que les champs non-null envoyés
+
         if (dto.getFullName()  != null) client.setFullName(dto.getFullName());
         if (dto.getEmail()     != null) client.setEmail(dto.getEmail());
         if (dto.getPhone()     != null) client.setPhone(dto.getPhone());
@@ -107,18 +105,17 @@ public class ClientService {
         if (dto.getCity()      != null) client.setCity(dto.getCity());
         if (dto.getState()     != null) client.setState(dto.getState());
         if (dto.getZipCode()   != null) client.setZipCode(dto.getZipCode());
- 
-        // Country : seulement si countryCode est fourni
+
         if (dto.getCountryCode() != null) {
             Country country = countryRepository.findById(dto.getCountryCode())
                     .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
             client.setCountry(country);
         }
- 
+
         return toResponseDTO(clientRepository.save(client));
     }
 
-    /** DELETE */
+    @Override
     @Transactional
     public void delete(Long id) {
         if (!clientRepository.existsById(id)) {
@@ -126,10 +123,7 @@ public class ClientService {
         }
         clientRepository.deleteById(id);
     }
- 
-    // -------------------------------------------------------------------------
-    // Mapping manuel Entity → ResponseDTO
-    // -------------------------------------------------------------------------
+
     private ClientResponseDTO toResponseDTO(Client client) {
         return ClientResponseDTO.builder()
                 .id(client.getId())

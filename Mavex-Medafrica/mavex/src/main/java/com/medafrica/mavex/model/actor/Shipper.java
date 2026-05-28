@@ -50,4 +50,19 @@ public class Shipper {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+
+
+/** Colonne Excel "Sender Location Name" */
+@Column(name = "location_name")
+private String locationName;
+
+/** Colonne Excel "Sender State" */
+@Column(length = 10)
+private String state;
+
+/** Colonne Excel "Sender Postcode" */
+@Column(name = "zip_code")
+private String zipCode; 
+
 }

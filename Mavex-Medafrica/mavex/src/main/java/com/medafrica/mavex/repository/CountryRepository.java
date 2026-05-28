@@ -9,5 +9,5 @@ public interface CountryRepository extends JpaRepository<Country, String> {
     Optional<Country> findByCode(String Code);
     
 
-    Optional<ImportLog> findByNameIgnoreCase(String countryCode);
+    Optional<Country> findByNameIgnoreCase(String name);
 }

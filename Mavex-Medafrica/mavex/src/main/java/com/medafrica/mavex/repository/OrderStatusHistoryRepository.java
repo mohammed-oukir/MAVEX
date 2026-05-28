@@ -14,4 +14,5 @@ public interface OrderStatusHistoryRepository extends JpaRepository<OrderStatusH
 
     /** Toutes les actions d'un utilisateur (audit) */
     List<OrderStatusHistory> findByChangedByIdOrderByChangedAtDesc(Long userId);
+    void deleteByOrderId(Long orderId);
 }

@@ -5,77 +5,69 @@ import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
 import com.medafrica.mavex.model.actor.Shipper;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
+import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
-import com.medafrica.mavex.repository.ShipmentRepository;
-import com.medafrica.mavex.repository.ShipperRepository;
+import com.medafrica.mavex.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShipmentService {
+    
 
-    private final ShipmentRepository shipmentRepository;
-    private final ShipperRepository  shipperRepository;
+    private final ShipmentRepository           shipmentRepository;
+    private final ShipperRepository            shipperRepository;
+    private final OrderRepository              orderRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final EmailLogRepository           emailLogRepository;
 
     // ---------------------------------------------------------------
     // CREATE
     // ---------------------------------------------------------------
-
     @Transactional
     public ShipmentResponseDTO create(ShipmentRequestDTO req) {
-
         if (shipmentRepository.existsByMawb(req.getMawb())) {
             throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
         }
-
         Shipper shipper = null;
         if (req.getShipperId() != null) {
             shipper = shipperRepository.findById(req.getShipperId())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
         }
-
         Shipment shipment = Shipment.builder()
                 .mawb(req.getMawb())
-                .exportDate(req.getExportDate())
-                .importDate(req.getImportDate())
                 .importingCarrier(req.getImportingCarrier())
                 .modeOfTransport(req.getModeOfTransport())
                 .portCode(req.getPortCode())
                 .shipper(shipper)
                 .createdBy(currentUser())
                 .build();
-
         return toResponse(shipmentRepository.save(shipment));
     }
 
     // ---------------------------------------------------------------
-    // READ - détail
+    // READ
     // ---------------------------------------------------------------
-
     @Transactional(readOnly = true)
     public ShipmentResponseDTO getById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
-    // ---------------------------------------------------------------
-    // READ - liste paginée
-    // ---------------------------------------------------------------
-
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> list(Pageable pageable) {
         return shipmentRepository.findAll(pageable).map(this::toResponse);
     }
-
-    // ---------------------------------------------------------------
-    // READ - liste par statut
-    // ---------------------------------------------------------------
 
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> listByStatus(ShipmentStatus status, Pageable pageable) {
@@ -83,41 +75,31 @@ public class ShipmentService {
     }
 
     // ---------------------------------------------------------------
-    // UPDATE - champs métier (PATCH, même DTO que create)
+    // UPDATE - PATCH
     // ---------------------------------------------------------------
-
     @Transactional
     public ShipmentResponseDTO update(Long id, ShipmentRequestDTO req) {
-
         Shipment shipment = findOrThrow(id);
-
-        // MAWB : vérifier unicité seulement si on le change
         if (req.getMawb() != null && !req.getMawb().equalsIgnoreCase(shipment.getMawb())) {
             if (shipmentRepository.existsByMawb(req.getMawb())) {
                 throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
             }
             shipment.setMawb(req.getMawb());
         }
-
-        if (req.getExportDate()      != null) shipment.setExportDate(req.getExportDate());
-        if (req.getImportDate()      != null) shipment.setImportDate(req.getImportDate());
-        if (req.getImportingCarrier()!= null) shipment.setImportingCarrier(req.getImportingCarrier());
-        if (req.getModeOfTransport() != null) shipment.setModeOfTransport(req.getModeOfTransport());
-        if (req.getPortCode()        != null) shipment.setPortCode(req.getPortCode());
-
+        if (req.getImportingCarrier() != null) shipment.setImportingCarrier(req.getImportingCarrier());
+        if (req.getModeOfTransport()  != null) shipment.setModeOfTransport(req.getModeOfTransport());
+        if (req.getPortCode()         != null) shipment.setPortCode(req.getPortCode());
         if (req.getShipperId() != null) {
             Shipper shipper = shipperRepository.findById(req.getShipperId())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
             shipment.setShipper(shipper);
         }
-
         return toResponse(shipmentRepository.save(shipment));
     }
 
     // ---------------------------------------------------------------
-    // UPDATE - statut uniquement
+    // UPDATE - statut
     // ---------------------------------------------------------------
-
     @Transactional
     public ShipmentResponseDTO updateStatus(Long id, ShipmentStatusUpdateDTO req) {
         Shipment shipment = findOrThrow(id);
@@ -125,53 +107,62 @@ public class ShipmentService {
         return toResponse(shipmentRepository.save(shipment));
     }
 
-
-
     // ---------------------------------------------------------------
-// UPDATE - PUT (mise à jour complète, tous les champs obligatoires)
-// ---------------------------------------------------------------
-
-@Transactional
-public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
-
-    Shipment shipment = findOrThrow(id);
-
-    // Vérifier unicité MAWB uniquement si modifié
-    if (!req.getMawb().equalsIgnoreCase(shipment.getMawb()) &&
-         shipmentRepository.existsByMawb(req.getMawb())) {
-        throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
+    // UPDATE - PUT
+    // ---------------------------------------------------------------
+    @Transactional
+    public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
+        Shipment shipment = findOrThrow(id);
+        if (!req.getMawb().equalsIgnoreCase(shipment.getMawb()) &&
+             shipmentRepository.existsByMawb(req.getMawb())) {
+            throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
+        }
+        Shipper shipper = null;
+        if (req.getShipperId() != null) {
+            shipper = shipperRepository.findById(req.getShipperId())
+                    .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
+        }
+        shipment.setMawb(req.getMawb());
+        shipment.setImportingCarrier(req.getImportingCarrier());
+        shipment.setModeOfTransport(req.getModeOfTransport());
+        shipment.setPortCode(req.getPortCode());
+        shipment.setShipper(shipper);
+        return toResponse(shipmentRepository.save(shipment));
     }
 
-    Shipper shipper = null;
-    if (req.getShipperId() != null) {
-        shipper = shipperRepository.findById(req.getShipperId())
-                .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
-    }
-
-    // On remplace TOUT
-    shipment.setMawb(req.getMawb());
-    shipment.setExportDate(req.getExportDate());
-    shipment.setImportDate(req.getImportDate());
-    shipment.setImportingCarrier(req.getImportingCarrier());
-    shipment.setModeOfTransport(req.getModeOfTransport());
-    shipment.setPortCode(req.getPortCode());
-    shipment.setShipper(shipper);
-
-    return toResponse(shipmentRepository.save(shipment));
-}
     // ---------------------------------------------------------------
-    // DELETE
+    // DELETE — supprime le shipment ET tous ses orders liés
     // ---------------------------------------------------------------
-
     @Transactional
     public void delete(Long id) {
-        shipmentRepository.delete(findOrThrow(id));
+        Shipment shipment = findOrThrow(id);
+
+        // 1. Récupérer tous les orders de ce shipment
+        List<Order> orders = orderRepository.findByShipmentId(id);
+        log.info("Suppression shipment {} ({}) — {} orders liés", id, shipment.getMawb(), orders.size());
+
+        for (Order order : orders) {
+            // 2a. Supprimer les email logs liés à cet order
+              emailLogRepository.deleteByOrderId(order.getId());
+
+              //paymentTransactionRepository.deleteByOrderId(order.getId());
+
+            // 2b. Supprimer l'historique des statuts
+          orderStatusHistoryRepository.deleteByOrderId(order.getId()); // ← corrigé
+        }
+
+        // 3. Supprimer tous les orders
+        orderRepository.deleteAll(orders);
+
+        // 4. Supprimer le shipment
+        shipmentRepository.delete(shipment);
+
+        log.info("Shipment {} supprimé avec {} orders", shipment.getMawb(), orders.size());
     }
 
     // ---------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------
-
     private Shipment findOrThrow(Long id) {
         return shipmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Shipment introuvable : " + id));
@@ -184,7 +175,6 @@ public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
     }
 
     private ShipmentResponseDTO toResponse(Shipment s) {
-
         ShipmentResponseDTO.ShipperSummary shipperSummary = null;
         if (s.getShipper() != null) {
             shipperSummary = ShipmentResponseDTO.ShipperSummary.builder()
@@ -193,12 +183,9 @@ public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
                     .email(s.getShipper().getEmail())
                     .build();
         }
-
         return ShipmentResponseDTO.builder()
                 .id(s.getId())
                 .mawb(s.getMawb())
-                .exportDate(s.getExportDate())
-                .importDate(s.getImportDate())
                 .importingCarrier(s.getImportingCarrier())
                 .modeOfTransport(s.getModeOfTransport())
                 .portCode(s.getPortCode())

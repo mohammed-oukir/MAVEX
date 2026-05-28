@@ -51,7 +51,7 @@ public class Client {
     private String zipCode;
 
    @ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "country_code", nullable = false)
+@JoinColumn(name = "country_code", nullable = true)
 private Country country;
    /*@Builder.Default
     private String country = "US"; */ 
@@ -66,5 +66,11 @@ private Country country;
     @Column(nullable = false)
     @Builder.Default
     private boolean active = true;
+
+
+
+    /** Colonne Excel "Receiver Contact" */
+@Column(name = "contact_name")
+private String contactName;
 
 }

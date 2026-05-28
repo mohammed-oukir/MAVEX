@@ -13,11 +13,9 @@
             --accent:#F97316; --accent2:#EA580C; --accent-soft:#FFF7ED;
             --text:#111827; --muted:#6B7280;
             --error:#EF4444; --success:#22C55E; --warning:#F59E0B; --info:#3B82F6;
-            --dup:#8B5CF6;
-            --sidebar:240px;
+            --dup:#8B5CF6; --sidebar:240px;
         }
         body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
-
         .sidebar { width:var(--sidebar);background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:2px 0 8px rgba(0,0,0,0.04); }
         .sidebar-logo { padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px; }
         .logo-mark { width:36px;height:36px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white;border-radius:10px; }
@@ -35,14 +33,11 @@
         .user-role { font-size:11px;color:var(--muted); }
         .btn-logout { margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;flex-shrink:0; }
         .btn-logout:hover { color:var(--error); }
-
         .main { margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh; }
-        .topbar { height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--panel);position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+        .topbar { height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;background:var(--panel);position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .topbar-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px; }
         .content { padding:28px;flex:1; }
-
         .section-title { font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px; }
-
         .upload-card { background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .drop-zone { border:2px dashed var(--border2);border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--accent-soft); }
         .drop-zone.drag-over { border-color:var(--accent);background:#FEF3E8;transform:scale(1.01); }
@@ -59,33 +54,28 @@
         .file-size { font-size:12px;color:var(--muted); }
         .btn-remove { margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;transition:color 0.15s; }
         .btn-remove:hover { color:var(--error); }
-
         .mode-row { display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap; }
         .mode-label { font-size:13px;font-weight:600;color:var(--text); }
         .toggle-group { display:flex;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:3px;gap:3px; }
         .toggle-btn { padding:7px 16px;border-radius:6px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;color:var(--muted); }
         .toggle-btn.active { background:var(--accent);color:white;font-weight:600;box-shadow:0 2px 6px rgba(249,115,22,0.3); }
-        .toggle-btn.strict.active { background:var(--error); box-shadow:0 2px 6px rgba(239,68,68,0.3); }
+        .toggle-btn.strict.active { background:var(--error);box-shadow:0 2px 6px rgba(239,68,68,0.3); }
         .mode-desc { font-size:12px;color:var(--muted);margin-top:4px; }
-
         .stats-row { display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap; }
         .stat-pill { background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:10px;flex:1;min-width:120px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .stat-pill-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
         .stat-pill-val { font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--text);line-height:1; }
         .stat-pill-label { font-size:11px;color:var(--muted);margin-top:2px; }
-
         .filter-tabs { display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap; }
         .filter-tab { padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--panel);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;color:var(--muted); }
         .filter-tab:hover { border-color:var(--accent);color:var(--accent); }
         .filter-tab.active { background:var(--accent);color:white;border-color:var(--accent); }
         .filter-tab .count { display:inline-block;background:rgba(255,255,255,0.25);border-radius:100px;padding:1px 6px;font-size:10px;margin-left:4px; }
         .filter-tab:not(.active) .count { background:var(--bg);color:var(--muted); }
-
         .preview-card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .preview-header { display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px; }
         .preview-title { font-family:'Syne',sans-serif;font-weight:700;font-size:14px; }
         .preview-actions { display:flex;gap:8px; }
-
         .table-wrap { overflow-x:auto;max-height:420px;overflow-y:auto; }
         table { width:100%;border-collapse:collapse;font-size:12px; }
         thead th { padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap;position:sticky;top:0;z-index:1; }
@@ -97,14 +87,12 @@
         tbody tr.row-ok       { background:#F0FDF4; }
         tbody td { padding:9px 12px;color:var(--text);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis; }
         .td-mono { font-family:monospace;font-size:11px; }
-
         .row-badge { display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;white-space:nowrap; }
         .row-badge.ok       { background:#DCFCE7;color:#166534; }
         .row-badge.error    { background:#FEE2E2;color:#991B1B; }
         .row-badge.dup-file { background:#EDE9FE;color:#5B21B6; }
         .row-badge.dup-db   { background:#DBEAFE;color:#1E40AF; }
-        .error-msg { font-size:10px;color:var(--error);margin-top:2px;max-width:200px;overflow:hidden;text-overflow:ellipsis; }
-
+        .error-msg { font-size:10px;color:var(--error);max-width:200px;overflow:hidden;text-overflow:ellipsis;display:block; }
         .btn-primary { display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:white;border:none;border-radius:9px;padding:11px 22px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 10px rgba(249,115,22,0.3); }
         .btn-primary:hover { background:var(--accent2);transform:translateY(-1px); }
         .btn-primary:disabled { opacity:0.5;cursor:not-allowed;transform:none; }
@@ -114,12 +102,9 @@
         .btn-export { display:inline-flex;align-items:center;gap:6px;background:#F0FDF4;color:#166534;border:1px solid #BBF7D0;border-radius:9px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s; }
         .btn-export:hover { background:#DCFCE7; }
         .btn-export:disabled { opacity:0.4;cursor:not-allowed; }
-
-        /* ── BOUTON SUPPRIMER ── */
         .btn-delete { display:inline-flex;align-items:center;gap:5px;background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s; }
         .btn-delete:hover { background:#FEE2E2;border-color:#FCA5A5;transform:translateY(-1px); }
         .btn-delete:disabled { opacity:0.4;cursor:not-allowed;transform:none; }
-
         .result-card { display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .result-card.show { display:block; }
         .result-header { display:flex;align-items:center;gap:12px;margin-bottom:16px; }
@@ -130,32 +115,25 @@
         .result-item { background:var(--bg);border-radius:8px;padding:12px 14px; }
         .result-val { font-family:'Syne',sans-serif;font-weight:800;font-size:22px;margin-bottom:2px; }
         .result-label { font-size:11px;color:var(--muted); }
-
         .history-card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .history-header { display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border); }
         .history-title { font-family:'Syne',sans-serif;font-weight:700;font-size:14px; }
-
         .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600; }
         .badge::before { content:'';width:5px;height:5px;border-radius:50%; }
         .badge-success { background:#F0FDF4;color:#22C55E; } .badge-success::before { background:#22C55E; }
         .badge-partial { background:#FFF7ED;color:#F97316; } .badge-partial::before { background:#F97316; }
         .badge-failed  { background:#FEF2F2;color:#EF4444; } .badge-failed::before  { background:#EF4444; }
         .badge-created { background:#F3F4F6;color:#6B7280; } .badge-created::before { background:#6B7280; }
-
         .spinner { width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
         @keyframes spin { to{transform:rotate(360deg)} }
         .empty-state { padding:40px;text-align:center;color:var(--muted);font-size:13px; }
-
         .loader-overlay { display:none;position:fixed;inset:0;background:rgba(255,255,255,0.8);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px; }
         .loader-overlay.show { display:flex; }
         .loader-big { width:48px;height:48px;border:4px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite; }
         .loader-text { font-family:'Syne',sans-serif;font-weight:600;font-size:14px;color:var(--accent); }
-
         .strict-warning { display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:13px;color:#991B1B;margin-top:12px;align-items:center;gap:8px; }
         .strict-warning.show { display:flex; }
         .action-bar { display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px; }
-
-        /* ── MODAL CONFIRMATION SUPPRESSION ── */
         .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:400;align-items:center;justify-content:center; }
         .modal-overlay.show { display:flex; }
         .modal { background:white;border-radius:16px;padding:28px;width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.2); }
@@ -165,19 +143,18 @@
         .modal-file { background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#DC2626;margin-bottom:20px;word-break:break-all; }
         .modal-warning { background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:20px;line-height:1.5; }
         .modal-actions { display:flex;gap:10px;justify-content:flex-end; }
-        .btn-cancel-modal { padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:white;font-size:13px;font-weight:600;cursor:pointer;color:var(--text);transition:all 0.15s; }
+        .btn-cancel-modal { padding:10px 20px;border-radius:8px;border:1px solid var(--border);background:white;font-size:13px;font-weight:600;cursor:pointer;color:var(--text); }
         .btn-cancel-modal:hover { background:var(--bg); }
-        .btn-confirm-delete { padding:10px 20px;border-radius:8px;border:none;background:#DC2626;color:white;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px; }
+        .btn-confirm-delete { padding:10px 20px;border-radius:8px;border:none;background:#DC2626;color:white;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px; }
         .btn-confirm-delete:hover { background:#B91C1C; }
         .btn-confirm-delete:disabled { opacity:0.5;cursor:not-allowed; }
         .delete-spinner { width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
-
         @media(max-width:768px) { .sidebar{display:none;} .main{margin-left:0;} .result-grid{grid-template-columns:repeat(2,1fr);} }
     </style>
 </head>
 <body>
 
-<!-- MODAL CONFIRMATION SUPPRESSION -->
+<!-- MODAL SUPPRESSION -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal">
         <div class="modal-icon">🗑️</div>
@@ -185,7 +162,7 @@
         <div class="modal-desc">Cette action supprimera définitivement l'import et toutes les données associées :</div>
         <div class="modal-file" id="modalFileName">—</div>
         <div class="modal-warning">
-            ⚠️ Seront supprimés : les orders importés, les shipments sans autres orders, les clients sans autres orders, et le log d'import.<br/>
+            ⚠️ Seront supprimés : les orders importés, les shipments liés, les clients sans autres orders, et le log d'import.<br/>
             <strong>Cette action est irréversible.</strong>
         </div>
         <div class="modal-actions">
@@ -206,56 +183,35 @@
     </div>
     <nav class="sidebar-nav">
         <div class="nav-section">Principal</div>
-        <a class="nav-item" href="/dashboard">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
-        </a>
-        <a class="nav-item" href="/shipments">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments
-        </a>
-        <a class="nav-item" href="/orders">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
-        </a>
+        <a class="nav-item" href="/dashboard"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
+        <a class="nav-item" href="/shipments"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments</a>
+        <a class="nav-item" href="/orders"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders</a>
         <div class="nav-section">Gestion</div>
-        <a class="nav-item" href="/clients">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients
-        </a>
-        <a class="nav-item" href="/shippers">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers
-        </a>
-        <a class="nav-item active" href="/imports">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports
-        </a>
+        <a class="nav-item" href="/clients"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients</a>
+        <a class="nav-item" href="/shippers"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers</a>
+        <a class="nav-item active" href="/imports"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports</a>
         <div class="nav-section" id="adminNav" style="display:none">Administration</div>
-        <a class="nav-item" href="/users" id="usersLink" style="display:none">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs
-        </a>
+        <a class="nav-item" href="/users" id="usersLink" style="display:none"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs</a>
     </nav>
     <div class="sidebar-footer">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">?</div>
             <div style="min-width:0"><div class="user-name" id="userName">...</div><div class="user-role" id="userRole">...</div></div>
-            <button class="btn-logout" onclick="doLogout()">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
+            <button class="btn-logout" onclick="doLogout()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
         </div>
     </div>
 </aside>
 
-<!-- LOADER OVERLAY -->
 <div class="loader-overlay" id="loaderOverlay">
     <div class="loader-big"></div>
     <div class="loader-text" id="loaderText">Import en cours...</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-    <div class="topbar">
-        <div class="topbar-title">Import Manifest Excel</div>
-    </div>
-
+    <div class="topbar"><div class="topbar-title">Import Manifest Excel</div></div>
     <div class="content">
 
-        <!-- 1. UPLOAD -->
+        <!-- UPLOAD -->
         <div class="upload-card">
             <div class="section-title">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
@@ -269,16 +225,9 @@
                 <div class="drop-sub" style="margin-top:6px;font-size:12px">Formats acceptés : .xlsx, .xls — Taille max : 10 MB</div>
             </div>
             <div class="file-info" id="fileInfo">
-                <div class="file-icon">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div>
-                    <div class="file-name" id="fileName"></div>
-                    <div class="file-size" id="fileSize"></div>
-                </div>
-                <button class="btn-remove" onclick="removeFile()">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
+                <div class="file-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                <div><div class="file-name" id="fileName"></div><div class="file-size" id="fileSize"></div></div>
+                <button class="btn-remove" onclick="removeFile()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="mode-row" id="modeRow" style="display:none">
                 <div class="mode-label">Mode d'import :</div>
@@ -294,7 +243,7 @@
             </div>
         </div>
 
-        <!-- 2. STATS -->
+        <!-- STATS -->
         <div id="statsSection" style="display:none">
             <div class="stats-row">
                 <div class="stat-pill"><div class="stat-pill-dot" style="background:var(--muted)"></div><div><div class="stat-pill-val" id="statTotal">0</div><div class="stat-pill-label">Total lignes</div></div></div>
@@ -305,7 +254,7 @@
             </div>
         </div>
 
-        <!-- 3. RÉSULTAT IMPORT -->
+        <!-- RÉSULTAT -->
         <div class="result-card" id="resultCard">
             <div class="result-header">
                 <div class="result-icon" id="resultIcon"></div>
@@ -319,7 +268,7 @@
             </div>
         </div>
 
-        <!-- 4. PRÉVISUALISATION -->
+        <!-- PRÉVISUALISATION -->
         <div class="preview-card" id="previewSection" style="display:none">
             <div class="preview-header">
                 <div class="preview-title">Prévisualisation <span id="previewCount" style="font-size:12px;color:var(--muted);font-weight:400;margin-left:6px"></span></div>
@@ -359,7 +308,7 @@
             </div>
         </div>
 
-        <!-- 5. HISTORIQUE -->
+        <!-- HISTORIQUE -->
         <div class="history-card">
             <div class="history-header">
                 <div class="history-title">🕓 Historique des imports</div>
@@ -372,16 +321,9 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Fichier</th>
-                            <th>MAWB</th>
-                            <th>Total</th>
-                            <th>✅ Success</th>
-                            <th>⚠️ Ignorées</th>
-                            <th>❌ Échouées</th>
-                            <th>Statut</th>
-                            <th>Importé par</th>
-                            <th>Date</th>
-                            <th>Action</th>
+                            <th>Fichier</th><th>MAWB</th><th>Total</th>
+                            <th>✅ Success</th><th>⚠️ Ignorées</th><th>❌ Échouées</th>
+                            <th>Statut</th><th>Importé par</th><th>Date</th><th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="historyBody">
@@ -422,17 +364,14 @@ const Auth = {
     }
 };
 
-let selectedFile   = null;
-let parsedRows     = [];
-let enrichedRows   = [];
-let existingHawbs  = new Set();
-let importMode     = 'PARTIAL';
-let activeFilter   = 'all';
+let selectedFile    = null;
+let parsedRows      = [];
+let enrichedRows    = [];
+let existingHawbs   = new Set();
+let importMode      = 'PARTIAL';
+let activeFilter    = 'all';
 let currentUserRole = '';
-
-// ── DELETE STATE ──
-let pendingDeleteId       = null;
-let pendingDeleteFileName = null;
+let pendingDeleteId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     if (!Auth.requireAuth()) return;
@@ -442,20 +381,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('userName').textContent   = fullName;
     document.getElementById('userRole').textContent   = role;
     document.getElementById('userAvatar').textContent = fullName.charAt(0).toUpperCase();
-    if (role==='ADMIN') {
+    if (role === 'ADMIN') {
         document.getElementById('adminNav').style.display  = 'block';
         document.getElementById('usersLink').style.display = 'flex';
     }
-
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault(); dropZone.classList.remove('drag-over');
-        const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
-    });
-
+    const dz = document.getElementById('dropZone');
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
     await Promise.all([ loadExistingHawbs(), loadHistory() ]);
 });
 
@@ -472,8 +405,8 @@ async function loadExistingHawbs() {
 function onFileSelected(e) { const f = e.target.files[0]; if (f) handleFile(f); }
 
 function handleFile(file) {
-    if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Format non supporté.'); return; }
-    if (file.size > 10*1024*1024) { alert('Fichier trop volumineux. Max 10 MB.'); return; }
+    if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Format non supporté. Utilisez .xlsx ou .xls'); return; }
+    if (file.size > 10*1024*1024) { alert('Fichier trop volumineux. Maximum 10 MB.'); return; }
     selectedFile = file;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileSize').textContent = formatSize(file.size);
@@ -488,7 +421,7 @@ function removeFile() {
     document.getElementById('fileInput').value = '';
     document.getElementById('fileInfo').classList.remove('show');
     document.getElementById('dropZone').classList.remove('has-file');
-    document.getElementById('modeRow').style.display    = 'none';
+    document.getElementById('modeRow').style.display        = 'none';
     document.getElementById('statsSection').style.display   = 'none';
     document.getElementById('previewSection').style.display = 'none';
     document.getElementById('resultCard').classList.remove('show');
@@ -503,7 +436,7 @@ function readExcel(file) {
             const workbook = XLSX.read(data, { type: 'array' });
             const sheet    = workbook.Sheets[workbook.SheetNames[0]];
             const rows     = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-            if (rows.length < 2) { alert('Fichier vide.'); return; }
+            if (rows.length < 2) { alert('Le fichier est vide ou ne contient que l\'en-tête.'); return; }
             parsedRows = rows.slice(1).filter(r => r.some(c => c !== ''));
             validateAndEnrich();
         } catch(err) { alert('Erreur lecture Excel : ' + err.message); }
@@ -514,16 +447,19 @@ function readExcel(file) {
 function validateAndEnrich() {
     const seenHawbs = new Set();
     enrichedRows = parsedRows.map((row, idx) => {
-        // Index corrigés selon l'en-tête réel du manifest
+        // Index selon l'en-tête réel :
+        // 0=MAWB, 1=HAWB, 2=AltRef, 3=SenderName, 4=SenderCountry,
+        // 5=SenderAddr, 6=SenderCity, 7=SenderState, 8=SenderPost,
+        // 9=SenderContact, 10=SenderPhone, 11=SenderEmail,
+        // 12=ReceiverName, 13=ReceiverCountry, 14=ReceiverAddr,
+        // 15=ReceiverCity, 16=ReceiverState, 17=ReceiverPost,
+        // 18=ReceiverContact, 19=ReceiverPhone, 20=ReceiverEmail,
+        // 21=NbItems, 22=GoodsDesc, 23=Weight, 24=CustomsValue, 25=Currency
         const mawb         = String(row[0]  || '').trim();
         const hawb         = String(row[1]  || '').trim();
         const senderName   = String(row[3]  || '').trim();
         const receiverName = String(row[12] || '').trim();
         const country      = String(row[13] || '').trim();
-        const address      = String(row[14] || '').trim();
-        const city         = String(row[15] || '').trim();
-        const state        = String(row[16] || '').trim();
-        const postcode     = String(row[17] || '').trim();
         const phone        = String(row[19] || '').trim();
         const email        = String(row[20] || '').trim();
         const nbItems      = String(row[21] || '').trim();
@@ -534,16 +470,29 @@ function validateAndEnrich() {
 
         let status = 'ok', errorMsg = null;
 
-        if (!mawb)        { status = 'error'; errorMsg = 'MAWB manquant'; }
-        else if (!hawb)   { status = 'error'; errorMsg = 'HAWB manquant'; }
-        else if (!receiverName) { status = 'error'; errorMsg = 'Receiver Name manquant'; }
-        else if (!email)  { status = 'error'; errorMsg = 'Email manquant'; }
-        else if (!email.includes('@')) { status = 'error'; errorMsg = 'Email invalide'; }
-        else if (!customsVal || isNaN(parseFloat(customsVal)) || parseFloat(customsVal) <= 0) { status = 'error'; errorMsg = 'Customs Value invalide'; }
-        else if (!weight || isNaN(parseFloat(weight))) { status = 'error'; errorMsg = 'Poids invalide'; }
-        else if (!country || country.length !== 2) { status = 'error'; errorMsg = `Code pays invalide : "${country}"`; }
-        else if (seenHawbs.has(hawb)) { status = 'dup-file'; errorMsg = 'HAWB déjà présent dans ce fichier'; }
-        else if (existingHawbs.has(hawb)) { status = 'dup-db'; errorMsg = 'HAWB déjà en base de données'; }
+        // Validations — alignées sur le backend
+        if (!mawb)
+            { status = 'error'; errorMsg = 'MAWB manquant'; }
+        else if (!hawb)
+            { status = 'error'; errorMsg = 'HAWB manquant'; }
+        else if (!receiverName)
+            { status = 'error'; errorMsg = 'Receiver Name manquant'; }
+        else if (!email)
+            { status = 'error'; errorMsg = 'Email manquant'; }
+        else if (!email.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
+            { status = 'error'; errorMsg = 'Format email invalide'; }
+        else if (!customsVal || isNaN(parseFloat(customsVal)) || parseFloat(customsVal) <= 0)
+            { status = 'error'; errorMsg = 'Customs Value invalide ou manquante'; }
+        else if (!weight || isNaN(parseFloat(weight)) || parseFloat(weight) <= 0)
+            { status = 'error'; errorMsg = 'Poids invalide ou manquant'; }
+        // ── CORRECTION : pays non bloquant côté frontend (backend gère la résolution souple)
+        // On affiche un avertissement mais on ne rejette pas la ligne
+        else if (country && country.length !== 2)
+            { status = 'error'; errorMsg = `Code pays invalide : "${country}" (2 lettres attendues)`; }
+        else if (seenHawbs.has(hawb))
+            { status = 'dup-file'; errorMsg = 'HAWB déjà présent dans ce fichier'; }
+        else if (existingHawbs.has(hawb))
+            { status = 'dup-db'; errorMsg = 'HAWB déjà en base de données'; }
 
         if (status === 'ok') seenHawbs.add(hawb);
         return { rowNum: idx+2, mawb, hawb, senderName, receiverName, country, email, phone, nbItems, description, weight, customsVal, currency, status, errorMsg };
@@ -560,11 +509,11 @@ function updateStats() {
     const errors  = enrichedRows.filter(r => r.status==='error').length;
     const dupFile = enrichedRows.filter(r => r.status==='dup-file').length;
     const dupDb   = enrichedRows.filter(r => r.status==='dup-db').length;
-    document.getElementById('statTotal').textContent   = total;
-    document.getElementById('statOk').textContent      = ok;
-    document.getElementById('statErrors').textContent  = errors;
-    document.getElementById('statDupFile').textContent = dupFile;
-    document.getElementById('statDupDb').textContent   = dupDb;
+    document.getElementById('statTotal').textContent    = total;
+    document.getElementById('statOk').textContent       = ok;
+    document.getElementById('statErrors').textContent   = errors;
+    document.getElementById('statDupFile').textContent  = dupFile;
+    document.getElementById('statDupDb').textContent    = dupDb;
     document.getElementById('cnt-all').textContent      = total;
     document.getElementById('cnt-ok').textContent       = ok;
     document.getElementById('cnt-error').textContent    = errors;
@@ -581,10 +530,10 @@ function filterRows(filter) {
 }
 
 function renderPreview() {
-    const rows = activeFilter==='all' ? enrichedRows : enrichedRows.filter(r => r.status===activeFilter);
+    const rows = activeFilter === 'all' ? enrichedRows : enrichedRows.filter(r => r.status === activeFilter);
     document.getElementById('previewCount').textContent = `(${rows.length} lignes)`;
     const tbody = document.getElementById('previewBody');
-    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="15" class="empty-state">Aucune ligne</td></tr>`; return; }
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="15" class="empty-state">Aucune ligne dans ce filtre</td></tr>`; return; }
     tbody.innerHTML = rows.map(r => `
         <tr class="row-${r.status}">
             <td>${r.rowNum}</td>
@@ -607,17 +556,17 @@ function renderPreview() {
 
 function setMode(mode) {
     importMode = mode;
-    document.getElementById('btnPartial').classList.toggle('active', mode==='PARTIAL');
-    document.getElementById('btnStrict').classList.toggle('active', mode==='STRICT');
-    document.getElementById('modeDesc').textContent = mode==='PARTIAL'
+    document.getElementById('btnPartial').classList.toggle('active', mode === 'PARTIAL');
+    document.getElementById('btnStrict').classList.toggle('active', mode === 'STRICT');
+    document.getElementById('modeDesc').textContent = mode === 'PARTIAL'
         ? 'Importer seulement les lignes valides, ignorer les erreurs'
-        : 'Bloquer l\'import si une seule erreur existe';
+        : 'Bloquer l\'import si une seule erreur existe dans le fichier';
     checkStrictMode();
 }
 
 function checkStrictMode() {
-    const hasErrors = enrichedRows.some(r => r.status==='error');
-    const isStrict  = importMode==='STRICT';
+    const hasErrors = enrichedRows.some(r => r.status === 'error');
+    const isStrict  = importMode === 'STRICT';
     document.getElementById('strictWarning').classList.toggle('show', isStrict);
     document.getElementById('btnImport').disabled = isStrict && hasErrors;
     document.getElementById('strictBlockMsg').style.display = (isStrict && hasErrors) ? 'block' : 'none';
@@ -625,23 +574,35 @@ function checkStrictMode() {
 
 async function doImport() {
     if (!selectedFile) return;
-    const btn=document.getElementById('btnImport'), spinner=document.getElementById('importSpinner'), btnText=document.getElementById('btnImportText');
-    btn.disabled=true; spinner.style.display='block'; btnText.style.display='none';
+    const btn     = document.getElementById('btnImport');
+    const spinner = document.getElementById('importSpinner');
+    const btnText = document.getElementById('btnImportText');
+    btn.disabled = true; spinner.style.display = 'block'; btnText.style.display = 'none';
     document.getElementById('loaderOverlay').classList.add('show');
     document.getElementById('loaderText').textContent = 'Import en cours...';
     try {
         const fd = new FormData();
         fd.append('file', selectedFile);
-        const res  = await fetch('/api/v1/imports/manifest', { method:'POST', headers:{'Authorization':`Bearer ${Auth.getToken()}`}, body:fd });
+        const res  = await fetch('/api/v1/imports/manifest', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${Auth.getToken()}` },
+            body: fd
+        });
+        if (!res.ok) {
+            const errText = await res.text();
+            showResult({ status: 'FAILED', totalRows: 0, successRows: 0, skippedRows: 0, failedRows: 0 });
+            console.error('Erreur import:', errText);
+            return;
+        }
         const json = await res.json();
         const data = json.data || json;
         showResult(data);
         await Promise.all([ loadExistingHawbs(), loadHistory() ]);
         if (parsedRows.length) validateAndEnrich();
     } catch(e) {
-        showResult({ status:'FAILED', totalRows:0, successRows:0, skippedRows:0, failedRows:0 });
+        showResult({ status: 'FAILED', totalRows: 0, successRows: 0, skippedRows: 0, failedRows: 0 });
     } finally {
-        btn.disabled=false; spinner.style.display='none'; btnText.style.display='inline';
+        btn.disabled = false; spinner.style.display = 'none'; btnText.style.display = 'inline';
         document.getElementById('loaderOverlay').classList.remove('show');
     }
 }
@@ -650,25 +611,25 @@ function showResult(data) {
     const card = document.getElementById('resultCard');
     card.classList.add('show');
     const configs = {
-        'SUCCESS': { icon:'✅', bg:'#F0FDF4', title:'Import réussi !',      sub:'Toutes les lignes ont été importées.' },
-        'PARTIAL': { icon:'⚠️', bg:'#FFF7ED', title:'Import partiel',       sub:'Certaines lignes ont été ignorées.' },
+        'SUCCESS': { icon:'✅', bg:'#F0FDF4', title:'Import réussi !',      sub:'Toutes les lignes ont été importées avec succès.' },
+        'PARTIAL': { icon:'⚠️', bg:'#FFF7ED', title:'Import partiel',       sub:'Certaines lignes ont été ignorées ou ont échoué.' },
         'FAILED':  { icon:'❌', bg:'#FEF2F2', title:'Import échoué',        sub:'Aucune ligne n\'a pu être importée.' },
-        'SKIPPED': { icon:'🔵', bg:'#EFF6FF', title:'Fichier déjà importé', sub:'Ce fichier a déjà été importé.' },
+        'SKIPPED': { icon:'🔵', bg:'#EFF6FF', title:'Fichier déjà importé', sub:'Ce fichier exact a déjà été importé précédemment.' },
     };
     const cfg = configs[data.status] || configs['FAILED'];
-    document.getElementById('resultIcon').textContent  = cfg.icon;
+    document.getElementById('resultIcon').textContent       = cfg.icon;
     document.getElementById('resultIcon').style.background = cfg.bg;
-    document.getElementById('resultTitle').textContent = cfg.title;
-    document.getElementById('resultSub').textContent   = cfg.sub;
+    document.getElementById('resultTitle').textContent     = cfg.title;
+    document.getElementById('resultSub').textContent       = cfg.sub;
     document.getElementById('rTotal').textContent   = data.totalRows   ?? 0;
     document.getElementById('rSuccess').textContent = data.successRows ?? 0;
     document.getElementById('rSkipped').textContent = data.skippedRows ?? 0;
     document.getElementById('rFailed').textContent  = data.failedRows  ?? 0;
-    card.scrollIntoView({ behavior:'smooth', block:'start' });
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function exportErrors() {
-    const errors = enrichedRows.filter(r => r.status==='error');
+    const errors = enrichedRows.filter(r => r.status === 'error');
     if (!errors.length) return;
     const wsData = [
         ['#Ligne','MAWB','HAWB','Sender','Receiver','Country','Email','Phone','Items','Description','Weight','Customs Value','Currency','Erreur'],
@@ -680,20 +641,21 @@ function exportErrors() {
     XLSX.writeFile(wb, `erreurs_import_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-// ══ HISTORIQUE ══
+// ── HISTORIQUE
 async function loadHistory() {
     const tbody = document.getElementById('historyBody');
     try {
+        // FIX : paramètre de tri correct pour Spring Pageable
         const res  = await Auth.fetchWithAuth('/api/v1/imports?size=20&sort=importedAt,desc');
-        if (!res || !res.ok) { tbody.innerHTML = emptyRow(10,'Erreur de chargement'); return; }
+        if (!res || !res.ok) { tbody.innerHTML = emptyRow(10, 'Erreur de chargement'); return; }
         const json = await res.json();
         const data = json.content || json.data || (Array.isArray(json) ? json : []);
-        if (!data.length) { tbody.innerHTML = emptyRow(10,'Aucun import effectué'); return; }
+        if (!data.length) { tbody.innerHTML = emptyRow(10, 'Aucun import effectué'); return; }
 
         const isAdmin = currentUserRole === 'ADMIN';
 
         tbody.innerHTML = data.map(h => `
-            <tr>
+            <tr data-import-id="${h.id}" data-import-name="${esc(h.fileName||'')}">
                 <td><strong>${esc(h.fileName||'—')}</strong></td>
                 <td style="font-family:monospace;font-size:11px">${esc(h.mawb||'—')}</td>
                 <td>${h.totalRows??0}</td>
@@ -705,55 +667,44 @@ async function loadHistory() {
                 <td style="color:var(--muted);font-size:12px">${formatDate(h.importedAt)}</td>
                 <td>
                     ${isAdmin ? `
-                  <button class="btn-delete" data-id="${h.id}" onclick="openDeleteModal(this)" title="Supprimer cet import complètement">
+                    <button class="btn-delete" data-id="${h.id}" data-name="${esc(h.fileName||'Import #'+h.id)}" onclick="openDeleteModal(this)">
                         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                         Supprimer
                     </button>` : '<span style="color:var(--muted);font-size:11px">—</span>'}
                 </td>
             </tr>`).join('');
-    } catch(e) { tbody.innerHTML = emptyRow(10,'Erreur de chargement'); }
+    } catch(e) { tbody.innerHTML = emptyRow(10, 'Erreur de chargement'); }
 }
 
-// ══ DELETE FLOW ══
-// APRÈS
+// ── DELETE — FIX : utilise data-name au lieu de textContent
 function openDeleteModal(btn) {
     pendingDeleteId = parseInt(btn.getAttribute('data-id'));
-    // récupère le nom depuis la cellule de la ligne
-    const row = btn.closest('tr');
-    const fileName = row ? row.cells[0].textContent.trim() : 'Import #' + pendingDeleteId;
-    pendingDeleteFileName = fileName;
+    // FIX : on lit le nom depuis data-name (propre, sans HTML parasite)
+    const fileName = btn.getAttribute('data-name') || ('Import #' + pendingDeleteId);
     document.getElementById('modalFileName').textContent = fileName;
     document.getElementById('deleteModal').classList.add('show');
 }
 
 function closeDeleteModal() {
-    pendingDeleteId = null; pendingDeleteFileName = null;
+    pendingDeleteId = null;
     document.getElementById('deleteModal').classList.remove('show');
-    document.getElementById('btnConfirmDelete').disabled = false;
-    document.getElementById('deleteModalText').style.display = 'inline';
-    document.getElementById('deleteSpinner').style.display   = 'none';
+    document.getElementById('btnConfirmDelete').disabled        = false;
+    document.getElementById('deleteModalText').style.display    = 'inline';
+    document.getElementById('deleteSpinner').style.display      = 'none';
 }
 
 async function confirmDelete() {
     if (!pendingDeleteId) return;
-
     const btn     = document.getElementById('btnConfirmDelete');
     const text    = document.getElementById('deleteModalText');
     const spinner = document.getElementById('deleteSpinner');
-
-    btn.disabled          = true;
-    text.style.display    = 'none';
-    spinner.style.display = 'block';
-
+    btn.disabled = true; text.style.display = 'none'; spinner.style.display = 'block';
     try {
         const res = await Auth.fetchWithAuth(`/api/v1/imports/${pendingDeleteId}`, { method: 'DELETE' });
-
         if (res && res.ok) {
             closeDeleteModal();
-            // Recharger tout
             await Promise.all([ loadHistory(), loadExistingHawbs() ]);
             if (parsedRows.length) validateAndEnrich();
-            // Feedback visuel temporaire
             showToast('✅ Import supprimé avec succès');
         } else {
             const err = await res?.text();
@@ -766,22 +717,14 @@ async function confirmDelete() {
     }
 }
 
-// ══ TOAST NOTIFICATION ══
 function showToast(message) {
     const toast = document.createElement('div');
-    toast.style.cssText = `
-        position:fixed;bottom:24px;right:24px;z-index:500;
-        background:#0a0f1e;color:white;padding:12px 20px;
-        border-radius:10px;font-size:13px;font-weight:600;
-        box-shadow:0 4px 20px rgba(0,0,0,0.3);
-        animation:slideIn 0.3s ease;
-    `;
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:500;background:#0a0f1e;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
     toast.textContent = message;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
 
-// ══ HELPERS ══
 function rowBadge(s) {
     const m = { ok:'<span class="row-badge ok">✅ OK</span>', error:'<span class="row-badge error">❌ ERROR</span>', 'dup-file':'<span class="row-badge dup-file">⚠️ DUP_FILE</span>', 'dup-db':'<span class="row-badge dup-db">🔵 DUP_DB</span>' };
     return m[s] || '';

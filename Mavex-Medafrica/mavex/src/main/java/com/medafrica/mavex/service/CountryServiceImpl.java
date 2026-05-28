@@ -2,8 +2,11 @@ package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.model.country.Country;
 import com.medafrica.mavex.repository.CountryRepository;
+import com.medafrica.mavex.service.interfaces.CountryService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,7 +16,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class CountryService {
+public class CountryServiceImpl implements CountryService {
 
     private final CountryRepository countryRepository;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -21,13 +24,15 @@ public class CountryService {
     private static final String API_URL =
             "https://restcountries.com/v3.1/all?fields=cca2,name";
 
-    /**
-     * Import countries from external API into database
-     */
+    @Override
     public void importCountries() {
 
-        ResponseEntity<List> response =
-                restTemplate.getForEntity(API_URL, List.class);
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                API_URL,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+        );
 
         List<Map<String, Object>> body = response.getBody();
 
@@ -36,18 +41,17 @@ public class CountryService {
         for (Map<String, Object> item : body) {
 
             try {
-                // country code (US, MA, FR...)
                 String code = (String) item.get("cca2");
 
-                // name object
-                Map<String, Object> nameMap =
-                        (Map<String, Object>) item.get("name");
+                Object nameObj = item.get("name");
+                if (!(nameObj instanceof Map<?, ?> rawMap)) continue;
+                @SuppressWarnings("unchecked")
+                Map<String, Object> nameMap = (Map<String, Object>) rawMap;
 
                 String countryName = (String) nameMap.get("common");
 
                 if (code == null || countryName == null) continue;
 
-                // avoid duplicates
                 if (countryRepository.existsById(code)) continue;
 
                 Country country = Country.builder()
@@ -58,15 +62,12 @@ public class CountryService {
                 countryRepository.save(country);
 
             } catch (Exception e) {
-                // skip corrupted data but continue import
                 System.out.println("Error parsing country: " + e.getMessage());
             }
         }
     }
 
-    /**
-     * Get all countries from DB
-     */
+    @Override
     public List<Country> getAllCountries() {
         return countryRepository.findAll();
     }

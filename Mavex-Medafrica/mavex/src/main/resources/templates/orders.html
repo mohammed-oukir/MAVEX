@@ -16,12 +16,12 @@
         }
         body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; display:flex; }
 
-        /* SIDEBAR */
+        /* ══ SIDEBAR ══ */
         .sidebar { width:var(--sidebar);background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;box-shadow:2px 0 8px rgba(0,0,0,0.04); }
         .sidebar-logo { padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px; }
         .logo-mark { width:36px;height:36px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:white;border-radius:10px; }
         .logo-text { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
-        .logo-sub { font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase; }
+        .logo-sub  { font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase; }
         .sidebar-nav { flex:1;padding:16px 10px;overflow-y:auto; }
         .nav-section { font-size:10px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;padding:0 10px;margin:16px 0 6px;font-weight:600; }
         .nav-item { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:all 0.15s;cursor:pointer;margin-bottom:2px; }
@@ -32,136 +32,223 @@
         .user-avatar { width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:white;flex-shrink:0; }
         .user-name { font-size:13px;font-weight:600;color:var(--text); }
         .user-role { font-size:11px;color:var(--muted); }
-        .btn-logout { margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;transition:color 0.2s;flex-shrink:0; }
+        .btn-logout { margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:4px;flex-shrink:0; }
         .btn-logout:hover { color:var(--error); }
 
-        /* MAIN */
+        /* ══ MAIN ══ */
         .main { margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh; }
         .topbar { height:60px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--panel);position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
         .topbar-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
         .topbar-right { display:flex;align-items:center;gap:10px; }
         .content { padding:28px;flex:1; }
 
-        /* TOOLBAR */
-        .toolbar { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px; }
+        /* ══ TOOLBAR ══ */
+        .toolbar { display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px; }
         .toolbar-left { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
-        .search-input { padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--panel);color:var(--text);outline:none;width:260px;transition:border-color 0.15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236B7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center; }
-        .search-input:focus { border-color:var(--accent); }
-        .filter-select { padding:9px 14px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--panel);color:var(--text);outline:none;cursor:pointer; }
+        .search-wrap { position:relative; }
+        .search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none; }
+        .search-input { padding:9px 12px 9px 36px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;background:var(--panel);color:var(--text);outline:none;width:260px;transition:all 0.2s;font-family:'DM Sans',sans-serif; }
+        .search-input:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,0.1); }
+        .search-input::placeholder { color:var(--muted); }
+        .filter-select { padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;background:var(--panel);color:var(--text);outline:none;cursor:pointer;font-family:'DM Sans',sans-serif; }
         .filter-select:focus { border-color:var(--accent); }
 
-        /* BUTTONS */
-        .btn-primary { display:flex;align-items:center;gap:6px;background:var(--accent);color:white;border:none;border-radius:9px;padding:9px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(249,115,22,0.3); }
+        /* ══ BUTTONS ══ */
+        .btn-primary { display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:white;border:none;border-radius:9px;padding:9px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(249,115,22,0.3); }
         .btn-primary:hover { background:var(--accent2);transform:translateY(-1px); }
-        .btn-secondary { display:flex;align-items:center;gap:6px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s; }
+        .btn-secondary { display:inline-flex;align-items:center;gap:6px;background:var(--panel);color:var(--text);border:1.5px solid var(--border);border-radius:9px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif; }
         .btn-secondary:hover { border-color:var(--accent);color:var(--accent); }
 
-        /* TABLE */
-        .table-card { background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04); }
-        .table-wrap { overflow-x:auto; }
-        table { width:100%;border-collapse:collapse;font-size:13px; }
-        thead th { padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg);white-space:nowrap; }
-        tbody tr { border-bottom:1px solid #F3F4F6;transition:background 0.15s; }
-        tbody tr:hover { background:var(--accent-soft); }
-        tbody tr:last-child { border-bottom:none; }
-        tbody td { padding:11px 14px;color:var(--text);white-space:nowrap; }
-        .td-muted { color:var(--muted);font-size:12px; }
+        /* ══ STATS ROW ══ */
+        .stats-row { display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap; }
+        .stat-chip { background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+        .stat-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+        .stat-val { font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text); }
+        .stat-lbl { font-size:12px;color:var(--muted); }
 
-        /* BADGES */
-        .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600; }
-        .badge::before { content:'';width:5px;height:5px;border-radius:50%; }
-        .badge-created   { background:#F3F4F6;color:#6B7280; } .badge-created::before   { background:#6B7280; }
-        .badge-email     { background:#EFF6FF;color:#3B82F6; } .badge-email::before     { background:#3B82F6; }
-        .badge-pending   { background:#FFFBEB;color:#F59E0B; } .badge-pending::before   { background:#F59E0B; }
-        .badge-paid      { background:#F0FDF4;color:#22C55E; } .badge-paid::before      { background:#22C55E; }
-        .badge-delivered { background:#F0FDF4;color:#22C55E; } .badge-delivered::before { background:#22C55E; }
+        /* ══ ACCORDION CARDS ══ */
+        .mawb-list { display:flex;flex-direction:column;gap:12px; }
 
-        /* ACTION BUTTONS */
-        .btn-send { display:inline-flex;align-items:center;gap:4px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--border2);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap; }
-        .btn-send:hover { background:var(--accent);color:white;border-color:var(--accent); }
-        .btn-send:disabled { opacity:0.4;cursor:not-allowed; }
-        .btn-send.sent { background:#F0FDF4;color:var(--success);border-color:#BBF7D0; }
-        .btn-edit { display:inline-flex;align-items:center;gap:4px;background:#EFF6FF;color:var(--info);border:1px solid #BFDBFE;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s; }
-        .btn-edit:hover { background:var(--info);color:white;border-color:var(--info); }
-        .btn-delete { display:inline-flex;align-items:center;gap:4px;background:#FEF2F2;color:var(--error);border:1px solid #FECACA;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.15s; }
-        .btn-delete:hover { background:var(--error);color:white;border-color:var(--error); }
-        .btn-view { display:inline-flex;align-items:center;gap:4px;background:var(--bg);color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:500;cursor:pointer;transition:all 0.15s; }
-        .btn-view:hover { border-color:var(--accent);color:var(--accent); }
+        .mawb-card {
+            background:var(--panel);
+            border:1px solid var(--border);
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 1px 4px rgba(0,0,0,0.04);
+            transition:box-shadow 0.2s;
+        }
+        .mawb-card:hover { box-shadow:0 4px 16px rgba(249,115,22,0.08); }
+        .mawb-card.open { border-color:var(--border2); }
 
-        /* EMPTY */
-        .empty-state { padding:40px;text-align:center;color:var(--muted);font-size:13px; }
+        /* ── Header de la carte MAWB ── */
+        .mawb-header {
+            display:flex;align-items:center;gap:16px;
+            padding:16px 20px;cursor:pointer;
+            user-select:none;
+            transition:background 0.15s;
+        }
+        .mawb-header:hover { background:var(--accent-soft); }
+        .mawb-card.open .mawb-header { background:var(--accent-soft);border-bottom:1px solid var(--border2); }
 
-        /* MODAL */
+        /* Icône package */
+        .mawb-icon {
+            width:40px;height:40px;border-radius:10px;
+            background:var(--accent-soft);border:1px solid var(--border2);
+            display:flex;align-items:center;justify-content:center;
+            flex-shrink:0;color:var(--accent);
+        }
+        .mawb-card.open .mawb-icon { background:var(--accent);color:white;border-color:var(--accent); }
+
+        .mawb-info { flex:1;min-width:0; }
+        .mawb-number {
+            font-family:'Syne',sans-serif;font-weight:800;font-size:16px;
+            color:var(--text);margin-bottom:3px;
+        }
+        .mawb-card.open .mawb-number { color:var(--accent); }
+        .mawb-meta { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+        .mawb-meta-item { font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px; }
+
+        /* Badges stats dans le header */
+        .mawb-badges { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
+        .count-badge { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700; }
+        .cb-total    { background:#F3F4F6;color:#374151; }
+        .cb-paid     { background:#F0FDF4;color:#166534; }
+        .cb-pending  { background:#FFFBEB;color:#92400E; }
+        .cb-email    { background:#EFF6FF;color:#1E40AF; }
+
+        /* Flèche expand */
+        .arrow-btn {
+            width:32px;height:32px;border-radius:8px;
+            background:var(--bg);border:1.5px solid var(--border);
+            display:flex;align-items:center;justify-content:center;
+            flex-shrink:0;color:var(--muted);transition:all 0.2s;
+        }
+        .mawb-header:hover .arrow-btn { border-color:var(--accent);color:var(--accent); }
+        .mawb-card.open .arrow-btn { background:var(--accent);border-color:var(--accent);color:white; }
+        .arrow-btn svg { transition:transform 0.25s; }
+        .mawb-card.open .arrow-btn svg { transform:rotate(90deg); }
+
+        /* ── Contenu orders ── */
+        .orders-body {
+            display:none;
+            padding:0 16px 16px;
+            animation:slideDown 0.2s ease;
+        }
+        .mawb-card.open .orders-body { display:block; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+        /* Toolbar interne */
+        .orders-toolbar { display:flex;align-items:center;justify-content:space-between;padding:12px 4px;gap:10px;flex-wrap:wrap; }
+        .orders-toolbar-left { display:flex;align-items:center;gap:8px; }
+        .filter-mini { padding:5px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;background:var(--panel);color:var(--muted);cursor:pointer;outline:none; }
+        .filter-mini:focus { border-color:var(--accent);color:var(--text); }
+
+        .btn-send-all {
+            display:inline-flex;align-items:center;gap:5px;
+            background:var(--accent);color:white;border:none;
+            border-radius:7px;padding:6px 12px;font-size:12px;
+            font-weight:600;cursor:pointer;transition:all 0.2s;
+            box-shadow:0 2px 6px rgba(249,115,22,0.25);
+        }
+        .btn-send-all:hover { background:var(--accent2); }
+        .btn-send-all:disabled { opacity:0.5;cursor:not-allowed; }
+
+        /* Mini table */
+        .orders-table-wrap { overflow-x:auto;border-radius:10px;border:1px solid var(--border); }
+        .orders-table { width:100%;border-collapse:collapse;font-size:12px; }
+        .orders-table thead th {
+            padding:9px 12px;text-align:left;font-size:10px;
+            font-weight:700;color:var(--muted);letter-spacing:0.06em;
+            text-transform:uppercase;border-bottom:1px solid var(--border);
+            background:var(--bg);white-space:nowrap;
+        }
+        .orders-table tbody tr { border-bottom:1px solid #F9FAFB;transition:background 0.1s; }
+        .orders-table tbody tr:hover { background:var(--accent-soft); }
+        .orders-table tbody tr:last-child { border-bottom:none; }
+        .orders-table td { padding:9px 12px;white-space:nowrap;color:var(--text); }
+        .td-mono { font-family:monospace;font-size:11px; }
+        .td-muted { color:var(--muted);font-size:11px; }
+
+        /* ── Action buttons ── */
+        .btn-email {
+            display:inline-flex;align-items:center;gap:4px;
+            background:var(--accent-soft);color:var(--accent);
+            border:1px solid var(--border2);border-radius:6px;
+            padding:4px 8px;font-size:11px;font-weight:600;
+            cursor:pointer;transition:all 0.15s;white-space:nowrap;
+        }
+        .btn-email:hover { background:var(--accent);color:white;border-color:var(--accent); }
+        .btn-email:disabled { opacity:0.4;cursor:not-allowed; }
+        .btn-email.sent { background:#F0FDF4;color:var(--success);border-color:#BBF7D0; }
+
+        .btn-edit-sm {
+            display:inline-flex;align-items:center;gap:4px;
+            background:#EFF6FF;color:var(--info);border:1px solid #BFDBFE;
+            border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;
+            cursor:pointer;transition:all 0.15s;
+        }
+        .btn-edit-sm:hover { background:var(--info);color:white; }
+
+        .btn-del-sm {
+            display:inline-flex;align-items:center;gap:4px;
+            background:#FEF2F2;color:var(--error);border:1px solid #FECACA;
+            border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;
+            cursor:pointer;transition:all 0.15s;
+        }
+        .btn-del-sm:hover { background:var(--error);color:white; }
+
+        /* ── Badges order ── */
+        .obadge { display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:100px;font-size:10px;font-weight:700; }
+        .obadge::before { content:'';width:4px;height:4px;border-radius:50%; }
+        .ob-created   { background:#F3F4F6;color:#6B7280; } .ob-created::before   { background:#6B7280; }
+        .ob-email     { background:#EFF6FF;color:#3B82F6; } .ob-email::before     { background:#3B82F6; }
+        .ob-pending   { background:#FFFBEB;color:#F59E0B; } .ob-pending::before   { background:#F59E0B; }
+        .ob-paid      { background:#F0FDF4;color:#22C55E; } .ob-paid::before      { background:#22C55E; }
+        .ob-delivery  { background:#F0FDF4;color:#22C55E; } .ob-delivery::before  { background:#22C55E; }
+        .ob-delivered { background:#DCFCE7;color:#166534; } .ob-delivered::before { background:#166534; }
+
+        /* ── Mini spinner ── */
+        .mini-spin { width:11px;height:11px;border:1.5px solid rgba(249,115,22,0.3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;display:inline-block; }
+        .mini-spin.white { border:1.5px solid rgba(255,255,255,0.3);border-top-color:white; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        /* ══ MODAL CRUD ══ */
         .modal-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center; }
         .modal-overlay.open { display:flex; }
         .modal { background:var(--panel);border:1px solid var(--border);border-radius:16px;width:680px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:fadeUp 0.2s ease; }
-        .modal-sm { width:440px; }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        .modal-sm { width:420px; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
         .modal-header { padding:20px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel);z-index:1;border-bottom:1px solid var(--border); }
         .modal-title { font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text); }
-        .modal-close { background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.15s; }
+        .modal-close { background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center; }
         .modal-close:hover { background:var(--bg);color:var(--text); }
         .modal-body { padding:20px 24px; }
         .modal-footer { padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end; }
-
-        /* FORM */
         .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
         .form-full { grid-column:1/-1; }
-        .section-title { font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border);grid-column:1/-1; }
+        .form-section { font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--border);grid-column:1/-1; }
         .field { display:flex;flex-direction:column;gap:5px; }
-        .field label { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase; }
-        .field .required { color:var(--error); }
-        .field input, .field select, .field textarea { padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);outline:none;transition:border-color 0.15s; }
-        .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--accent);background:var(--panel); }
-        .field select { cursor:pointer; }
-        .field textarea { resize:vertical;min-height:60px; }
-
-        /* IMPORT */
-        .drop-zone { border:2px dashed var(--border2);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--accent-soft); }
-        .drop-zone:hover,.drop-zone.drag-over { border-color:var(--accent);background:#FEF3E8; }
-        .drop-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
-        .drop-icon { font-size:30px;margin-bottom:8px; }
-        .drop-text { font-size:13px;color:var(--muted); }
-        .drop-text span { color:var(--accent);font-weight:600; }
-        .drop-filename { font-size:13px;color:var(--success);margin-top:6px;font-weight:500; }
-        .import-result { display:none;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px; }
-        .import-result.success { background:#F0FDF4;border:1px solid #BBF7D0; }
-        .import-result.error   { background:#FEF2F2;border:1px solid #FECACA; }
-        .import-result.partial { background:#FFF7ED;border:1px solid #FED7AA; }
-        .result-row { display:flex;justify-content:space-between;margin-bottom:5px; }
-        .result-row:last-child { margin-bottom:0; }
-        .result-label { color:var(--muted); }
-        .result-val { font-weight:600; }
-
-        /* MODAL BUTTONS */
-        .btn-confirm { padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px; }
-        .btn-confirm:hover { background:var(--accent2); }
-        .btn-confirm:disabled { opacity:0.5;cursor:not-allowed; }
-        .btn-confirm-danger { background:var(--error); }
-        .btn-confirm-danger:hover { background:#DC2626; }
-        .btn-cancel-modal { padding:10px 18px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;transition:all 0.2s;font-weight:500; }
-        .btn-cancel-modal:hover { border-color:var(--muted);color:var(--text); }
-
-        /* MODAL ALERT */
+        .field label { font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase; }
+        .req { color:var(--error); }
+        .field input, .field select, .field textarea { padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);outline:none;transition:border-color 0.15s; }
+        .field input:focus,.field select:focus,.field textarea:focus { border-color:var(--accent);background:var(--panel); }
+        .field textarea { resize:vertical;min-height:56px; }
         .modal-alert { padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none; }
         .modal-alert.error { display:block;background:#FEF2F2;border:1px solid #FECACA;color:var(--error); }
+        .btn-confirm { padding:10px 22px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:7px; }
+        .btn-confirm:hover { background:var(--accent2); }
+        .btn-confirm:disabled { opacity:0.5;cursor:not-allowed; }
+        .btn-danger-modal { padding:10px 22px;background:var(--error);color:white;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px; }
+        .btn-cancel-modal { padding:10px 18px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;cursor:pointer;font-weight:500; }
+        .btn-cancel-modal:hover { border-color:var(--muted);color:var(--text); }
+        .spinner-sm { width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none; }
 
-        /* DELETE MODAL */
-        .delete-warning { text-align:center;padding:8px 0 16px; }
-        .delete-icon { font-size:40px;margin-bottom:12px; }
-        .delete-msg { font-size:14px;color:var(--muted);line-height:1.6; }
-        .delete-hawb { font-family:monospace;font-weight:700;color:var(--text);font-size:15px; }
-
-        /* TOAST */
+        /* ══ EMPTY & TOAST ══ */
+        .empty-state { padding:48px;text-align:center;color:var(--muted);font-size:13px; }
         .toast { position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.15);z-index:999;transform:translateY(100px);opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:8px; }
         .toast.show { transform:translateY(0);opacity:1; }
         .toast.success { background:#166534;color:white; }
         .toast.error   { background:#991B1B;color:white; }
-
-        /* SPINNER */
-        .spinner-sm { width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block; }
-        .spinner-dark { border:2px solid rgba(249,115,22,0.2);border-top-color:var(--accent); }
-        @keyframes spin { to{transform:rotate(360deg)} }
 
         @media(max-width:768px) { .sidebar{display:none;} .main{margin-left:0;} .form-grid{grid-template-columns:1fr;} }
     </style>
@@ -176,51 +263,38 @@
     </div>
     <nav class="sidebar-nav">
         <div class="nav-section">Principal</div>
-        <a class="nav-item" href="/dashboard">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
-        </a>
-        <a class="nav-item" href="/shipments">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments
-        </a>
-        <a class="nav-item active" href="/orders">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders
-        </a>
+        <a class="nav-item" href="/dashboard"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>
+        <a class="nav-item" href="/shipments"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Shipments</a>
+        <a class="nav-item active" href="/orders"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Orders</a>
         <div class="nav-section">Gestion</div>
-        <a class="nav-item" href="/clients">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients
-        </a>
-        <a class="nav-item" href="/shippers">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers
-        </a>
-        <a class="nav-item" href="/imports">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports
-        </a>
+        <a class="nav-item" href="/clients"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Clients</a>
+        <a class="nav-item" href="/shippers"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Shippers</a>
+        <a class="nav-item" href="/imports"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>Imports</a>
         <div class="nav-section" id="adminNav" style="display:none">Administration</div>
-        <a class="nav-item" href="/users" id="usersLink" style="display:none">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs
-        </a>
+        <a class="nav-item" href="/users" id="usersLink" style="display:none"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Utilisateurs</a>
     </nav>
     <div class="sidebar-footer">
         <div class="user-card">
             <div class="user-avatar" id="userAvatar">?</div>
             <div style="min-width:0"><div class="user-name" id="userName">...</div><div class="user-role" id="userRole">...</div></div>
-            <button class="btn-logout" onclick="doLogout()">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
+            <button class="btn-logout" onclick="doLogout()"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
         </div>
     </div>
 </aside>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <!-- MAIN -->
 <div class="main">
     <div class="topbar">
         <div class="topbar-title">Orders</div>
         <div class="topbar-right">
-            <button class="btn-secondary" onclick="openImportModal()">
+            <button class="btn-secondary" onclick="window.location.href='/imports'">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
                 Importer Excel
             </button>
-            <button class="btn-primary" onclick="openFormModal()">
+            <button class="btn-primary" onclick="openCreateModal()">
                 <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Créer manuellement
             </button>
@@ -228,10 +302,15 @@
     </div>
 
     <div class="content">
+
+        <!-- TOOLBAR -->
         <div class="toolbar">
             <div class="toolbar-left">
-                <input class="search-input" type="text" id="searchInput" placeholder="Rechercher HAWB, client, MAWB..." oninput="filterOrders()"/>
-                <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input class="search-input" type="text" id="searchInput" placeholder="Rechercher MAWB, HAWB, client..." oninput="applySearch()"/>
+                </div>
+                <select class="filter-select" id="statusFilter" onchange="applySearch()">
                     <option value="">Tous les statuts</option>
                     <option value="CREATED">CREATED</option>
                     <option value="EMAIL_SENT">EMAIL_SENT</option>
@@ -244,168 +323,101 @@
             <div style="font-size:13px;color:var(--muted)" id="countLabel"></div>
         </div>
 
-        <div class="table-card">
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>HAWB</th>
-                            <th>Receiver</th>
-                            <th>MAWB</th>
-                            <th>Description</th>
-                            <th>Weight</th>
-                            <th>Customs Value</th>
-                            <th>Total</th>
-                            <th>Statut</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersBody">
-                        <tr><td colspan="9" class="empty-state">Chargement...</td></tr>
-                    </tbody>
-                </table>
+        <!-- STATS -->
+        <div class="stats-row" id="statsRow" style="display:none">
+            <div class="stat-chip">
+                <div class="stat-dot" style="background:var(--muted)"></div>
+                <div><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Total orders</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="stat-dot" style="background:var(--success)"></div>
+                <div><div class="stat-val" id="stPaid" style="color:var(--success)">0</div><div class="stat-lbl">Payés</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="stat-dot" style="background:var(--warning)"></div>
+                <div><div class="stat-val" id="stPending" style="color:var(--warning)">0</div><div class="stat-lbl">En attente</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="stat-dot" style="background:var(--info)"></div>
+                <div><div class="stat-val" id="stEmail" style="color:var(--info)">0</div><div class="stat-lbl">Email envoyé</div></div>
+            </div>
+            <div class="stat-chip">
+                <div class="stat-dot" style="background:var(--accent)"></div>
+                <div><div class="stat-val" id="stGroups" style="color:var(--accent)">0</div><div class="stat-lbl">Shipments</div></div>
             </div>
         </div>
+
+        <!-- LISTE DES CARTES MAWB -->
+        <div class="mawb-list" id="mawbList">
+            <div class="empty-state">Chargement...</div>
+        </div>
+
     </div>
 </div>
 
-<!-- ══════ MODAL IMPORT ══════ -->
-<div class="modal-overlay" id="importModal" onclick="closeOnOutside(event,'importModal')">
-    <div class="modal" style="width:500px">
-        <div class="modal-header">
-            <div class="modal-title">Importer un manifest Excel</div>
-            <button class="modal-close" onclick="closeModal('importModal')">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="import-result" id="importResult"></div>
-            <div class="drop-zone">
-                <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="onFileSelect(event)"/>
-                <div class="drop-icon">📊</div>
-                <div class="drop-text">Glissez votre fichier ici ou <span>parcourez</span></div>
-                <div class="drop-text" style="font-size:12px;margin-top:4px">Formats : .xlsx, .xls</div>
-                <div class="drop-filename" id="dropFilename"></div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-cancel-modal" onclick="closeModal('importModal')">Annuler</button>
-            <button class="btn-confirm" id="importBtn" onclick="doImport()" disabled>
-                <span id="importBtnText">Importer</span>
-                <div class="spinner-sm" id="importSpinner" style="display:none"></div>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ══════ MODAL CRÉER / MODIFIER ══════ -->
+<!-- ══ MODAL CRÉER / MODIFIER ══ -->
 <div class="modal-overlay" id="formModal" onclick="closeOnOutside(event,'formModal')">
     <div class="modal">
         <div class="modal-header">
-            <div class="modal-title" id="formModalTitle">Créer un order</div>
+            <div class="modal-title" id="formTitle">Créer un order</div>
             <button class="modal-close" onclick="closeModal('formModal')">✕</button>
         </div>
         <div class="modal-body">
             <div class="modal-alert" id="formAlert"></div>
             <div class="form-grid">
-
-                <div class="section-title">📦 Shipment & Client</div>
-
-                <div class="field">
-                    <label>Shipment (MAWB) <span class="required">*</span></label>
-                    <select id="f_shipmentId"></select>
-                </div>
-                <div class="field">
-                    <label>Client (Receiver) <span class="required">*</span></label>
-                    <select id="f_clientId"></select>
-                </div>
-
-                <div class="section-title">📋 Détails du colis</div>
-
-                <div class="field">
-                    <label>Connote # (HAWB) <span class="required">*</span></label>
-                    <input type="text" id="f_hawb" placeholder="013090009953"/>
-                </div>
-                <div class="field">
-                    <label>Nombre d'articles</label>
-                    <input type="number" id="f_numberOfItems" placeholder="1" min="1"/>
-                </div>
-                <div class="field form-full">
-                    <label>Description des marchandises</label>
-                    <textarea id="f_goodsDescription" placeholder="2 Handmade carpets"></textarea>
-                </div>
-                <div class="field">
-                    <label>Poids (kg) <span class="required">*</span></label>
-                    <input type="number" id="f_shipmentWeight" placeholder="19.4" step="0.001"/>
-                </div>
-                <div class="field">
-                    <label>Code HTSUS</label>
-                    <input type="text" id="f_htsusCode" placeholder="6913.90.1000"/>
-                </div>
-
-                <div class="section-title">💰 Valeurs douanières</div>
-
-                <div class="field">
-                    <label>Customs Value <span class="required">*</span></label>
-                    <input type="number" id="f_customsValue" placeholder="988.00" step="0.01"/>
-                </div>
-                <div class="field">
-                    <label>Devise</label>
-                    <select id="f_customsCurrency">
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="MAD">MAD</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Taux douanier (%)</label>
-                    <input type="number" id="f_dutyRate" placeholder="10" step="0.01" value="10"/>
-                </div>
-                <div class="field">
-                    <label>Frais bancaires</label>
-                    <input type="number" id="f_bankCharges" placeholder="0.00" step="0.01"/>
-                </div>
+                <div class="form-section">📦 Shipment & Client</div>
+                <div class="field"><label>Shipment (MAWB) <span class="req">*</span></label><select id="f_shipmentId"></select></div>
+                <div class="field"><label>Client (Receiver) <span class="req">*</span></label><select id="f_clientId"></select></div>
+                <div class="form-section">📋 Détails colis</div>
+                <div class="field"><label>HAWB (Connote #) <span class="req">*</span></label><input type="text" id="f_hawb" placeholder="013090009953"/></div>
+                <div class="field"><label>Nombre d'articles</label><input type="number" id="f_numberOfItems" placeholder="1" min="1"/></div>
+                <div class="field form-full"><label>Description</label><textarea id="f_goodsDescription" placeholder="2 Handmade carpets"></textarea></div>
+                <div class="field"><label>Poids (kg) <span class="req">*</span></label><input type="number" id="f_shipmentWeight" placeholder="19.4" step="0.001"/></div>
+                <div class="field"><label>Code HTSUS</label><input type="text" id="f_htsusCode" placeholder="6913.90.1000"/></div>
+                <div class="form-section">💰 Valeurs douanières</div>
+                <div class="field"><label>Customs Value <span class="req">*</span></label><input type="number" id="f_customsValue" placeholder="988.00" step="0.01"/></div>
+                <div class="field"><label>Devise</label><select id="f_customsCurrency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="MAD">MAD</option></select></div>
+                <div class="field"><label>Taux douanier (%)</label><input type="number" id="f_dutyRate" placeholder="10" value="10" step="0.01"/></div>
+                <div class="field"><label>Frais bancaires</label><input type="number" id="f_bankCharges" placeholder="0.00" step="0.01"/></div>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn-cancel-modal" onclick="closeModal('formModal')">Annuler</button>
             <button class="btn-confirm" id="formConfirmBtn" onclick="doSave()">
-                <span id="formBtnText">Créer l'order</span>
-                <div class="spinner-sm" id="formSpinner" style="display:none"></div>
+                <span id="formBtnText">Créer</span>
+                <div class="spinner-sm" id="formSpinner"></div>
             </button>
         </div>
     </div>
 </div>
 
-<!-- ══════ MODAL DELETE ══════ -->
+<!-- ══ MODAL DELETE ══ -->
 <div class="modal-overlay" id="deleteModal" onclick="closeOnOutside(event,'deleteModal')">
     <div class="modal modal-sm">
         <div class="modal-header">
             <div class="modal-title">Supprimer l'order</div>
             <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
         </div>
-        <div class="modal-body">
-            <div class="delete-warning">
-                <div class="delete-icon">🗑️</div>
-                <div class="delete-msg">
-                    Voulez-vous supprimer l'order<br/>
-                    <span class="delete-hawb" id="deleteHawb"></span> ?<br/><br/>
-                    <span style="color:var(--error);font-size:12px">Cette action est irréversible.</span>
-                </div>
-            </div>
+        <div class="modal-body" style="text-align:center;padding:24px">
+            <div style="font-size:40px;margin-bottom:12px">🗑️</div>
+            <p style="font-size:14px;color:var(--muted);line-height:1.6">
+                Supprimer l'order<br/>
+                <strong id="deleteHawbLabel" style="font-family:monospace;font-size:15px;color:var(--text)"></strong> ?<br/>
+                <span style="color:var(--error);font-size:12px">Cette action est irréversible.</span>
+            </p>
         </div>
         <div class="modal-footer">
             <button class="btn-cancel-modal" onclick="closeModal('deleteModal')">Annuler</button>
-            <button class="btn-confirm btn-confirm-danger" id="deleteConfirmBtn" onclick="doDelete()">
+            <button class="btn-danger-modal" id="btnConfirmDelete" onclick="doDelete()">
                 <span id="deleteBtnText">Supprimer</span>
-                <div class="spinner-sm" id="deleteSpinner" style="display:none"></div>
+                <div class="spinner-sm" id="deleteSpinner"></div>
             </button>
         </div>
     </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
 <script>
+// ══ AUTH ══
 const Auth = {
     getToken()        { return localStorage.getItem('accessToken'); },
     getRefreshToken() { return localStorage.getItem('refreshToken'); },
@@ -433,13 +445,14 @@ const Auth = {
     }
 };
 
-// ── État
-let allOrders    = [];
-let selectedFile = null;
-let editingId    = null;   // null = création, number = modification
-let deletingId   = null;
+// ══ STATE ══
+let allOrders  = [];      // tous les orders chargés
+let groups     = [];      // groupes { shipmentId, mawb, date, orders[] }
+let editingId  = null;
+let deletingId = null;
+const openGroups = new Set(); // IDs des groupes ouverts
 
-// ── Init
+// ══ INIT ══
 document.addEventListener('DOMContentLoaded', async () => {
     if (!Auth.requireAuth()) return;
     const fullName = localStorage.getItem('userFullName') || '?';
@@ -454,145 +467,344 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadOrders();
 });
 
-// ════════════════════════════════════
-// LOAD & RENDER
-// ════════════════════════════════════
+// ══ LOAD ══
 async function loadOrders() {
-    const tbody = document.getElementById('ordersBody');
+    document.getElementById('mawbList').innerHTML = '<div class="empty-state">Chargement...</div>';
     try {
         const res  = await Auth.fetchWithAuth('/api/orders');
-        if (!res||!res.ok) { tbody.innerHTML=emptyRow(9,'Erreur de chargement'); return; }
+        if (!res||!res.ok) { document.getElementById('mawbList').innerHTML = '<div class="empty-state">Erreur de chargement</div>'; return; }
         const json = await res.json();
-        allOrders  = Array.isArray(json)?json:(json.data||json.content||[]);
-        renderOrders(allOrders);
-    } catch(e) { tbody.innerHTML=emptyRow(9,'Erreur de chargement'); }
+        allOrders  = Array.isArray(json) ? json : (json.data || json.content || []);
+        buildGroups(allOrders);
+        renderStats(allOrders);
+        renderGroups();
+    } catch(e) { document.getElementById('mawbList').innerHTML = '<div class="empty-state">Erreur de chargement</div>'; }
 }
 
-function renderOrders(orders) {
-    document.getElementById('countLabel').textContent = `${orders.length} order${orders.length>1?'s':''}`;
-    const tbody = document.getElementById('ordersBody');
-    if (!orders.length) { tbody.innerHTML=emptyRow(9,'Aucun order'); return; }
-
-    tbody.innerHTML = orders.map(o => `
-        <tr>
-            <td><strong style="font-family:monospace;font-size:12px">${esc(o.hawb)}</strong></td>
-            <td>${esc(o.clientFullName||'—')}</td>
-            <td class="td-muted">${esc(o.mawb||'—')}</td>
-            <td class="td-muted" style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(o.goodsDescription||'—')}</td>
-            <td class="td-muted">${o.shipmentWeight?o.shipmentWeight+' kg':'—'}</td>
-            <td>${o.customsValue?o.customsValue+' '+(o.customsCurrency||'USD'):'—'}</td>
-            <td><strong>${o.totalAmount?o.totalAmount+' '+(o.customsCurrency||'USD'):'—'}</strong></td>
-            <td id="status-${o.id}">${statusBadge(o.status)}</td>
-            <td>
-                <div style="display:flex;gap:5px;align-items:center">
-                    <button class="btn-send ${o.status==='EMAIL_SENT'?'sent':''}"
-                        id="btn-${o.id}" onclick="sendEmail(${o.id})"
-                        ${['PAID','DELIVERED'].includes(o.status)?'disabled':''}>
-                        ${o.status==='EMAIL_SENT'
-                            ?`<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Envoyé`
-                            :`<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Email`
-                        }
-                    </button>
-                    <button class="btn-edit" onclick="openEditModal(${o.id})">
-                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Modifier
-                    </button>
-                    <button class="btn-delete" onclick="openDeleteModal(${o.id},'${esc(o.hawb)}')">
-                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                        Supprimer
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// ── Filtre
-function filterOrders() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    const s = document.getElementById('statusFilter').value;
-    renderOrders(allOrders.filter(o =>
-        (!q || (o.hawb||'').toLowerCase().includes(q) || (o.clientFullName||'').toLowerCase().includes(q) || (o.mawb||'').toLowerCase().includes(q)) &&
-        (!s || o.status===s)
-    ));
-}
-
-// ════════════════════════════════════
-// SEND EMAIL
-// ════════════════════════════════════
-async function sendEmail(orderId) {
-    const btn = document.getElementById(`btn-${orderId}`);
-    if (!btn||btn.disabled) return;
-    btn.disabled=true;
-    btn.innerHTML=`<div class="spinner-sm spinner-dark" style="display:inline-block"></div>`;
-    try {
-        const res  = await Auth.fetchWithAuth(`/api/emails/orders/${orderId}/send`,{method:'POST'});
-        if (!res) return;
-        const data = (await res.json()).data || await res.json();
-        if (data?.success) {
-            btn.className='btn-send sent';
-            btn.innerHTML=`<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Envoyé`;
-            document.getElementById(`status-${orderId}`).innerHTML=statusBadge('EMAIL_SENT');
-            const o=allOrders.find(x=>x.id===orderId); if(o) o.status='EMAIL_SENT';
-            showToast(`✓ Email envoyé`,'success');
-        } else {
-            btn.disabled=false;
-            btn.innerHTML=`Email`;
-            showToast(data?.message||'Échec','error');
+// ══ GROUPER PAR SHIPMENT ID ══
+function buildGroups(orders) {
+    const map = new Map();
+    orders.forEach(o => {
+        const key = o.shipmentId ?? 'unknown';
+        if (!map.has(key)) {
+            map.set(key, {
+                shipmentId: o.shipmentId,
+                mawb:       o.mawb || '—',
+                date:       o.createdAt,
+                orders:     []
+            });
         }
-    } catch(e) { btn.disabled=false; btn.innerHTML='Email'; showToast('Erreur','error'); }
+        map.get(key).orders.push(o);
+    });
+    // Trier par date décroissante
+    groups = Array.from(map.values()).sort((a, b) => {
+        if (!a.date) return 1; if (!b.date) return -1;
+        return new Date(b.date) - new Date(a.date);
+    });
 }
 
-// ════════════════════════════════════
-// MODAL FORMULAIRE — CREATE / UPDATE
-// ════════════════════════════════════
-async function openFormModal(orderId = null) {
-    editingId = orderId;
-    document.getElementById('formModalTitle').textContent = orderId ? 'Modifier l\'order' : 'Créer un order';
-    document.getElementById('formBtnText').textContent    = orderId ? 'Enregistrer' : 'Créer l\'order';
-    document.getElementById('formAlert').className = 'modal-alert';
+// ══ STATS ══
+function renderStats(orders) {
+    document.getElementById('stTotal').textContent   = orders.length;
+    document.getElementById('stPaid').textContent    = orders.filter(o => o.status === 'PAID').length;
+    document.getElementById('stPending').textContent = orders.filter(o => ['PENDING_PAYMENT','CREATED'].includes(o.status)).length;
+    document.getElementById('stEmail').textContent   = orders.filter(o => o.status === 'EMAIL_SENT').length;
+    document.getElementById('stGroups').textContent  = groups.length;
+    document.getElementById('statsRow').style.display = orders.length ? 'flex' : 'none';
+}
 
-    // Réinitialiser
-    ['f_hawb','f_goodsDescription','f_htsusCode','f_numberOfItems','f_shipmentWeight','f_customsValue','f_bankCharges']
-        .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('f_dutyRate').value = '10';
-    document.getElementById('f_customsCurrency').value = 'USD';
+// ══ RECHERCHE ET FILTRE ══
+function applySearch() {
+    const q   = document.getElementById('searchInput').value.toLowerCase().trim();
+    const s   = document.getElementById('statusFilter').value;
 
-    openModal('formModal');
+    const filtered = allOrders.filter(o =>
+        (!q || (o.mawb||'').toLowerCase().includes(q) || (o.hawb||'').toLowerCase().includes(q) || (o.clientFullName||'').toLowerCase().includes(q)) &&
+        (!s || o.status === s)
+    );
 
-    // Charger les dropdowns
-    await Promise.all([loadShipmentsDropdown(), loadClientsDropdown()]);
+    buildGroups(filtered);
+    renderStats(filtered);
+    renderGroups();
 
-    // Si modification → pré-remplir
-    if (orderId) {
-        const order = allOrders.find(o => o.id === orderId);
-        if (order) prefillForm(order);
+    document.getElementById('countLabel').textContent = `${filtered.length} order${filtered.length > 1 ? 's' : ''}`;
+}
+
+// ══ RENDER GROUPES ══
+function renderGroups() {
+    const container = document.getElementById('mawbList');
+    document.getElementById('countLabel').textContent = `${allOrders.length} order${allOrders.length > 1 ? 's' : ''}`;
+
+    if (!groups.length) {
+        container.innerHTML = `<div class="empty-state">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px;display:block;color:#D1D5DB"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p style="font-weight:600;margin-bottom:4px">Aucun order trouvé</p>
+            <small>Importez un manifest Excel ou créez un order manuellement</small>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = groups.map(g => renderGroupCard(g)).join('');
+}
+
+function renderGroupCard(g) {
+    const isOpen = openGroups.has(g.shipmentId);
+    const paid    = g.orders.filter(o => o.status === 'PAID').length;
+    const pending = g.orders.filter(o => ['CREATED','PENDING_PAYMENT'].includes(o.status)).length;
+    const emailed = g.orders.filter(o => o.status === 'EMAIL_SENT').length;
+    const dateStr = g.orders[0]?.createdAt ? formatDate(g.orders[0].createdAt) : '—';
+
+    return `
+    <div class="mawb-card ${isOpen ? 'open' : ''}" id="card-${g.shipmentId}">
+
+        <!-- ── Header ── -->
+        <div class="mawb-header" onclick="toggleGroup('${g.shipmentId}')">
+            <div class="mawb-icon">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+
+            <div class="mawb-info">
+                <div class="mawb-number">${esc(g.mawb)}</div>
+                <div class="mawb-meta">
+                    <div class="mawb-meta-item">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Importé le ${dateStr}
+                    </div>
+                    <div class="mawb-meta-item">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Shipment #${g.shipmentId ?? '?'}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mawb-badges">
+                <span class="count-badge cb-total">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                    ${g.orders.length} orders
+                </span>
+                ${paid > 0 ? `<span class="count-badge cb-paid">✅ ${paid} payés</span>` : ''}
+                ${emailed > 0 ? `<span class="count-badge cb-email">📧 ${emailed} emails</span>` : ''}
+                ${pending > 0 ? `<span class="count-badge cb-pending">⏳ ${pending} en attente</span>` : ''}
+            </div>
+
+            <div class="arrow-btn">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- ── Orders ── -->
+        <div class="orders-body">
+            <div class="orders-toolbar">
+                <div class="orders-toolbar-left">
+                    <select class="filter-mini" onchange="filterGroupOrders('${g.shipmentId}', this.value)">
+                        <option value="">Tous (${g.orders.length})</option>
+                        <option value="CREATED">CREATED</option>
+                        <option value="EMAIL_SENT">EMAIL_SENT</option>
+                        <option value="PENDING_PAYMENT">PENDING_PAYMENT</option>
+                        <option value="PAID">PAID</option>
+                        <option value="DELIVERED">DELIVERED</option>
+                    </select>
+                </div>
+                <button class="btn-send-all" id="sendall-${g.shipmentId}" onclick="sendAllEmails('${g.shipmentId}')">
+                    <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Envoyer tous les emails
+                </button>
+            </div>
+
+            <div class="orders-table-wrap" id="table-${g.shipmentId}">
+                ${renderOrdersTable(g.orders, g.shipmentId)}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderOrdersTable(orders, shipmentId) {
+    if (!orders.length) return `<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">Aucun order dans ce groupe</div>`;
+
+    return `
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>HAWB</th>
+                <th>Receiver</th>
+                <th>Email</th>
+                <th>Description</th>
+                <th>Poids</th>
+                <th>Customs Value</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${orders.map(o => `
+            <tr id="orow-${o.id}">
+                <td><strong class="td-mono">${esc(o.hawb)}</strong></td>
+                <td>${esc(o.clientFullName||'—')}</td>
+                <td class="td-muted">${esc(o.clientEmail||'—')}</td>
+                <td class="td-muted" style="max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${esc(o.goodsDescription)}">${esc(o.goodsDescription||'—')}</td>
+                <td class="td-muted">${o.shipmentWeight ? o.shipmentWeight+' kg' : '—'}</td>
+                <td>${o.customsValue ? o.customsValue+' '+(o.customsCurrency||'USD') : '—'}</td>
+                <td><strong>${o.totalAmount ? o.totalAmount+' '+(o.customsCurrency||'USD') : '—'}</strong></td>
+                <td id="ostatus-${o.id}">${orderBadge(o.status)}</td>
+                <td>
+                    <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+                        <button
+                            class="btn-email ${o.status==='EMAIL_SENT'?'sent':''}"
+                            id="obtn-${o.id}"
+                            onclick="sendEmail(${o.id})"
+                            ${['PAID','DELIVERED'].includes(o.status)?'disabled':''}>
+                            ${o.status==='EMAIL_SENT'
+                                ? `<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Envoyé`
+                                : `<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Email`
+                            }
+                        </button>
+                        <button class="btn-edit-sm" onclick="openEditModal(${o.id})">
+                            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Modifier
+                        </button>
+                        <button class="btn-del-sm" onclick="openDeleteModal(${o.id},'${esc(o.hawb)}')">
+                            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                            Supprimer
+                        </button>
+                    </div>
+                </td>
+            </tr>`).join('')}
+        </tbody>
+    </table>`;
+}
+
+// ══ ACCORDION TOGGLE ══
+function toggleGroup(shipmentId) {
+    const card = document.getElementById(`card-${shipmentId}`);
+    if (openGroups.has(shipmentId)) {
+        openGroups.delete(shipmentId);
+        card.classList.remove('open');
+    } else {
+        openGroups.add(shipmentId);
+        card.classList.add('open');
     }
 }
 
-function prefillForm(o) {
-    document.getElementById('f_hawb').value            = o.hawb || '';
-    document.getElementById('f_goodsDescription').value= o.goodsDescription || '';
-    document.getElementById('f_htsusCode').value       = o.htsusCode || '';
-    document.getElementById('f_numberOfItems').value   = o.numberOfItems || '';
-    document.getElementById('f_shipmentWeight').value  = o.shipmentWeight || '';
-    document.getElementById('f_customsValue').value    = o.customsValue || '';
-    document.getElementById('f_customsCurrency').value = o.customsCurrency || 'USD';
-    document.getElementById('f_dutyRate').value        = o.dutyRate ? (o.dutyRate * 100).toFixed(2) : '10';
-    document.getElementById('f_bankCharges').value     = o.bankCharges || '';
+// ══ FILTRE DANS UN GROUPE ══
+function filterGroupOrders(shipmentId, status) {
+    const g = groups.find(x => String(x.shipmentId) === String(shipmentId));
+    if (!g) return;
+    const filtered = status ? g.orders.filter(o => o.status === status) : g.orders;
+    document.getElementById(`table-${shipmentId}`).innerHTML = renderOrdersTable(filtered, shipmentId);
+}
 
-    // Sélectionner le shipment et client dans les dropdowns
-    if (o.shipmentId) document.getElementById('f_shipmentId').value = o.shipmentId;
-    if (o.clientId)   document.getElementById('f_clientId').value   = o.clientId;
+// ══ ENVOYER EMAIL ══
+async function sendEmail(orderId) {
+    const btn = document.getElementById(`obtn-${orderId}`);
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    btn.innerHTML = `<div class="mini-spin" style="display:inline-block"></div>`;
+    try {
+        const res  = await Auth.fetchWithAuth(`/api/emails/orders/${orderId}/send`, { method: 'POST' });
+        if (!res) return;
+        const json = await res.json();
+        const data = json.data || json;
+        if (data?.success !== false) {
+            btn.className = 'btn-email sent';
+            btn.innerHTML = `<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Envoyé`;
+            document.getElementById(`ostatus-${orderId}`).innerHTML = orderBadge('EMAIL_SENT');
+            updateOrderStatus(orderId, 'EMAIL_SENT');
+            showToast('✓ Email envoyé', 'success');
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Email`;
+            showToast(data?.message || 'Échec', 'error');
+        }
+    } catch(e) { btn.disabled = false; btn.innerHTML = 'Email'; showToast('Erreur', 'error'); }
+}
+
+// ══ ENVOYER TOUS LES EMAILS D'UN GROUPE ══
+async function sendAllEmails(shipmentId) {
+    const btn = document.getElementById(`sendall-${shipmentId}`);
+    const g   = groups.find(x => String(x.shipmentId) === String(shipmentId));
+    if (!g) return;
+
+    const pending = g.orders.filter(o => o.status === 'CREATED');
+    if (!pending.length) { showToast('Aucun order à envoyer', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = `<div class="mini-spin white" style="display:inline-block"></div> Envoi...`;
+
+    let sent = 0;
+    for (const o of pending) {
+        try {
+            const res  = await Auth.fetchWithAuth(`/api/emails/orders/${o.id}/send`, { method: 'POST' });
+            if (res && res.ok) {
+                const data = (await res.json()).data || {};
+                if (data?.success !== false) {
+                    sent++;
+                    const obtn = document.getElementById(`obtn-${o.id}`);
+                    const ost  = document.getElementById(`ostatus-${o.id}`);
+                    if (obtn) { obtn.className = 'btn-email sent'; obtn.innerHTML = `✅ Envoyé`; }
+                    if (ost)  ost.innerHTML = orderBadge('EMAIL_SENT');
+                    updateOrderStatus(o.id, 'EMAIL_SENT');
+                }
+            }
+        } catch(e) {}
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer tous les emails`;
+    showToast(`✓ ${sent} email${sent > 1 ? 's' : ''} envoyé${sent > 1 ? 's' : ''}`, 'success');
+    renderStats(allOrders);
+}
+
+function updateOrderStatus(orderId, newStatus) {
+    const o = allOrders.find(x => x.id === orderId);
+    if (o) o.status = newStatus;
+    groups.forEach(g => {
+        const go = g.orders.find(x => x.id === orderId);
+        if (go) go.status = newStatus;
+    });
+}
+
+// ══ CREATE / EDIT ══
+async function openCreateModal() {
+    editingId = null;
+    document.getElementById('formTitle').textContent    = 'Créer un order';
+    document.getElementById('formBtnText').textContent  = 'Créer';
+    document.getElementById('formAlert').className = 'modal-alert';
+    ['f_hawb','f_goodsDescription','f_htsusCode','f_numberOfItems','f_shipmentWeight','f_customsValue','f_bankCharges'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('f_dutyRate').value = '10';
+    document.getElementById('f_customsCurrency').value = 'USD';
+    openModal('formModal');
+    await Promise.all([loadShipmentsDD(), loadClientsDD()]);
 }
 
 async function openEditModal(orderId) {
-    await openFormModal(orderId);
+    editingId = orderId;
+    document.getElementById('formTitle').textContent   = 'Modifier l\'order';
+    document.getElementById('formBtnText').textContent = 'Enregistrer';
+    document.getElementById('formAlert').className = 'modal-alert';
+    openModal('formModal');
+    await Promise.all([loadShipmentsDD(), loadClientsDD()]);
+    const o = allOrders.find(x => x.id === orderId);
+    if (o) {
+        document.getElementById('f_hawb').value            = o.hawb || '';
+        document.getElementById('f_goodsDescription').value= o.goodsDescription || '';
+        document.getElementById('f_htsusCode').value       = o.htsusCode || '';
+        document.getElementById('f_numberOfItems').value   = o.numberOfItems || '';
+        document.getElementById('f_shipmentWeight').value  = o.shipmentWeight || '';
+        document.getElementById('f_customsValue').value    = o.customsValue || '';
+        document.getElementById('f_customsCurrency').value = o.customsCurrency || 'USD';
+        document.getElementById('f_dutyRate').value        = o.dutyRate ? (o.dutyRate * 100).toFixed(2) : '10';
+        document.getElementById('f_bankCharges').value     = o.bankCharges || '';
+        if (o.shipmentId) document.getElementById('f_shipmentId').value = o.shipmentId;
+        if (o.clientId)   document.getElementById('f_clientId').value   = o.clientId;
+    }
 }
 
-async function loadShipmentsDropdown() {
+async function loadShipmentsDD() {
     const sel = document.getElementById('f_shipmentId');
-    sel.innerHTML='<option value="">Chargement...</option>';
+    sel.innerHTML = '<option value="">Chargement...</option>';
     try {
         const res  = await Auth.fetchWithAuth('/api/shipments?size=200');
         if (!res||!res.ok) { sel.innerHTML='<option value="">Erreur</option>'; return; }
@@ -603,9 +815,9 @@ async function loadShipmentsDropdown() {
     } catch(e) { sel.innerHTML='<option value="">Erreur</option>'; }
 }
 
-async function loadClientsDropdown() {
+async function loadClientsDD() {
     const sel = document.getElementById('f_clientId');
-    sel.innerHTML='<option value="">Chargement...</option>';
+    sel.innerHTML = '<option value="">Chargement...</option>';
     try {
         const res  = await Auth.fetchWithAuth('/api/clients');
         if (!res||!res.ok) { sel.innerHTML='<option value="">Erreur</option>'; return; }
@@ -617,161 +829,93 @@ async function loadClientsDropdown() {
 }
 
 async function doSave() {
-    const alert = document.getElementById('formAlert');
-    alert.className = 'modal-alert';
-
-    const hawb        = document.getElementById('f_hawb').value.trim();
-    const shipmentId  = document.getElementById('f_shipmentId').value;
-    const clientId    = document.getElementById('f_clientId').value;
-    const customsVal  = document.getElementById('f_customsValue').value;
-    const weight      = document.getElementById('f_shipmentWeight').value;
-
-    if (!hawb)       { showFormAlert('Le HAWB est obligatoire.'); return; }
-    if (!shipmentId) { showFormAlert('Veuillez sélectionner un shipment.'); return; }
-    if (!clientId)   { showFormAlert('Veuillez sélectionner un client.'); return; }
-    if (!customsVal) { showFormAlert('La valeur douanière est obligatoire.'); return; }
-    if (!weight)     { showFormAlert('Le poids est obligatoire.'); return; }
+    const hawb = document.getElementById('f_hawb').value.trim();
+    const sid  = document.getElementById('f_shipmentId').value;
+    const cid  = document.getElementById('f_clientId').value;
+    const cv   = document.getElementById('f_customsValue').value;
+    const w    = document.getElementById('f_shipmentWeight').value;
+    if (!hawb) { showFormAlert('Le HAWB est obligatoire.'); return; }
+    if (!sid)  { showFormAlert('Veuillez sélectionner un shipment.'); return; }
+    if (!cid)  { showFormAlert('Veuillez sélectionner un client.'); return; }
+    if (!cv)   { showFormAlert('La valeur douanière est obligatoire.'); return; }
+    if (!w)    { showFormAlert('Le poids est obligatoire.'); return; }
 
     const payload = {
-        hawb,
-        shipmentId:      parseInt(shipmentId),
-        clientId:        parseInt(clientId),
-        goodsDescription: document.getElementById('f_goodsDescription').value.trim() || null,
-        htsusCode:        document.getElementById('f_htsusCode').value.trim() || null,
-        numberOfItems:    parseInt(document.getElementById('f_numberOfItems').value) || null,
-        shipmentWeight:   parseFloat(weight),
-        customsValue:     parseFloat(customsVal),
+        hawb, shipmentId:parseInt(sid), clientId:parseInt(cid),
+        goodsDescription: document.getElementById('f_goodsDescription').value.trim()||null,
+        htsusCode:        document.getElementById('f_htsusCode').value.trim()||null,
+        numberOfItems:    parseInt(document.getElementById('f_numberOfItems').value)||null,
+        shipmentWeight:   parseFloat(w),
+        customsValue:     parseFloat(cv),
         customsCurrency:  document.getElementById('f_customsCurrency').value,
-        dutyRate:         parseFloat(document.getElementById('f_dutyRate').value || '10') / 100,
-        bankCharges:      parseFloat(document.getElementById('f_bankCharges').value) || null
+        dutyRate:         parseFloat(document.getElementById('f_dutyRate').value||'10')/100,
+        bankCharges:      parseFloat(document.getElementById('f_bankCharges').value)||null
     };
 
-    const btn     = document.getElementById('formConfirmBtn');
-    const spinner = document.getElementById('formSpinner');
-    const btnText = document.getElementById('formBtnText');
-    btn.disabled=true; spinner.style.display='inline-block'; btnText.style.display='none';
+    const btn=document.getElementById('formConfirmBtn');
+    const sp=document.getElementById('formSpinner');
+    const tx=document.getElementById('formBtnText');
+    btn.disabled=true; sp.style.display='inline-block'; tx.style.display='none';
 
     try {
-        // CREATE → POST   |   UPDATE → PUT
         const url    = editingId ? `/api/orders/${editingId}` : '/api/orders';
         const method = editingId ? 'PUT' : 'POST';
         const res    = await Auth.fetchWithAuth(url, {method, body:JSON.stringify(payload)});
         if (!res) return;
         const json   = await res.json();
-
-        if (!res.ok) { showFormAlert(json.message||'Erreur lors de la sauvegarde.'); return; }
-
+        if (!res.ok) { showFormAlert(json.message||'Erreur.'); return; }
         closeModal('formModal');
         showToast(editingId ? '✓ Order modifié' : '✓ Order créé', 'success');
         await loadOrders();
-
-    } catch(e) {
-        showFormAlert('Erreur de connexion au serveur.');
-    } finally {
-        btn.disabled=false; spinner.style.display='none'; btnText.style.display='inline';
-    }
+    } catch(e) { showFormAlert('Erreur de connexion.'); }
+    finally { btn.disabled=false; sp.style.display='none'; tx.style.display='inline'; }
 }
 
 function showFormAlert(msg) {
     const el=document.getElementById('formAlert');
-    el.className='modal-alert error';
-    el.textContent=msg;
+    el.className='modal-alert error'; el.textContent=msg;
 }
 
-// ════════════════════════════════════
-// DELETE
-// ════════════════════════════════════
+// ══ DELETE ══
 function openDeleteModal(orderId, hawb) {
     deletingId = orderId;
-    document.getElementById('deleteHawb').textContent = hawb;
+    document.getElementById('deleteHawbLabel').textContent = hawb;
     openModal('deleteModal');
 }
 
 async function doDelete() {
-    const btn     = document.getElementById('deleteConfirmBtn');
-    const spinner = document.getElementById('deleteSpinner');
-    const btnText = document.getElementById('deleteBtnText');
-    btn.disabled=true; spinner.style.display='inline-block'; btnText.style.display='none';
-
+    const btn=document.getElementById('btnConfirmDelete');
+    const sp=document.getElementById('deleteSpinner');
+    const tx=document.getElementById('deleteBtnText');
+    btn.disabled=true; sp.style.display='inline-block'; tx.style.display='none';
     try {
-        const res = await Auth.fetchWithAuth(`/api/orders/${deletingId}`,{method:'DELETE'});
-        if (!res) return;
-
-        if (res.ok || res.status===204) {
+        const res = await Auth.fetchWithAuth(`/api/orders/${deletingId}`, {method:'DELETE'});
+        if (res && (res.ok || res.status===204)) {
             closeModal('deleteModal');
-            showToast('✓ Order supprimé','success');
+            showToast('✓ Order supprimé', 'success');
             await loadOrders();
         } else {
-            const json = await res.json();
-            showToast(json.message||'Erreur lors de la suppression','error');
+            const j = await res.json();
+            showToast(j.message||'Erreur', 'error');
         }
-    } catch(e) {
-        showToast('Erreur de connexion','error');
-    } finally {
-        btn.disabled=false; spinner.style.display='none'; btnText.style.display='inline';
-    }
+    } catch(e) { showToast('Erreur de connexion', 'error'); }
+    finally { btn.disabled=false; sp.style.display='none'; tx.style.display='inline'; }
 }
 
-// ════════════════════════════════════
-// IMPORT EXCEL
-// ════════════════════════════════════
-function openImportModal() {
-    document.getElementById('importResult').style.display='none';
-    document.getElementById('dropFilename').textContent='';
-    document.getElementById('fileInput').value='';
-    document.getElementById('importBtn').disabled=true;
-    document.getElementById('importBtnText').textContent='Importer';
-    document.getElementById('importSpinner').style.display='none';
-    selectedFile=null;
-    openModal('importModal');
+// ══ HELPERS ══
+function orderBadge(s) {
+    const map={'CREATED':'ob-created','EMAIL_SENT':'ob-email','PENDING_PAYMENT':'ob-pending','PAID':'ob-paid','IN_DELIVERY':'ob-delivery','DELIVERED':'ob-delivered'};
+    return `<span class="obadge ${map[s]||'ob-created'}">${s||'—'}</span>`;
 }
 
-function onFileSelect(e) {
-    const file=e.target.files[0]; if(!file) return;
-    selectedFile=file;
-    document.getElementById('dropFilename').textContent='✓ '+file.name;
-    document.getElementById('importBtn').disabled=false;
+function formatDate(d) {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
-async function doImport() {
-    if (!selectedFile) return;
-    const btn=document.getElementById('importBtn');
-    const spinner=document.getElementById('importSpinner');
-    const btnText=document.getElementById('importBtnText');
-    const result=document.getElementById('importResult');
-    btn.disabled=true; spinner.style.display='inline-block'; btnText.style.display='none';
-    try {
-        const fd=new FormData(); fd.append('file',selectedFile);
-        const res=await fetch('/api/v1/imports/manifest',{method:'POST',headers:{'Authorization':`Bearer ${Auth.getToken()}`},body:fd});
-        const json=await res.json();
-        const data=json.data||json;
-        const cls=data.status==='SUCCESS'?'success':data.status==='PARTIAL'?'partial':'error';
-        result.className=`import-result ${cls}`; result.style.display='block';
-        result.innerHTML=`
-            <div class="result-row"><span class="result-label">MAWB</span><span class="result-val">${esc(data.mawb||'—')}</span></div>
-            <div class="result-row"><span class="result-label">✅ Importées</span><span class="result-val" style="color:var(--success)">${data.successRows??0}</span></div>
-            <div class="result-row"><span class="result-label">❌ Erreurs</span><span class="result-val" style="color:var(--error)">${data.failedRows??0}</span></div>`;
-        if (['SUCCESS','PARTIAL'].includes(data.status)) await loadOrders();
-    } catch(e) {
-        result.className='import-result error'; result.style.display='block';
-        result.innerHTML='<div>Erreur lors de l\'import.</div>';
-    } finally {
-        btn.disabled=false; spinner.style.display='none'; btnText.style.display='inline';
-        btnText.textContent='Importer à nouveau';
-    }
-}
-
-// ════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeOnOutside(e,id) { if(e.target===document.getElementById(id)) closeModal(id); }
-
-function statusBadge(s) {
-    const map={'CREATED':'badge-created','EMAIL_SENT':'badge-email','PENDING_PAYMENT':'badge-pending','PAID':'badge-paid','IN_DELIVERY':'badge-pending','DELIVERED':'badge-delivered'};
-    return `<span class="badge ${map[s]||'badge-created'}">${s||'—'}</span>`;
-}
 
 function showToast(msg, type='success') {
     const t=document.getElementById('toast');
@@ -779,7 +923,6 @@ function showToast(msg, type='success') {
     setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-function emptyRow(cols,msg) { return `<tr><td colspan="${cols}" class="empty-state">${msg}</td></tr>`; }
 function esc(str) { if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 async function doLogout() { await Auth.logout(); }
 </script>

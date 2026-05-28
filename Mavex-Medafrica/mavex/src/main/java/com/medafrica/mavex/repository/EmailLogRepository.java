@@ -11,4 +11,5 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
     List<EmailLog> findByOrderId(Long orderId);
 
     List<EmailLog> findByStatus(EmailStatus status);
+    void deleteByOrderId(Long orderId);
 }

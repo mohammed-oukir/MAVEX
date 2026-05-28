@@ -22,7 +22,7 @@ import java.util.UUID;
  *   Customs Value         -> customsValue
  *   Customs Currency Code -> customsCurrency
  *
- * Table BDD : orders 
+ * Table BDD : orders
  */
 @Entity
 @Table(name = "orders")
@@ -126,6 +126,14 @@ public class Order {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+
+    /** Colonne Excel "Alternate Reference" */
+@Column(name = "alternate_reference")
+private String alternateReference;
+
+
 
     @PrePersist
     @PreUpdate
