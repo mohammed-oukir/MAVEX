@@ -1,0 +1,77 @@
+/* ─────────────────────────────────────────────────────────
+   TOPBAR — Clean, sticky, minimal
+   ───────────────────────────────────────────────────────── */
+
+:host { display: block; }
+
+.tb {
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 16px;
+  /* Subtle shadow that separates content from topbar */
+  box-shadow: 0 1px 0 #F3F4F6, 0 1px 8px rgba(0,0,0,.04);
+}
+
+/* Page title */
+.tb-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: #0C0C0E;
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action button */
+.tb-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #F97316;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 36px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: .01em;
+  flex-shrink: 0;
+  transition: background .14s, transform .1s, box-shadow .14s;
+  box-shadow:
+    0 1px 2px rgba(249, 115, 22, .25),
+    0 3px 8px rgba(249, 115, 22, .15);
+}
+
+.tb-action:hover {
+  background: #EA580C;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 6px rgba(249, 115, 22, .35),
+    0 6px 16px rgba(249, 115, 22, .2);
+}
+
+.tb-action:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(249, 115, 22, .25);
+}
+
+.tb-action:focus-visible {
+  outline: 2px solid #F97316;
+  outline-offset: 2px;
+}

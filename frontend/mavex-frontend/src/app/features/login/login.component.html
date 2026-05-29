@@ -1,0 +1,349 @@
+<div class="lp-wrap">
+
+  <!-- ══════════════════════════════════════════════════════
+       LEFT PANEL — Branding
+  ══════════════════════════════════════════════════════════ -->
+  <aside class="lp-left d-none d-lg-flex flex-column" aria-hidden="true">
+
+    <div class="lp-brand">
+      <div class="lp-logo-mark">M</div>
+      <div>
+        <div class="lp-logo-name">MAVEX</div>
+        <div class="lp-logo-sub">Med Africa</div>
+      </div>
+    </div>
+
+    <div class="lp-hero">
+      <h2 class="lp-headline">
+        Gérez vos<br>
+        <span class="lp-accent">expéditions</span><br>
+        avec précision.
+      </h2>
+      <p class="lp-sub">
+        Plateforme de gestion fret centralisée —<br>
+        imports, shipments et paiements en un seul endroit.
+      </p>
+      <div class="lp-features">
+        <div class="lp-feature">
+          <div class="lp-feature-dot"></div>
+          Imports de manifestes Excel automatisés
+        </div>
+        <div class="lp-feature">
+          <div class="lp-feature-dot"></div>
+          Suivi des shipments en temps réel
+        </div>
+        <div class="lp-feature">
+          <div class="lp-feature-dot"></div>
+          Notifications de paiement par email
+        </div>
+      </div>
+    </div>
+
+    <div class="lp-foot">Med Africa &copy; 2025 &nbsp;·&nbsp; MAVEX</div>
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════════
+       RIGHT PANEL — Form
+  ══════════════════════════════════════════════════════════ -->
+  <main class="lp-right">
+    <div class="lp-form-wrap">
+
+      <!-- Mobile brand (visible below lg) -->
+      <div class="lp-mobile-brand">
+        <div class="lp-mobile-mark">M</div>
+        <span class="lp-mobile-name">MAVEX</span>
+      </div>
+
+      <!-- ────────────────────────────────────────────
+           LOGIN TAB
+      ──────────────────────────────────────────── -->
+      @if (tab() === 'login') {
+
+        <h1 class="lp-title">Connexion</h1>
+        <p class="lp-subtitle">Accédez à votre espace de travail</p>
+
+        @if (success()) {
+          <div class="lp-alert lp-alert-success" role="alert">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            {{ success() }}
+          </div>
+        }
+
+        @if (error()) {
+          <div class="lp-alert lp-alert-error" role="alert">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ error() }}
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
+
+          <!-- Email -->
+          <div class="lp-field">
+            <label for="lEmail" class="lp-label">Email</label>
+            <input
+              id="lEmail"
+              type="email"
+              class="lp-input"
+              [class.invalid]="fieldInvalid(loginForm, 'email')"
+              formControlName="email"
+              placeholder="you@company.com"
+              autocomplete="email"
+            />
+            @if (fieldInvalid(loginForm, 'email')) {
+              <div class="lp-field-error" role="alert">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Adresse email invalide.
+              </div>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="lp-field">
+            <div class="lp-field-header">
+              <label for="lPwd" class="lp-label">Mot de passe</label>
+              <button type="button" class="lp-forgot-link" (click)="setTab('forgot')">
+                Mot de passe oublié ?
+              </button>
+            </div>
+            <div class="lp-input-wrap">
+              <input
+                id="lPwd"
+                [type]="showPwd() ? 'text' : 'password'"
+                class="lp-input lp-input-pwd"
+                [class.invalid]="fieldInvalid(loginForm, 'password')"
+                formControlName="password"
+                placeholder="••••••••"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="lp-pwd-toggle"
+                (click)="showPwd.update(v => !v)"
+                [attr.aria-label]="showPwd() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                [attr.aria-pressed]="showPwd()"
+              >
+                @if (showPwd()) {
+                  <!-- Eye-off -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <!-- Eye -->
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (fieldInvalid(loginForm, 'password')) {
+              <div class="lp-field-error" role="alert">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Minimum 6 caractères.
+              </div>
+            }
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="lp-btn" [disabled]="loading()">
+            @if (loading()) {
+              <span class="lp-spinner" aria-hidden="true"></span>
+              Connexion…
+            } @else {
+              Se connecter
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            }
+          </button>
+
+        </form>
+      }
+
+      <!-- ────────────────────────────────────────────
+           FORGOT PASSWORD FLOW
+      ──────────────────────────────────────────── -->
+      @if (tab() === 'forgot') {
+
+        <button type="button" class="lp-back" (click)="setTab('login')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Retour
+        </button>
+
+        <!-- Step indicator -->
+        <div class="lp-steps" aria-hidden="true">
+          <div class="lp-step" [class.done]="step() > 1" [class.active]="step() >= 1"></div>
+          <div class="lp-step" [class.done]="step() > 2" [class.active]="step() >= 2"></div>
+          <div class="lp-step"                            [class.active]="step() >= 3"></div>
+        </div>
+
+        @if (error()) {
+          <div class="lp-alert lp-alert-error" role="alert">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ error() }}
+          </div>
+        }
+
+        <!-- STEP 1 — Email -->
+        @if (step() === 1) {
+          <h1 class="lp-title">Mot de passe oublié</h1>
+          <p class="lp-subtitle">Entrez votre email pour recevoir un code de vérification.</p>
+
+          <form [formGroup]="forgotEmailForm" (ngSubmit)="submitForgotEmail()" novalidate>
+            <div class="lp-field">
+              <label for="fEmail" class="lp-label">Email</label>
+              <input
+                id="fEmail"
+                type="email"
+                class="lp-input"
+                [class.invalid]="fieldInvalid(forgotEmailForm, 'email')"
+                formControlName="email"
+                placeholder="you@company.com"
+                autocomplete="email"
+              />
+              @if (fieldInvalid(forgotEmailForm, 'email')) {
+                <div class="lp-field-error" role="alert">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Adresse email invalide.
+                </div>
+              }
+            </div>
+            <button type="submit" class="lp-btn" [disabled]="loading()">
+              @if (loading()) {
+                <span class="lp-spinner" aria-hidden="true"></span>Envoi…
+              } @else {
+                Envoyer le code
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              }
+            </button>
+          </form>
+        }
+
+        <!-- STEP 2 — OTP -->
+        @if (step() === 2) {
+          <h1 class="lp-title">Code de vérification</h1>
+          <p class="lp-subtitle">Entrez le code à 6 chiffres envoyé à votre email.</p>
+
+          <form [formGroup]="otpForm" (ngSubmit)="submitOtp()" novalidate>
+            <div class="lp-field">
+              <label for="lOtp" class="lp-label">Code OTP</label>
+              <input
+                id="lOtp"
+                type="text"
+                inputmode="numeric"
+                class="lp-input lp-otp"
+                [class.invalid]="fieldInvalid(otpForm, 'otp')"
+                formControlName="otp"
+                placeholder="— — — — — —"
+                maxlength="6"
+                autocomplete="one-time-code"
+              />
+              @if (fieldInvalid(otpForm, 'otp')) {
+                <div class="lp-field-error" role="alert">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Code requis.
+                </div>
+              }
+            </div>
+            <button type="submit" class="lp-btn">
+              Vérifier le code
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </form>
+        }
+
+        <!-- STEP 3 — New password -->
+        @if (step() === 3) {
+          <h1 class="lp-title">Nouveau mot de passe</h1>
+          <p class="lp-subtitle">Choisissez un mot de passe sécurisé d'au moins 8 caractères.</p>
+
+          <form [formGroup]="resetForm" (ngSubmit)="submitReset()" novalidate>
+
+            <div class="lp-field">
+              <label for="rPwd" class="lp-label">Nouveau mot de passe</label>
+              <div class="lp-input-wrap">
+                <input
+                  id="rPwd"
+                  [type]="showPwdReset() ? 'text' : 'password'"
+                  class="lp-input lp-input-pwd"
+                  [class.invalid]="fieldInvalid(resetForm, 'password')"
+                  formControlName="password"
+                  placeholder="Minimum 8 caractères"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="lp-pwd-toggle"
+                  (click)="showPwdReset.update(v => !v)"
+                  [attr.aria-label]="showPwdReset() ? 'Masquer' : 'Afficher'"
+                  [attr.aria-pressed]="showPwdReset()"
+                >
+                  @if (showPwdReset()) {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  } @else {
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+              @if (fieldInvalid(resetForm, 'password')) {
+                <div class="lp-field-error" role="alert">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Minimum 8 caractères.
+                </div>
+              }
+            </div>
+
+            <div class="lp-field">
+              <label for="rPwd2" class="lp-label">Confirmer le mot de passe</label>
+              <input
+                id="rPwd2"
+                type="password"
+                class="lp-input"
+                [class.invalid]="fieldInvalid(resetForm, 'password2')"
+                formControlName="password2"
+                placeholder="Répéter le mot de passe"
+                autocomplete="new-password"
+              />
+              @if (fieldInvalid(resetForm, 'password2')) {
+                <div class="lp-field-error" role="alert">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Ce champ est requis.
+                </div>
+              }
+            </div>
+
+            <button type="submit" class="lp-btn" [disabled]="loading()">
+              @if (loading()) {
+                <span class="lp-spinner" aria-hidden="true"></span>Réinitialisation…
+              } @else {
+                Réinitialiser le mot de passe
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              }
+            </button>
+
+          </form>
+        }
+
+      }
+
+    </div>
+  </main>
+
+</div>

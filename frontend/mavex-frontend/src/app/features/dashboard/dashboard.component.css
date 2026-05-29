@@ -1,0 +1,203 @@
+/* ── KPI Cards ───────────────────────────────────────────── */
+.dk-kpi {
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 20px;
+  background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+  cursor: default;
+}
+.dk-kpi:hover {
+  border-color: #FED7AA;
+  box-shadow: 0 4px 20px rgba(249,115,22,.08);
+}
+
+.dk-kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dk-kpi-value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 1;
+  color: #0C0C0E;
+  margin: 12px 0 3px;
+}
+.dk-kpi-value span { font-size: 18px; color: #9CA3AF; }
+
+.dk-kpi-label { font-size: 13px; color: #374151; font-weight: 500; }
+.dk-kpi-sub   { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+
+/* Payment rate progress bar */
+.dk-pay-bar {
+  height: 4px;
+  border-radius: 100px;
+  background: #F3F4F6;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.dk-pay-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width .8s ease;
+}
+.dk-pay-fill.fill-green { background: #22C55E; }
+.dk-pay-fill.fill-amber { background: #F59E0B; }
+.dk-pay-fill.fill-red   { background: #EF4444; }
+
+/* ── Skeleton loading ────────────────────────────────────── */
+.sk-row {
+  height: 13px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #F3F4F6 25%, #E9EAEC 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: sk-wave 1.4s ease infinite;
+}
+@keyframes sk-wave {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.sk-kpi-val {
+  height: 34px;
+  width: 64px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #F3F4F6 25%, #E9EAEC 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: sk-wave 1.4s ease infinite;
+  margin: 12px 0 6px;
+}
+
+/* ── Section panels ──────────────────────────────────────── */
+.dk-section {
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+.dk-section-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.dk-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0C0C0E;
+}
+.dk-section-link {
+  font-size: 12px;
+  color: #F97316;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity .15s;
+}
+.dk-section-link:hover { opacity: .75; text-decoration: none; }
+
+/* ── Activity feed (imports) ─────────────────────────────── */
+.dk-feed-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #F9FAFB;
+  transition: background .15s;
+}
+.dk-feed-item:last-child { border-bottom: none; }
+.dk-feed-item:hover { background: #FAFAFA; }
+
+.dk-feed-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #FFF7ED;
+  color: #F97316;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dk-feed-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+.dk-feed-date { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
+
+/* ── Empty states ────────────────────────────────────────── */
+.dk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 10px;
+  text-align: center;
+}
+.dk-empty svg  { color: #D1D5DB; }
+.dk-empty p    { font-size: 13px; color: #9CA3AF; margin: 0; }
+
+/* ── Refresh button ──────────────────────────────────────── */
+.dk-refresh {
+  background: none;
+  border: 1px solid #E5E7EB;
+  color: #6B7280;
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color .15s, color .15s;
+}
+.dk-refresh:hover { border-color: #F97316; color: #F97316; }
+.dk-refresh.spinning svg { animation: dk-spin .7s linear infinite; }
+@keyframes dk-spin { to { transform: rotate(360deg); } }
+
+/* ── Table inside sections ───────────────────────────────── */
+.dk-section .table > thead > tr > th {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9CA3AF;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  background: #FAFAFA;
+  border-bottom: 1px solid #F3F4F6;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+.dk-section .table > tbody > tr > td {
+  padding: 11px 16px;
+  vertical-align: middle;
+  font-size: 13px;
+  border-bottom: 1px solid #F9FAFB;
+}
+.dk-section .table > tbody > tr:last-child > td { border-bottom: none; }
+.dk-section .table > tbody > tr[routerLink] { cursor: pointer; }
+.dk-section .table > tbody > tr[routerLink]:hover { background: #FAFAFA; }
+
+.td-muted { color: #9CA3AF; }
+.td-bold  { font-weight: 600; color: #111827; font-family: 'Syne', sans-serif; font-size: 12px; }
+.td-mono  { font-family: 'DM Sans', monospace; font-size: 12px; letter-spacing: .02em; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dk-kpi-value { font-size: 28px; }
+}

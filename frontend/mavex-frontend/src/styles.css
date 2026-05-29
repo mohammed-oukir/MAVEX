@@ -1,1 +1,180 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ── Bootstrap ───────────────────────────────────────────── */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* ── Design tokens ───────────────────────────────────────── */
+:root {
+  --bs-font-sans-serif:  'DM Sans', system-ui, sans-serif;
+  --bs-body-font-family: 'DM Sans', sans-serif;
+  --bs-body-bg:          #F8F9FA;
+
+  --mavex-accent:      #F97316;
+  --mavex-accent-dark: #EA580C;
+  --mavex-accent-soft: #FFF7ED;
+  --mavex-sidebar:     240px;
+  --mavex-muted:       #6B7280;
+
+  /* Bootstrap primary → orange */
+  --bs-primary:          #F97316;
+  --bs-primary-rgb:      249, 115, 22;
+  --bs-link-color:       #F97316;
+  --bs-link-hover-color: #EA580C;
+}
+
+body { font-family: 'DM Sans', sans-serif; }
+.font-syne { font-family: 'Syne', sans-serif !important; }
+
+/* ── Bootstrap primary overrides ────────────────────────── */
+.btn-primary {
+  background-color: var(--mavex-accent);
+  border-color:     var(--mavex-accent);
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--mavex-accent-dark);
+  border-color:     var(--mavex-accent-dark);
+}
+.btn-outline-primary {
+  color:        var(--mavex-accent);
+  border-color: var(--mavex-accent);
+}
+.btn-outline-primary:hover {
+  background-color: var(--mavex-accent);
+  border-color:     var(--mavex-accent);
+}
+
+/* ── App shell (main layout structure) ───────────────────── */
+.mavex-layout  { display: flex; min-height: 100vh; }
+.mavex-main    { margin-left: var(--mavex-sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.mavex-content { padding: 28px; flex: 1; }
+
+/* ── Status badges ───────────────────────────────────────── */
+.badge-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.badge-status::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.bs-created         { background: #F3F4F6; color: #6B7280; }
+.bs-draft           { background: #F3F4F6; color: #6B7280; }
+.bs-imported        { background: #EFF6FF; color: #3B82F6; }
+.bs-email_sent      { background: #EFF6FF; color: #3B82F6; }
+.bs-paid            { background: #F0FDF4; color: #22C55E; }
+.bs-pending         { background: #FFFBEB; color: #F59E0B; }
+.bs-pending_payment { background: #FFFBEB; color: #F59E0B; }
+.bs-in_delivery     { background: #FFFBEB; color: #F59E0B; }
+.bs-delivered       { background: #F0FDF4; color: #22C55E; }
+.bs-success         { background: #F0FDF4; color: #22C55E; }
+.bs-partial         { background: #FFF7ED; color: #F97316; }
+.bs-failed          { background: #FEF2F2; color: #EF4444; }
+.bs-skipped         { background: #F3F4F6; color: #6B7280; }
+.bs-processing      { background: #EFF6FF; color: #3B82F6; }
+.bs-closed          { background: #F3F4F6; color: #6B7280; }
+
+/* ── Table refinements ───────────────────────────────────── */
+.table > thead > tr > th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mavex-muted);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: #F8F9FA;
+  white-space: nowrap;
+}
+.table-hover > tbody > tr:hover { background-color: var(--mavex-accent-soft); cursor: pointer; }
+.td-muted { color: var(--mavex-muted); font-size: 12px; }
+
+/* ── Stat cards ──────────────────────────────────────────── */
+.stat-card       { border: 1px solid #E5E7EB !important; transition: all .2s; }
+.stat-card:hover { border-color: #FED7AA !important; box-shadow: 0 4px 12px rgba(249,115,22,.08) !important; }
+.stat-value      { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px; line-height: 1; }
+.stat-icon       { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-icon.gold   { background: #FFF7ED; color: var(--mavex-accent); }
+.stat-icon.green  { background: #F0FDF4; color: #22C55E; }
+.stat-icon.blue   { background: #EFF6FF; color: #3B82F6; }
+.stat-icon.orange { background: #FFFBEB; color: #F59E0B; }
+
+/* ── Ghost button ────────────────────────────────────────── */
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--mavex-muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-ghost:hover:not(:disabled) { background: #F3F4F6; color: #374151; }
+
+/* ── Drop zone (Imports page) ────────────────────────────── */
+.drop-zone {
+  border: 2px dashed #E5E7EB;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: #fff;
+}
+.drop-zone.drag-over { border-color: var(--mavex-accent); background: var(--mavex-accent-soft); }
+.drop-zone:hover     { border-color: var(--mavex-accent); }
+
+/* ── Toast container ─────────────────────────────────────── */
+.toast-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Angular @if modals ──────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 20px;
+}
+.modal-overlay > .modal {
+  /* Bootstrap's .modal is transparent by default — override everything */
+  display: block !important;
+  position: static !important;
+  background: #ffffff !important;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, .22) !important;
+  border: none !important;
+}
+.modal-overlay > .modal.modal-lg { max-width: 720px; }
+.modal-header { position: sticky; top: 0; background: #fff; z-index: 1; border-bottom: 1px solid #F3F4F6 !important; }
+.modal-footer { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #F3F4F6 !important; }
+
+/* ── Responsive shell ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .mavex-main { margin-left: 0; }
+}

@@ -1,0 +1,238 @@
+/* ─────────────────────────────────────────────────────────
+   SIDEBAR — Dark, premium, Linear-inspired
+   ───────────────────────────────────────────────────────── */
+
+:host {
+  display: block;
+  flex-shrink: 0;
+}
+
+.sb {
+  width: 240px;
+  background: #0C0C0E;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 200;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, .055);
+}
+
+/* Subtle top glow — brand continuity with login page */
+.sb::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: -60px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(249, 115, 22, .16) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.sb-logo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 20px 18px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, .07);
+  flex-shrink: 0;
+}
+
+.sb-mark {
+  width: 32px;
+  height: 32px;
+  background: #F97316;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, .35);
+}
+
+.sb-brand-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: -.2px;
+  line-height: 1.25;
+}
+
+.sb-brand-sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, .3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* ── Nav ─────────────────────────────────────────────────── */
+.sb-nav {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 10px 10px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sb-nav::-webkit-scrollbar { display: none; }
+
+/* Section label */
+.sb-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .22);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 10px 10px 4px;
+  user-select: none;
+}
+
+/* Nav item */
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: rgba(255, 255, 255, .42);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background .14s, color .14s;
+  margin-bottom: 1px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.sb-item svg {
+  flex-shrink: 0;
+  transition: color .14s;
+}
+
+.sb-item:hover {
+  background: rgba(255, 255, 255, .065);
+  color: rgba(255, 255, 255, .82);
+}
+
+.sb-item:focus-visible {
+  box-shadow: 0 0 0 2px #F97316;
+  color: rgba(255, 255, 255, .82);
+}
+
+/* Active state */
+.sb-item.active {
+  background: rgba(249, 115, 22, .14);
+  color: #F97316;
+}
+
+/* Left-edge active indicator */
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  background: #F97316;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ── Footer / User card ──────────────────────────────────── */
+.sb-footer {
+  position: relative;
+  z-index: 1;
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+  flex-shrink: 0;
+}
+
+.sb-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+  transition: background .14s;
+}
+
+.sb-user:hover { background: rgba(255, 255, 255, .07); }
+
+.sb-avatar {
+  width: 30px;
+  height: 30px;
+  background: #F97316;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sb-user-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, .82);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.sb-user-role {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, .32);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sb-logout {
+  background: none;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, .28);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .14s, background .14s;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.sb-logout:hover {
+  color: #F87171;
+  background: rgba(239, 68, 68, .12);
+}
+
+.sb-logout:focus-visible {
+  outline: 2px solid #F97316;
+  outline-offset: 2px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sb { display: none; }
+}

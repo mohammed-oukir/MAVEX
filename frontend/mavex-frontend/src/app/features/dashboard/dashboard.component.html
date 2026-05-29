@@ -1,0 +1,320 @@
+<!-- ── Toolbar row ─────────────────────────────────────────── -->
+<div class="d-flex align-items-center justify-content-end mb-4">
+  <button
+    type="button"
+    class="dk-refresh"
+    [class.spinning]="loading()"
+    (click)="refresh()"
+    aria-label="Actualiser les données"
+    [disabled]="loading()"
+  >
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="23 4 23 10 17 10"/>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+    </svg>
+    Actualiser
+  </button>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     ZONE 1 — KPI Strip
+     ───────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <!-- Shipments -->
+  <div class="col-6 col-xl-3">
+    <div class="dk-kpi">
+      <div class="d-flex align-items-start justify-content-between">
+        <div style="flex:1;min-width:0">
+          @if (loading()) {
+            <div class="sk-kpi-val"></div>
+            <div class="sk-row" style="width:70px"></div>
+            <div class="sk-row mt-1" style="width:50px;height:10px"></div>
+          } @else {
+            <div class="dk-kpi-value">{{ totalShipments() }}</div>
+            <div class="dk-kpi-label">Shipments</div>
+            <div class="dk-kpi-sub">{{ activeShipments() }} en cours</div>
+          }
+        </div>
+        <div class="dk-kpi-icon" style="background:#FFF7ED;color:#F97316" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders -->
+  <div class="col-6 col-xl-3">
+    <div class="dk-kpi">
+      <div class="d-flex align-items-start justify-content-between">
+        <div style="flex:1;min-width:0">
+          @if (loading()) {
+            <div class="sk-kpi-val"></div>
+            <div class="sk-row" style="width:70px"></div>
+            <div class="sk-row mt-1" style="width:50px;height:10px"></div>
+          } @else {
+            <div class="dk-kpi-value">{{ totalOrders() }}</div>
+            <div class="dk-kpi-label">Orders</div>
+            <div class="dk-kpi-sub">{{ paidOrders() }} payés</div>
+          }
+        </div>
+        <div class="dk-kpi-icon" style="background:#EFF6FF;color:#3B82F6" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taux de paiement -->
+  <div class="col-6 col-xl-3">
+    <div class="dk-kpi">
+      <div class="d-flex align-items-start justify-content-between">
+        <div style="flex:1;min-width:0">
+          @if (loading()) {
+            <div class="sk-kpi-val"></div>
+            <div class="sk-row" style="width:90px"></div>
+            <div class="sk-row mt-2" style="width:100%;height:4px;border-radius:100px"></div>
+          } @else {
+            <div class="dk-kpi-value">{{ paymentRate() }}<span>%</span></div>
+            <div class="dk-kpi-label">Taux de paiement</div>
+            <div class="dk-pay-bar" role="progressbar" [attr.aria-valuenow]="paymentRate()" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Taux de paiement : ' + paymentRate() + '%'">
+              <div [class]="paymentFillClass()" [style.width.%]="paymentRate()"></div>
+            </div>
+          }
+        </div>
+        <div class="dk-kpi-icon" style="background:#F0FDF4;color:#22C55E" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Imports -->
+  <div class="col-6 col-xl-3">
+    <div class="dk-kpi">
+      <div class="d-flex align-items-start justify-content-between">
+        <div style="flex:1;min-width:0">
+          @if (loading()) {
+            <div class="sk-kpi-val"></div>
+            <div class="sk-row" style="width:70px"></div>
+            <div class="sk-row mt-1" style="width:80px;height:10px"></div>
+          } @else {
+            <div class="dk-kpi-value">{{ imports().length }}</div>
+            <div class="dk-kpi-label">Imports réalisés</div>
+            <div class="dk-kpi-sub">
+              @if (recentImports().length > 0) {
+                Dernier : {{ recentImports()[0].importedAt | date:'d MMM yyyy' }}
+              } @else {
+                Aucun import
+              }
+            </div>
+          }
+        </div>
+        <div class="dk-kpi-icon" style="background:#FFFBEB;color:#F59E0B" aria-hidden="true">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     ZONE 2 — Shipments + Imports feed
+     ───────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-3">
+
+  <!-- Recent Shipments (left, wider) -->
+  <div class="col-12 col-lg-7">
+    <div class="dk-section h-100">
+      <div class="dk-section-hd">
+        <span class="dk-section-title">Derniers shipments</span>
+        <a routerLink="/shipments" class="dk-section-link" aria-label="Voir tous les shipments">Voir tout →</a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table mb-0" aria-label="Derniers shipments">
+          <thead>
+            <tr>
+              <th scope="col">MAWB</th>
+              <th scope="col">Transporteur</th>
+              <th scope="col">Orders</th>
+              <th scope="col">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              @for (i of [1,2,3,4,5]; track i) {
+                <tr>
+                  <td><div class="sk-row" style="width:85%"></div></td>
+                  <td><div class="sk-row" style="width:65%"></div></td>
+                  <td><div class="sk-row" style="width:30%"></div></td>
+                  <td><div class="sk-row" style="width:55%"></div></td>
+                </tr>
+              }
+            } @else if (recentShipments().length === 0) {
+              <tr>
+                <td colspan="4" style="cursor:default;padding:0;border:none">
+                  <div class="dk-empty">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    </svg>
+                    <p>Aucun shipment disponible</p>
+                    <a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Commencer un import</a>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (s of recentShipments(); track s.id) {
+                <tr [routerLink]="['/shipments', s.id]" [attr.aria-label]="'Shipment ' + s.mawb">
+                  <td><span class="td-bold td-mono">{{ s.mawb }}</span></td>
+                  <td class="td-muted">{{ s.shipper?.companyName || '—' }}</td>
+                  <td>{{ s.totalOrders ?? 0 }}</td>
+                  <td><app-badge [status]="s.status" /></td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Imports activity feed (right, narrower) -->
+  <div class="col-12 col-lg-5">
+    <div class="dk-section h-100">
+      <div class="dk-section-hd">
+        <span class="dk-section-title">Activité récente</span>
+        <a routerLink="/imports" class="dk-section-link" aria-label="Voir tous les imports">Voir tout →</a>
+      </div>
+
+      @if (loading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="dk-feed-item">
+            <div class="dk-feed-icon" aria-hidden="true">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="sk-row mb-1" style="width:80%"></div>
+              <div class="sk-row" style="width:50%;height:10px"></div>
+            </div>
+          </div>
+        }
+      } @else if (recentImports().length === 0) {
+        <div class="dk-empty">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          <p>Aucun import réalisé</p>
+          <a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Importer un fichier</a>
+        </div>
+      } @else {
+        @for (imp of recentImports(); track imp.id) {
+          <div class="dk-feed-item">
+            <div class="dk-feed-icon" aria-hidden="true">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div class="dk-feed-name" [title]="imp.fileName">{{ imp.fileName }}</div>
+              <div class="dk-feed-date">{{ imp.importedAt | date:'d MMM yyyy · HH:mm' }}</div>
+            </div>
+            <app-badge [status]="imp.status" />
+          </div>
+        }
+      }
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     ZONE 3 — Recent Orders
+     ───────────────────────────────────────────────────────── -->
+<div class="dk-section">
+  <div class="dk-section-hd">
+    <span class="dk-section-title">Derniers orders</span>
+    <a routerLink="/orders" class="dk-section-link" aria-label="Voir tous les orders">Voir tout →</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table mb-0" aria-label="Derniers orders">
+      <thead>
+        <tr>
+          <th scope="col">HAWB</th>
+          <th scope="col">Client</th>
+          <th scope="col">MAWB</th>
+          <th scope="col">Description</th>
+          <th scope="col">Poids</th>
+          <th scope="col">Customs</th>
+          <th scope="col">Total</th>
+          <th scope="col">Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <tr>
+              <td><div class="sk-row" style="width:70%"></div></td>
+              <td><div class="sk-row" style="width:80%"></div></td>
+              <td><div class="sk-row" style="width:60%"></div></td>
+              <td><div class="sk-row" style="width:90%"></div></td>
+              <td><div class="sk-row" style="width:50%"></div></td>
+              <td><div class="sk-row" style="width:55%"></div></td>
+              <td><div class="sk-row" style="width:65%"></div></td>
+              <td><div class="sk-row" style="width:70%"></div></td>
+            </tr>
+          }
+        } @else if (recentOrders().length === 0) {
+          <tr>
+            <td colspan="8" style="cursor:default;padding:0;border:none">
+              <div class="dk-empty">
+                <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <p>Aucun order disponible</p>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (o of recentOrders(); track o.id) {
+            <tr [routerLink]="['/shipments', o.shipmentId]" [attr.aria-label]="'Order ' + o.hawb">
+              <td><span class="td-bold td-mono">{{ o.hawb }}</span></td>
+              <td class="td-muted">{{ o.clientFullName || '—' }}</td>
+              <td class="td-muted td-mono" style="font-size:11px">{{ o.mawb || '—' }}</td>
+              <td class="td-muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
+              <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
+              <td class="td-muted">{{ o.customsValue != null ? (o.customsValue + ' ' + (o.customsCurrency || 'USD')) : '—' }}</td>
+              <td><strong>{{ o.totalAmount != null ? (o.totalAmount + ' USD') : '—' }}</strong></td>
+              <td><app-badge [status]="o.status" /></td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

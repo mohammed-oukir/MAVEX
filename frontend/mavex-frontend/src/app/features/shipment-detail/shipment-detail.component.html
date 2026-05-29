@@ -1,0 +1,209 @@
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Chargement…</span></div>
+  </div>
+} @else if (!shipment()) {
+  <div class="alert alert-danger" role="alert">Shipment introuvable.</div>
+} @else {
+
+  <!-- Back link -->
+  <a routerLink="/shipments" class="btn btn-sm btn-outline-secondary mb-3">← Retour aux shipments</a>
+
+  <!-- Info card -->
+  <div class="card mb-4">
+    <div class="card-body p-4">
+      <div class="row g-3 align-items-start">
+        <div class="col-md-8">
+          <div class="row g-3">
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">MAWB</div>
+              <div class="fw-bold font-syne fs-5">{{ shipment()!.mawb }}</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Shipper</div>
+              <div>{{ shipment()!.shipper?.companyName || '—' }}</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Créé par</div>
+              <div>{{ shipment()!.createdBy || '—' }}</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Carrier</div>
+              <div>{{ shipment()!.importingCarrier || '—' }}</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Mode</div>
+              <div>{{ shipment()!.modeOfTransport || '—' }}</div>
+            </div>
+            <div class="col-sm-4">
+              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Port</div>
+              <div>{{ shipment()!.portCode || '—' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 d-flex flex-column gap-3 align-items-md-end">
+          <!-- Status -->
+          <app-badge [status]="shipment()!.status" />
+
+          <!-- Duty rate inline editor -->
+          <div>
+            <div class="text-muted mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Duty Rate</div>
+            @if (!editingDuty()) {
+              <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold">{{ shipment()!.dutyRate != null ? shipment()!.dutyRate + '%' : '—' }}</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="startEditDuty()" aria-label="Modifier le duty rate">Modifier</button>
+              </div>
+            } @else {
+              <div class="d-flex align-items-center gap-2">
+                <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  style="width:90px"
+                  [(ngModel)]="dutyRateInput"
+                  [ngModelOptions]="{standalone:true}"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  aria-label="Nouveau duty rate"
+                />
+                <span class="text-muted">%</span>
+                <button type="button" class="btn btn-sm btn-primary" [disabled]="savingDuty()" (click)="saveDuty()">
+                  @if (savingDuty()) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
+                  @else { Appliquer }
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cancelEditDuty()">✕</button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card stat-card text-center p-3">
+        <div class="stat-value">{{ totalOrders() }}</div>
+        <div class="text-muted" style="font-size:12px">Total orders</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stat-card text-center p-3">
+        <div class="stat-value" style="color:#22C55E">{{ paidCount() }}</div>
+        <div class="text-muted" style="font-size:12px">Payés</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stat-card text-center p-3">
+        <div class="stat-value" style="color:#F59E0B">{{ pendingCount() }}</div>
+        <div class="text-muted" style="font-size:12px">En attente</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card stat-card text-center p-3">
+        <div class="stat-value" style="color:#3B82F6">{{ emailCount() }}</div>
+        <div class="text-muted" style="font-size:12px">Emails envoyés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders table -->
+  <div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between py-3 px-4 flex-wrap gap-2">
+      <span class="card-title font-syne">Manifeste — {{ filteredOrders().length }} ligne(s)</span>
+      <div class="d-flex align-items-center gap-2">
+        <!-- Search -->
+        <div style="position:relative">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9CA3AF" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input
+            type="search"
+            class="form-control form-control-sm"
+            style="padding-left:28px;width:200px"
+            placeholder="Rechercher…"
+            [value]="search()"
+            (input)="search.set($any($event.target).value)"
+            aria-label="Rechercher dans le manifeste"
+          />
+        </div>
+        <!-- Send all -->
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          [disabled]="sendingAll()"
+          (click)="sendAll()"
+          aria-label="Envoyer tous les emails"
+        >
+          @if (sendingAll()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
+          Envoyer tous les emails
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" aria-label="Manifeste du shipment">
+        <thead>
+          <tr>
+            <th scope="col">HAWB</th>
+            <th scope="col">Expéditeur</th>
+            <th scope="col">Destinataire</th>
+            <th scope="col">Pays</th>
+            <th scope="col">Email</th>
+            <th scope="col">Tél</th>
+            <th scope="col">Items</th>
+            <th scope="col">Description</th>
+            <th scope="col">Poids</th>
+            <th scope="col">Customs</th>
+            <th scope="col">Devise</th>
+            <th scope="col">Duty%</th>
+            <th scope="col">Duty amt</th>
+            <th scope="col">Bank</th>
+            <th scope="col">Total</th>
+            <th scope="col">Statut</th>
+            <th scope="col" class="text-end">Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredOrders().length === 0) {
+            <tr><td colspan="17" class="text-center text-muted py-4" style="cursor:default">Aucun order.</td></tr>
+          } @else {
+            @for (o of filteredOrders(); track o.id) {
+              <tr style="cursor:default">
+                <td><strong>{{ o.hawb }}</strong></td>
+                <td class="td-muted">{{ o.senderName || '—' }}</td>
+                <td>{{ o.clientFullName || o.receiverName || '—' }}</td>
+                <td class="td-muted">{{ o.country || '—' }}</td>
+                <td class="td-muted">{{ o.clientEmail || '—' }}</td>
+                <td class="td-muted">{{ o.phone || '—' }}</td>
+                <td>{{ o.itemCount ?? '—' }}</td>
+                <td class="td-muted">{{ o.goodsDescription || '—' }}</td>
+                <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
+                <td>{{ o.customsValue ?? '—' }}</td>
+                <td class="td-muted">{{ o.customsCurrency || '—' }}</td>
+                <td class="td-muted">{{ o.dutyRate != null ? o.dutyRate + '%' : '—' }}</td>
+                <td>{{ o.dutyAmount ?? '—' }}</td>
+                <td>{{ o.bankCharges ?? '—' }}</td>
+                <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
+                <td><app-badge [status]="o.status" /></td>
+                <td class="text-end">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="sendingId() === o.id"
+                    (click)="sendEmail(o.id)"
+                    aria-label="Envoyer l'email"
+                  >
+                    @if (sendingId() === o.id) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
+                    @else { Envoyer }
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+}

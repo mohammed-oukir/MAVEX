@@ -1,0 +1,34 @@
+<div class="mavex-layout">
+  <app-sidebar />
+
+  <div class="mavex-main">
+    <app-topbar />
+    <div class="mavex-content">
+      <router-outlet />
+    </div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="toast-wrapper" aria-live="polite" aria-atomic="true">
+  @for (t of toast.toasts(); track t.id) {
+    <div
+      class="toast show align-items-center border-0"
+      [class]="'toast show align-items-center border-0 ' + toastClass(t.type)"
+      role="alert"
+    >
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2">
+          <strong>{{ toastIcon(t.type) }}</strong>
+          {{ t.message }}
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          (click)="toast.dismiss(t.id)"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+  }
+</div>

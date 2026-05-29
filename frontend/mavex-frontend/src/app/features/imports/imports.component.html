@@ -1,0 +1,164 @@
+<!-- Upload card -->
+<div class="card mb-4">
+  <div class="card-header py-3 px-4">
+    <span class="card-title font-syne">Importer un manifeste</span>
+  </div>
+  <div class="card-body p-4">
+
+    <!-- Drop zone -->
+    <div
+      class="drop-zone mb-3"
+      [class.drag-over]="dragOver()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="fileInput.click()"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="fileInput.click()"
+      (keydown.space)="fileInput.click()"
+      [attr.aria-label]="selectedFile() ? selectedFile()!.name : 'Cliquez ou glissez un fichier Excel'"
+    >
+      <input
+        #fileInput
+        type="file"
+        accept=".xlsx,.xls"
+        class="d-none"
+        (change)="onFileChange($event)"
+        aria-label="Sélectionner un fichier Excel"
+      />
+
+      @if (selectedFile()) {
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <svg width="32" height="32" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <div>
+            <div class="fw-semibold">{{ selectedFile()!.name }}</div>
+            <div class="text-muted" style="font-size:12px">{{ formatSize(selectedFile()!.size) }}</div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary ms-2"
+            (click)="$event.stopPropagation(); selectedFile.set(null)"
+            aria-label="Retirer le fichier"
+          >✕</button>
+        </div>
+      } @else {
+        <div class="d-flex flex-column align-items-center gap-2 text-muted">
+          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          <div class="fw-medium">Glissez un fichier Excel ici</div>
+          <div style="font-size:12px">ou cliquez pour parcourir — .xlsx / .xls</div>
+        </div>
+      }
+    </div>
+
+    <!-- Mode + submit -->
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div>
+        <label for="importMode" class="form-label fw-medium mb-1" style="font-size:13px">Mode d'import</label>
+        <select
+          id="importMode"
+          class="form-select form-select-sm"
+          style="width:auto"
+          [(ngModel)]="mode"
+          [ngModelOptions]="{standalone:true}"
+        >
+          <option value="PARTIAL">PARTIAL — ignorer les erreurs</option>
+          <option value="STRICT">STRICT — bloquer sur erreur</option>
+        </select>
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary mt-3"
+        [disabled]="!selectedFile() || uploading()"
+        (click)="upload()"
+        aria-label="Lancer l'import"
+      >
+        @if (uploading()) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        }
+        Importer
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- History card -->
+<div class="card">
+  <div class="card-header py-3 px-4">
+    <span class="card-title font-syne">Historique des imports</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0" aria-label="Historique des imports">
+      <thead>
+        <tr>
+          <th scope="col">Fichier</th>
+          <th scope="col">MAWB</th>
+          <th scope="col">Lignes</th>
+          <th scope="col">OK</th>
+          <th scope="col">Erreurs</th>
+          <th scope="col">Statut</th>
+          <th scope="col">Importé par</th>
+          <th scope="col">Date</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (historyLoading()) {
+          <tr><td colspan="9" class="text-center text-muted py-4" style="cursor:default">Chargement…</td></tr>
+        } @else if (history().length === 0) {
+          <tr><td colspan="9" class="text-center text-muted py-4" style="cursor:default">Aucun import enregistré</td></tr>
+        } @else {
+          @for (imp of history(); track imp.id) {
+            <tr style="cursor:default">
+              <td class="fw-medium">{{ imp.fileName }}</td>
+              <td class="td-muted">{{ imp.mawb || '—' }}</td>
+              <td>{{ imp.totalRows }}</td>
+              <td class="text-success">{{ imp.successRows ?? '—' }}</td>
+              <td class="text-danger">{{ imp.failedRows ?? '—' }}</td>
+              <td><app-badge [status]="imp.status" /></td>
+              <td class="td-muted">{{ imp.importedBy || '—' }}</td>
+              <td class="td-muted">{{ imp.importedAt | date:'dd/MM/yy HH:mm' }}</td>
+              <td class="text-end">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="confirmDelete(imp.id)"
+                  aria-label="Supprimer l'import"
+                >Supprimer</button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+@if (deleteId() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delImportTitle">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <span id="delImportTitle" class="modal-title">Confirmer la suppression</span>
+        <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px">Êtes-vous sûr de vouloir supprimer cet import ? Cette action est irréversible.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="btn btn-danger btn-sm" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}
