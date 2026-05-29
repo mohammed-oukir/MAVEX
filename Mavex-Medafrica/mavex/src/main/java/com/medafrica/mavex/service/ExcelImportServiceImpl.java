@@ -500,6 +500,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                 .shipmentWeight(getCellDecimal(row, cols[COL_WEIGHT]))
                 .customsValue(getCellDecimal(row, cols[COL_CUSTOMS_VALUE]))
                 .customsCurrency(currency)
+                .dutyRate(shipment.getDutyRate())
                 .shipment(shipment)
                 .client(client)
                 .status(OrderStatus.CREATED)

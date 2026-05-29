@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,11 +34,18 @@ public class Shipment {
     @Column(unique = true, nullable = false)       
     private String mawb;
 
-    /*@Column(name = "export_date")
+    @Column(name = "export_date")
     private LocalDate exportDate;
 
     @Column(name = "import_date")
-    private LocalDate importDate;*/    /** Compagnie aerienne ex: AT (Air Transat) */
+    private LocalDate importDate;
+
+    /** Taux douanier applique a tous les orders de ce shipment (ex: 0.10 = 10%) */
+    @Column(name = "duty_rate", precision = 5, scale = 4)
+    @Builder.Default
+    private BigDecimal dutyRate = new BigDecimal("0.10");
+
+    /** Compagnie aerienne ex: AT (Air Transat) */
     @Column(name = "importing_carrier")
     private String importingCarrier;
 

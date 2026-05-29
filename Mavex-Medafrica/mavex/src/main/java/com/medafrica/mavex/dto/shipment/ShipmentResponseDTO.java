@@ -4,6 +4,7 @@ import com.medafrica.mavex.model.enums.ShipmentStatus;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ public class ShipmentResponseDTO {
     private String modeOfTransport;
     private String portCode;
     private ShipmentStatus status;
+    private BigDecimal dutyRate;
 
     /** Nombre d'orders dans ce shipment */
     private int totalOrders;

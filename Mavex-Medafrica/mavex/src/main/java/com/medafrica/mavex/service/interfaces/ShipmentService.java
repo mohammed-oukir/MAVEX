@@ -7,6 +7,8 @@ import com.medafrica.mavex.model.enums.ShipmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
+
 public interface ShipmentService {
 
     ShipmentResponseDTO create(ShipmentRequestDTO req);
@@ -22,6 +24,8 @@ public interface ShipmentService {
     ShipmentResponseDTO updateStatus(Long id, ShipmentStatusUpdateDTO req);
 
     ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req);
+
+    ShipmentResponseDTO updateDutyRate(Long id, BigDecimal rate);
 
     void delete(Long id);
 }

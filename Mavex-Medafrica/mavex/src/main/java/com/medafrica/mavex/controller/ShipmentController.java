@@ -1,5 +1,6 @@
 package com.medafrica.mavex.controller;
 
+import com.medafrica.mavex.dto.shipment.DutyRateUpdateDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
@@ -79,6 +80,14 @@ public ResponseEntity<ShipmentResponseDTO> replace(
         @Valid @RequestBody ShipmentRequestDTO req) {
     return ResponseEntity.ok(shipmentService.replace(id, req));
 }
+
+    // PATCH /api/shipments/{id}/duty-rate
+    @PatchMapping("/{id}/duty-rate")
+    public ResponseEntity<ShipmentResponseDTO> updateDutyRate(
+            @PathVariable Long id,
+            @Valid @RequestBody DutyRateUpdateDTO req) {
+        return ResponseEntity.ok(shipmentService.updateDutyRate(id, req.getDutyRate()));
+    }
 
     // DELETE /api/v1/shipments/{id}  — ADMIN seulement
     @DeleteMapping("/{id}")

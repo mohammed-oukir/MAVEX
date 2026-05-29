@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -124,6 +125,24 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Override
     @Transactional
+    public ShipmentResponseDTO updateDutyRate(Long id, BigDecimal rate) {
+        Shipment shipment = findOrThrow(id);
+        shipment.setDutyRate(rate);
+        shipmentRepository.save(shipment);
+
+        List<Order> orders = orderRepository.findByShipmentId(id);
+        for (Order order : orders) {
+            order.setDutyRate(rate);
+        }
+        orderRepository.saveAll(orders);
+
+        log.info("Taux mis à jour shipment {} → {}% ({} orders recalculés)",
+                id, rate.multiply(new BigDecimal("100")), orders.size());
+        return toResponse(shipment);
+    }
+
+    @Override
+    @Transactional
     public void delete(Long id) {
         Shipment shipment = findOrThrow(id);
 
@@ -168,6 +187,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .modeOfTransport(s.getModeOfTransport())
                 .portCode(s.getPortCode())
                 .status(s.getStatus())
+                .dutyRate(s.getDutyRate())
                 .totalOrders(s.getOrders().size())
                 .shipper(shipperSummary)
                 .createdBy(s.getCreatedBy() != null ? s.getCreatedBy().getFullName() : "system")

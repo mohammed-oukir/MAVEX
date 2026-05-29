@@ -303,8 +303,6 @@
                             <th style="width:40px"></th>
                             <th>MAWB</th>
                             <th>Shipper</th>
-                            <th>Date export</th>
-                            <th>Date import</th>
                             <th>Transporteur</th>
                             <th>Orders</th>
                             <th>Statut</th>
@@ -313,7 +311,7 @@
                         </tr>
                     </thead>
                     <tbody id="shipmentsBody">
-                        <tr><td colspan="10" class="empty-state">Chargement...</td></tr>
+                        <tr><td colspan="8" class="empty-state">Chargement...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -343,8 +341,6 @@
             </div>
 
             <div class="form-grid">
-                <div class="field"><label>Date export</label><input type="date" id="editExportDate"/></div>
-                <div class="field"><label>Date import</label><input type="date" id="editImportDate"/></div>
                 <div class="field"><label>Transporteur</label><input type="text" id="editCarrier" placeholder="ex: Royal Air Maroc"/></div>
                 <div class="field"><label>Mode de transport</label><input type="text" id="editMode" placeholder="ex: AIR"/></div>
                 <div class="field"><label>Code port</label><input type="text" id="editPort" placeholder="ex: CMN"/></div>
@@ -487,8 +483,6 @@ function renderTable() {
             </td>
             <td class="td-bold">${esc(s.mawb||'—')}</td>
             <td class="td-muted">${esc(s.shipper?.companyName||'—')}</td>
-            <td class="td-muted">${s.exportDate||'—'}</td>
-            <td class="td-muted">${s.importDate||'—'}</td>
             <td class="td-muted">${esc(s.importingCarrier||'—')}</td>
             <td>
                 <span style="background:#FFF7ED;color:#F97316;padding:2px 8px;border-radius:100px;font-size:12px;font-weight:700">
@@ -741,8 +735,6 @@ function openEdit(id) {
     editingId = id;
     document.getElementById('editAlert').className = 'alert-modal';
     document.getElementById('editMawbDisplay').textContent = s.mawb || '—';
-    document.getElementById('editExportDate').value  = s.exportDate || '';
-    document.getElementById('editImportDate').value  = s.importDate || '';
     document.getElementById('editCarrier').value     = s.importingCarrier || '';
     document.getElementById('editMode').value        = s.modeOfTransport || '';
     document.getElementById('editPort').value        = s.portCode || '';
@@ -759,8 +751,6 @@ async function saveEdit() {
     try {
         // 1. PATCH les infos complémentaires (sans le statut)
         const patchPayload = {
-            exportDate:       document.getElementById('editExportDate').value || null,
-            importDate:       document.getElementById('editImportDate').value || null,
             importingCarrier: document.getElementById('editCarrier').value.trim() || null,
             modeOfTransport:  document.getElementById('editMode').value.trim() || null,
             portCode:         document.getElementById('editPort').value.trim() || null,
