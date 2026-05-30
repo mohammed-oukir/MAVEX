@@ -1,15 +1,15 @@
-<!-- ── Status chips ─────────────────────────────────────────── -->
-<div class="sp-chips" role="group" aria-label="Filtrer par statut">
+<!-- ── Stat cards ─────────────────────────────────────────── -->
+<div class="sp-stat-cards" role="group" aria-label="Filtrer par statut">
   @for (opt of statusOptions; track opt.value) {
     <button
       type="button"
-      class="sp-chip"
+      [class]="'sp-stat-card card-' + (opt.value || 'all').toLowerCase()"
       [class.active]="statusFilter() === opt.value"
       (click)="setStatus(opt.value)"
       [attr.aria-pressed]="statusFilter() === opt.value"
     >
-      {{ opt.label }}
-      <span class="sp-count">{{ statusCounts()[opt.value] ?? 0 }}</span>
+      <div class="sp-stat-num">{{ statusCounts()[opt.value] ?? 0 }}</div>
+      <div class="sp-stat-lbl">{{ opt.label }}</div>
     </button>
   }
 </div>
@@ -89,7 +89,7 @@
 
             <!-- Main row -->
             <tr
-              class="sp-row"
+              [class]="'sp-row status-' + s.status.toLowerCase()"
               (click)="goToDetail(s.id)"
               (keydown.enter)="goToDetail(s.id)"
               tabindex="0"
@@ -115,12 +115,17 @@
                 </button>
               </td>
 
-              <td><span class="sp-mawb">{{ s.mawb }}</span></td>
+              <td>
+                <div class="sp-mawb-wrap">
+                  <span class="sp-mawb-dot" [class]="'dot-' + s.status.toLowerCase()"></span>
+                  <span class="sp-mawb">{{ s.mawb }}</span>
+                </div>
+              </td>
               <td class="sp-muted">{{ s.shipper?.companyName || '—' }}</td>
               <td class="sp-muted">{{ s.importingCarrier || '—' }}</td>
               <td class="sp-muted">{{ s.modeOfTransport || '—' }}</td>
-              <td><strong>{{ s.totalOrders ?? 0 }}</strong></td>
-              <td class="sp-muted">{{ s.dutyRate != null ? s.dutyRate + ' %' : '—' }}</td>
+              <td><span class="sp-orders-pill" [class.has-orders]="(s.totalOrders ?? 0) > 0">{{ s.totalOrders ?? 0 }}</span></td>
+              <td class="sp-muted">{{ fmtDuty(s.dutyRate) }}</td>
               <td><app-badge [status]="s.status" /></td>
 
               <!-- Action icons -->
@@ -199,6 +204,7 @@
                                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
                                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
                                 <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
+
                                 <td><app-badge [status]="o.status" /></td>
                               </tr>
                             }
@@ -319,6 +325,25 @@
 
             <!-- Section divider -->
             <div class="col-12 pt-1">
+              <div class="nm-section">Dates du vol</div>
+            </div>
+
+            <!-- Export date + Import date -->
+            <div class="col-6">
+              <div class="nm-field">
+                <label for="cExportDate" class="nm-label">Date départ <span class="nm-opt">optionnel</span></label>
+                <input id="cExportDate" type="date" class="nm-input" formControlName="exportDate" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nm-field">
+                <label for="cImportDate" class="nm-label">Date arrivée <span class="nm-opt">optionnel</span></label>
+                <input id="cImportDate" type="date" class="nm-input" formControlName="importDate" />
+              </div>
+            </div>
+
+            <!-- Section divider -->
+            <div class="col-12 pt-1">
               <div class="nm-section">Détails supplémentaires</div>
             </div>
 
@@ -385,7 +410,7 @@
         </div>
         <div style="flex:1;min-width:0">
           <h2 id="editShipTitle" class="nm-title">Modifier le shipment</h2>
-          <p class="nm-sub">{{ editingShipment()!.mawb }}</p>
+          <p class="nm-sub">Modifier les informations du shipment.</p>
         </div>
         <button type="button" class="nm-close" (click)="closeEdit()" aria-label="Fermer">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -399,33 +424,97 @@
         <div class="nm-body">
           <div class="row g-3">
 
+            <!-- MAWB -->
             <div class="col-12">
               <div class="nm-field">
-                <label for="eCarrier" class="nm-label">Carrier</label>
+                <label for="eMawb" class="nm-label">
+                  MAWB <span class="nm-req">Requis</span>
+                </label>
+                <input
+                  id="eMawb" type="text"
+                  class="nm-input"
+                  [class.nm-err]="editFieldInvalid('mawb')"
+                  formControlName="mawb"
+                  placeholder="ex : MX-2024-001"
+                  autocomplete="off"
+                  aria-describedby="eMawbErr"
+                />
+                @if (editFieldInvalid('mawb')) {
+                  <div class="nm-err-msg" id="eMawbErr" role="alert">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    MAWB obligatoire — minimum 3 caractères.
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Shipper -->
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="eShipper" class="nm-label">
+                  Shipper <span class="nm-opt">optionnel</span>
+                </label>
+                <select id="eShipper" class="nm-select" formControlName="shipperId">
+                  <option [ngValue]="null">— Sélectionner un shipper —</option>
+                  @for (sh of shippers(); track sh.id) {
+                    <option [ngValue]="sh.id">{{ sh.companyName }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <!-- Section divider -->
+            <div class="col-12 pt-1">
+              <div class="nm-section">Dates du vol</div>
+            </div>
+
+            <div class="col-6">
+              <div class="nm-field">
+                <label for="eExportDate" class="nm-label">Date départ <span class="nm-opt">optionnel</span></label>
+                <input id="eExportDate" type="date" class="nm-input" formControlName="exportDate" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nm-field">
+                <label for="eImportDate" class="nm-label">Date arrivée <span class="nm-opt">optionnel</span></label>
+                <input id="eImportDate" type="date" class="nm-input" formControlName="importDate" />
+              </div>
+            </div>
+
+            <!-- Section divider -->
+            <div class="col-12 pt-1">
+              <div class="nm-section">Détails du transport</div>
+            </div>
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="eCarrier" class="nm-label">Carrier <span class="nm-opt">optionnel</span></label>
                 <input id="eCarrier" type="text" class="nm-input" formControlName="importingCarrier" placeholder="ex : Air France Cargo" />
               </div>
             </div>
 
             <div class="col-6">
               <div class="nm-field">
-                <label for="eMode" class="nm-label">Mode de transport</label>
+                <label for="eMode" class="nm-label">Mode <span class="nm-opt">optionnel</span></label>
                 <input id="eMode" type="text" class="nm-input" formControlName="modeOfTransport" placeholder="ex : AIR" />
               </div>
             </div>
             <div class="col-6">
               <div class="nm-field">
-                <label for="ePort" class="nm-label">Code port</label>
+                <label for="ePort" class="nm-label">Code port <span class="nm-opt">optionnel</span></label>
                 <input id="ePort" type="text" class="nm-input" formControlName="portCode" placeholder="ex : CDG" />
               </div>
             </div>
 
             <div class="col-12 pt-1">
-              <div class="nm-section">Statut du shipment</div>
+              <div class="nm-section">Statut</div>
             </div>
 
             <div class="col-12">
               <div class="nm-field">
-                <label for="eStatus" class="nm-label">Statut</label>
+                <label for="eStatus" class="nm-label">Statut du shipment</label>
                 <select id="eStatus" class="nm-select" formControlName="status">
                   <option value="DRAFT">Draft</option>
                   <option value="IMPORTED">Imported</option>

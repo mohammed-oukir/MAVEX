@@ -9,6 +9,8 @@ export interface ShipmentResponse {
   id: number;
   mawb: string;
   shipper?: ShipperSummary;
+  exportDate?: string;
+  importDate?: string;
   importingCarrier?: string;
   modeOfTransport?: string;
   portCode?: string;
@@ -17,11 +19,14 @@ export interface ShipmentResponse {
   dutyRate?: number;
   totalOrders?: number;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ShipmentRequest {
   mawb: string;
   shipperId?: number;
+  exportDate?: string;
+  importDate?: string;
   importingCarrier?: string;
   modeOfTransport?: string;
   portCode?: string;
@@ -30,6 +35,10 @@ export interface ShipmentRequest {
 }
 
 export interface ShipmentPatch {
+  mawb?: string;
+  shipperId?: number | null;
+  exportDate?: string;
+  importDate?: string;
   importingCarrier?: string;
   modeOfTransport?: string;
   portCode?: string;

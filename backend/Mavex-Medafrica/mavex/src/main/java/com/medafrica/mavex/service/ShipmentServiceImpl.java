@@ -46,6 +46,8 @@ public class ShipmentServiceImpl implements ShipmentService {
         }
         Shipment shipment = Shipment.builder()
                 .mawb(req.getMawb())
+                .exportDate(req.getExportDate())
+                .importDate(req.getImportDate())
                 .importingCarrier(req.getImportingCarrier())
                 .modeOfTransport(req.getModeOfTransport())
                 .portCode(req.getPortCode())
@@ -83,14 +85,20 @@ public class ShipmentServiceImpl implements ShipmentService {
             }
             shipment.setMawb(req.getMawb());
         }
+        if (req.getExportDate()       != null) shipment.setExportDate(req.getExportDate());
+        if (req.getImportDate()       != null) shipment.setImportDate(req.getImportDate());
         if (req.getImportingCarrier() != null) shipment.setImportingCarrier(req.getImportingCarrier());
         if (req.getModeOfTransport()  != null) shipment.setModeOfTransport(req.getModeOfTransport());
         if (req.getPortCode()         != null) shipment.setPortCode(req.getPortCode());
+        // shipperId null = retirer le shipper ; présent = l'affecter
         if (req.getShipperId() != null) {
             Shipper shipper = shipperRepository.findById(req.getShipperId())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
             shipment.setShipper(shipper);
+        } else {
+            shipment.setShipper(null);
         }
+        if (req.getStatus() != null) shipment.setStatus(req.getStatus());
         return toResponse(shipmentRepository.save(shipment));
     }
 
@@ -116,6 +124,8 @@ public class ShipmentServiceImpl implements ShipmentService {
                     .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
         }
         shipment.setMawb(req.getMawb());
+        shipment.setExportDate(req.getExportDate());
+        shipment.setImportDate(req.getImportDate());
         shipment.setImportingCarrier(req.getImportingCarrier());
         shipment.setModeOfTransport(req.getModeOfTransport());
         shipment.setPortCode(req.getPortCode());
@@ -183,6 +193,8 @@ public class ShipmentServiceImpl implements ShipmentService {
         return ShipmentResponseDTO.builder()
                 .id(s.getId())
                 .mawb(s.getMawb())
+                .exportDate(s.getExportDate())
+                .importDate(s.getImportDate())
                 .importingCarrier(s.getImportingCarrier())
                 .modeOfTransport(s.getModeOfTransport())
                 .portCode(s.getPortCode())

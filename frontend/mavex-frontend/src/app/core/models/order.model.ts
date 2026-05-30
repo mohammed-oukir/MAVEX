@@ -4,31 +4,33 @@ export type OrderStatus =
   | 'PENDING_PAYMENT'
   | 'PAID'
   | 'IN_DELIVERY'
-  | 'DELIVERED';
+  | 'DELIVERED'
+  | 'CANCELLED';
 
 export interface OrderResponse {
   id: number;
   hawb: string;
   mawb?: string;
+  clientId?: number;
   clientFullName?: string;
   clientEmail?: string;
+  clientPhone?: string;
+  clientAddress?: string;
+  clientCity?: string;
+  clientCountry?: string;
+  companyName?: string;
   goodsDescription?: string;
+  htsusCode?: string;
+  numberOfItems?: number;
   shipmentWeight?: number;
   customsValue?: number;
   customsCurrency?: string;
-  totalAmount?: number;
+  dutyRate?: number;
   dutyAmount?: number;
   bankCharges?: number;
+  totalAmount?: number;
   status: OrderStatus;
   shipmentId?: number;
-  clientId?: number;
-  itemCount?: number;
-  htsusCode?: string;
-  dutyRate?: number;
-  senderName?: string;
-  receiverName?: string;
-  country?: string;
-  phone?: string;
   createdAt?: string;
 }
 
@@ -36,7 +38,7 @@ export interface OrderRequest {
   hawb: string;
   shipmentId: number;
   clientId: number;
-  itemCount?: number;
+  numberOfItems?: number;
   goodsDescription?: string;
   shipmentWeight?: number;
   htsusCode?: string;
@@ -48,7 +50,8 @@ export interface OrderRequest {
 
 export interface OrderPatch {
   hawb?: string;
-  itemCount?: number;
+  clientId?: number;
+  numberOfItems?: number;
   goodsDescription?: string;
   shipmentWeight?: number;
   htsusCode?: string;
@@ -56,4 +59,9 @@ export interface OrderPatch {
   customsCurrency?: string;
   dutyRate?: number;
   bankCharges?: number;
+}
+
+export interface OrderStatusUpdate {
+  newStatus: OrderStatus;
+  note?: string;
 }

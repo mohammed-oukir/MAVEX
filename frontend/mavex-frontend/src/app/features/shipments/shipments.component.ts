@@ -102,12 +102,18 @@ export class ShipmentsComponent implements OnInit {
   createForm = this.fb.group({
     mawb:             ['', [Validators.required, Validators.minLength(3)]],
     shipperId:        [null as number | null],
+    exportDate:       [''],
+    importDate:       [''],
     importingCarrier: [''],
     modeOfTransport:  [''],
     portCode:         [''],
   });
 
   editForm = this.fb.group({
+    mawb:             ['', [Validators.required, Validators.minLength(3)]],
+    shipperId:        [null as number | null],
+    exportDate:       [''],
+    importDate:       [''],
     importingCarrier: [''],
     modeOfTransport:  [''],
     portCode:         [''],
@@ -183,6 +189,7 @@ export class ShipmentsComponent implements OnInit {
   openCreate(): void {
     this.createForm.reset({
       mawb: '', shipperId: null,
+      exportDate: '', importDate: '',
       importingCarrier: '', modeOfTransport: '', portCode: '',
     });
     this.creatingShipment.set(true);
@@ -196,17 +203,18 @@ export class ShipmentsComponent implements OnInit {
     const req: ShipmentRequest = {
       mawb:             v.mawb!,
       shipperId:        v.shipperId ?? undefined,
+      exportDate:       v.exportDate || undefined,
+      importDate:       v.importDate || undefined,
       importingCarrier: v.importingCarrier || undefined,
       modeOfTransport:  v.modeOfTransport || undefined,
       portCode:         v.portCode || undefined,
     };
     this.shipSvc.create(req).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: created => {
         this.creating.set(false);
         this.creatingShipment.set(false);
-        this.toast.success('Shipment créé avec succès.');
-        this.currentPage.set(0);
-        this.loadAll();
+        this.toast.success('Shipment créé ! Ajoutez maintenant vos orders.');
+        this.router.navigate(['/shipments', created.id]);
       },
       error: err => {
         this.creating.set(false);
@@ -224,6 +232,10 @@ export class ShipmentsComponent implements OnInit {
   openEdit(s: ShipmentResponse): void {
     this.editingShipment.set(s);
     this.editForm.patchValue({
+      mawb:             s.mawb,
+      shipperId:        s.shipper?.id ?? null,
+      exportDate:       s.exportDate ?? '',
+      importDate:       s.importDate ?? '',
       importingCarrier: s.importingCarrier ?? '',
       modeOfTransport:  s.modeOfTransport ?? '',
       portCode:         s.portCode ?? '',
@@ -234,10 +246,14 @@ export class ShipmentsComponent implements OnInit {
 
   saveEdit(): void {
     const s = this.editingShipment();
-    if (!s || this.editForm.invalid) return;
+    if (!s || this.editForm.invalid) { this.editForm.markAllAsTouched(); return; }
     this.saving.set(true);
     const v = this.editForm.value;
     const req: ShipmentPatch = {
+      mawb:             v.mawb!,
+      shipperId:        v.shipperId ?? null,
+      exportDate:       v.exportDate || undefined,
+      importDate:       v.importDate || undefined,
       importingCarrier: v.importingCarrier || undefined,
       modeOfTransport:  v.modeOfTransport || undefined,
       portCode:         v.portCode || undefined,
@@ -255,6 +271,16 @@ export class ShipmentsComponent implements OnInit {
         this.toast.error(err?.error?.message || 'Erreur.');
       },
     });
+  }
+
+  editFieldInvalid(name: string): boolean {
+    const c = this.editForm.get(name);
+    return !!(c?.invalid && c?.touched);
+  }
+
+  fmtDuty(rate: number | null | undefined): string {
+    if (rate == null) return '—';
+    return Math.round(rate * 10000) / 100 + ' %';
   }
 
   /* ── Delete ───────────────────────────────────────────── */

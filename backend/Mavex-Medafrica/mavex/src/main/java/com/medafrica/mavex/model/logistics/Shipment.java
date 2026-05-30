@@ -5,6 +5,7 @@ import com.medafrica.mavex.model.enums.ShipmentStatus;
 import com.medafrica.mavex.model.security.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
@@ -77,7 +78,8 @@ public class Shipment {
     private User createdBy;
 
     /** Liste des Orders (HAWB) de ce shipment */
-    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY,  orphanRemoval = true)
+    @BatchSize(size = 50)
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
 

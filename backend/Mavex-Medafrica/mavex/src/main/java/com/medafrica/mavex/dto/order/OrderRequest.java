@@ -17,7 +17,6 @@ public class OrderRequest {
     @Min(value = 1, message = "Le nombre d'articles doit être >= 1")
     private Integer numberOfItems;
 
-    @NotNull(message = "Le poids est obligatoire")
     @DecimalMin(value = "0.001", message = "Le poids doit être positif")
     private BigDecimal shipmentWeight;
 
@@ -27,7 +26,6 @@ public class OrderRequest {
 
     private Integer manifestQty;
 
-    @NotNull(message = "La valeur douanière est obligatoire")
     @DecimalMin(value = "0.00", inclusive = false, message = "La valeur douanière doit être positive")
     private BigDecimal customsValue;
 

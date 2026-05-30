@@ -1,209 +1,715 @@
 @if (loading()) {
-  <div class="text-center py-5">
-    <div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Chargement…</span></div>
+
+  <div class="sk-row" style="width:90px;height:32px;border-radius:8px;margin-bottom:20px"></div>
+  <div class="sk-row" style="width:260px;height:30px;border-radius:8px;margin-bottom:6px"></div>
+  <div class="sk-row" style="width:150px;height:14px;border-radius:5px;margin-bottom:20px"></div>
+  <div class="sd-panel">
+    <div class="sd-grid">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div>
+          <div class="sk-row" style="width:55px;height:11px;border-radius:4px;margin-bottom:7px"></div>
+          <div class="sk-row" style="width:80%;height:14px;border-radius:5px"></div>
+        </div>
+      }
+    </div>
   </div>
+
 } @else if (!shipment()) {
-  <div class="alert alert-danger" role="alert">Shipment introuvable.</div>
+
+  <a routerLink="/shipments" class="sd-back">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour aux shipments
+  </a>
+  <div class="sd-panel"><p style="color:#EF4444;font-size:13px;margin:0">Shipment introuvable.</p></div>
+
 } @else {
 
   <!-- Back link -->
-  <a routerLink="/shipments" class="btn btn-sm btn-outline-secondary mb-3">← Retour aux shipments</a>
+  <a routerLink="/shipments" class="sd-back">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+    Retour aux shipments
+  </a>
 
-  <!-- Info card -->
-  <div class="card mb-4">
-    <div class="card-body p-4">
-      <div class="row g-3 align-items-start">
-        <div class="col-md-8">
-          <div class="row g-3">
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">MAWB</div>
-              <div class="fw-bold font-syne fs-5">{{ shipment()!.mawb }}</div>
-            </div>
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Shipper</div>
-              <div>{{ shipment()!.shipper?.companyName || '—' }}</div>
-            </div>
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Créé par</div>
-              <div>{{ shipment()!.createdBy || '—' }}</div>
-            </div>
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Carrier</div>
-              <div>{{ shipment()!.importingCarrier || '—' }}</div>
-            </div>
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Mode</div>
-              <div>{{ shipment()!.modeOfTransport || '—' }}</div>
-            </div>
-            <div class="col-sm-4">
-              <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Port</div>
-              <div>{{ shipment()!.portCode || '—' }}</div>
-            </div>
-          </div>
-        </div>
+  <!-- Page header -->
+  <div class="sd-page-hd">
+    <div>
+      <h1 class="sd-mawb">{{ shipment()!.mawb }}</h1>
+      <p class="sd-created">Créé par {{ shipment()!.createdBy || 'Système' }}</p>
+    </div>
+    <div class="sd-page-actions">
+      <app-badge [status]="shipment()!.status" />
+      <button type="button" class="sd-btn-edit-ship" (click)="openEditShipment()" title="Modifier le shipment">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        Modifier
+      </button>
+      <button type="button" class="sd-btn-add" (click)="openCreateOrder()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvel order
+      </button>
+    </div>
+  </div>
 
-        <div class="col-md-4 d-flex flex-column gap-3 align-items-md-end">
-          <!-- Status -->
-          <app-badge [status]="shipment()!.status" />
-
-          <!-- Duty rate inline editor -->
-          <div>
-            <div class="text-muted mb-1" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Duty Rate</div>
-            @if (!editingDuty()) {
-              <div class="d-flex align-items-center gap-2">
-                <span class="fw-bold">{{ shipment()!.dutyRate != null ? shipment()!.dutyRate + '%' : '—' }}</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="startEditDuty()" aria-label="Modifier le duty rate">Modifier</button>
-              </div>
-            } @else {
-              <div class="d-flex align-items-center gap-2">
-                <input
-                  type="number"
-                  class="form-control form-control-sm"
-                  style="width:90px"
-                  [(ngModel)]="dutyRateInput"
-                  [ngModelOptions]="{standalone:true}"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  aria-label="Nouveau duty rate"
-                />
-                <span class="text-muted">%</span>
-                <button type="button" class="btn btn-sm btn-primary" [disabled]="savingDuty()" (click)="saveDuty()">
-                  @if (savingDuty()) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
-                  @else { Appliquer }
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" (click)="cancelEditDuty()">✕</button>
-              </div>
-            }
-          </div>
+  <!-- Info panel -->
+  <div class="sd-panel">
+    <div class="sd-grid">
+      <div>
+        <div class="sd-key">Shipper</div>
+        <div class="sd-val">{{ shipment()!.shipper?.companyName || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Carrier</div>
+        <div class="sd-val">{{ shipment()!.importingCarrier || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Mode</div>
+        <div class="sd-val">{{ shipment()!.modeOfTransport || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Port</div>
+        <div class="sd-val">{{ shipment()!.portCode || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Départ</div>
+        <div class="sd-val">{{ shipment()!.exportDate || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Arrivée</div>
+        <div class="sd-val">{{ shipment()!.importDate || '—' }}</div>
+      </div>
+      <div>
+        <div class="sd-key">Duty Rate</div>
+        <div class="sd-val">
+          @if (!editingDuty()) {
+            <div class="sd-duty-static">
+              <span>{{ fmtDuty(shipment()!.dutyRate) }}</span>
+              <button type="button" class="sd-edit-lnk" (click)="startEditDuty()" aria-label="Modifier le duty rate">Modifier</button>
+            </div>
+          } @else {
+            <div class="sd-duty-wrap">
+              <input type="number" class="sd-duty-input" [value]="dutyRateInput()" (input)="dutyRateInput.set(+$any($event.target).value)" min="0" max="100" step="0.01" aria-label="Nouveau duty rate" />
+              <span class="sd-key" style="margin:0">%</span>
+              <button type="button" class="sd-duty-btn" [disabled]="savingDuty()" (click)="saveDuty()">
+                @if (savingDuty()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+                @else { Appliquer }
+              </button>
+              <button type="button" class="sd-duty-cancel" (click)="cancelEditDuty()">✕</button>
+            </div>
+          }
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Stats -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-      <div class="card stat-card text-center p-3">
-        <div class="stat-value">{{ totalOrders() }}</div>
-        <div class="text-muted" style="font-size:12px">Total orders</div>
+  <!-- Stats (cliquables → filtre) -->
+  <div class="sd-stats" role="group" aria-label="Filtrer les orders par statut">
+    <button type="button" class="sd-stat sd-stat-all"
+      [class.is-active]="statusFilter() === ''"
+      (click)="setStatusFilter('')"
+      [attr.aria-pressed]="statusFilter() === ''">
+      <div class="sd-stat-val sd-val-orange">{{ totalOrders() }}</div>
+      <div class="sd-stat-lbl">Tous les orders</div>
+    </button>
+    <button type="button" class="sd-stat sd-stat-paid"
+      [class.is-active]="statusFilter() === 'PAID'"
+      (click)="setStatusFilter('PAID')"
+      [attr.aria-pressed]="statusFilter() === 'PAID'">
+      <div class="sd-stat-val sd-val-green">{{ paidCount() }}</div>
+      <div class="sd-stat-lbl">Payés</div>
+    </button>
+    <button type="button" class="sd-stat sd-stat-pending"
+      [class.is-active]="statusFilter() === 'PENDING_PAYMENT'"
+      (click)="setStatusFilter('PENDING_PAYMENT')"
+      [attr.aria-pressed]="statusFilter() === 'PENDING_PAYMENT'">
+      <div class="sd-stat-val sd-val-amber">{{ pendingCount() }}</div>
+      <div class="sd-stat-lbl">En attente</div>
+    </button>
+    <button type="button" class="sd-stat sd-stat-email"
+      [class.is-active]="statusFilter() === 'EMAIL_SENT'"
+      (click)="setStatusFilter('EMAIL_SENT')"
+      [attr.aria-pressed]="statusFilter() === 'EMAIL_SENT'">
+      <div class="sd-stat-val sd-val-blue">{{ emailCount() }}</div>
+      <div class="sd-stat-lbl">Emails envoyés</div>
+    </button>
+  </div>
+
+  <!-- Financial totals -->
+  <div class="sd-totals">
+    <div class="sd-total-item">
+      <div class="sd-total-icon ico-blue" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <div>
+        <div class="sd-total-val">{{ fmtNum(totalWeight()) }} kg</div>
+        <div class="sd-total-lbl">Poids total</div>
       </div>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="card stat-card text-center p-3">
-        <div class="stat-value" style="color:#22C55E">{{ paidCount() }}</div>
-        <div class="text-muted" style="font-size:12px">Payés</div>
+    <div class="sd-total-item">
+      <div class="sd-total-icon ico-purple" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div>
+        <div class="sd-total-val">{{ fmtNum(totalCustoms()) }} <span class="sd-total-cur">USD</span></div>
+        <div class="sd-total-lbl">Customs value</div>
       </div>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="card stat-card text-center p-3">
-        <div class="stat-value" style="color:#F59E0B">{{ pendingCount() }}</div>
-        <div class="text-muted" style="font-size:12px">En attente</div>
+    <div class="sd-total-item">
+      <div class="sd-total-icon ico-orange" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+      </div>
+      <div>
+        <div class="sd-total-val">{{ fmtNum(totalDuty()) }} <span class="sd-total-cur">USD</span></div>
+        <div class="sd-total-lbl">Duty dû</div>
       </div>
     </div>
-    <div class="col-6 col-md-3">
-      <div class="card stat-card text-center p-3">
-        <div class="stat-value" style="color:#3B82F6">{{ emailCount() }}</div>
-        <div class="text-muted" style="font-size:12px">Emails envoyés</div>
+    <div class="sd-total-item sd-total-highlight">
+      <div class="sd-total-icon ico-green" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="sd-total-val sd-total-big">{{ fmtNum(grandTotal()) }} <span class="sd-total-cur">USD</span></div>
+        <div class="sd-total-lbl">Total à encaisser</div>
       </div>
     </div>
   </div>
 
-  <!-- Orders table -->
-  <div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between py-3 px-4 flex-wrap gap-2">
-      <span class="card-title font-syne">Manifeste — {{ filteredOrders().length }} ligne(s)</span>
-      <div class="d-flex align-items-center gap-2">
-        <!-- Search -->
-        <div style="position:relative">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#9CA3AF" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input
-            type="search"
-            class="form-control form-control-sm"
-            style="padding-left:28px;width:200px"
-            placeholder="Rechercher…"
-            [value]="search()"
-            (input)="search.set($any($event.target).value)"
-            aria-label="Rechercher dans le manifeste"
-          />
+  <!-- Orders section -->
+  <div class="sd-section">
+    <div class="sd-section-hd">
+      <span class="sd-section-title">Manifeste — {{ filteredOrders().length }} ordre(s)</span>
+      <div class="sd-tools">
+        <div class="sd-search-wrap">
+          <svg class="sd-search-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" class="sd-search" placeholder="Rechercher…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Rechercher dans le manifeste" />
         </div>
-        <!-- Send all -->
-        <button
-          type="button"
-          class="btn btn-primary btn-sm"
-          [disabled]="sendingAll()"
-          (click)="sendAll()"
-          aria-label="Envoyer tous les emails"
-        >
-          @if (sendingAll()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
-          Envoyer tous les emails
+        <button type="button" class="sd-btn-ghost" [disabled]="sendingAll()" (click)="sendAll()" aria-label="Envoyer tous les emails">
+          @if (sendingAll()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+          Envoyer tous
+        </button>
+        <button type="button" class="sd-btn-add" (click)="openCreateOrder()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouvel order
         </button>
       </div>
     </div>
 
-    <div class="table-responsive">
-      <table class="table table-hover mb-0" aria-label="Manifeste du shipment">
-        <thead>
-          <tr>
-            <th scope="col">HAWB</th>
-            <th scope="col">Expéditeur</th>
-            <th scope="col">Destinataire</th>
-            <th scope="col">Pays</th>
-            <th scope="col">Email</th>
-            <th scope="col">Tél</th>
-            <th scope="col">Items</th>
-            <th scope="col">Description</th>
-            <th scope="col">Poids</th>
-            <th scope="col">Customs</th>
-            <th scope="col">Devise</th>
-            <th scope="col">Duty%</th>
-            <th scope="col">Duty amt</th>
-            <th scope="col">Bank</th>
-            <th scope="col">Total</th>
-            <th scope="col">Statut</th>
-            <th scope="col" class="text-end">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (filteredOrders().length === 0) {
-            <tr><td colspan="17" class="text-center text-muted py-4" style="cursor:default">Aucun order.</td></tr>
-          } @else {
+    @if (filteredOrders().length === 0) {
+      <div class="sd-empty">
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <line x1="9" y1="12" x2="15" y2="12"/>
+          <line x1="9" y1="16" x2="13" y2="16"/>
+        </svg>
+        @if (search()) {
+          <p>Aucun ordre correspond à la recherche.</p>
+        } @else {
+          <p>Ce shipment n'a pas encore d'orders.</p>
+          <button type="button" class="sd-btn-add" (click)="openCreateOrder()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ajouter le premier order
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table sd-table mb-0" aria-label="Manifeste du shipment">
+          <thead>
+            <tr>
+              <th scope="col">HAWB</th>
+              <th scope="col">Client</th>
+              <th scope="col">Description</th>
+              <th scope="col">Poids</th>
+              <th scope="col">Items</th>
+              <th scope="col">Customs</th>
+              <th scope="col">Devise</th>
+              <th scope="col">Duty%</th>
+              <th scope="col">Total</th>
+              <th scope="col">Statut</th>
+              <th scope="col" style="text-align:right;width:120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
             @for (o of filteredOrders(); track o.id) {
-              <tr style="cursor:default">
-                <td><strong>{{ o.hawb }}</strong></td>
-                <td class="td-muted">{{ o.senderName || '—' }}</td>
-                <td>{{ o.clientFullName || o.receiverName || '—' }}</td>
-                <td class="td-muted">{{ o.country || '—' }}</td>
-                <td class="td-muted">{{ o.clientEmail || '—' }}</td>
-                <td class="td-muted">{{ o.phone || '—' }}</td>
-                <td>{{ o.itemCount ?? '—' }}</td>
-                <td class="td-muted">{{ o.goodsDescription || '—' }}</td>
+              <tr>
+                <td><span class="sd-hawb">{{ o.hawb }}</span></td>
+                <td>{{ o.clientFullName || '—' }}</td>
+                <td class="sd-muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
+                <td>{{ o.numberOfItems ?? '—' }}</td>
                 <td>{{ o.customsValue ?? '—' }}</td>
-                <td class="td-muted">{{ o.customsCurrency || '—' }}</td>
-                <td class="td-muted">{{ o.dutyRate != null ? o.dutyRate + '%' : '—' }}</td>
-                <td>{{ o.dutyAmount ?? '—' }}</td>
-                <td>{{ o.bankCharges ?? '—' }}</td>
+                <td class="sd-muted">{{ o.customsCurrency || '—' }}</td>
+                <td class="sd-muted">{{ fmtDuty(o.dutyRate) }}</td>
                 <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
                 <td><app-badge [status]="o.status" /></td>
-                <td class="text-end">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary"
-                    [disabled]="sendingId() === o.id"
-                    (click)="sendEmail(o.id)"
-                    aria-label="Envoyer l'email"
-                  >
-                    @if (sendingId() === o.id) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
-                    @else { Envoyer }
-                  </button>
+                <td>
+                  <div class="sd-actions">
+                    <!-- Email -->
+                    <button type="button" class="sd-act email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer email" [attr.aria-label]="'Email ' + o.hawb">
+                      @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
+                      @else {
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      }
+                    </button>
+                    <!-- Statut -->
+                    <button type="button" class="sd-act status" (click)="openStatusModal(o)" title="Changer le statut" [attr.aria-label]="'Statut ' + o.hawb">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    </button>
+                    <!-- Modifier -->
+                    <button type="button" class="sd-act edit" (click)="openEditOrder(o)" title="Modifier" [attr.aria-label]="'Modifier ' + o.hawb">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <!-- Supprimer -->
+                    <button type="button" class="sd-act del" (click)="confirmDeleteOrder(o.id)" title="Supprimer" [attr.aria-label]="'Supprimer ' + o.hawb">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                    </button>
+                  </div>
                 </td>
               </tr>
             }
-          }
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
+
+
+  <!-- ============================================================
+       MODAL — Nouvel Order
+       ============================================================ -->
+  @if (creatingOrder()) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle">
+      <div class="modal modal-lg">
+        <div class="nm-header">
+          <div class="nm-icon orange" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="createOrderTitle" class="nm-title">Nouvel order</h2>
+            <p class="nm-sub">{{ shipment()!.mawb }} — saisie manuelle</p>
+          </div>
+          <button type="button" class="nm-close" (click)="closeCreateOrder()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <form [formGroup]="orderForm" (ngSubmit)="submitOrder()" novalidate>
+          <div class="nm-body">
+            <div class="row g-3">
+              <div class="col-12"><div class="nm-section">Identification</div></div>
+              <div class="col-md-6">
+                <div class="nm-field">
+                  <label for="oHawb" class="nm-label">HAWB <span class="nm-req">Requis</span></label>
+                  <input id="oHawb" type="text" class="nm-input" [class.nm-err]="orderFieldInvalid('hawb')" formControlName="hawb" placeholder="ex : MX-2024-001-01" autocomplete="off" />
+                  @if (orderFieldInvalid('hawb')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> HAWB obligatoire.</div> }
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="nm-field">
+                  <label for="oClient" class="nm-label">Client <span class="nm-req">Requis</span></label>
+                  <select id="oClient" class="nm-select" [class.nm-err]="orderFieldInvalid('clientId')" formControlName="clientId">
+                    <option [ngValue]="null">— Sélectionner —</option>
+                    @for (c of clients(); track c.id) { <option [ngValue]="c.id">{{ c.fullName }}</option> }
+                  </select>
+                  @if (orderFieldInvalid('clientId')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Client obligatoire.</div> }
+                </div>
+              </div>
+              <div class="col-12 pt-1"><div class="nm-section">Marchandise</div></div>
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="oDesc" class="nm-label">Description <span class="nm-opt">optionnel</span></label>
+                  <input id="oDesc" type="text" class="nm-input" formControlName="goodsDescription" placeholder="ex : Electronics, textiles…" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="oItems" class="nm-label">Nb articles <span class="nm-opt">optionnel</span></label>
+                  <input id="oItems" type="number" class="nm-input" formControlName="numberOfItems" min="1" placeholder="ex : 3" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="oWeight" class="nm-label">Poids (kg) <span class="nm-opt">optionnel</span></label>
+                  <input id="oWeight" type="number" class="nm-input" formControlName="shipmentWeight" min="0" step="0.01" placeholder="ex : 12.5" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="oHtsus" class="nm-label">Code HTSUS <span class="nm-opt">optionnel</span></label>
+                  <input id="oHtsus" type="text" class="nm-input" formControlName="htsusCode" placeholder="ex : 8471.30" />
+                </div>
+              </div>
+              <div class="col-12 pt-1"><div class="nm-section">Valeurs douanières</div></div>
+              <div class="col-md-5">
+                <div class="nm-field">
+                  <label for="oCustomsVal" class="nm-label">Valeur customs <span class="nm-opt">optionnel</span></label>
+                  <input id="oCustomsVal" type="number" class="nm-input" formControlName="customsValue" min="0" step="0.01" placeholder="ex : 500.00" />
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="nm-field">
+                  <label for="oCurrency" class="nm-label">Devise <span class="nm-opt">optionnel</span></label>
+                  <select id="oCurrency" class="nm-select" formControlName="customsCurrency">
+                    <option value="USD">USD</option><option value="EUR">EUR</option>
+                    <option value="MAD">MAD</option><option value="GBP">GBP</option><option value="CAD">CAD</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="oDuty" class="nm-label">
+                    Duty %
+                    <span class="nm-opt">optionnel</span>
+                  </label>
+                  <input id="oDuty" type="number" class="nm-input" formControlName="dutyRate" min="0" max="100" step="0.01" [placeholder]="fmtDuty(shipment()!.dutyRate)" />
+                  <span style="font-size:11px;color:#9CA3AF;margin-top:3px;display:block">Taux shipment : {{ fmtDuty(shipment()!.dutyRate) }}</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="oBank" class="nm-label">Bank charges <span class="nm-opt">optionnel</span></label>
+                  <input id="oBank" type="number" class="nm-input" formControlName="bankCharges" min="0" step="0.01" placeholder="ex : 25.00" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="nm-footer">
+            <button type="button" class="nm-btn-cancel" (click)="closeCreateOrder()">Annuler</button>
+            <button type="submit" class="nm-btn-primary" [disabled]="creating()">
+              @if (creating()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Création… }
+              @else { <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Créer l'order }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+
+  <!-- ============================================================
+       MODAL — Modifier Order
+       ============================================================ -->
+  @if (editingOrder()) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editOrderTitle">
+      <div class="modal modal-lg">
+        <div class="nm-header">
+          <div class="nm-icon orange" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="editOrderTitle" class="nm-title">Modifier l'order</h2>
+            <p class="nm-sub">{{ editingOrder()!.hawb }}</p>
+          </div>
+          <button type="button" class="nm-close" (click)="closeEditOrder()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <form [formGroup]="editOrderForm" (ngSubmit)="saveOrder()" novalidate>
+          <div class="nm-body">
+            <div class="row g-3">
+              <div class="col-12"><div class="nm-section">Identification</div></div>
+              <div class="col-md-6">
+                <div class="nm-field">
+                  <label for="eHawb" class="nm-label">HAWB <span class="nm-req">Requis</span></label>
+                  <input id="eHawb" type="text" class="nm-input" [class.nm-err]="editOrderFieldInvalid('hawb')" formControlName="hawb" autocomplete="off" />
+                  @if (editOrderFieldInvalid('hawb')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> HAWB obligatoire.</div> }
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="nm-field">
+                  <label for="eClient" class="nm-label">Client <span class="nm-req">Requis</span></label>
+                  <select id="eClient" class="nm-select" [class.nm-err]="editOrderFieldInvalid('clientId')" formControlName="clientId">
+                    <option [ngValue]="null">— Sélectionner —</option>
+                    @for (c of clients(); track c.id) { <option [ngValue]="c.id">{{ c.fullName }}</option> }
+                  </select>
+                  @if (editOrderFieldInvalid('clientId')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Client obligatoire.</div> }
+                </div>
+              </div>
+              <div class="col-12 pt-1"><div class="nm-section">Marchandise</div></div>
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="eDesc" class="nm-label">Description <span class="nm-opt">optionnel</span></label>
+                  <input id="eDesc" type="text" class="nm-input" formControlName="goodsDescription" placeholder="ex : Electronics…" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="eItems" class="nm-label">Nb articles <span class="nm-opt">optionnel</span></label>
+                  <input id="eItems" type="number" class="nm-input" formControlName="numberOfItems" min="1" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="eWeight" class="nm-label">Poids (kg) <span class="nm-opt">optionnel</span></label>
+                  <input id="eWeight" type="number" class="nm-input" formControlName="shipmentWeight" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="eHtsus" class="nm-label">Code HTSUS <span class="nm-opt">optionnel</span></label>
+                  <input id="eHtsus" type="text" class="nm-input" formControlName="htsusCode" />
+                </div>
+              </div>
+              <div class="col-12 pt-1"><div class="nm-section">Valeurs douanières</div></div>
+              <div class="col-md-5">
+                <div class="nm-field">
+                  <label for="eCustomsVal" class="nm-label">Valeur customs <span class="nm-opt">optionnel</span></label>
+                  <input id="eCustomsVal" type="number" class="nm-input" formControlName="customsValue" min="0" step="0.01" />
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="nm-field">
+                  <label for="eCurrency" class="nm-label">Devise <span class="nm-opt">optionnel</span></label>
+                  <select id="eCurrency" class="nm-select" formControlName="customsCurrency">
+                    <option value="USD">USD</option><option value="EUR">EUR</option>
+                    <option value="MAD">MAD</option><option value="GBP">GBP</option><option value="CAD">CAD</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="eDuty" class="nm-label">
+                    Duty %
+                    <span class="nm-opt">optionnel</span>
+                  </label>
+                  <input id="eDuty" type="number" class="nm-input" formControlName="dutyRate" min="0" max="100" step="0.01" [placeholder]="fmtDuty(shipment()!.dutyRate)" />
+                  <span style="font-size:11px;color:#9CA3AF;margin-top:3px;display:block">Taux shipment : {{ fmtDuty(shipment()!.dutyRate) }}</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="nm-field">
+                  <label for="eBank" class="nm-label">Bank charges <span class="nm-opt">optionnel</span></label>
+                  <input id="eBank" type="number" class="nm-input" formControlName="bankCharges" min="0" step="0.01" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="nm-footer">
+            <button type="button" class="nm-btn-cancel" (click)="closeEditOrder()">Annuler</button>
+            <button type="submit" class="nm-btn-primary" [disabled]="savingOrder()">
+              @if (savingOrder()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Enregistrement… }
+              @else { <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+
+  <!-- ============================================================
+       MODAL — Changer le statut
+       ============================================================ -->
+  @if (changingStatusOrder()) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="statusOrderTitle">
+      <div class="modal" style="max-width:480px">
+        <div class="nm-header">
+          <div class="nm-icon blue" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="statusOrderTitle" class="nm-title">Changer le statut</h2>
+            <p class="nm-sub">{{ changingStatusOrder()!.hawb }}</p>
+          </div>
+          <button type="button" class="nm-close" (click)="closeStatusModal()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="nm-body">
+          <div class="sd-status-grid" role="group" aria-label="Sélectionner un statut">
+            @for (opt of statusOptions; track opt.value) {
+              <button
+                type="button"
+                class="sd-status-chip"
+                [class.chip-current]="changingStatusOrder()!.status === opt.value"
+                [class.chip-selected]="selectedNewStatus() === opt.value"
+                [style.color]="opt.color"
+                [style.borderColor]="selectedNewStatus() === opt.value ? opt.color : (changingStatusOrder()!.status === opt.value ? opt.color : '#E5E7EB')"
+                [style.background]="selectedNewStatus() === opt.value ? opt.bg : '#fff'"
+                [disabled]="changingStatusOrder()!.status === opt.value"
+                (click)="selectedNewStatus.set(opt.value)"
+                [attr.aria-pressed]="selectedNewStatus() === opt.value"
+              >
+                <span class="sd-status-dot" [style.background]="opt.color" aria-hidden="true"></span>
+                {{ opt.label }}
+                @if (changingStatusOrder()!.status === opt.value) {
+                  <span class="sd-current-badge">actuel</span>
+                }
+              </button>
+            }
+          </div>
+          <div class="nm-field" style="margin-top:16px">
+            <label for="sNote" class="nm-label">Note <span class="nm-opt">optionnel</span></label>
+            <textarea id="sNote" class="sd-note" [value]="statusNote()" (input)="statusNote.set($any($event.target).value)" placeholder="Raison du changement…" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeStatusModal()">Annuler</button>
+          <button type="button" class="nm-btn-primary" [disabled]="!selectedNewStatus() || changingStatus()" (click)="confirmStatusChange()">
+            @if (changingStatus()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Mise à jour… }
+            @else { <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Confirmer }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- ============================================================
+       MODAL — Supprimer Order
+       ============================================================ -->
+  @if (deleteOrderId() !== null) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle">
+      <div class="modal" style="max-width:420px">
+        <div class="nm-header">
+          <div class="nm-icon red" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="delOrderTitle" class="nm-title">Supprimer cet order ?</h2>
+            <p class="nm-sub">Cette action est définitive.</p>
+          </div>
+          <button type="button" class="nm-close" (click)="cancelDeleteOrder()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="nm-body">
+          <p class="nm-alert">L'order et son historique de statuts seront supprimés définitivement. Cette action est irréversible.</p>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="cancelDeleteOrder()">Annuler</button>
+          <button type="button" class="nm-btn-danger" [disabled]="deletingOrder()" (click)="executeDeleteOrder()">
+            @if (deletingOrder()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
+            @else { <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> Supprimer définitivement }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <!-- ============================================================
+       MODAL — Modifier le Shipment
+       ============================================================ -->
+  @if (editingShipment()) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editShipTitle">
+      <div class="modal" style="max-width:520px">
+        <div class="nm-header">
+          <div class="nm-icon orange" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="editShipTitle" class="nm-title">Modifier le shipment</h2>
+            <p class="nm-sub">{{ shipment()!.mawb }}</p>
+          </div>
+          <button type="button" class="nm-close" (click)="closeEditShipment()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <form [formGroup]="shipmentEditForm" (ngSubmit)="saveShipment()" novalidate>
+          <div class="nm-body">
+            <div class="row g-3">
+
+              <!-- MAWB -->
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="smawb" class="nm-label">MAWB <span class="nm-req">Requis</span></label>
+                  <input id="smawb" type="text" class="nm-input"
+                    [class.nm-err]="shipmentFieldInvalid('mawb')"
+                    formControlName="mawb" autocomplete="off" placeholder="ex : MX-2024-001" />
+                  @if (shipmentFieldInvalid('mawb')) {
+                    <div class="nm-err-msg" role="alert">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      MAWB obligatoire (min 3 caractères).
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Shipper -->
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="sshipper" class="nm-label">Shipper <span class="nm-opt">optionnel</span></label>
+                  <select id="sshipper" class="nm-select" formControlName="shipperId">
+                    <option [ngValue]="null">— Sélectionner un shipper —</option>
+                    @for (sh of shippers(); track sh.id) {
+                      <option [ngValue]="sh.id">{{ sh.companyName }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Statut -->
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="sstatus" class="nm-label">Statut</label>
+                  <select id="sstatus" class="nm-select" formControlName="status">
+                    <option value="DRAFT">Draft</option>
+                    <option value="IMPORTED">Imported</option>
+                    <option value="PROCESSING">Processing</option>
+                    <option value="CLOSED">Closed</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="col-12 pt-1"><div class="nm-section">Dates du vol</div></div>
+              <div class="col-6">
+                <div class="nm-field">
+                  <label for="sexport" class="nm-label">Date départ <span class="nm-opt">optionnel</span></label>
+                  <input id="sexport" type="date" class="nm-input" formControlName="exportDate" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="nm-field">
+                  <label for="simport" class="nm-label">Date arrivée <span class="nm-opt">optionnel</span></label>
+                  <input id="simport" type="date" class="nm-input" formControlName="importDate" />
+                </div>
+              </div>
+
+              <!-- Transport -->
+              <div class="col-12 pt-1"><div class="nm-section">Transport</div></div>
+              <div class="col-12">
+                <div class="nm-field">
+                  <label for="scarrier" class="nm-label">Carrier <span class="nm-opt">optionnel</span></label>
+                  <input id="scarrier" type="text" class="nm-input" formControlName="importingCarrier" placeholder="ex : Air France Cargo" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="nm-field">
+                  <label for="smode" class="nm-label">Mode <span class="nm-opt">optionnel</span></label>
+                  <input id="smode" type="text" class="nm-input" formControlName="modeOfTransport" placeholder="ex : AIR" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="nm-field">
+                  <label for="sport" class="nm-label">Code port <span class="nm-opt">optionnel</span></label>
+                  <input id="sport" type="text" class="nm-input" formControlName="portCode" placeholder="ex : CDG" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="nm-footer">
+            <button type="button" class="nm-btn-cancel" (click)="closeEditShipment()">Annuler</button>
+            <button type="submit" class="nm-btn-primary" [disabled]="savingShipment()">
+              @if (savingShipment()) {
+                <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+                Enregistrement…
+              } @else {
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Enregistrer
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
 
 }

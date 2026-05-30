@@ -1,5 +1,6 @@
 package com.medafrica.mavex.dto.shipment;
 
+import com.medafrica.mavex.model.enums.ShipmentStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,7 @@ public class ShipmentRequestDTO {
 
     /** ID du shipper lié */
     private Long shipperId;
+
+    /** Statut — optionnel au PATCH */
+    private ShipmentStatus status;
 }
