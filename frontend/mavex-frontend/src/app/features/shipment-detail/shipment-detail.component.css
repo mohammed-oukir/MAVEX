@@ -5,6 +5,20 @@
 .sd-back:hover { border-color: #9CA3AF; color: #374151; text-decoration: none; }
 
 /* =====================================================
+   COPY BUTTON
+   ===================================================== */
+.sd-mawb-row { display: flex; align-items: center; gap: 10px; }
+.sd-copy-btn {
+  width: 28px; height: 28px; border: 1px solid #E5E7EB; border-radius: 7px;
+  background: #fff; cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; color: #9CA3AF; flex-shrink: 0;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.sd-copy-btn:hover  { border-color: #9CA3AF; color: #374151; background: #F9FAFB; }
+.sd-copy-btn.copied { border-color: #86EFAC; background: #F0FDF4; }
+.sd-hawb-cell { display: flex; align-items: center; gap: 6px; }
+
+/* =====================================================
    PAGE HEADER
    ===================================================== */
 .sd-page-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }

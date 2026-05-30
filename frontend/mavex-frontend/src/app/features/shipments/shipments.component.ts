@@ -283,6 +283,13 @@ export class ShipmentsComponent implements OnInit {
     return Math.round(rate * 10000) / 100 + ' %';
   }
 
+  fmtDate(d: string | null | undefined): string {
+    if (!d) return '—';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
   /* ── Delete ───────────────────────────────────────────── */
   confirmDelete(id: number): void { this.deleteId.set(id); }
   cancelDelete():             void { this.deleteId.set(null); }

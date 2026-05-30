@@ -160,8 +160,8 @@
 
 <!-- Create / Edit modal -->
 @if (showModal()) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-labelledby]="'orderModalTitle'">
-    <div class="modal modal-lg">
+  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-labelledby]="'orderModalTitle'" (click)="closeModal()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <span id="orderModalTitle" class="modal-title font-syne">
           {{ editingId() ? 'Modifier l\'order' : 'Nouvel order' }}
@@ -260,8 +260,8 @@
 
 <!-- Delete confirmation -->
 @if (deleteId() !== null) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle">
-    <div class="modal" style="max-width:420px">
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle" (click)="cancelDelete()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <span id="delOrderTitle" class="modal-title">Supprimer l'order ?</span>
         <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Fermer"></button>

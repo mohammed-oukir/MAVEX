@@ -36,9 +36,6 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional
     public ShipmentResponseDTO create(ShipmentRequestDTO req) {
-        if (shipmentRepository.existsByMawb(req.getMawb())) {
-            throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
-        }
         Shipper shipper = null;
         if (req.getShipperId() != null) {
             shipper = shipperRepository.findById(req.getShipperId())
@@ -79,10 +76,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Transactional
     public ShipmentResponseDTO update(Long id, ShipmentRequestDTO req) {
         Shipment shipment = findOrThrow(id);
-        if (req.getMawb() != null && !req.getMawb().equalsIgnoreCase(shipment.getMawb())) {
-            if (shipmentRepository.existsByMawb(req.getMawb())) {
-                throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
-            }
+        if (req.getMawb() != null) {
             shipment.setMawb(req.getMawb());
         }
         if (req.getExportDate()       != null) shipment.setExportDate(req.getExportDate());
@@ -114,10 +108,6 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Transactional
     public ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req) {
         Shipment shipment = findOrThrow(id);
-        if (!req.getMawb().equalsIgnoreCase(shipment.getMawb()) &&
-             shipmentRepository.existsByMawb(req.getMawb())) {
-            throw new IllegalArgumentException("MAWB déjà existant : " + req.getMawb());
-        }
         Shipper shipper = null;
         if (req.getShipperId() != null) {
             shipper = shipperRepository.findById(req.getShipperId())

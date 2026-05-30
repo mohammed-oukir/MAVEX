@@ -109,6 +109,12 @@
 .sp-orders-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 8px; border-radius: 100px; background: #F3F4F6; font-size: 12px; font-weight: 700; color: #9CA3AF; font-family: 'Syne', sans-serif; }
 .sp-orders-pill.has-orders { background: #FFF7ED; color: #F97316; border: 1px solid #FED7AA; }
 
+/* ── Date badge ── */
+.sp-date-cell  { display: flex; align-items: center; }
+.sp-date-badge { font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+.sp-date-badge.arrival { background: #EFF6FF; color: #3B82F6; }
+.sp-date-badge.created { background: #F3F4F6; color: #6B7280; }
+
 /* Expand chevron */
 .sp-chevron { width: 26px; height: 26px; border: none; background: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #9CA3AF; transition: background .15s, color .15s; }
 .sp-chevron:hover        { background: #F3F4F6; color: #374151; }

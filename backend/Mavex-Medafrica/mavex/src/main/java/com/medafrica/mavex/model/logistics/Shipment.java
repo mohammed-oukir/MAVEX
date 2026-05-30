@@ -32,7 +32,7 @@ public class Shipment {
     private Long id;
 
     /** Colonne Excel "Mawb #" ex: 147-44480365 */
-    @Column(unique = true, nullable = false)       
+    @Column(nullable = false)
     private String mawb;
 
     @Column(name = "export_date")

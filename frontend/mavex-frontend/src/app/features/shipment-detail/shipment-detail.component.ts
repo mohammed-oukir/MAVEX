@@ -474,9 +474,26 @@ export class ShipmentDetailComponent implements OnInit {
     return !!(c?.invalid && c?.touched);
   }
 
+  /* ── Clipboard ────────────────────────────────────────── */
+  copiedText = signal<string | null>(null);
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.copiedText.set(text);
+      setTimeout(() => this.copiedText.set(null), 1500);
+    });
+  }
+
   /* ── Helpers ──────────────────────────────────────────── */
   fmtNum(n: number): string {
     if (n === 0) return '0';
     return n % 1 === 0 ? n.toString() : n.toFixed(2);
+  }
+
+  fmtDate(d: string | null | undefined): string {
+    if (!d) return '—';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return d;
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 }

@@ -41,6 +41,7 @@
           <th scope="col" style="width:44px"></th>
           <th scope="col">MAWB</th>
           <th scope="col">Shipper</th>
+          <th scope="col">Date arrivée</th>
           <th scope="col">Carrier</th>
           <th scope="col">Mode</th>
           <th scope="col">Orders</th>
@@ -57,6 +58,7 @@
               <td><div class="sk-row" style="width:26px;height:26px;border-radius:6px"></div></td>
               <td><div class="sk-row" style="width:88%"></div></td>
               <td><div class="sk-row" style="width:72%"></div></td>
+              <td><div class="sk-row" style="width:70%"></div></td>
               <td><div class="sk-row" style="width:60%"></div></td>
               <td><div class="sk-row" style="width:50%"></div></td>
               <td><div class="sk-row" style="width:28%"></div></td>
@@ -68,7 +70,7 @@
 
         } @else if (pageItems().length === 0) {
           <tr>
-            <td colspan="9" style="padding:0;border:none">
+            <td colspan="10" style="padding:0;border:none">
               <div class="sp-empty">
                 <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -122,6 +124,17 @@
                 </div>
               </td>
               <td class="sp-muted">{{ s.shipper?.companyName || '—' }}</td>
+              <td>
+                <div class="sp-date-cell">
+                  @if (s.importDate) {
+                    <span class="sp-date-badge arrival">{{ fmtDate(s.importDate) }}</span>
+                  } @else if (s.createdAt) {
+                    <span class="sp-date-badge created">{{ fmtDate(s.createdAt) }}</span>
+                  } @else {
+                    <span class="sp-muted">—</span>
+                  }
+                </div>
+              </td>
               <td class="sp-muted">{{ s.importingCarrier || '—' }}</td>
               <td class="sp-muted">{{ s.modeOfTransport || '—' }}</td>
               <td><span class="sp-orders-pill" [class.has-orders]="(s.totalOrders ?? 0) > 0">{{ s.totalOrders ?? 0 }}</span></td>
@@ -179,7 +192,7 @@
             <!-- Expanded orders -->
             @if (isExpanded(s.id)) {
               <tr class="sp-expand-row">
-                <td colspan="9">
+                <td colspan="10">
                   <div class="sp-expand-panel">
                     @if (getExpandedOrders(s.id).length === 0) {
                       <p class="text-center sp-muted py-3 mb-0" style="font-size:13px">Aucun order pour ce shipment.</p>
@@ -254,8 +267,8 @@
      MODAL — Nouveau Shipment
      ═══════════════════════════════════════════════════════════ -->
 @if (creatingShipment()) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createShipTitle">
-    <div class="modal" style="max-width:520px">
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createShipTitle" (click)="closeCreate()">
+    <div class="modal" style="max-width:520px" (click)="$event.stopPropagation()">
 
       <!-- Header -->
       <div class="nm-header">
@@ -397,8 +410,8 @@
      MODAL — Modifier
      ═══════════════════════════════════════════════════════════ -->
 @if (editingShipment()) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editShipTitle">
-    <div class="modal" style="max-width:480px">
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editShipTitle" (click)="closeEdit()">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
 
       <!-- Header -->
       <div class="nm-header">
@@ -551,8 +564,8 @@
      MODAL — Confirmer suppression
      ═══════════════════════════════════════════════════════════ -->
 @if (deleteId() !== null) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delShipTitle">
-    <div class="modal" style="max-width:420px">
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delShipTitle" (click)="cancelDelete()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
 
       <!-- Header -->
       <div class="nm-header">

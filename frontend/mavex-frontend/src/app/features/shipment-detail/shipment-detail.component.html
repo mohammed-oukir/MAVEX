@@ -33,8 +33,24 @@
   <!-- Page header -->
   <div class="sd-page-hd">
     <div>
-      <h1 class="sd-mawb">{{ shipment()!.mawb }}</h1>
-      <p class="sd-created">Créé par {{ shipment()!.createdBy || 'Système' }}</p>
+      <div class="sd-mawb-row">
+        <h1 class="sd-mawb">{{ shipment()!.mawb }}</h1>
+        <button type="button" class="sd-copy-btn"
+          [class.copied]="copiedText() === shipment()!.mawb"
+          (click)="copyToClipboard(shipment()!.mawb)"
+          [title]="copiedText() === shipment()!.mawb ? 'Copié !' : 'Copier le MAWB'"
+          [attr.aria-label]="'Copier ' + shipment()!.mawb">
+          @if (copiedText() === shipment()!.mawb) {
+            <svg width="13" height="13" fill="none" stroke="#22C55E" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          } @else {
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          }
+        </button>
+      </div>
+      <p class="sd-created">
+        Créé par {{ shipment()!.createdBy || 'Système' }}
+        @if (shipment()!.createdAt) { · {{ fmtDate(shipment()!.createdAt) }} }
+      </p>
     </div>
     <div class="sd-page-actions">
       <app-badge [status]="shipment()!.status" />
@@ -73,11 +89,11 @@
       </div>
       <div>
         <div class="sd-key">Départ</div>
-        <div class="sd-val">{{ shipment()!.exportDate || '—' }}</div>
+        <div class="sd-val">{{ fmtDate(shipment()!.exportDate) }}</div>
       </div>
       <div>
         <div class="sd-key">Arrivée</div>
-        <div class="sd-val">{{ shipment()!.importDate || '—' }}</div>
+        <div class="sd-val">{{ fmtDate(shipment()!.importDate) }}</div>
       </div>
       <div>
         <div class="sd-key">Duty Rate</div>
@@ -234,7 +250,22 @@
           <tbody>
             @for (o of filteredOrders(); track o.id) {
               <tr>
-                <td><span class="sd-hawb">{{ o.hawb }}</span></td>
+                <td>
+                  <div class="sd-hawb-cell">
+                    <span class="sd-hawb">{{ o.hawb }}</span>
+                    <button type="button" class="sd-copy-btn"
+                      [class.copied]="copiedText() === o.hawb"
+                      (click)="copyToClipboard(o.hawb)"
+                      [title]="copiedText() === o.hawb ? 'Copié !' : 'Copier le HAWB'"
+                      [attr.aria-label]="'Copier ' + o.hawb">
+                      @if (copiedText() === o.hawb) {
+                        <svg width="11" height="11" fill="none" stroke="#22C55E" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                      } @else {
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      }
+                    </button>
+                  </div>
+                </td>
                 <td>{{ o.clientFullName || '—' }}</td>
                 <td class="sd-muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
@@ -280,8 +311,8 @@
        MODAL — Nouvel Order
        ============================================================ -->
   @if (creatingOrder()) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle">
-      <div class="modal modal-lg">
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createOrderTitle" (click)="closeCreateOrder()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
         <div class="nm-header">
           <div class="nm-icon orange" aria-hidden="true">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
@@ -391,8 +422,8 @@
        MODAL — Modifier Order
        ============================================================ -->
   @if (editingOrder()) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editOrderTitle">
-      <div class="modal modal-lg">
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editOrderTitle" (click)="closeEditOrder()">
+      <div class="modal modal-lg" (click)="$event.stopPropagation()">
         <div class="nm-header">
           <div class="nm-icon orange" aria-hidden="true">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -502,8 +533,8 @@
        MODAL — Changer le statut
        ============================================================ -->
   @if (changingStatusOrder()) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="statusOrderTitle">
-      <div class="modal" style="max-width:480px">
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="statusOrderTitle" (click)="closeStatusModal()">
+      <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
         <div class="nm-header">
           <div class="nm-icon blue" aria-hidden="true">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
@@ -560,8 +591,8 @@
        MODAL — Supprimer Order
        ============================================================ -->
   @if (deleteOrderId() !== null) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle">
-      <div class="modal" style="max-width:420px">
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle" (click)="cancelDeleteOrder()">
+      <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
         <div class="nm-header">
           <div class="nm-icon red" aria-hidden="true">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -593,8 +624,8 @@
        MODAL — Modifier le Shipment
        ============================================================ -->
   @if (editingShipment()) {
-    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editShipTitle">
-      <div class="modal" style="max-width:520px">
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editShipTitle" (click)="closeEditShipment()">
+      <div class="modal" style="max-width:520px" (click)="$event.stopPropagation()">
         <div class="nm-header">
           <div class="nm-icon orange" aria-hidden="true">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
