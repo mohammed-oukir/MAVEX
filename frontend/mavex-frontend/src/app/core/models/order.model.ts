@@ -8,60 +8,84 @@ export type OrderStatus =
   | 'CANCELLED';
 
 export interface OrderResponse {
-  id: number;
-  hawb: string;
-  mawb?: string;
-  clientId?: number;
-  clientFullName?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  clientAddress?: string;
-  clientCity?: string;
-  clientCountry?: string;
-  companyName?: string;
-  goodsDescription?: string;
-  htsusCode?: string;
-  numberOfItems?: number;
+  id:               number;
+  hawb:             string;
+  mawb?:            string;
+  shipmentId?:      number;
+  clientId?:        number;
+  clientFullName?:  string;
+  clientEmail?:     string;
+  clientPhone?:     string;
+  clientAddress?:   string;
+  clientCity?:      string;
+  clientState?:     string;
+  clientZipCode?:   string;
+  clientCountry?:   string;
+  companyName?:     string;
+  goodsDescription?:   string;
+  htsusCode?:          string;
+  alternateReference?: string;
+  numberOfItems?:  number;
   shipmentWeight?: number;
-  customsValue?: number;
+  grossWeight?:    number;
+  customsValue?:   number;
   customsCurrency?: string;
-  dutyRate?: number;
-  dutyAmount?: number;
-  bankCharges?: number;
-  totalAmount?: number;
-  status: OrderStatus;
-  shipmentId?: number;
-  createdAt?: string;
+  dutyRate?:       number;
+  dutyAmount?:     number;
+  bankCharges?:    number;
+  totalAmount?:    number;
+  enteredValue?:   number;
+  status:          OrderStatus;
+  paymentToken?:   string;
+  tokenExpiresAt?: string;
+  tokenValid?:     boolean;
+  emailSentAt?:    string;
+  createdAt?:      string;
+  updatedAt?:      string;
 }
 
 export interface OrderRequest {
-  hawb: string;
-  shipmentId: number;
-  clientId: number;
-  numberOfItems?: number;
+  hawb:             string;
+  shipmentId:       number;
+  clientId:         number;
+  numberOfItems?:   number;
   goodsDescription?: string;
-  shipmentWeight?: number;
-  htsusCode?: string;
-  customsValue?: number;
+  shipmentWeight?:  number;
+  htsusCode?:       string;
+  customsValue?:    number;
   customsCurrency?: string;
-  dutyRate?: number;
-  bankCharges?: number;
+  dutyRate?:        number;
+  bankCharges?:     number;
 }
 
 export interface OrderPatch {
-  hawb?: string;
-  clientId?: number;
-  numberOfItems?: number;
+  hawb?:            string;
+  clientId?:        number;
+  numberOfItems?:   number;
   goodsDescription?: string;
-  shipmentWeight?: number;
-  htsusCode?: string;
-  customsValue?: number;
+  shipmentWeight?:  number;
+  htsusCode?:       string;
+  customsValue?:    number;
   customsCurrency?: string;
-  dutyRate?: number;
-  bankCharges?: number;
+  dutyRate?:        number;
+  bankCharges?:     number;
 }
 
 export interface OrderStatusUpdate {
   newStatus: OrderStatus;
-  note?: string;
+  note?:     string;
+}
+
+export interface OrderSearchParams {
+  q?:          string;
+  status?:     OrderStatus | '';
+  shipmentId?: number;
+  from?:       string;
+  to?:         string;
+}
+
+export interface BulkEmailResult {
+  total:  number;
+  sent:   number;
+  failed: number;
 }

@@ -4,6 +4,7 @@ import com.medafrica.mavex.model.enums.ImportStatus;
 import com.medafrica.mavex.model.security.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -64,16 +65,6 @@ public class ImportLog {
     @Column(name = "failed_rows")
     private int failedRows;
 
-    /** JSON detail des erreurs par ligne */
-    @Lob
-    @Column(name = "error_details", columnDefinition = "TEXT")
-    private String errorDetails;
-
-    /** JSON detail des lignes ignorees + raison */
-    @Lob
-    @Column(name = "skipped_details", columnDefinition = "TEXT")
-    private String skippedDetails;
-
     /** Agent qui a uploade le fichier */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "imported_by")
@@ -87,6 +78,7 @@ public class ImportLog {
 
     /** Detail ligne par ligne */
     @OneToMany(mappedBy = "importLog", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     @Builder.Default
     private List<ImportRowLog> rowLogs = new ArrayList<>();
 

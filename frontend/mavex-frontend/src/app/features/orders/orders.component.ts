@@ -2,168 +2,219 @@ import {
   ChangeDetectionStrategy, Component, DestroyRef, OnInit,
   computed, inject, signal,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { DatePipe }   from '@angular/common';
+import { Subject }    from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { forkJoin }   from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LayoutService } from '../../core/services/layout.service';
-import { OrderService } from '../../core/services/order.service';
-import { ShipmentService } from '../../core/services/shipment.service';
-import { ClientService } from '../../core/services/client.service';
-import { EmailService } from '../../core/services/email.service';
-import { ToastService } from '../../core/services/toast.service';
+import { LayoutService }  from '../../core/services/layout.service';
+import { OrderService }   from '../../core/services/order.service';
+import { EmailService }   from '../../core/services/email.service';
+import { ToastService }   from '../../core/services/toast.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
-import { OrderResponse, OrderRequest } from '../../core/models/order.model';
-import { ShipmentResponse } from '../../core/models/shipment.model';
-import { ClientResponse } from '../../core/models/client.model';
-
-interface OrderGroup {
-  mawb:       string;
-  shipmentId: number;
-  orders:     OrderResponse[];
-}
+import { BulkEmailResult, OrderResponse, OrderStatus } from '../../core/models/order.model';
 
 @Component({
   selector: 'app-orders',
-  imports: [ReactiveFormsModule, BadgeComponent],
+  imports: [RouterLink, DatePipe, BadgeComponent],
   templateUrl: './orders.component.html',
+  styleUrl:    './orders.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrdersComponent implements OnInit {
   private readonly layout     = inject(LayoutService);
   private readonly orderSvc   = inject(OrderService);
-  private readonly shipSvc    = inject(ShipmentService);
-  private readonly clientSvc  = inject(ClientService);
   private readonly emailSvc   = inject(EmailService);
   private readonly toast      = inject(ToastService);
-  private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  orders      = signal<OrderResponse[]>([]);
-  shipments   = signal<ShipmentResponse[]>([]);
-  clients     = signal<ClientResponse[]>([]);
-  loading     = signal(true);
-  search      = signal('');
-  statusFilter = signal('');
-  expanded    = signal<Set<string>>(new Set());
+  private readonly searchSubject = new Subject<string>();
 
-  showModal   = signal(false);
-  editingId   = signal<number | null>(null);
-  saving      = signal(false);
-  deleteId    = signal<number | null>(null);
-  deleting    = signal(false);
+  /* ── Data ─────────────────────────────────────────────── */
+  orders  = signal<OrderResponse[]>([]);
+  total   = signal(0);
+  page    = signal(0);
+  loading = signal(true);
+  readonly pageSize = 20;
+
+  /* ── KPIs ─────────────────────────────────────────────── */
+  kpiTotal   = signal(0);
+  kpiNoEmail = signal(0);
+  kpiPending = signal(0);
+  kpiPaid    = signal(0);
+
+  /* ── Filtres ──────────────────────────────────────────── */
+  searchQ   = signal('');
+  statusTab = signal<OrderStatus | ''>('');
+  fromDate  = signal('');
+  toDate    = signal('');
+
+  /* ── Sélection bulk ───────────────────────────────────── */
+  selectedIds  = signal<Set<number>>(new Set());
+  someSelected = computed(() => this.selectedIds().size > 0);
+  allSelected  = computed(() => this.orders().length > 0 && this.selectedIds().size === this.orders().length);
+  selCount     = computed(() => this.selectedIds().size);
+
+  /* ── Actions ──────────────────────────────────────────── */
   sendingId   = signal<number | null>(null);
-  sendingAll  = signal<number | null>(null);
+  bulkLoading = signal(false);
+  bulkConfirm = signal<'email' | 'paid' | null>(null);
+  lastBulkResult = signal<BulkEmailResult | null>(null);
 
-  orderForm = this.fb.group({
-    shipmentId:       [null as number | null, Validators.required],
-    clientId:         [null as number | null, Validators.required],
-    hawb:             ['', Validators.required],
-    numberOfItems:    [null as number | null],
-    goodsDescription: [''],
-    shipmentWeight:   [null as number | null],
-    htsusCode:        [''],
-    customsValue:     [null as number | null],
-    customsCurrency:  ['USD'],
-    dutyRate:         [null as number | null],
-    bankCharges:      [0],
-  });
+  /* ── Modals ───────────────────────────────────────────── */
+  detail   = signal<OrderResponse | null>(null);
+  deleteId = signal<number | null>(null);
+  deleting = signal(false);
 
-  filteredOrders = computed(() => {
-    const q = this.search().toLowerCase();
-    const s = this.statusFilter();
-    return this.orders().filter(o => {
-      const matchQ = !q || (o.hawb?.toLowerCase().includes(q) || o.clientFullName?.toLowerCase().includes(q) || o.mawb?.toLowerCase().includes(q));
-      const matchS = !s || o.status === s;
-      return matchQ && matchS;
-    });
-  });
+  /* ── Computed ─────────────────────────────────────────── */
+  totalPages  = computed(() => Math.ceil(this.total() / this.pageSize));
+  hasFilters  = computed(() => !!this.searchQ() || !!this.statusTab() || !!this.fromDate() || !!this.toDate());
 
-  groups = computed<OrderGroup[]>(() => {
-    const map = new Map<string, OrderGroup>();
-    for (const o of this.filteredOrders()) {
-      const key = o.mawb || 'Sans MAWB';
-      if (!map.has(key)) map.set(key, { mawb: key, shipmentId: o.shipmentId ?? 0, orders: [] });
-      map.get(key)!.orders.push(o);
-    }
-    return Array.from(map.values());
-  });
-
-  totalOrders   = computed(() => this.orders().length);
-  paidCount     = computed(() => this.orders().filter(o => o.status === 'PAID').length);
-  pendingCount  = computed(() => this.orders().filter(o => o.status === 'PENDING_PAYMENT').length);
-  emailCount    = computed(() => this.orders().filter(o => o.status === 'EMAIL_SENT').length);
-
+  /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
-    this.layout.setPage('Orders', { label: 'Nouvel order', onClick: () => this.openCreate() });
+    this.layout.setPage('Orders');
+
+    this.searchSubject.pipe(
+      debounceTime(350),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(q => {
+      this.searchQ.set(q);
+      this.page.set(0);
+      this.loadOrders();
+    });
+
+    this.loadKpis();
     this.loadOrders();
-    this.loadDropdowns();
   }
 
-  toggleGroup(mawb: string): void {
-    this.expanded.update(s => {
+  /* ── Chargement ───────────────────────────────────────── */
+  private loadOrders(): void {
+    this.loading.set(true);
+    this.selectedIds.set(new Set());
+    this.orderSvc.search({
+      q:          this.searchQ()   || undefined,
+      status:     this.statusTab() || undefined,
+      from:       this.fromDate()  || undefined,
+      to:         this.toDate()    || undefined,
+    }, this.page(), this.pageSize)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: p => { this.orders.set(p.content); this.total.set(p.totalElements); this.loading.set(false); },
+      error: ()  => this.loading.set(false),
+    });
+  }
+
+  private loadKpis(): void {
+    forkJoin({
+      all:     this.orderSvc.search({}, 0, 1),
+      noEmail: this.orderSvc.search({ status: 'CREATED' }, 0, 1),
+      pending: this.orderSvc.search({ status: 'PENDING_PAYMENT' }, 0, 1),
+      paid:    this.orderSvc.search({ status: 'PAID' }, 0, 1),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ all, noEmail, pending, paid }) => {
+        this.kpiTotal.set(all.totalElements);
+        this.kpiNoEmail.set(noEmail.totalElements);
+        this.kpiPending.set(pending.totalElements);
+        this.kpiPaid.set(paid.totalElements);
+      },
+    });
+  }
+
+  /* ── Filtres ──────────────────────────────────────────── */
+  onSearchInput(e: Event): void {
+    this.searchSubject.next((e.target as HTMLInputElement).value);
+  }
+
+  setTab(tab: OrderStatus | ''): void {
+    this.statusTab.set(tab);
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  applyDates(): void { this.page.set(0); this.loadOrders(); }
+
+  clearFilters(): void {
+    this.searchQ.set('');
+    this.statusTab.set('');
+    this.fromDate.set('');
+    this.toDate.set('');
+    this.page.set(0);
+    this.loadOrders();
+  }
+
+  /* ── Sélection ────────────────────────────────────────── */
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
       const n = new Set(s);
-      n.has(mawb) ? n.delete(mawb) : n.add(mawb);
+      n.has(id) ? n.delete(id) : n.add(id);
       return n;
     });
   }
 
-  isExpanded(mawb: string): boolean { return this.expanded().has(mawb); }
-
-  openCreate(): void {
-    this.editingId.set(null);
-    this.orderForm.reset({ customsCurrency: 'USD', bankCharges: 0 });
-    this.showModal.set(true);
+  toggleAll(): void {
+    this.allSelected()
+      ? this.selectedIds.set(new Set())
+      : this.selectedIds.set(new Set(this.orders().map(o => o.id)));
   }
 
-  openEdit(o: OrderResponse): void {
-    this.editingId.set(o.id);
-    this.orderForm.patchValue({
-      shipmentId: o.shipmentId ?? null,
-      clientId:   o.clientId ?? null,
-      hawb:       o.hawb,
-      numberOfItems: o.numberOfItems ?? null,
-      goodsDescription: o.goodsDescription ?? '',
-      shipmentWeight:   o.shipmentWeight ?? null,
-      htsusCode:        o.htsusCode ?? '',
-      customsValue:     o.customsValue ?? null,
-      customsCurrency:  o.customsCurrency ?? 'USD',
-      dutyRate:         o.dutyRate ?? null,
-      bankCharges:      o.bankCharges ?? 0,
-    });
-    this.showModal.set(true);
-  }
+  isSelected(id: number): boolean { return this.selectedIds().has(id); }
+  clearSelection(): void          { this.selectedIds.set(new Set()); }
 
-  closeModal(): void { this.showModal.set(false); }
-
-  save(): void {
-    if (this.orderForm.invalid) { this.orderForm.markAllAsTouched(); return; }
-    this.saving.set(true);
-    const v    = this.orderForm.value;
-    const req: OrderRequest = {
-      hawb:             v.hawb!,
-      shipmentId:       v.shipmentId!,
-      clientId:         v.clientId!,
-      numberOfItems:    v.numberOfItems ?? undefined,
-      goodsDescription: v.goodsDescription ?? undefined,
-      shipmentWeight:   v.shipmentWeight ?? undefined,
-      htsusCode:        v.htsusCode ?? undefined,
-      customsValue:     v.customsValue ?? undefined,
-      customsCurrency:  v.customsCurrency ?? undefined,
-      dutyRate:         v.dutyRate ?? undefined,
-      bankCharges:      v.bankCharges ?? undefined,
-    };
-    const id = this.editingId();
-    const call = id ? this.orderSvc.update(id, req) : this.orderSvc.create(req);
-    call.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+  /* ── Email unitaire ───────────────────────────────────── */
+  sendEmail(id: number): void {
+    this.sendingId.set(id);
+    this.emailSvc.sendToOrder(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.saving.set(false);
-        this.showModal.set(false);
-        this.toast.success(id ? 'Order mis à jour.' : 'Order créé.');
-        this.loadOrders();
+        this.sendingId.set(null);
+        this.toast.success('Email envoyé avec succès.');
+        this.loadOrders(); this.loadKpis();
       },
-      error: err => { this.saving.set(false); this.toast.error(err?.error?.message || 'Erreur.'); },
+      error: err => { this.sendingId.set(null); this.toast.error(err?.error?.message || 'Erreur envoi email.'); },
     });
   }
 
+  /* ── Bulk actions ─────────────────────────────────────── */
+  openBulkConfirm(action: 'email' | 'paid'): void { this.bulkConfirm.set(action); }
+  closeBulkConfirm(): void                         { this.bulkConfirm.set(null); }
+
+  executeBulkEmail(): void {
+    const ids = Array.from(this.selectedIds());
+    this.bulkLoading.set(true);
+    this.bulkConfirm.set(null);
+    this.orderSvc.bulkEmail(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: r => {
+        this.bulkLoading.set(false);
+        this.lastBulkResult.set(r);
+        this.clearSelection();
+        this.toast.success(`${r.sent}/${r.total} email(s) envoyé(s)${r.failed > 0 ? ` — ${r.failed} échec(s)` : ''}.`);
+        this.loadOrders(); this.loadKpis();
+      },
+      error: () => { this.bulkLoading.set(false); this.toast.error('Erreur lors de l\'envoi.'); },
+    });
+  }
+
+  executeBulkPaid(): void {
+    const ids = Array.from(this.selectedIds());
+    this.bulkLoading.set(true);
+    this.bulkConfirm.set(null);
+    this.orderSvc.bulkStatus(ids, 'PAID', 'Paiement enregistré en masse').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.bulkLoading.set(false);
+        this.clearSelection();
+        this.toast.success(`${ids.length} order(s) marqués comme payés.`);
+        this.loadOrders(); this.loadKpis();
+      },
+      error: () => { this.bulkLoading.set(false); this.toast.error('Erreur lors de la mise à jour.'); },
+    });
+  }
+
+  /* ── Detail ───────────────────────────────────────────── */
+  openDetail(o: OrderResponse): void { this.detail.set(o); }
+  closeDetail(): void                { this.detail.set(null); }
+
+  /* ── Suppression ──────────────────────────────────────── */
   confirmDelete(id: number): void { this.deleteId.set(id); }
   cancelDelete(): void            { this.deleteId.set(null); }
 
@@ -172,42 +223,70 @@ export class OrdersComponent implements OnInit {
     if (!id) return;
     this.deleting.set(true);
     this.orderSvc.delete(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => { this.deleting.set(false); this.deleteId.set(null); this.toast.success('Order supprimé.'); this.loadOrders(); },
+      next: () => {
+        this.deleting.set(false); this.deleteId.set(null);
+        this.toast.success('Order supprimé.'); this.loadOrders(); this.loadKpis();
+      },
       error: () => { this.deleting.set(false); this.toast.error('Erreur.'); },
     });
   }
 
-  sendEmail(id: number): void {
-    this.sendingId.set(id);
-    this.emailSvc.sendToOrder(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => { this.sendingId.set(null); this.toast.success('Email envoyé.'); this.loadOrders(); },
-      error: err => { this.sendingId.set(null); this.toast.error(err?.error?.message || 'Erreur envoi email.'); },
-    });
+  /* ── Pagination ───────────────────────────────────────── */
+  goToPage(p: number): void { this.page.set(p); this.loadOrders(); }
+  pagesArray(): number[]    { return Array.from({ length: this.totalPages() }, (_, i) => i); }
+
+  /* ── Helpers ──────────────────────────────────────────── */
+  fmtAmount(n?: number | null): string {
+    if (n == null) return '—';
+    return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' MAD';
   }
 
-  sendAll(shipmentId: number): void {
-    this.sendingAll.set(shipmentId);
-    this.emailSvc.sendToShipment(shipmentId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => { this.sendingAll.set(null); this.toast.success('Emails envoyés.'); this.loadOrders(); },
-      error: err => { this.sendingAll.set(null); this.toast.error(err?.error?.message || 'Erreur.'); },
-    });
+  fmtWeight(n?: number | null): string {
+    if (n == null) return '—';
+    return n.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' kg';
   }
 
-  fieldInvalid(name: string): boolean {
-    const c = this.orderForm.get(name);
-    return !!(c?.invalid && c?.touched);
+  fmtDuty(rate?: number | null): string {
+    if (rate == null) return '—';
+    return (Math.round(rate * 10000) / 100) + ' %';
   }
 
-  private loadOrders(): void {
-    this.loading.set(true);
-    this.orderSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: list => { this.orders.set(list); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
+  statusLabel(s: OrderStatus): string {
+    const labels: Record<OrderStatus, string> = {
+      CREATED:         'Créé',
+      EMAIL_SENT:      'Email envoyé',
+      PENDING_PAYMENT: 'En attente',
+      PAID:            'Payé',
+      IN_DELIVERY:     'En livraison',
+      DELIVERED:       'Livré',
+      CANCELLED:       'Annulé',
+    };
+    return labels[s] ?? s;
   }
 
-  private loadDropdowns(): void {
-    this.shipSvc.getAllUnpaged().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: p => this.shipments.set(p.content) });
-    this.clientSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: list => this.clients.set(list) });
+  statusClass(s: OrderStatus): string {
+    const map: Record<OrderStatus, string> = {
+      CREATED:         'or-s-created',
+      EMAIL_SENT:      'or-s-email',
+      PENDING_PAYMENT: 'or-s-pending',
+      PAID:            'or-s-paid',
+      IN_DELIVERY:     'or-s-delivery',
+      DELIVERED:       'or-s-delivered',
+      CANCELLED:       'or-s-cancelled',
+    };
+    return map[s] ?? '';
+  }
+
+  rowClass(s: OrderStatus): string {
+    const map: Record<OrderStatus, string> = {
+      CREATED:         'or-row-created',
+      EMAIL_SENT:      'or-row-email',
+      PENDING_PAYMENT: 'or-row-pending',
+      PAID:            'or-row-paid',
+      IN_DELIVERY:     'or-row-delivery',
+      DELIVERED:       'or-row-delivered',
+      CANCELLED:       'or-row-cancelled',
+    };
+    return map[s] ?? '';
   }
 }

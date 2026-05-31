@@ -1,277 +1,429 @@
-<!-- Stats -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-xl-3">
-    <div class="card stat-card">
-      <div class="card-body d-flex align-items-start justify-content-between p-3">
-        <div><div class="stat-value">{{ totalOrders() }}</div><div class="text-muted" style="font-size:13px">Total</div></div>
-        <div class="stat-icon blue"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-      </div>
+<!-- ══════════════════════════════════════════════════════════
+     KPI CARDS
+     ══════════════════════════════════════════════════════════ -->
+<div class="or-kpi-grid mb-4">
+
+  <button type="button" class="or-kpi-card" [class.or-kpi-active]="statusTab() === ''" (click)="setTab('')" aria-label="Tous les orders">
+    <div class="or-kpi-icon or-kpi-dark">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="card stat-card">
-      <div class="card-body d-flex align-items-start justify-content-between p-3">
-        <div><div class="stat-value">{{ paidCount() }}</div><div class="text-muted" style="font-size:13px">Payés</div></div>
-        <div class="stat-icon green"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiTotal() }}</div>
+      <div class="or-kpi-lbl">Total orders</div>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="card stat-card">
-      <div class="card-body d-flex align-items-start justify-content-between p-3">
-        <div><div class="stat-value">{{ pendingCount() }}</div><div class="text-muted" style="font-size:13px">En attente</div></div>
-        <div class="stat-icon orange"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-      </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-amber" [class.or-kpi-active]="statusTab() === 'CREATED'" (click)="setTab('CREATED')" aria-label="Email non envoyé">
+    <div class="or-kpi-icon or-kpi-amber-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     </div>
-  </div>
-  <div class="col-6 col-xl-3">
-    <div class="card stat-card">
-      <div class="card-body d-flex align-items-start justify-content-between p-3">
-        <div><div class="stat-value">{{ emailCount() }}</div><div class="text-muted" style="font-size:13px">Emails envoyés</div></div>
-        <div class="stat-icon gold"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiNoEmail() }}</div>
+      <div class="or-kpi-lbl">Email non envoyé</div>
+    </div>
+    @if (kpiNoEmail() > 0) { <div class="or-kpi-alert" aria-hidden="true">!</div> }
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-blue" [class.or-kpi-active]="statusTab() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" aria-label="En attente de paiement">
+    <div class="or-kpi-icon or-kpi-blue-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiPending() }}</div>
+      <div class="or-kpi-lbl">En attente paiement</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="statusTab() === 'PAID'" (click)="setTab('PAID')" aria-label="Payés">
+    <div class="or-kpi-icon or-kpi-green-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiPaid() }}</div>
+      <div class="or-kpi-lbl">Payés</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     FILTRES + TABS
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-0">
+    <div class="or-filter-bar">
+      <div class="or-search-wrap">
+        <svg class="or-search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" class="or-search-input" placeholder="HAWB, nom client, email…"
+          [value]="searchQ()" (input)="onSearchInput($event)" aria-label="Rechercher" />
       </div>
+      <div class="or-date-wrap">
+        <label class="or-date-lbl" for="or-from">Du</label>
+        <input id="or-from" type="date" class="or-date-input" [value]="fromDate()"
+          (change)="fromDate.set($any($event.target).value); applyDates()" />
+      </div>
+      <div class="or-date-wrap">
+        <label class="or-date-lbl" for="or-to">Au</label>
+        <input id="or-to" type="date" class="or-date-input" [value]="toDate()"
+          (change)="toDate.set($any($event.target).value); applyDates()" />
+      </div>
+      @if (hasFilters()) {
+        <button type="button" class="or-clear-btn" (click)="clearFilters()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Effacer
+        </button>
+      }
+      <span class="or-total-badge ms-auto">{{ total() }} résultat(s)</span>
+    </div>
+
+    <div class="or-tab-bar" role="tablist">
+      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === ''" (click)="setTab('')" role="tab">Tous</button>
+      <button type="button" class="or-tab or-tab-amber" [class.or-tab-active]="statusTab() === 'CREATED'" (click)="setTab('CREATED')" role="tab">
+        Non envoyés @if (kpiNoEmail() > 0) { <span class="or-tab-pill">{{ kpiNoEmail() }}</span> }
+      </button>
+      <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="statusTab() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" role="tab">Email envoyé</button>
+      <button type="button" class="or-tab or-tab-pending" [class.or-tab-active]="statusTab() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" role="tab">
+        En attente @if (kpiPending() > 0) { <span class="or-tab-pill or-tab-pill-amber">{{ kpiPending() }}</span> }
+      </button>
+      <button type="button" class="or-tab or-tab-green" [class.or-tab-active]="statusTab() === 'PAID'" (click)="setTab('PAID')" role="tab">Payés</button>
+      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === 'IN_DELIVERY'" (click)="setTab('IN_DELIVERY')" role="tab">En livraison</button>
+      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === 'DELIVERED'" (click)="setTab('DELIVERED')" role="tab">Livrés</button>
     </div>
   </div>
 </div>
 
-<!-- Filters -->
-<div class="card mb-4">
-  <div class="card-body d-flex align-items-center gap-2 flex-wrap p-3">
-    <div class="flex-fill" style="min-width:200px;position:relative">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input
-        type="search"
-        class="form-control form-control-sm ps-4"
-        placeholder="Rechercher HAWB, client, MAWB…"
-        [value]="search()"
-        (input)="search.set($any($event.target).value)"
-        aria-label="Rechercher"
-      />
+
+<!-- ══════════════════════════════════════════════════════════
+     BULK ACTION BAR
+     ══════════════════════════════════════════════════════════ -->
+@if (someSelected()) {
+  <div class="or-bulk-bar" role="toolbar" aria-label="Actions groupées">
+    <div class="or-bulk-info">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <strong>{{ selCount() }}</strong> order(s) sélectionné(s)
     </div>
-    <select
-      class="form-select form-select-sm"
-      style="width:auto"
-      [value]="statusFilter()"
-      (change)="statusFilter.set($any($event.target).value)"
-      aria-label="Filtrer par statut"
-    >
-      <option value="">Tous les statuts</option>
-      <option value="CREATED">CREATED</option>
-      <option value="EMAIL_SENT">EMAIL_SENT</option>
-      <option value="PENDING_PAYMENT">PENDING_PAYMENT</option>
-      <option value="PAID">PAID</option>
-      <option value="IN_DELIVERY">IN_DELIVERY</option>
-      <option value="DELIVERED">DELIVERED</option>
-    </select>
+    <div class="or-bulk-actions">
+      <button type="button" class="or-bulk-btn or-bulk-email" [disabled]="bulkLoading()" (click)="openBulkConfirm('email')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Envoyer emails ({{ selCount() }})
+      </button>
+      <button type="button" class="or-bulk-btn or-bulk-paid" [disabled]="bulkLoading()" (click)="openBulkConfirm('paid')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Marquer payés ({{ selCount() }})
+      </button>
+      <button type="button" class="or-bulk-clear" (click)="clearSelection()" aria-label="Désélectionner">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
   </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TABLE
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table or-table align-middle mb-0" aria-label="Liste des orders">
+      <thead>
+        <tr class="or-thead">
+          <th scope="col" style="width:44px;text-align:center">
+            <input type="checkbox" class="form-check-input or-check" [checked]="allSelected()" (change)="toggleAll()" aria-label="Sélectionner tout" />
+          </th>
+          <th scope="col">HAWB</th>
+          <th scope="col">Client</th>
+          <th scope="col">Shipment</th>
+          <th scope="col" class="text-end">Poids</th>
+          <th scope="col" class="text-end">Valeur</th>
+          <th scope="col" class="text-end">Total dû</th>
+          <th scope="col">Statut</th>
+          <th scope="col" class="text-center">✉</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <tr>
+              @for (j of [44,100,140,120,60,80,90,80,40,80]; track j) {
+                <td><div class="or-sk" [style.width.px]="j"></div></td>
+              }
+            </tr>
+          }
+        } @else if (orders().length === 0) {
+          <tr>
+            <td colspan="10" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="or-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucun order trouvé</p>
+                  @if (hasFilters()) {
+                    <p class="text-muted mb-2" style="font-size:13px">Essayez de modifier vos filtres</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Effacer les filtres</button>
+                  } @else {
+                    <p class="text-muted mb-0" style="font-size:13px">Importez un manifeste Excel pour créer des orders</p>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (o of orders(); track o.id) {
+            <tr [class]="'or-row ' + rowClass(o.status)" [class.or-row-selected]="isSelected(o.id)">
+
+              <td style="text-align:center">
+                <input type="checkbox" class="form-check-input or-check" [checked]="isSelected(o.id)" (change)="toggleSelect(o.id)" [attr.aria-label]="'Sélectionner ' + o.hawb" />
+              </td>
+
+              <td>
+                <button type="button" class="or-hawb-btn" (click)="openDetail(o)">{{ o.hawb }}</button>
+                @if (o.alternateReference) { <div class="or-alt-ref">{{ o.alternateReference }}</div> }
+              </td>
+
+              <td>
+                <div class="or-client-name">{{ o.clientFullName || '—' }}</div>
+                @if (o.clientEmail) { <div class="or-client-email">{{ o.clientEmail }}</div> }
+              </td>
+
+              <td>
+                @if (o.shipmentId) {
+                  <a [routerLink]="['/shipments', o.shipmentId]" class="or-mawb-link">{{ o.mawb || '—' }}</a>
+                }
+                @if (o.companyName) { <div class="or-shipper">{{ o.companyName }}</div> }
+              </td>
+
+              <td class="text-end or-num">{{ fmtWeight(o.shipmentWeight) }}</td>
+
+              <td class="text-end or-num">
+                {{ o.customsValue?.toLocaleString('fr-FR') ?? '—' }}
+                @if (o.customsCurrency) { <span class="or-currency">{{ o.customsCurrency }}</span> }
+              </td>
+
+              <td class="text-end">
+                <span class="or-total-amount">{{ fmtAmount(o.totalAmount) }}</span>
+                @if (o.dutyRate) { <div class="or-duty-rate">{{ fmtDuty(o.dutyRate) }}</div> }
+              </td>
+
+              <td><span [class]="'or-status-badge ' + statusClass(o.status)">{{ statusLabel(o.status) }}</span></td>
+
+              <td style="text-align:center">
+                @if (o.emailSentAt) {
+                  <span class="or-email-sent" [title]="(o.emailSentAt | date:'dd/MM/yy HH:mm') ?? ''" aria-label="Email envoyé">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  </span>
+                } @else {
+                  <span class="or-email-none" aria-label="Email non envoyé">–</span>
+                }
+              </td>
+
+              <td>
+                <div class="d-flex gap-1 justify-content-end">
+                  <button type="button" class="or-act-btn or-act-view" (click)="openDetail(o)" title="Voir le détail" aria-label="Détail">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'PENDING_PAYMENT') {
+                    <button type="button" class="or-act-btn or-act-email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer l'email" [attr.aria-label]="'Envoyer email à ' + o.clientFullName">
+                      @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
+                      @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> }
+                    </button>
+                  }
+                  <button type="button" class="or-act-btn or-act-del" (click)="confirmDelete(o.id)" title="Supprimer" aria-label="Supprimer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages() > 1) {
+    <div class="or-pagination">
+      <span class="or-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ total() }} résultats</span>
+      <div class="d-flex gap-1">
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pagesArray(); track p) {
+          <button type="button" class="or-pg-btn" [class.or-pg-active]="p === page()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  }
 </div>
 
-<!-- Grouped accordion -->
-@if (loading()) {
-  <div class="text-center text-muted py-5">
-    <div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Chargement…</span></div>
-  </div>
-} @else if (groups().length === 0) {
-  <div class="card"><div class="card-body text-center text-muted py-5">Aucun order trouvé.</div></div>
-} @else {
-  @for (g of groups(); track g.mawb) {
-    <div class="card mb-3">
-      <!-- Group header -->
-      <div
-        class="card-header d-flex align-items-center justify-content-between py-3 px-4"
-        style="cursor:pointer"
-        (click)="toggleGroup(g.mawb)"
-        role="button"
-        [attr.aria-expanded]="isExpanded(g.mawb)"
-        [attr.aria-controls]="'group-' + g.mawb"
-      >
-        <div class="d-flex align-items-center gap-3">
-          <svg
-            width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-            [style.transform]="isExpanded(g.mawb) ? 'rotate(90deg)' : ''"
-            style="transition:transform .2s" aria-hidden="true"
-          ><polyline points="9 18 15 12 9 6"/></svg>
-          <span class="font-syne fw-bold">{{ g.mawb }}</span>
-          <span class="badge bg-secondary">{{ g.orders.length }} order{{ g.orders.length > 1 ? 's' : '' }}</span>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Bulk confirm
+     ══════════════════════════════════════════════════════════ -->
+@if (bulkConfirm()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bulk-title" (click)="closeBulkConfirm()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div [class]="bulkConfirm() === 'email' ? 'nm-icon blue' : 'nm-icon green'" aria-hidden="true">
+          @if (bulkConfirm() === 'email') {
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          } @else {
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          }
         </div>
-        <button
-          type="button"
-          class="btn btn-sm btn-outline-primary"
-          [disabled]="sendingAll() === g.shipmentId"
-          (click)="$event.stopPropagation(); sendAll(g.shipmentId)"
-          aria-label="Envoyer tous les emails pour ce shipment"
-        >
-          @if (sendingAll() === g.shipmentId) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
-          Envoyer tous les emails
+        <div style="flex:1;min-width:0">
+          <h2 id="bulk-title" class="nm-title">
+            @if (bulkConfirm() === 'email') { Envoyer {{ selCount() }} email(s) }
+            @else { Marquer {{ selCount() }} order(s) comme payés }
+          </h2>
+          <p class="nm-sub">Action appliquée à tous les orders sélectionnés.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeBulkConfirm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        @if (bulkConfirm() === 'email') {
+          <p class="mb-0" style="font-size:13px">Un email avec le lien de paiement sera envoyé à chaque destinataire des {{ selCount() }} orders sélectionnés.</p>
+        } @else {
+          <p class="nm-alert">Les {{ selCount() }} orders passeront au statut <strong>Payé</strong>.</p>
+        }
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeBulkConfirm()">Annuler</button>
+        @if (bulkConfirm() === 'email') {
+          <button type="button" class="nm-btn-primary" [disabled]="bulkLoading()" (click)="executeBulkEmail()">
+            @if (bulkLoading()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Envoi… }
+            @else { Envoyer les emails }
+          </button>
+        } @else {
+          <button type="button" class="nm-btn-primary" [disabled]="bulkLoading()" (click)="executeBulkPaid()">
+            @if (bulkLoading()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Mise à jour… }
+            @else { Confirmer }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Détail order
+     ══════════════════════════════════════════════════════════ -->
+@if (detail(); as o) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle" (click)="closeDetail()">
+    <div class="modal or-detail-modal" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="detailTitle" class="nm-title">{{ o.hawb }}</h2>
+          <p class="nm-sub">
+            <span [class]="'or-status-badge ' + statusClass(o.status)">{{ statusLabel(o.status) }}</span>
+            <span class="ms-2 text-muted" style="font-size:12px">Créé le {{ o.createdAt | date:'dd/MM/yyyy' }}</span>
+          </p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeDetail()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <!-- Group body -->
-      @if (isExpanded(g.mawb)) {
-        <div [id]="'group-' + g.mawb" class="table-responsive">
-          <table class="table table-hover mb-0" [attr.aria-label]="'Orders du shipment ' + g.mawb">
-            <thead>
-              <tr>
-                <th scope="col">HAWB</th>
-                <th scope="col">Client</th>
-                <th scope="col">Email</th>
-                <th scope="col">Description</th>
-                <th scope="col">Poids</th>
-                <th scope="col">Customs</th>
-                <th scope="col">Total</th>
-                <th scope="col">Statut</th>
-                <th scope="col" class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (o of g.orders; track o.id) {
-                <tr style="cursor:default">
-                  <td><strong>{{ o.hawb }}</strong></td>
-                  <td class="td-muted">{{ o.clientFullName || '—' }}</td>
-                  <td class="td-muted">{{ o.clientEmail || '—' }}</td>
-                  <td class="td-muted">{{ o.goodsDescription || '—' }}</td>
-                  <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
-                  <td>{{ o.customsValue != null ? o.customsValue + ' ' + (o.customsCurrency || 'USD') : '—' }}</td>
-                  <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
-                  <td><app-badge [status]="o.status" /></td>
-                  <td class="text-end" style="white-space:nowrap">
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      [disabled]="sendingId() === o.id"
-                      (click)="sendEmail(o.id)"
-                      aria-label="Envoyer l'email"
-                    >
-                      @if (sendingId() === o.id) { <span class="spinner-border spinner-border-sm" aria-hidden="true"></span> }
-                      @else { Email }
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(o)" aria-label="Modifier">Éditer</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="confirmDelete(o.id)" aria-label="Supprimer">✕</button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </div>
-  }
-}
-
-<!-- Create / Edit modal -->
-@if (showModal()) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-labelledby]="'orderModalTitle'" (click)="closeModal()">
-    <div class="modal modal-lg" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <span id="orderModalTitle" class="modal-title font-syne">
-          {{ editingId() ? 'Modifier l\'order' : 'Nouvel order' }}
-        </span>
-        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fermer"></button>
-      </div>
-
-      <form [formGroup]="orderForm" (ngSubmit)="save()" novalidate>
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="oShipment" class="form-label fw-medium" style="font-size:13px">Shipment <span aria-hidden="true">*</span></label>
-              <select id="oShipment" class="form-select" [class.is-invalid]="fieldInvalid('shipmentId')" formControlName="shipmentId">
-                <option [ngValue]="null">-- Sélectionner --</option>
-                @for (s of shipments(); track s.id) {
-                  <option [value]="s.id">{{ s.mawb }}</option>
-                }
-              </select>
-              @if (fieldInvalid('shipmentId')) { <div class="invalid-feedback">Requis.</div> }
+      <div class="nm-body">
+        <div class="row g-4">
+          <div class="col-12 col-md-6">
+            <p class="or-detail-section">Destinataire</p>
+            <div class="or-detail-item"><span>Nom</span><strong>{{ o.clientFullName || '—' }}</strong></div>
+            <div class="or-detail-item"><span>Email</span><span class="or-client-email">{{ o.clientEmail || '—' }}</span></div>
+            <div class="or-detail-item"><span>Téléphone</span><span>{{ o.clientPhone || '—' }}</span></div>
+            <div class="or-detail-item"><span>Ville</span><span>{{ o.clientCity || '—' }}, {{ o.clientCountry || '' }}</span></div>
+          </div>
+          <div class="col-12 col-md-6">
+            <p class="or-detail-section">Expédition</p>
+            <div class="or-detail-item">
+              <span>MAWB</span>
+              @if (o.shipmentId) { <a [routerLink]="['/shipments', o.shipmentId]" class="or-mawb-link" (click)="closeDetail()">{{ o.mawb }}</a> }
+              @else { <span>—</span> }
             </div>
-
-            <div class="col-md-6">
-              <label for="oClient" class="form-label fw-medium" style="font-size:13px">Client <span aria-hidden="true">*</span></label>
-              <select id="oClient" class="form-select" [class.is-invalid]="fieldInvalid('clientId')" formControlName="clientId">
-                <option [ngValue]="null">-- Sélectionner --</option>
-                @for (c of clients(); track c.id) {
-                  <option [value]="c.id">{{ c.fullName }}</option>
-                }
-              </select>
-              @if (fieldInvalid('clientId')) { <div class="invalid-feedback">Requis.</div> }
-            </div>
-
-            <div class="col-md-6">
-              <label for="oHawb" class="form-label fw-medium" style="font-size:13px">HAWB <span aria-hidden="true">*</span></label>
-              <input id="oHawb" type="text" class="form-control" [class.is-invalid]="fieldInvalid('hawb')" formControlName="hawb" placeholder="Ex : 123456789" />
-              @if (fieldInvalid('hawb')) { <div class="invalid-feedback">Requis.</div> }
-            </div>
-
-            <div class="col-md-6">
-              <label for="oItems" class="form-label fw-medium" style="font-size:13px">Nb. items</label>
-              <input id="oItems" type="number" class="form-control" formControlName="numberOfItems" min="0" />
-            </div>
-
-            <div class="col-12">
-              <label for="oDesc" class="form-label fw-medium" style="font-size:13px">Description</label>
-              <input id="oDesc" type="text" class="form-control" formControlName="goodsDescription" />
-            </div>
-
-            <div class="col-md-6">
-              <label for="oWeight" class="form-label fw-medium" style="font-size:13px">Poids (kg)</label>
-              <input id="oWeight" type="number" class="form-control" formControlName="shipmentWeight" step="0.01" min="0" />
-            </div>
-
-            <div class="col-md-6">
-              <label for="oHtsus" class="form-label fw-medium" style="font-size:13px">Code HTSUS</label>
-              <input id="oHtsus" type="text" class="form-control" formControlName="htsusCode" />
-            </div>
-
-            <div class="col-md-5">
-              <label for="oCustoms" class="form-label fw-medium" style="font-size:13px">Customs Value</label>
-              <input id="oCustoms" type="number" class="form-control" formControlName="customsValue" step="0.01" min="0" />
-            </div>
-
-            <div class="col-md-3">
-              <label for="oCurrency" class="form-label fw-medium" style="font-size:13px">Devise</label>
-              <select id="oCurrency" class="form-select" formControlName="customsCurrency">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="MAD">MAD</option>
-              </select>
-            </div>
-
-            <div class="col-md-2">
-              <label for="oDuty" class="form-label fw-medium" style="font-size:13px">Duty %</label>
-              <input id="oDuty" type="number" class="form-control" formControlName="dutyRate" step="0.01" min="0" max="100" />
-            </div>
-
-            <div class="col-md-2">
-              <label for="oBank" class="form-label fw-medium" style="font-size:13px">Bank charges</label>
-              <input id="oBank" type="number" class="form-control" formControlName="bankCharges" step="0.01" min="0" />
+            <div class="or-detail-item"><span>Expéditeur</span><span>{{ o.companyName || '—' }}</span></div>
+            <div class="or-detail-item"><span>Description</span><span>{{ o.goodsDescription || '—' }}</span></div>
+            <div class="or-detail-item"><span>Poids</span><span>{{ fmtWeight(o.shipmentWeight) }}</span></div>
+          </div>
+          <div class="col-12">
+            <p class="or-detail-section">Calcul financier</p>
+            <div class="or-finance-grid">
+              <div class="or-finance-row"><span>Valeur douanière</span><span class="fw-semibold">{{ o.customsValue?.toLocaleString('fr-FR') ?? '—' }} {{ o.customsCurrency }}</span></div>
+              <div class="or-finance-row"><span>Taux de douane</span><span>× {{ fmtDuty(o.dutyRate) }}</span></div>
+              <div class="or-finance-row"><span>Montant droits</span><span>{{ fmtAmount(o.dutyAmount) }}</span></div>
+              @if (o.bankCharges) { <div class="or-finance-row"><span>Frais bancaires</span><span>+ {{ fmtAmount(o.bankCharges) }}</span></div> }
+              <div class="or-finance-total"><span>Total à payer</span><span class="or-finance-num">{{ fmtAmount(o.totalAmount) }}</span></div>
             </div>
           </div>
+          <div class="col-12">
+            <p class="or-detail-section">Email</p>
+            @if (o.emailSentAt) {
+              <div class="or-email-info or-email-sent-info">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Email envoyé le {{ o.emailSentAt | date:'dd/MM/yyyy à HH:mm' }}
+              </div>
+            } @else {
+              <div class="or-email-info or-email-none-info">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Aucun email envoyé
+              </div>
+            }
+          </div>
         </div>
+      </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="closeModal()">Annuler</button>
-          <button type="submit" class="btn btn-primary btn-sm" [disabled]="saving()">
-            @if (saving()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
-            {{ editingId() ? 'Mettre à jour' : 'Créer' }}
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
+        @if (o.status !== 'PAID' && o.status !== 'DELIVERED') {
+          <button type="button" class="nm-btn-primary" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id); closeDetail()">
+            @if (sendingId() === o.id) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> }
+            Envoyer l'email
           </button>
-        </div>
-      </form>
+        }
+      </div>
     </div>
   </div>
 }
 
-<!-- Delete confirmation -->
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Suppression
+     ══════════════════════════════════════════════════════════ -->
 @if (deleteId() !== null) {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delOrderTitle" (click)="cancelDelete()">
     <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <span id="delOrderTitle" class="modal-title">Supprimer l'order ?</span>
-        <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Fermer"></button>
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="delOrderTitle" class="nm-title">Supprimer cet order ?</h2>
+          <p class="nm-sub">Cette action est irréversible.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
-      <div class="modal-body"><p style="font-size:14px">Cette action est irréversible.</p></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelDelete()">Annuler</button>
-        <button type="button" class="btn btn-danger btn-sm" [disabled]="deleting()" (click)="executeDelete()">
-          @if (deleting()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
-          Supprimer
+      <div class="nm-body"><p class="nm-alert">L'order sera définitivement supprimé de la base de données.</p></div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
+          @else { Supprimer }
         </button>
       </div>
     </div>

@@ -1,6 +1,8 @@
 package com.medafrica.mavex.service;
 
+import com.medafrica.mavex.dto.imports.ImportConfirmRequest;
 import com.medafrica.mavex.dto.imports.ImportLogResponse;
+import com.medafrica.mavex.dto.imports.ImportPreviewResponse;
 import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.actor.Shipper;
 import com.medafrica.mavex.model.country.Country;
@@ -17,6 +19,7 @@ import com.medafrica.mavex.service.interfaces.ExcelImportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -207,11 +210,12 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                 String hawb          = getCellString(row, cols[COL_HAWB]);
                 String receiverEmail = getCellString(row, cols[COL_EMAIL]);
 
-                String validationError = validateRow(row, mawb, hawb, receiverEmail, cols);
-                if (validationError != null) {
-                    log.warn("Ligne {} rejetée — HAWB={} : {}", rowNumber, hawb, validationError);
+                List<String> rowErrors = validateRow(row, mawb, hawb, receiverEmail, cols);
+                if (!rowErrors.isEmpty()) {
+                    String joined = String.join(" | ", rowErrors);
+                    log.warn("Ligne {} rejetée — HAWB={} : {}", rowNumber, hawb, joined);
                     rowLogs.add(buildRowLog(importLog, rowNumber, hawb, receiverEmail,
-                            ImportRowStatus.FAILED, validationError, null));
+                            ImportRowStatus.FAILED, joined, null));
                     failedRows++;
                     continue;
                 }
@@ -295,6 +299,412 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     }
 
     // ---------------------------------------------------------------
+    // PREVIEW — lit + valide le fichier sans rien écrire en base
+    // ---------------------------------------------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public ImportPreviewResponse previewManifest(MultipartFile file) throws Exception {
+
+        if (file == null || file.isEmpty())
+            throw new IllegalArgumentException("Le fichier est vide ou absent.");
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.toLowerCase().endsWith(".xlsx") && !filename.toLowerCase().endsWith(".xls")))
+            throw new IllegalArgumentException("Format non supporté. Utilisez .xlsx ou .xls");
+
+        if (file.getSize() > 10L * 1024 * 1024)
+            throw new IllegalArgumentException("Fichier trop volumineux. Maximum 10 MB autorisé.");
+
+        byte[] fileBytes = file.getBytes();
+        String fileHash  = computeMd5(fileBytes);
+
+        // P2.1 — détecter si ce fichier exact a déjà été importé
+        boolean alreadyImported = false;
+        java.time.LocalDateTime previousImportDate = null;
+        Optional<ImportLog> existing = importLogRepository.findByFileHash(fileHash);
+        if (existing.isPresent()) {
+            alreadyImported      = true;
+            previousImportDate   = existing.get().getImportedAt();
+        }
+
+        List<ImportPreviewResponse.PreviewRow> previewRows = new ArrayList<>();
+        int totalRows = 0, validRows = 0, invalidRows = 0, skippedRows = 0;
+        String mawbFound = null;
+
+        try (InputStream is = file.getInputStream();
+             Workbook workbook = new XSSFWorkbook(is)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet.getLastRowNum() < 1)
+                throw new IllegalArgumentException("Le fichier Excel est vide ou ne contient que l'en-tête.");
+
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null)
+                throw new IllegalArgumentException("La ligne d'en-tête est absente.");
+
+            int[] cols = buildColMap(headerRow);
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null || isRowEmpty(row, cols)) continue;
+
+                totalRows++;
+                int rowNumber = i + 1;
+
+                String mawb         = getCellString(row, cols[COL_MAWB]);
+                String hawb         = getCellString(row, cols[COL_HAWB]);
+                String receiverEmail = getCellString(row, cols[COL_EMAIL]);
+
+                if (mawbFound == null && mawb != null) mawbFound = mawb;
+
+                // Construire la ligne preview avec tous ses champs
+                ImportPreviewResponse.PreviewRow.PreviewRowBuilder pb =
+                        ImportPreviewResponse.PreviewRow.builder()
+                        .rowNumber(rowNumber)
+                        .mawb(mawb)
+                        .hawb(hawb)
+                        .alternateReference(getCellString(row, cols[COL_ALTERNATE_REF]))
+                        .senderName(getCellString(row, cols[COL_SENDER_NAME]))
+                        .senderCountry(getCellString(row, cols[COL_SENDER_COUNTRY]))
+                        .senderAddress(getCellString(row, cols[COL_SENDER_ADDRESS]))
+                        .senderCity(getCellString(row, cols[COL_SENDER_CITY]))
+                        .senderState(getCellString(row, cols[COL_SENDER_STATE]))
+                        .senderPostcode(getCellString(row, cols[COL_SENDER_POSTCODE]))
+                        .senderContact(getCellString(row, cols[COL_SENDER_CONTACT]))
+                        .senderPhone(getCellString(row, cols[COL_SENDER_PHONE]))
+                        .senderEmail(getCellString(row, cols[COL_SENDER_EMAIL]))
+                        .receiverName(getCellString(row, cols[COL_RECEIVER_NAME]))
+                        .receiverCountry(getCellString(row, cols[COL_RECEIVER_COUNTRY]))
+                        .receiverAddress(getCellString(row, cols[COL_RECEIVER_ADDRESS]))
+                        .receiverCity(getCellString(row, cols[COL_RECEIVER_CITY]))
+                        .receiverState(getCellString(row, cols[COL_RECEIVER_STATE]))
+                        .receiverPostcode(getCellString(row, cols[COL_RECEIVER_POSTCODE]))
+                        .receiverContact(getCellString(row, cols[COL_RECEIVER_CONTACT]))
+                        .receiverPhone(getCellString(row, cols[COL_RECEIVER_PHONE]))
+                        .receiverEmail(receiverEmail)
+                        .numberOfItems(getCellInteger(row, cols[COL_NB_ITEMS]))
+                        .goodsDescription(getCellString(row, cols[COL_GOODS_DESC]))
+                        .shipmentWeight(getCellDecimal(row, cols[COL_WEIGHT]))
+                        .customsValue(getCellDecimal(row, cols[COL_CUSTOMS_VALUE]))
+                        .customsCurrency(getCellString(row, cols[COL_CURRENCY]));
+
+                // Validation sans écriture en base
+                List<String> rowErrors = validateRow(row, mawb, hawb, receiverEmail, cols);
+                if (!rowErrors.isEmpty()) {
+                    pb.previewStatus("INVALID").errors(rowErrors).warnings(List.of()).alreadyExists(false);
+                    invalidRows++;
+                } else if (orderRepository.existsByHawbAndShipmentMawb(hawb, mawb)
+                        || orderRepository.existsByHawb(hawb)) {
+                    pb.previewStatus("SKIPPED").errors(List.of("Déjà importé dans la base")).warnings(List.of()).alreadyExists(true);
+                    skippedRows++;
+                } else {
+                    // P2.2 — calculer les corrections automatiques qui seront appliquées
+                    List<String> rowWarnings = computeRowWarnings(row, cols);
+                    pb.previewStatus("VALID").errors(List.of()).warnings(rowWarnings).alreadyExists(false);
+                    validRows++;
+                }
+
+                previewRows.add(pb.build());
+            }
+        }
+
+        return ImportPreviewResponse.builder()
+                .fileName(filename)
+                .fileHash(fileHash)
+                .mawb(mawbFound)
+                .totalRows(totalRows)
+                .validRows(validRows)
+                .invalidRows(invalidRows)
+                .skippedRows(skippedRows)
+                .alreadyImported(alreadyImported)
+                .previousImportDate(previousImportDate)
+                .rows(previewRows)
+                .build();
+    }
+
+    // ---------------------------------------------------------------
+    // CONFIRM — crée les entités depuis les données corrigées du frontend
+    // ---------------------------------------------------------------
+
+    @Override
+    @Transactional
+    public ImportLogResponse confirmImport(ImportConfirmRequest request) throws Exception {
+
+        User currentUser = getCurrentUser();
+
+        // On génère un hash unique pour ce confirm (le fileHash original peut déjà exister)
+        String logHash = request.getFileHash() + "_confirmed_" + System.currentTimeMillis();
+
+        ImportLog importLog = ImportLog.builder()
+                .fileName(request.getFileName())
+                .fileHash(logHash)
+                .importedBy(currentUser)
+                .build();
+        importLog = importLogRepository.save(importLog);
+
+        List<ImportRowLog> rowLogs = new ArrayList<>();
+        int totalRows = request.getRows().size();
+        int successRows = 0, skippedRows = 0, failedRows = 0;
+        String mawbFound = null;
+
+        for (ImportConfirmRequest.RowData d : request.getRows()) {
+            String hawb  = d.getHawb();
+            String mawb  = d.getMawb();
+            String email = d.getReceiverEmail();
+
+            // Re-validation côté serveur (sécurité : le frontend peut envoyer n'importe quoi)
+            List<String> rowErrors = validateRowData(d);
+            if (!rowErrors.isEmpty()) {
+                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
+                        ImportRowStatus.FAILED, String.join(" | ", rowErrors), null));
+                failedRows++;
+                continue;
+            }
+
+            if (mawbFound == null) mawbFound = mawb;
+
+            // Vérifier doublons
+            if (orderRepository.existsByHawbAndShipmentMawb(hawb, mawb)) {
+                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
+                        ImportRowStatus.SKIPPED, "Doublon MAWB+HAWB", null));
+                skippedRows++;
+                continue;
+            }
+            if (orderRepository.existsByHawb(hawb)) {
+                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
+                        ImportRowStatus.SKIPPED, "HAWB existant sous autre MAWB", null));
+                skippedRows++;
+                continue;
+            }
+
+            try {
+                List<String> warnings = new ArrayList<>();
+                Shipment shipment = findOrCreateShipment(mawb, currentUser);
+                Shipper  shipper  = findOrCreateShipperFromRequest(d, warnings);
+                if (shipment.getShipper() == null) {
+                    shipment.setShipper(shipper);
+                    shipmentRepository.save(shipment);
+                }
+                Client client = findOrCreateClientFromRequest(d, warnings);
+                createOrderFromRequest(d, shipment, client, warnings);
+
+                String warningText = warnings.isEmpty() ? null : String.join(" | ", warnings);
+                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
+                        ImportRowStatus.IMPORTED, null, warningText));
+                successRows++;
+            } catch (Exception e) {
+                log.error("Erreur confirm ligne {} HAWB={} : {}", d.getRowNumber(), hawb, e.getMessage(), e);
+                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
+                        ImportRowStatus.FAILED, "Erreur traitement : " + e.getMessage(), null));
+                failedRows++;
+            }
+        }
+
+        importRowLogRepository.saveAll(rowLogs);
+        importLog.setMawb(mawbFound);
+        importLog.setTotalRows(totalRows);
+        importLog.setSuccessRows(successRows);
+        importLog.setSkippedRows(skippedRows);
+        importLog.setFailedRows(failedRows);
+        importLog.setStatus(resolveStatus(successRows, failedRows, skippedRows, totalRows));
+        importLog.setRowLogs(rowLogs);
+        importLogRepository.save(importLog);
+
+        return buildResponse(importLog);
+    }
+
+    // ── Validation depuis le DTO (même règles que validateRow) ──────────
+
+    private List<String> validateRowData(ImportConfirmRequest.RowData d) {
+        List<String> errors = new ArrayList<>();
+        if (d.getMawb()         == null || d.getMawb().isBlank())         errors.add("MAWB manquant");
+        if (d.getHawb()         == null || d.getHawb().isBlank())         errors.add("HAWB manquant");
+        if (d.getReceiverName() == null || d.getReceiverName().isBlank()) errors.add("Nom destinataire manquant");
+        if (d.getReceiverEmail() == null || d.getReceiverEmail().isBlank()) {
+            errors.add("Email destinataire manquant");
+        } else if (!d.getReceiverEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            errors.add("Format email invalide : " + d.getReceiverEmail());
+        }
+        if (d.getCustomsValue()   == null || d.getCustomsValue().compareTo(BigDecimal.ZERO)   <= 0) errors.add("Valeur douanière invalide");
+        if (d.getShipmentWeight() == null || d.getShipmentWeight().compareTo(BigDecimal.ZERO) <= 0) errors.add("Poids invalide");
+        return errors;
+    }
+
+    // ── Shipper depuis RowData ───────────────────────────────────────────
+
+    private Shipper findOrCreateShipperFromRequest(ImportConfirmRequest.RowData d, List<String> warnings) {
+        String name = d.getSenderName();
+        if (name == null || name.isBlank()) {
+            name = "Unknown Shipper";
+            warnings.add("Sender name manquant → 'Unknown Shipper'");
+        }
+        final String finalName = name;
+
+        Country country = resolveCountry(d.getSenderCountry());
+
+        String state = d.getSenderState();
+        if (state != null && state.length() > 10) {
+            state = state.substring(0, 10);
+            warnings.add("Sender state tronqué à 10 chars");
+        }
+        final String finalState = state;
+
+        return shipperRepository.findByCompanyNameIgnoreCase(finalName).map(existing -> {
+            existing.setContactName(d.getSenderContact());
+            existing.setPhone(d.getSenderPhone());
+            existing.setAddress(d.getSenderAddress());
+            existing.setCity(d.getSenderCity());
+            existing.setLocationName(d.getSenderCity());
+            existing.setState(finalState);
+            existing.setZipCode(d.getSenderPostcode());
+            if (country != null) existing.setCountry(country);
+            String email = d.getSenderEmail();
+            if (email != null && !email.isBlank()) existing.setEmail(email);
+            return shipperRepository.save(existing);
+        }).orElseGet(() -> {
+            String email = d.getSenderEmail();
+            if (email == null || email.isBlank()) {
+                email = finalName.toLowerCase().replaceAll("[^a-z0-9]", ".") + "@unknown.com";
+                warnings.add("Sender email manquant → email généré");
+            }
+            final String finalEmail = email;
+            return shipperRepository.save(Shipper.builder()
+                    .companyName(finalName).contactName(d.getSenderContact())
+                    .email(finalEmail).phone(d.getSenderPhone())
+                    .address(d.getSenderAddress()).city(d.getSenderCity())
+                    .locationName(d.getSenderCity()).state(finalState)
+                    .zipCode(d.getSenderPostcode()).country(country).build());
+        });
+    }
+
+    // ── Client depuis RowData ────────────────────────────────────────────
+
+    private Client findOrCreateClientFromRequest(ImportConfirmRequest.RowData d, List<String> warnings) {
+        String email    = d.getReceiverEmail();
+        String fullName = d.getReceiverName();
+        Country country = resolveCountry(d.getReceiverCountry());
+
+        String state = d.getReceiverState();
+        if (state != null && state.length() > 2) {
+            state = state.substring(0, 2).toUpperCase();
+            warnings.add("Receiver state tronqué à 2 chars");
+        }
+        final String finalState = state;
+
+        return clientRepository.findByEmail(email).map(existing -> {
+            existing.setFullName(fullName);
+            existing.setPhone(d.getReceiverPhone());
+            existing.setAddress(d.getReceiverAddress());
+            existing.setCity(d.getReceiverCity());
+            existing.setState(finalState);
+            existing.setZipCode(d.getReceiverPostcode());
+            existing.setContactName(d.getReceiverContact());
+            if (country != null) existing.setCountry(country);
+            return clientRepository.save(existing);
+        }).orElseGet(() -> clientRepository.save(Client.builder()
+                .fullName(fullName).email(email).phone(d.getReceiverPhone())
+                .address(d.getReceiverAddress()).city(d.getReceiverCity())
+                .state(finalState).zipCode(d.getReceiverPostcode())
+                .contactName(d.getReceiverContact()).country(country).build()));
+    }
+
+    // ── Order depuis RowData ─────────────────────────────────────────────
+
+    private void createOrderFromRequest(ImportConfirmRequest.RowData d, Shipment shipment, Client client, List<String> warnings) {
+        String currency = d.getCustomsCurrency();
+        if (currency == null || currency.isBlank()) {
+            currency = "USD"; warnings.add("Currency manquante → 'USD'");
+        } else if (!currency.matches("[A-Z]{3}")) {
+            currency = "USD"; warnings.add("Currency invalide → 'USD'");
+        }
+        orderRepository.save(Order.builder()
+                .hawb(d.getHawb())
+                .alternateReference(d.getAlternateReference())
+                .goodsDescription(d.getGoodsDescription())
+                .numberOfItems(d.getNumberOfItems())
+                .shipmentWeight(d.getShipmentWeight())
+                .customsValue(d.getCustomsValue())
+                .customsCurrency(currency)
+                .dutyRate(shipment.getDutyRate())
+                .shipment(shipment).client(client)
+                .status(OrderStatus.CREATED).build());
+    }
+
+    // ---------------------------------------------------------------
+    // GÉNÉRATION DU TEMPLATE EXCEL
+    // ---------------------------------------------------------------
+
+    @Override
+    public byte[] generateTemplate() throws Exception {
+
+        // Données d'exemple — 2 lignes pour montrer le format attendu
+        String[][] examples = {
+            { "12345678901", "HAWB001", "REF001",
+              "DHL Express", "US", "1600 Pennsylvania Ave", "Washington", "DC", "20500",
+              "John Doe", "+12025551234", "jdoe@dhl.com",
+              "Mohammed Oukir", "MA", "123 Rue Hassan II", "Casablanca", "CA", "20000",
+              "Mohammed", "+212600000000", "client@example.com",
+              "2", "Electronic equipment", "5.5", "1200.00", "USD" },
+            { "12345678901", "HAWB002", "REF002",
+              "DHL Express", "US", "1600 Pennsylvania Ave", "Washington", "DC", "20500",
+              "John Doe", "+12025551234", "jdoe@dhl.com",
+              "Ahmed Benali", "MA", "456 Avenue Mohammed V", "Rabat", "RB", "10000",
+              "Ahmed", "+212611111111", "ahmed@example.com",
+              "1", "Clothing", "2.3", "350.00", "USD" }
+        };
+
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Manifeste");
+
+            // ── Style en-tête : fond orange MAVEX + texte blanc gras ──
+            CellStyle headerStyle = workbook.createCellStyle();
+            // XSSFColor prend les bytes R, G, B du orange #F97316
+            headerStyle.setFillForegroundColor(
+                new XSSFColor(new byte[]{ (byte)0xF9, (byte)0x73, (byte)0x16 }, null));
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font font = workbook.createFont();
+            font.setBold(true);
+            font.setColor(IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(font);
+
+            // ── Style lignes d'exemple : fond gris très clair ──
+            CellStyle exampleStyle = workbook.createCellStyle();
+            exampleStyle.setFillForegroundColor(
+                new XSSFColor(new byte[]{ (byte)0xF9, (byte)0xFA, (byte)0xFB }, null));
+            exampleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            // ── Ligne 0 : en-têtes de colonnes ──
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < COL_HEADERS.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(COL_HEADERS[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            // ── Lignes 1 et 2 : données d'exemple ──
+            for (int r = 0; r < examples.length; r++) {
+                Row row = sheet.createRow(r + 1);
+                for (int c = 0; c < examples[r].length; c++) {
+                    Cell cell = row.createCell(c);
+                    cell.setCellValue(examples[r][c]);
+                    cell.setCellStyle(exampleStyle);
+                }
+            }
+
+            // ── Auto-dimensionner chaque colonne selon son contenu ──
+            for (int i = 0; i < COL_HEADERS.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            // ── Écrire le workbook en mémoire et retourner les octets ──
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            workbook.write(out);
+            return out.toByteArray();
+        }
+    }
+
+    // ---------------------------------------------------------------
     // RÉSOLUTION DYNAMIQUE DES COLONNES DEPUIS L'EN-TÊTE
     // ---------------------------------------------------------------
 
@@ -357,7 +767,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     // ---------------------------------------------------------------
 
     private Shipment findOrCreateShipment(String mawb, User createdBy) {
-        return shipmentRepository.findByMawb(mawb).orElseGet(() -> {
+        return shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(mawb).orElseGet(() -> {
             Shipment s = Shipment.builder()
                     .mawb(mawb)
                     .createdBy(createdBy)
@@ -532,64 +942,85 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     // VALIDATION COMPLÈTE D'UNE LIGNE
     // ---------------------------------------------------------------
 
-    private String validateRow(Row row, String mawb, String hawb, String receiverEmail, int[] cols) {
+    private List<String> validateRow(Row row, String mawb, String hawb, String receiverEmail, int[] cols) {
+        List<String> errors = new ArrayList<>();
 
-        if (mawb == null || mawb.isBlank())
-            return "MAWB manquant";
+        // MAWB
+        if (mawb == null || mawb.isBlank())       errors.add("MAWB manquant");
+        else if (mawb.length() > MAX_MAWB_LENGTH) errors.add("MAWB trop long (" + mawb.length() + " chars, max " + MAX_MAWB_LENGTH + ")");
 
-        if (hawb == null || hawb.isBlank())
-            return "Connote # (HAWB) manquant";
+        // HAWB
+        if (hawb == null || hawb.isBlank())       errors.add("Connote # (HAWB) manquant");
+        else if (hawb.length() > MAX_HAWB_LENGTH) errors.add("HAWB trop long (" + hawb.length() + " chars, max " + MAX_HAWB_LENGTH + ")");
 
+        // Nom destinataire
         String receiverName = getCellString(row, cols[COL_RECEIVER_NAME]);
-        if (receiverName == null || receiverName.isBlank())
-            return "Nom du destinataire manquant";
+        if (receiverName == null || receiverName.isBlank())       errors.add("Nom du destinataire manquant");
+        else if (receiverName.length() > MAX_NAME_LENGTH)         errors.add("Nom destinataire trop long (" + receiverName.length() + " chars, max " + MAX_NAME_LENGTH + ")");
 
-        if (receiverEmail == null || receiverEmail.isBlank())
-            return "Email du destinataire manquant";
+        // Email — on vérifie le format seulement si l'email est présent
+        if (receiverEmail == null || receiverEmail.isBlank()) {
+            errors.add("Email du destinataire manquant");
+        } else {
+            if (!receiverEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) errors.add("Format email invalide : " + receiverEmail);
+            if (receiverEmail.length() > MAX_EMAIL_LENGTH)                 errors.add("Email trop long (" + receiverEmail.length() + " chars, max " + MAX_EMAIL_LENGTH + ")");
+        }
 
+        // Valeur douanière — on vérifie le montant seulement si la valeur existe
         BigDecimal customs = getCellDecimal(row, cols[COL_CUSTOMS_VALUE]);
-        if (customs == null)
-            return "Valeur douanière manquante";
-        if (customs.compareTo(BigDecimal.ZERO) <= 0)
-            return "Valeur douanière doit être > 0 (valeur actuelle : " + customs + ")";
+        if (customs == null)                                  errors.add("Valeur douanière manquante");
+        else if (customs.compareTo(BigDecimal.ZERO) <= 0)    errors.add("Valeur douanière doit être > 0 (valeur actuelle : " + customs + ")");
+        else if (customs.compareTo(MAX_CUSTOMS_VALUE) > 0)   errors.add("Valeur douanière anormalement élevée : " + customs + " (max " + MAX_CUSTOMS_VALUE + ")");
 
-        if (!receiverEmail.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
-            return "Format email invalide : " + receiverEmail;
-
-        if (receiverEmail.length() > MAX_EMAIL_LENGTH)
-            return "Email trop long (" + receiverEmail.length() + " chars, max " + MAX_EMAIL_LENGTH + ")";
-
-        if (hawb.length() > MAX_HAWB_LENGTH)
-            return "HAWB trop long (" + hawb.length() + " chars, max " + MAX_HAWB_LENGTH + ")";
-
-        if (mawb.length() > MAX_MAWB_LENGTH)
-            return "MAWB trop long (" + mawb.length() + " chars, max " + MAX_MAWB_LENGTH + ")";
-
-        if (receiverName.length() > MAX_NAME_LENGTH)
-            return "Nom destinataire trop long (" + receiverName.length() + " chars, max " + MAX_NAME_LENGTH + ")";
-
-        if (customs.compareTo(MAX_CUSTOMS_VALUE) > 0)
-            return "Valeur douanière anormalement élevée : " + customs + " (max " + MAX_CUSTOMS_VALUE + ")";
-
+        // Poids
         BigDecimal weight = getCellDecimal(row, cols[COL_WEIGHT]);
-        if (weight == null)
-            return "Poids du colis manquant";
-        if (weight.compareTo(BigDecimal.ZERO) <= 0)
-            return "Poids doit être > 0 (valeur actuelle : " + weight + ")";
-        if (weight.compareTo(MAX_WEIGHT) > 0)
-            return "Poids anormalement élevé : " + weight + " kg (max " + MAX_WEIGHT + ")";
+        if (weight == null)                               errors.add("Poids du colis manquant");
+        else if (weight.compareTo(BigDecimal.ZERO) <= 0)  errors.add("Poids doit être > 0 (valeur actuelle : " + weight + ")");
+        else if (weight.compareTo(MAX_WEIGHT) > 0)        errors.add("Poids anormalement élevé : " + weight + " kg (max " + MAX_WEIGHT + ")");
 
+        // Nombre d'articles (optionnel — vérifié seulement si présent)
         Integer nbItems = getCellInteger(row, cols[COL_NB_ITEMS]);
-        if (nbItems != null && nbItems <= 0)
-            return "Nombre d'articles doit être > 0 (valeur actuelle : " + nbItems + ")";
-        if (nbItems != null && nbItems > 10000)
-            return "Nombre d'articles anormalement élevé : " + nbItems;
+        if (nbItems != null && nbItems <= 0)    errors.add("Nombre d'articles doit être > 0 (valeur actuelle : " + nbItems + ")");
+        if (nbItems != null && nbItems > 10000) errors.add("Nombre d'articles anormalement élevé : " + nbItems);
 
+        // Description (optionnelle)
         String description = getCellString(row, cols[COL_GOODS_DESC]);
         if (description != null && description.length() > MAX_DESCRIPTION_LENGTH)
-            return "Description trop longue (" + description.length() + " chars, max " + MAX_DESCRIPTION_LENGTH + ")";
+            errors.add("Description trop longue (" + description.length() + " chars, max " + MAX_DESCRIPTION_LENGTH + ")");
 
-        return null;
+        return errors;
+    }
+
+    // ---------------------------------------------------------------
+    // P2.2 — CALCUL DES CORRECTIONS AUTOMATIQUES (warnings preview)
+    // ---------------------------------------------------------------
+
+    private List<String> computeRowWarnings(Row row, int[] cols) {
+        List<String> warnings = new ArrayList<>();
+
+        String senderName = getCellString(row, cols[COL_SENDER_NAME]);
+        if (senderName == null || senderName.isBlank())
+            warnings.add("Sender name manquant → remplacé par 'Unknown Shipper'");
+
+        String senderEmail = getCellString(row, cols[COL_SENDER_EMAIL]);
+        if (senderEmail == null || senderEmail.isBlank())
+            warnings.add("Sender email manquant → email généré automatiquement");
+
+        String currency = getCellString(row, cols[COL_CURRENCY]);
+        if (currency == null || currency.isBlank())
+            warnings.add("Devise manquante → forcée à 'USD'");
+        else if (!currency.matches("[A-Z]{3}"))
+            warnings.add("Devise invalide '" + currency + "' → forcée à 'USD'");
+
+        String senderState = getCellString(row, cols[COL_SENDER_STATE]);
+        if (senderState != null && senderState.length() > 10)
+            warnings.add("Sender State trop long → tronqué à 10 caractères");
+
+        String receiverState = getCellString(row, cols[COL_RECEIVER_STATE]);
+        if (receiverState != null && receiverState.length() > 2)
+            warnings.add("Receiver State trop long → tronqué à 2 caractères");
+
+        return warnings;
     }
 
     // ---------------------------------------------------------------

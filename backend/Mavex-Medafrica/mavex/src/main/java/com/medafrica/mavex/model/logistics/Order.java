@@ -119,6 +119,9 @@ public class Order {
     @JoinColumn(name = "client_id")
     private Client client;
 
+    @Column(name = "email_sent_at")
+    private LocalDateTime emailSentAt;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

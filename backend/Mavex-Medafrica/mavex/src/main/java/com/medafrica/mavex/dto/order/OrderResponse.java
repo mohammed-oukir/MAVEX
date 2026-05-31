@@ -48,6 +48,7 @@ private String clientZipCode;
 private String clientCountry;
  private String companyName;
 
+    private LocalDateTime emailSentAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

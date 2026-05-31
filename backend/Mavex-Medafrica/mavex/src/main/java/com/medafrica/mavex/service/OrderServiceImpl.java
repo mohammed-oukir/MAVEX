@@ -14,17 +14,24 @@ import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
 import com.medafrica.mavex.repository.ShipmentRepository;
+import com.medafrica.mavex.repository.specification.OrderSpecification;
 import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -94,10 +101,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAll() {
-        return orderRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<OrderResponse> search(String q, OrderStatus status, Long shipmentId,
+                                       LocalDateTime from, LocalDateTime to, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.build(q, status, shipmentId, from, to);
+        return orderRepository.findAll(spec, pageable).map(this::toResponse);
     }
 
     @Override
@@ -112,14 +119,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getByClient(Long clientId) {
         return orderRepository.findByClientId(clientId).stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrderResponse> getByStatus(OrderStatus status) {
-        return orderRepository.findByStatus(status).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -213,6 +212,22 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
         recordHistory(order, previous, request.getNewStatus(), request.getNote(), getCurrentUser());
         return toResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public void bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note) {
+        for (Long id : ids) {
+            try {
+                Order order = findOrThrow(id);
+                OrderStatus previous = order.getStatus();
+                order.setStatus(newStatus);
+                orderRepository.save(order);
+                recordHistory(order, previous, newStatus, note, getCurrentUser());
+            } catch (Exception e) {
+                log.warn("bulkUpdateStatus — erreur order {} : {}", id, e.getMessage());
+            }
+        }
     }
 
     @Override
@@ -348,6 +363,7 @@ public class OrderServiceImpl implements OrderService {
                 .clientZipCode(clientZipCode)
                 .clientCountry(clientCountry)
                 .companyName(companyName)
+                .emailSentAt(o.getEmailSentAt())
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

@@ -1,12 +1,15 @@
 package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.dto.email.SendEmailResponse;
+import com.medafrica.mavex.dto.order.BulkEmailResult;
 import com.medafrica.mavex.model.email.EmailLog;
 import com.medafrica.mavex.model.email.EmailTemplate;
 import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.logistics.Order;
+
+import java.time.LocalDateTime;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -81,10 +85,11 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             emailLog.markSent();
             emailLogRepository.save(emailLog);
 
+            order.setEmailSentAt(LocalDateTime.now());
             if (order.getStatus() == OrderStatus.CREATED) {
                 order.setStatus(OrderStatus.EMAIL_SENT);
-                orderRepository.save(order);
             }
+            orderRepository.save(order);
 
             log.info("Email envoyé avec succès → {} (Order HAWB={})",
                     order.getClient().getEmail(), order.getHawb());
@@ -137,6 +142,27 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         summary.put("sent",   sent);
         summary.put("failed", failed);
         return summary;
+    }
+
+    @Override
+    @Transactional
+    public BulkEmailResult sendBulkEmails(List<Long> orderIds) {
+        int sent = 0, failed = 0;
+        for (Long id : orderIds) {
+            try {
+                SendEmailResponse result = sendPaymentEmail(id);
+                if (result.isSuccess()) sent++;
+                else                    failed++;
+            } catch (Exception e) {
+                log.error("Bulk email — erreur order {} : {}", id, e.getMessage());
+                failed++;
+            }
+        }
+        return BulkEmailResult.builder()
+                .total(orderIds.size())
+                .sent(sent)
+                .failed(failed)
+                .build();
     }
 
     // ---------------------------------------------------------------
