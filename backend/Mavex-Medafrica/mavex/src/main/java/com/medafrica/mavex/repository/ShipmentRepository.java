@@ -24,6 +24,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long> {
 
     long countByStatus(ShipmentStatus status);
 
+    Optional<Shipment> findFirstByMawbOrderByCreatedAtDesc(String mawb);
+
     @Query("SELECT YEAR(s.createdAt), MONTH(s.createdAt), COUNT(s) " +
            "FROM Shipment s WHERE s.createdAt >= :from " +
            "GROUP BY YEAR(s.createdAt), MONTH(s.createdAt) " +

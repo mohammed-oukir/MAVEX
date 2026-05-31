@@ -7,6 +7,7 @@ import com.medafrica.mavex.service.interfaces.ImportLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public class ImportController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     public ResponseEntity<Page<ImportLogResponse>> list(
-            @PageableDefault(size = 20, sort = "importedAt") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "importedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(importLogService.list(pageable));
     }
 

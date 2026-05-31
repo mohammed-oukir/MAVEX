@@ -1,162 +1,554 @@
-<!-- Upload card -->
-<div class="card mb-4">
-  <div class="card-header py-3 px-4">
-    <span class="card-title font-syne">Importer un manifeste</span>
+<!-- ══════════════════════════════════════════════════════════
+     UPLOAD SECTION
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white border-bottom px-4 py-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="im-section-icon" aria-hidden="true">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </div>
+      <span class="im-section-title">Importer un manifeste Excel</span>
+    </div>
   </div>
+
   <div class="card-body p-4">
 
-    <!-- Drop zone -->
-    <div
-      class="drop-zone mb-3"
-      [class.drag-over]="dragOver()"
-      (dragover)="onDragOver($event)"
-      (dragleave)="onDragLeave()"
-      (drop)="onDrop($event)"
-      (click)="fileInput.click()"
-      role="button"
-      tabindex="0"
-      (keydown.enter)="fileInput.click()"
-      (keydown.space)="fileInput.click()"
-      [attr.aria-label]="selectedFile() ? selectedFile()!.name : 'Cliquez ou glissez un fichier Excel'"
-    >
-      <input
-        #fileInput
-        type="file"
-        accept=".xlsx,.xls"
-        class="d-none"
-        (change)="onFileChange($event)"
-        aria-label="Sélectionner un fichier Excel"
-      />
-
-      @if (selectedFile()) {
-        <div class="d-flex align-items-center justify-content-center gap-3">
-          <svg width="32" height="32" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <div>
-            <div class="fw-semibold">{{ selectedFile()!.name }}</div>
-            <div class="text-muted" style="font-size:12px">{{ formatSize(selectedFile()!.size) }}</div>
-          </div>
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-secondary ms-2"
-            (click)="$event.stopPropagation(); selectedFile.set(null)"
-            aria-label="Retirer le fichier"
-          >✕</button>
-        </div>
-      } @else {
-        <div class="d-flex flex-column align-items-center gap-2 text-muted">
-          <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-          </svg>
-          <div class="fw-medium">Glissez un fichier Excel ici</div>
-          <div style="font-size:12px">ou cliquez pour parcourir — .xlsx / .xls</div>
-        </div>
-      }
-    </div>
-
-    <!-- Mode + submit -->
-    <div class="d-flex align-items-center gap-3 flex-wrap">
-      <div>
-        <label for="importMode" class="form-label fw-medium mb-1" style="font-size:13px">Mode d'import</label>
-        <select
-          id="importMode"
-          class="form-select form-select-sm"
-          style="width:auto"
-          [(ngModel)]="mode"
-          [ngModelOptions]="{standalone:true}"
-        >
-          <option value="PARTIAL">PARTIAL — ignorer les erreurs</option>
-          <option value="STRICT">STRICT — bloquer sur erreur</option>
-        </select>
-      </div>
-      <button
-        type="button"
-        class="btn btn-primary mt-3"
-        [disabled]="!selectedFile() || uploading()"
-        (click)="upload()"
-        aria-label="Lancer l'import"
+    <!-- ── Drop zone ────────────────────────────────────── -->
+    @if (!uploading() && !result()) {
+      <div
+        class="im-dropzone"
+        [class.im-drag-over]="dragOver()"
+        [class.im-has-file]="!!selectedFile()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+        (click)="!selectedFile() && fileInput.click()"
+        [attr.role]="!selectedFile() ? 'button' : null"
+        [attr.tabindex]="!selectedFile() ? 0 : null"
+        (keydown.enter)="!selectedFile() && fileInput.click()"
+        [attr.aria-label]="selectedFile() ? null : 'Cliquez ou glissez un fichier Excel'"
       >
-        @if (uploading()) {
-          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+        <input #fileInput type="file" accept=".xlsx,.xls" class="d-none"
+          (change)="onFileChange($event)" aria-label="Sélectionner un fichier Excel" />
+
+        @if (!selectedFile()) {
+          <!-- Empty state -->
+          <div class="d-flex flex-column align-items-center gap-3">
+            <div class="im-upload-icon" aria-hidden="true">
+              <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24">
+                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
+            </div>
+            <div>
+              <p class="im-dz-title mb-1">Glissez votre manifeste Excel ici</p>
+              <p class="im-dz-sub mb-0">ou <span class="im-dz-link">cliquez pour parcourir</span></p>
+            </div>
+            <div class="d-flex gap-2">
+              <span class="im-format-badge">.xlsx</span>
+              <span class="im-format-badge">.xls</span>
+              <span class="im-format-badge">max 10 MB</span>
+            </div>
+          </div>
+
+        } @else {
+          <!-- File selected state -->
+          <div class="im-file-preview">
+            <div class="im-file-icon" aria-hidden="true">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <div class="im-file-info">
+              <div class="im-file-name">{{ selectedFile()!.name }}</div>
+              <div class="im-file-size">{{ fmtSize(selectedFile()!.size) }} · prêt à importer</div>
+            </div>
+            <button type="button" class="btn-close ms-auto"
+              (click)="$event.stopPropagation(); selectedFile.set(null)"
+              aria-label="Retirer le fichier"></button>
+          </div>
         }
-        Importer
-      </button>
-    </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="d-flex align-items-center gap-3 mt-3">
+        @if (!selectedFile()) {
+          <button type="button" class="btn btn-outline-secondary btn-sm"
+            (click)="fileInput.click()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Parcourir les fichiers
+          </button>
+        } @else {
+          <button type="button" class="btn btn-primary px-4"
+            (click)="upload()" [disabled]="uploading()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            Lancer l'import
+          </button>
+          <span class="text-muted" style="font-size:12px">
+            {{ selectedFile()!.name }}
+          </span>
+        }
+      </div>
+    }
+
+    <!-- ── Uploading state ───────────────────────────────── -->
+    @if (uploading()) {
+      <div class="im-uploading-state">
+        <div class="im-spinner-wrap" aria-hidden="true">
+          <div class="spinner-border text-primary" style="width:48px;height:48px" role="status">
+            <span class="visually-hidden">Import en cours…</span>
+          </div>
+        </div>
+        <div class="im-uploading-text">
+          <p class="fw-semibold mb-1" style="font-size:16px">Import en cours…</p>
+          <p class="text-muted mb-0" style="font-size:13px">Lecture, validation et création des orders. Veuillez patienter.</p>
+        </div>
+      </div>
+    }
 
   </div>
 </div>
 
-<!-- History card -->
-<div class="card">
-  <div class="card-header py-3 px-4">
-    <span class="card-title font-syne">Historique des imports</span>
+<!-- ══════════════════════════════════════════════════════════
+     RESULT CARD
+     ══════════════════════════════════════════════════════════ -->
+@if (result(); as res) {
+  <div class="card border-0 shadow-sm mb-4 im-result" [class]="'im-result-' + res.status.toLowerCase()">
+    <div class="card-body p-4">
+
+      <!-- Header -->
+      <div class="d-flex align-items-start gap-3 mb-4">
+        <div class="im-result-icon-wrap" [class]="'im-icon-' + res.status.toLowerCase()" aria-hidden="true">
+          @if (res.status === 'SUCCESS') {
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          } @else if (res.status === 'PARTIAL') {
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          } @else {
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          }
+        </div>
+        <div>
+          <h5 class="mb-1 fw-bold" style="font-family:'Syne',sans-serif">
+            @if (res.status === 'SUCCESS') { Import terminé avec succès }
+            @else if (res.status === 'PARTIAL') { Import terminé avec avertissements }
+            @else { Import échoué }
+          </h5>
+          <p class="text-muted mb-0" style="font-size:13px">{{ res.fileName }}</p>
+        </div>
+        <button type="button" class="btn-close ms-auto" (click)="resetUpload()" aria-label="Fermer le résultat"></button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="im-stat-box">
+            <div class="im-stat-num text-dark">{{ res.totalRows }}</div>
+            <div class="im-stat-lbl">Lignes totales</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="im-stat-box im-stat-success">
+            <div class="im-stat-num text-success">{{ res.successRows ?? 0 }}</div>
+            <div class="im-stat-lbl">Orders créés</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="im-stat-box im-stat-warning">
+            <div class="im-stat-num text-warning">{{ res.skippedRows ?? 0 }}</div>
+            <div class="im-stat-lbl">Ignorées</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="im-stat-box im-stat-danger">
+            <div class="im-stat-num text-danger">{{ res.failedRows ?? 0 }}</div>
+            <div class="im-stat-lbl">Erreurs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      @if (res.totalRows > 0) {
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span style="font-size:12px;color:#6c757d">Taux de succès</span>
+            <span class="fw-semibold" style="font-size:12px">{{ resultRate() }}%</span>
+          </div>
+          <div class="progress" style="height:8px;border-radius:100px">
+            <div class="progress-bar"
+              [class]="res.status === 'SUCCESS' ? 'bg-success' : res.status === 'PARTIAL' ? 'bg-warning' : 'bg-danger'"
+              [style.width.%]="resultRate()"
+              role="progressbar"
+              [attr.aria-valuenow]="resultRate()" aria-valuemin="0" aria-valuemax="100">
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        @if (res.shipmentId) {
+          <a [routerLink]="['/shipments', res.shipmentId]" class="btn btn-success">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Voir le shipment {{ res.mawb }}
+          </a>
+        }
+        <button type="button" class="btn btn-outline-secondary" (click)="resetUpload()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          Importer un autre fichier
+        </button>
+
+        @if (problemRows().length > 0) {
+          <button type="button" class="btn btn-link text-decoration-none p-0 ms-auto"
+            (click)="showRows.set(!showRows())"
+            [attr.aria-expanded]="showRows()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"
+              [style.transform]="showRows() ? 'rotate(180deg)' : ''"
+              style="transition:transform .2s;margin-right:5px">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+            {{ showRows() ? 'Masquer' : 'Voir' }} les détails ({{ problemRows().length }} ligne(s))
+          </button>
+        }
+      </div>
+
+      <!-- Expandable rows detail -->
+      @if (showRows() && problemRows().length > 0) {
+        <div class="im-rows-table mt-4">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0" aria-label="Détail des lignes problématiques">
+              <thead>
+                <tr>
+                  <th scope="col" style="width:60px">Ligne</th>
+                  <th scope="col">HAWB</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Statut</th>
+                  <th scope="col">Raison</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of failedRows(); track row.rowNumber) {
+                  <tr class="im-row-failed">
+                    <td class="text-muted">{{ row.rowNumber }}</td>
+                    <td><code class="text-dark">{{ row.hawb || '—' }}</code></td>
+                    <td class="text-muted">{{ row.receiverEmail || '—' }}</td>
+                    <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle">Erreur</span></td>
+                    <td style="font-size:12px">{{ row.reason || '—' }}</td>
+                  </tr>
+                }
+                @for (row of skippedRows(); track row.rowNumber) {
+                  <tr class="im-row-skipped">
+                    <td class="text-muted">{{ row.rowNumber }}</td>
+                    <td><code class="text-dark">{{ row.hawb || '—' }}</code></td>
+                    <td class="text-muted">{{ row.receiverEmail || '—' }}</td>
+                    <td><span class="badge bg-warning-subtle text-warning border border-warning-subtle">Ignorée</span></td>
+                    <td style="font-size:12px">{{ row.reason || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+    </div>
   </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════
+     HISTORY TABLE
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+      <div class="im-section-icon" aria-hidden="true">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <span class="im-section-title">Historique des imports</span>
+    </div>
+    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+      {{ history().length }} import(s)
+    </span>
+  </div>
+
   <div class="table-responsive">
-    <table class="table table-hover mb-0" aria-label="Historique des imports">
+    <table class="table table-hover align-middle mb-0" aria-label="Historique des imports">
       <thead>
-        <tr>
+        <tr class="im-table-head">
           <th scope="col">Fichier</th>
           <th scope="col">MAWB</th>
-          <th scope="col">Lignes</th>
-          <th scope="col">OK</th>
-          <th scope="col">Erreurs</th>
+          <th scope="col" style="min-width:160px">Progression</th>
+          <th scope="col">Résultats</th>
           <th scope="col">Statut</th>
-          <th scope="col">Importé par</th>
+          <th scope="col">Par</th>
           <th scope="col">Date</th>
           <th scope="col" class="text-end">Actions</th>
         </tr>
       </thead>
       <tbody>
+
         @if (historyLoading()) {
-          <tr><td colspan="9" class="text-center text-muted py-4" style="cursor:default">Chargement…</td></tr>
+          @for (i of [1,2,3,4,5]; track i) {
+            <tr>
+              <td colspan="8">
+                <div class="im-sk-row" [style.width.%]="[90,70,85,60,75][i-1]"></div>
+              </td>
+            </tr>
+          }
+
         } @else if (history().length === 0) {
-          <tr><td colspan="9" class="text-center text-muted py-4" style="cursor:default">Aucun import enregistré</td></tr>
+          <tr>
+            <td colspan="8" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-2">
+                <svg width="40" height="40" fill="none" stroke="#dee2e6" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                </svg>
+                <p class="text-muted mb-0" style="font-size:13px">Aucun import réalisé</p>
+              </div>
+            </td>
+          </tr>
+
         } @else {
           @for (imp of history(); track imp.id) {
-            <tr style="cursor:default">
-              <td class="fw-medium">{{ imp.fileName }}</td>
-              <td class="td-muted">{{ imp.mawb || '—' }}</td>
-              <td>{{ imp.totalRows }}</td>
-              <td class="text-success">{{ imp.successRows ?? '—' }}</td>
-              <td class="text-danger">{{ imp.failedRows ?? '—' }}</td>
+            <tr>
+              <!-- Fichier -->
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="im-file-badge" aria-hidden="true">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div>
+                    <div class="im-file-name-sm" [title]="imp.fileName">{{ imp.fileName }}</div>
+                    <div class="text-muted" style="font-size:11px">{{ imp.totalRows }} ligne(s)</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- MAWB -->
+              <td>
+                @if (imp.mawb) {
+                  @if (imp.shipmentId) {
+                    <a [routerLink]="['/shipments', imp.shipmentId]" class="im-mawb-link">{{ imp.mawb }}</a>
+                  } @else {
+                    <code class="im-mawb-code">{{ imp.mawb }}</code>
+                  }
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+
+              <!-- Progression bar -->
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height:6px;border-radius:100px;min-width:80px">
+                    <div class="progress-bar"
+                      [class]="imp.status === 'SUCCESS' ? 'bg-success' : imp.status === 'PARTIAL' ? 'bg-warning' : 'bg-danger'"
+                      [style.width.%]="historyRate(imp)"
+                      role="progressbar"
+                      [attr.aria-valuenow]="historyRate(imp)"
+                      aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                  </div>
+                  <span style="font-size:11px;color:#6c757d;white-space:nowrap">{{ historyRate(imp) }}%</span>
+                </div>
+              </td>
+
+              <!-- Résultats -->
+              <td>
+                <div class="d-flex gap-2 flex-wrap">
+                  <span class="im-count-badge im-count-success" title="Créés">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{ imp.successRows ?? 0 }}
+                  </span>
+                  @if ((imp.skippedRows ?? 0) > 0) {
+                    <span class="im-count-badge im-count-warning" title="Ignorées">
+                      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="5 12 12 12 19 12"/></svg>
+                      {{ imp.skippedRows }}
+                    </span>
+                  }
+                  @if ((imp.failedRows ?? 0) > 0) {
+                    <span class="im-count-badge im-count-danger" title="Erreurs">
+                      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      {{ imp.failedRows }}
+                    </span>
+                  }
+                </div>
+              </td>
+
+              <!-- Statut -->
               <td><app-badge [status]="imp.status" /></td>
-              <td class="td-muted">{{ imp.importedBy || '—' }}</td>
-              <td class="td-muted">{{ imp.importedAt | date:'dd/MM/yy HH:mm' }}</td>
+
+              <!-- Par -->
+              <td class="text-muted" style="font-size:12px">{{ imp.importedBy || '—' }}</td>
+
+              <!-- Date -->
+              <td class="text-muted" style="font-size:12px;white-space:nowrap">
+                {{ imp.importedAt | date:'dd/MM/yy HH:mm' }}
+              </td>
+
+              <!-- Actions -->
               <td class="text-end">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="confirmDelete(imp.id)"
-                  aria-label="Supprimer l'import"
-                >Supprimer</button>
+                <div class="d-flex gap-1 justify-content-end">
+                  <button type="button" class="btn btn-sm im-act-btn im-act-view"
+                    (click)="openDetail(imp.id)" title="Voir le détail" aria-label="Détail">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button type="button" class="btn btn-sm im-act-btn im-act-del"
+                    (click)="confirmDelete(imp.id)" title="Supprimer" aria-label="Supprimer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
               </td>
             </tr>
           }
         }
+
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- Delete confirmation modal -->
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Détail import
+     ══════════════════════════════════════════════════════════ -->
+@if (detail() || loadingDetail()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle" (click)="closeDetail()">
+    <div class="modal" style="max-width:720px;max-height:85vh;display:flex;flex-direction:column" (click)="$event.stopPropagation()">
+
+      <div class="nm-header" style="flex-shrink:0">
+        <div class="nm-icon blue" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="detailTitle" class="nm-title">Détail de l'import</h2>
+          @if (detail()) {
+            <p class="nm-sub">{{ detail()!.fileName }} · {{ detail()!.totalRows }} ligne(s)</p>
+          }
+        </div>
+        <button type="button" class="nm-close" (click)="closeDetail()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      @if (loadingDetail()) {
+        <div class="nm-body text-center py-5">
+          <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement…</span></div>
+        </div>
+
+      } @else if (detail(); as d) {
+        <!-- Stats summary -->
+        <div class="nm-body" style="flex-shrink:0;border-bottom:1px solid #f3f4f6">
+          <div class="row g-3">
+            <div class="col-3 text-center">
+              <div class="fw-bold fs-4" style="font-family:'Syne',sans-serif">{{ d.totalRows }}</div>
+              <div class="text-muted" style="font-size:12px">Total</div>
+            </div>
+            <div class="col-3 text-center">
+              <div class="fw-bold fs-4 text-success" style="font-family:'Syne',sans-serif">{{ d.successRows ?? 0 }}</div>
+              <div class="text-muted" style="font-size:12px">Créés</div>
+            </div>
+            <div class="col-3 text-center">
+              <div class="fw-bold fs-4 text-warning" style="font-family:'Syne',sans-serif">{{ d.skippedRows ?? 0 }}</div>
+              <div class="text-muted" style="font-size:12px">Ignorés</div>
+            </div>
+            <div class="col-3 text-center">
+              <div class="fw-bold fs-4 text-danger" style="font-family:'Syne',sans-serif">{{ d.failedRows ?? 0 }}</div>
+              <div class="text-muted" style="font-size:12px">Erreurs</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rows table -->
+        <div style="overflow-y:auto;flex:1">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0" aria-label="Détail des lignes">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">HAWB</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Statut</th>
+                  <th scope="col">Détail</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (!d.rows || d.rows.length === 0) {
+                  <tr><td colspan="5" class="text-center text-muted py-4">Aucun détail disponible</td></tr>
+                } @else {
+                  @for (row of d.rows; track row.rowNumber) {
+                    <tr [class]="row.status === 'FAILED' ? 'table-danger' : row.status === 'SKIPPED' ? 'table-warning' : ''">
+                      <td class="text-muted" style="font-size:12px">{{ row.rowNumber }}</td>
+                      <td><code style="font-size:12px">{{ row.hawb || '—' }}</code></td>
+                      <td class="text-muted" style="font-size:12px">{{ row.receiverEmail || '—' }}</td>
+                      <td>
+                        @if (row.status === 'IMPORTED') {
+                          <span class="badge bg-success-subtle text-success border border-success-subtle">Importé</span>
+                        } @else if (row.status === 'SKIPPED') {
+                          <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Ignoré</span>
+                        } @else {
+                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Erreur</span>
+                        }
+                      </td>
+                      <td style="font-size:12px;max-width:260px;white-space:normal">
+                        @if (row.reason) { <span class="text-danger">{{ row.reason }}</span> }
+                        @if (row.warnings) { <span class="text-warning d-block">⚠ {{ row.warnings }}</span> }
+                        @if (!row.reason && !row.warnings) { <span class="text-muted">—</span> }
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        @if (d.shipmentId) {
+          <div class="nm-footer" style="flex-shrink:0">
+            <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
+            <a [routerLink]="['/shipments', d.shipmentId]" class="nm-btn-primary text-decoration-none" (click)="closeDetail()">
+              Voir le shipment {{ d.mawb }} →
+            </a>
+          </div>
+        } @else {
+          <div class="nm-footer" style="flex-shrink:0">
+            <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Confirmer suppression
+     ══════════════════════════════════════════════════════════ -->
 @if (deleteId() !== null) {
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delImportTitle">
-    <div class="modal" style="max-width:420px">
-      <div class="modal-header">
-        <span id="delImportTitle" class="modal-title">Confirmer la suppression</span>
-        <button type="button" class="btn-close" (click)="cancelDelete()" aria-label="Fermer"></button>
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delImportTitle" (click)="cancelDelete()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="delImportTitle" class="nm-title">Supprimer cet import ?</h2>
+          <p class="nm-sub">Tous les orders et le shipment associés seront supprimés.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
-      <div class="modal-body">
-        <p style="font-size:14px">Êtes-vous sûr de vouloir supprimer cet import ? Cette action est irréversible.</p>
+      <div class="nm-body">
+        <p class="nm-alert">Cette action est irréversible. Le shipment, tous ses orders et l'historique d'import seront définitivement supprimés.</p>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="cancelDelete()">Annuler</button>
-        <button type="button" class="btn btn-danger btn-sm" [disabled]="deleting()" (click)="executeDelete()">
-          @if (deleting()) { <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span> }
-          Supprimer
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
+          @else { Supprimer définitivement }
         </button>
       </div>
     </div>

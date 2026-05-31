@@ -722,10 +722,18 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                     .toList()
                 : List.of();
 
+        Long shipmentId = null;
+        if (log.getMawb() != null) {
+            shipmentId = shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(log.getMawb())
+                    .map(s -> s.getId())
+                    .orElse(null);
+        }
+
         return ImportLogResponse.builder()
                 .id(log.getId())
                 .fileName(log.getFileName())
                 .mawb(log.getMawb())
+                .shipmentId(shipmentId)
                 .totalRows(log.getTotalRows())
                 .successRows(log.getSuccessRows())
                 .skippedRows(log.getSkippedRows())

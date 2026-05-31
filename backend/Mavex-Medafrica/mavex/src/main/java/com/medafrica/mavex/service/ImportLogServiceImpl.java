@@ -4,6 +4,7 @@ import com.medafrica.mavex.dto.imports.ImportLogResponse;
 import com.medafrica.mavex.model.imports.ImportLog;
 import com.medafrica.mavex.repository.ImportLogRepository;
 import com.medafrica.mavex.repository.ImportRowLogRepository;
+import com.medafrica.mavex.repository.ShipmentRepository;
 import com.medafrica.mavex.service.interfaces.ImportLogService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class ImportLogServiceImpl implements ImportLogService {
 
     private final ImportLogRepository    importLogRepository;
     private final ImportRowLogRepository importRowLogRepository;
+    private final ShipmentRepository     shipmentRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -35,11 +37,19 @@ public class ImportLogServiceImpl implements ImportLogService {
         return toResponseWithRows(log);
     }
 
+    private Long resolveShipmentId(String mawb) {
+        if (mawb == null) return null;
+        return shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(mawb)
+                .map(s -> s.getId())
+                .orElse(null);
+    }
+
     private ImportLogResponse toResponse(ImportLog log) {
         return ImportLogResponse.builder()
                 .id(log.getId())
                 .fileName(log.getFileName())
                 .mawb(log.getMawb())
+                .shipmentId(resolveShipmentId(log.getMawb()))
                 .totalRows(log.getTotalRows())
                 .successRows(log.getSuccessRows())
                 .skippedRows(log.getSkippedRows())
@@ -61,6 +71,7 @@ public class ImportLogServiceImpl implements ImportLogService {
                         .receiverEmail(r.getReceiverEmail())
                         .status(r.getStatus())
                         .reason(r.getReason())
+                        .warnings(r.getWarnings())
                         .build())
                 .toList();
 
@@ -68,6 +79,7 @@ public class ImportLogServiceImpl implements ImportLogService {
                 .id(log.getId())
                 .fileName(log.getFileName())
                 .mawb(log.getMawb())
+                .shipmentId(resolveShipmentId(log.getMawb()))
                 .totalRows(log.getTotalRows())
                 .successRows(log.getSuccessRows())
                 .skippedRows(log.getSkippedRows())

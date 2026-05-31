@@ -15,6 +15,7 @@ public class ImportLogResponse {
     private Long id;
     private String fileName;
     private String mawb;
+    private Long shipmentId;
     private int totalRows;
     private int successRows;
     private int skippedRows;

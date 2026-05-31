@@ -8,16 +8,19 @@ import { ImportLogResponse } from '../models/import.model';
 export class ImportService {
   private readonly http = inject(HttpClient);
 
-  upload(file: File, mode: 'PARTIAL' | 'STRICT'): Observable<unknown> {
+  upload(file: File): Observable<ImportLogResponse> {
     const form = new FormData();
     form.append('file', file);
-    form.append('mode', mode);
-    return this.http.post('/api/v1/imports/manifest', form);
+    return this.http.post<ImportLogResponse>('/api/v1/imports/manifest', form);
   }
 
   getHistory(page = 0, size = 20): Observable<Page<ImportLogResponse>> {
     const params = new HttpParams().set('page', page).set('size', size).set('sort', 'importedAt,desc');
     return this.http.get<Page<ImportLogResponse>>('/api/v1/imports', { params });
+  }
+
+  getById(id: number): Observable<ImportLogResponse> {
+    return this.http.get<ImportLogResponse>(`/api/v1/imports/${id}`);
   }
 
   delete(id: number): Observable<void> {
