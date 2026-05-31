@@ -11,6 +11,7 @@ import com.medafrica.mavex.model.logistics.OrderStatusHistory;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.ClientRepository;
+import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
 import com.medafrica.mavex.repository.ShipmentRepository;
@@ -40,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderStatusHistoryRepository historyRepository;
     private final ShipmentRepository           shipmentRepository;
     private final ClientRepository             clientRepository;
+    private final EmailLogRepository           emailLogRepository;
 
     // ───────────────────────────── CREATE ─────────────────────────────
 
@@ -269,6 +271,8 @@ public class OrderServiceImpl implements OrderService {
         if (!orderRepository.existsById(id)) {
             throw new EntityNotFoundException("Order introuvable id=" + id);
         }
+        emailLogRepository.deleteByOrderId(id);
+        historyRepository.deleteByOrderId(id);
         orderRepository.deleteById(id);
     }
 

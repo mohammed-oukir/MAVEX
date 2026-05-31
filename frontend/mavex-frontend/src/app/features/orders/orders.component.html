@@ -150,7 +150,7 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5,6,7,8]; track i) {
             <tr>
-              @for (j of [44,100,140,120,60,80,90,80,40,80]; track j) {
+              @for (j of [44,100,140,120,60,80,90,80,40,80]; track $index) {
                 <td><div class="or-sk" [style.width.px]="j"></div></td>
               }
             </tr>

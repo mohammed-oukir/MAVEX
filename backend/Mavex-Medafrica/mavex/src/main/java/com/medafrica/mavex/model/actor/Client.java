@@ -35,7 +35,7 @@ public class Client {
     private String fullName;
 
     /** Receptionne la facture et le lien de paiement */
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String phone;
