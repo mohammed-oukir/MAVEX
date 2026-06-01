@@ -90,6 +90,34 @@
       Imports
     </a>
 
+    <a
+      class="sb-item"
+      routerLink="/shippers"
+      routerLinkActive="active"
+      aria-label="Shippers"
+    >
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="1" y="3" width="15" height="13" rx="1"/>
+        <path d="M16 8h4l3 3v5h-7V8z"/>
+        <circle cx="5.5" cy="18.5" r="2.5"/>
+        <circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      Shippers
+    </a>
+
+    <a
+      class="sb-item"
+      routerLink="/payments"
+      routerLinkActive="active"
+      aria-label="Paiements"
+    >
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+        <line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Paiements
+    </a>
+
     @if (auth.isAdmin()) {
       <div class="sb-label">Administration</div>
       <a

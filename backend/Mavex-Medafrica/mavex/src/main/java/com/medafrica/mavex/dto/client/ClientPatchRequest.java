@@ -24,4 +24,6 @@ public class ClientPatchRequest {
 
     @Size(min = 2, max = 2, message = "Le code pays doit faire 2 caractères")
     private String countryCode;
+
+    private Boolean active;
 }

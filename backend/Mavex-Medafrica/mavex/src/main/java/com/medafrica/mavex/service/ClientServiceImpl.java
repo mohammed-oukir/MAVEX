@@ -112,6 +112,8 @@ public class ClientServiceImpl implements ClientService {
             client.setCountry(country);
         }
 
+        if (dto.getActive() != null) client.setActive(dto.getActive());
+
         return toResponseDTO(clientRepository.save(client));
     }
 
@@ -136,6 +138,7 @@ public class ClientServiceImpl implements ClientService {
                 .zipCode(client.getZipCode())
                 .country(client.getCountry())
                 .createdAt(client.getCreatedAt())
+                .active(client.isActive())
                 .build();
     }
 }

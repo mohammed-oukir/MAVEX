@@ -32,6 +32,10 @@ export class OrderService {
     return this.http.get<OrderResponse[]>(`/api/orders/shipment/${shipmentId}`);
   }
 
+  getByClient(clientId: number): Observable<OrderResponse[]> {
+    return this.http.get<OrderResponse[]>(`/api/orders/client/${clientId}`);
+  }
+
   create(req: OrderRequest): Observable<OrderResponse> {
     return this.http.post<OrderResponse>('/api/orders', req);
   }

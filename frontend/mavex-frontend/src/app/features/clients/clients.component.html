@@ -1,0 +1,525 @@
+<!-- ══════════════════════════════════════════════════════════
+     KPI CARDS
+     ══════════════════════════════════════════════════════════ -->
+<div class="cl-kpi-grid mb-4">
+
+  <button type="button" class="cl-kpi-card" [class.cl-kpi-selected]="fStatus() === 'all'" (click)="setStatus('all')" aria-label="Tous les clients">
+    <div class="cl-kpi-accent cl-accent-orange"></div>
+    <div class="cl-kpi-icon cl-icon-orange">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="cl-kpi-body">
+      <div class="cl-kpi-num cl-num-orange">{{ kpiTotal() }}</div>
+      <div class="cl-kpi-lbl">Total clients</div>
+    </div>
+  </button>
+
+  <button type="button" class="cl-kpi-card" [class.cl-kpi-selected]="fStatus() === 'active'" (click)="setStatus('active')" aria-label="Clients actifs">
+    <div class="cl-kpi-accent cl-accent-green"></div>
+    <div class="cl-kpi-icon cl-icon-green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="cl-kpi-body">
+      <div class="cl-kpi-num cl-num-green">{{ kpiActive() }}</div>
+      <div class="cl-kpi-lbl">Clients actifs</div>
+    </div>
+  </button>
+
+  <button type="button" class="cl-kpi-card" [class.cl-kpi-selected]="fStatus() === 'inactive'" (click)="setStatus('inactive')" aria-label="Clients inactifs">
+    <div class="cl-kpi-accent cl-accent-red"></div>
+    <div class="cl-kpi-icon cl-icon-red">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <div class="cl-kpi-body">
+      <div class="cl-kpi-num cl-num-red">{{ kpiInactive() }}</div>
+      <div class="cl-kpi-lbl">Clients inactifs</div>
+    </div>
+    @if (kpiInactive() > 0) {
+      <span class="cl-kpi-badge-alert">{{ kpiInactive() }}</span>
+    }
+  </button>
+
+  <button type="button" class="cl-kpi-card" aria-label="Nouveaux ce mois">
+    <div class="cl-kpi-accent cl-accent-blue"></div>
+    <div class="cl-kpi-icon cl-icon-blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="cl-kpi-body">
+      <div class="cl-kpi-num cl-num-blue">{{ kpiMonth() }}</div>
+      <div class="cl-kpi-lbl">Nouveaux ce mois</div>
+    </div>
+  </button>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TOOLBAR
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="cl-toolbar">
+    <div class="d-flex align-items-center gap-2">
+      <span class="cl-total-badge">{{ total() }} client(s)</span>
+      @if (hasFilters()) {
+        <button type="button" class="cl-clear-btn" (click)="clearFilters()">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Effacer filtres
+        </button>
+      }
+    </div>
+    <button type="button" class="cl-new-btn" (click)="openCreate()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau client
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TABLE
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table cl-table align-middle mb-0" aria-label="Liste des clients">
+      <thead>
+
+        <!-- Header row -->
+        <tr class="cl-thead">
+          <th scope="col">Nom</th>
+          <th scope="col">Email</th>
+          <th scope="col">Téléphone</th>
+          <th scope="col">Ville</th>
+          <th scope="col">État</th>
+          <th scope="col">Pays</th>
+          <th scope="col">Statut</th>
+          <th scope="col">Inscrit</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+
+        <!-- Filter row -->
+        <tr class="cl-filter-tr" aria-label="Filtres par colonne">
+          <th scope="col">
+            <div class="cl-fi-wrap">
+              <svg class="cl-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="cl-fi-input" [value]="fName()" (input)="setFilter('name', $any($event.target).value)" placeholder="Nom…" aria-label="Filtrer par nom" />
+            </div>
+          </th>
+          <th scope="col">
+            <input class="cl-fi-input" [value]="fEmail()" (input)="setFilter('email', $any($event.target).value)" placeholder="Email…" aria-label="Filtrer par email" />
+          </th>
+          <th scope="col">
+            <input class="cl-fi-input" [value]="fPhone()" (input)="setFilter('phone', $any($event.target).value)" placeholder="Tél…" aria-label="Filtrer par téléphone" />
+          </th>
+          <th scope="col">
+            <input class="cl-fi-input" [value]="fCity()" (input)="setFilter('city', $any($event.target).value)" placeholder="Ville…" aria-label="Filtrer par ville" />
+          </th>
+          <th scope="col">
+            <input class="cl-fi-input" [value]="fState()" (input)="setFilter('state', $any($event.target).value)" placeholder="NY…" aria-label="Filtrer par état" maxlength="2" style="width:56px" />
+          </th>
+          <th scope="col">
+            <input class="cl-fi-input" [value]="fCountry()" (input)="setFilter('country', $any($event.target).value)" placeholder="US…" aria-label="Filtrer par pays" maxlength="2" style="width:60px" />
+          </th>
+          <th scope="col">
+            <select class="cl-fi-select" [value]="fStatus()" (change)="setStatus($any($event.target).value)" aria-label="Filtrer par statut">
+              <option value="all">Tous</option>
+              <option value="active">Actif</option>
+              <option value="inactive">Inactif</option>
+            </select>
+          </th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+
+      </thead>
+      <tbody>
+
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6,7,8]; track $index) {
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="cl-sk" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>
+                  <div class="cl-sk" style="width:120px"></div>
+                </div>
+              </td>
+              @for (w of [160,90,80,40,36,60,80]; track $index) {
+                <td><div class="cl-sk" [style.width.px]="w"></div></td>
+              }
+              <td><div class="cl-sk" style="width:90px;height:28px;border-radius:8px"></div></td>
+            </tr>
+          }
+
+        } @else if (pageItems().length === 0) {
+          <tr>
+            <td colspan="9" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="cl-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucun client trouvé</p>
+                  @if (hasFilters()) {
+                    <p class="text-muted mb-2" style="font-size:13px">Essayez de modifier vos filtres</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Effacer les filtres</button>
+                  } @else {
+                    <p class="text-muted mb-0" style="font-size:13px">Créez votre premier client</p>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        } @else {
+          @for (c of pageItems(); track c.id) {
+            <tr class="cl-row" [class.cl-row-inactive]="!c.active">
+
+              <!-- Nom + avatar -->
+              <td>
+                <div class="cl-identity">
+                  <div class="cl-avatar" [style.background]="getAvatarColor(c.fullName)" aria-hidden="true">
+                    {{ getInitials(c.fullName) }}
+                  </div>
+                  <div>
+                    <button type="button" class="cl-name-btn" (click)="openDetail(c)">{{ c.fullName }}</button>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                @if (c.email) { <span class="cl-email">{{ c.email }}</span> }
+                @else { <span class="cl-muted">—</span> }
+              </td>
+
+              <td class="cl-muted">{{ c.phone || '—' }}</td>
+              <td class="cl-muted">{{ c.city  || '—' }}</td>
+              <td>
+                @if (c.state) { <span class="cl-state-badge">{{ c.state }}</span> }
+                @else { <span class="cl-muted">—</span> }
+              </td>
+              <td>
+                @if (c.country?.code) { <span class="cl-country-badge">{{ c.country!.code }}</span> }
+                @else { <span class="cl-muted">—</span> }
+              </td>
+
+              <td>
+                <span [class]="c.active ? 'cl-badge cl-badge-active' : 'cl-badge cl-badge-inactive'">
+                  <span class="cl-badge-dot" aria-hidden="true"></span>
+                  {{ c.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+
+              <td class="cl-muted" style="font-size:12px">
+                {{ c.createdAt ? (c.createdAt | date:'dd/MM/yyyy') : '—' }}
+              </td>
+
+              <td>
+                <div class="cl-actions">
+                  <button type="button" class="cl-act cl-act-view" (click)="openDetail(c)" title="Voir le détail" aria-label="Voir le détail">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button type="button" class="cl-act cl-act-edit" (click)="openEdit(c)" title="Modifier" aria-label="Modifier">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button type="button" class="cl-act" [class.cl-act-activate]="!c.active" [class.cl-act-deactivate]="c.active"
+                    [disabled]="toggling() === c.id"
+                    (click)="toggleActive(c)"
+                    [title]="c.active ? 'Désactiver' : 'Activer'"
+                    [attr.aria-label]="c.active ? 'Désactiver ce client' : 'Activer ce client'">
+                    @if (toggling() === c.id) {
+                      <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
+                    } @else if (c.active) {
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    } @else {
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    }
+                  </button>
+                  <button type="button" class="cl-act cl-act-del" (click)="confirmDelete(c.id)" title="Supprimer" aria-label="Supprimer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          }
+        }
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="cl-pagination">
+      <span class="cl-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ total() }} résultats</span>
+      <div class="d-flex gap-1">
+        <button type="button" class="cl-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pages(); track p) {
+          <button type="button" class="cl-pg-btn" [class.cl-pg-active]="p === page()" (click)="goToPage(p)" [attr.aria-current]="p === page() ? 'page' : null">{{ p + 1 }}</button>
+        }
+        <button type="button" class="cl-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Créer / Modifier
+     ══════════════════════════════════════════════════════════ -->
+@if (formMode()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-labelledby]="'cl-form-title'" (click)="closeForm()">
+    <div class="modal" style="max-width:560px" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            @if (formMode() === 'create') {
+              <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+            } @else {
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            }
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="cl-form-title" class="nm-title">{{ formMode() === 'create' ? 'Nouveau client' : 'Modifier le client' }}</h2>
+          <p class="nm-sub">{{ formMode() === 'create' ? 'Remplissez les informations du destinataire.' : 'Modifiez les informations du client.' }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeForm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="saveForm()" novalidate>
+        <div class="nm-body">
+          <div class="row g-3">
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="clFullName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
+                <input id="clFullName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('fullName')"
+                  formControlName="fullName" placeholder="John Doe" autocomplete="name" />
+                @if (fieldInvalid('fullName')) {
+                  <div class="nm-err-msg" role="alert">Nom obligatoire (min. 2 caractères).</div>
+                }
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="clEmail" class="nm-label">Email <span class="nm-req">*</span></label>
+                <input id="clEmail" type="email" class="nm-input" [class.nm-err]="fieldInvalid('email')"
+                  formControlName="email" placeholder="john@example.com" autocomplete="email" />
+                @if (fieldInvalid('email')) {
+                  <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
+                }
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="clPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
+                <input id="clPhone" type="tel" class="nm-input" formControlName="phone" placeholder="+1 555 000 0000" autocomplete="tel" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="clAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
+                <input id="clAddress" type="text" class="nm-input" formControlName="address" placeholder="123 Main St" autocomplete="street-address" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-5">
+              <div class="nm-field">
+                <label for="clCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
+                <input id="clCity" type="text" class="nm-input" formControlName="city" placeholder="New York" autocomplete="address-level2" />
+              </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <div class="nm-field">
+                <label for="clState" class="nm-label">État <span class="nm-opt">optionnel</span></label>
+                <input id="clState" type="text" class="nm-input" [class.nm-err]="fieldInvalid('state')"
+                  formControlName="state" placeholder="NY" maxlength="2" style="text-transform:uppercase" autocomplete="address-level1" />
+                @if (fieldInvalid('state')) {
+                  <div class="nm-err-msg" role="alert">2 lettres majuscules.</div>
+                }
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4">
+              <div class="nm-field">
+                <label for="clZip" class="nm-label">Code postal <span class="nm-opt">optionnel</span></label>
+                <input id="clZip" type="text" class="nm-input" formControlName="zipCode" placeholder="10001" autocomplete="postal-code" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="nm-field">
+                <label for="clCountry" class="nm-label">Pays <span class="nm-req">*</span></label>
+                <input id="clCountry" type="text" class="nm-input" [class.nm-err]="fieldInvalid('countryCode')"
+                  formControlName="countryCode" placeholder="US" maxlength="2" style="text-transform:uppercase" autocomplete="country" />
+                @if (fieldInvalid('countryCode')) {
+                  <div class="nm-err-msg" role="alert">Code pays 2 lettres (ex: US, MA).</div>
+                }
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+              Enregistrement…
+            } @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ formMode() === 'create' ? 'Créer le client' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Détail client
+     ══════════════════════════════════════════════════════════ -->
+@if (detailClient(); as c) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cl-detail-title" (click)="closeDetail()">
+    <div class="modal cl-detail-modal" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="cl-avatar cl-avatar-lg" [style.background]="getAvatarColor(c.fullName)" aria-hidden="true">
+          {{ getInitials(c.fullName) }}
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="cl-detail-title" class="nm-title">{{ c.fullName }}</h2>
+          <p class="nm-sub">
+            <span [class]="c.active ? 'cl-badge cl-badge-active' : 'cl-badge cl-badge-inactive'">
+              <span class="cl-badge-dot" aria-hidden="true"></span>
+              {{ c.active ? 'Actif' : 'Inactif' }}
+            </span>
+            @if (c.createdAt) {
+              <span class="ms-2 text-muted" style="font-size:12px">Depuis le {{ c.createdAt | date:'dd/MM/yyyy' }}</span>
+            }
+          </p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeDetail()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="nm-body">
+        <div class="row g-4">
+
+          <!-- Infos contact -->
+          <div class="col-12 col-md-6">
+            <p class="cl-detail-section">Contact</p>
+            <div class="cl-detail-item">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span class="cl-email">{{ c.email || '—' }}</span>
+            </div>
+            <div class="cl-detail-item">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z"/></svg>
+              <span>{{ c.phone || '—' }}</span>
+            </div>
+          </div>
+
+          <!-- Adresse -->
+          <div class="col-12 col-md-6">
+            <p class="cl-detail-section">Adresse</p>
+            <div class="cl-address-block">
+              @if (c.address) { <div>{{ c.address }}</div> }
+              @if (c.city || c.state || c.zipCode) {
+                <div>{{ [c.city, c.state, c.zipCode].filter(x => !!x).join(', ') }}</div>
+              }
+              @if (c.country?.code) { <div class="cl-muted" style="font-size:12px">{{ c.country!.code }}{{ c.country!.name ? ' — ' + c.country!.name : '' }}</div> }
+              @if (!c.address && !c.city && !c.state) { <div class="cl-muted">Adresse non renseignée</div> }
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <div class="col-12">
+            <p class="cl-detail-section">
+              Commandes associées
+              <span class="cl-section-count">{{ detailOrders().length }}</span>
+            </p>
+            @if (detailLoading()) {
+              <div class="text-center py-3">
+                <span class="spinner-border" style="width:20px;height:20px;border-width:2px;color:#F97316" aria-label="Chargement"></span>
+              </div>
+            } @else if (detailOrders().length === 0) {
+              <p class="cl-muted" style="font-size:13px">Aucune commande pour ce client.</p>
+            } @else {
+              <div class="cl-orders-list">
+                @for (o of detailOrders(); track o.id) {
+                  <div class="cl-order-row">
+                    <div class="cl-order-hawb">{{ o.hawb }}</div>
+                    <div class="cl-order-desc">{{ o.goodsDescription || '—' }}</div>
+                    <div class="cl-order-amount">{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</div>
+                    <span [class]="'cl-os-badge ' + orderStatusClass(o.status)">{{ orderStatusLabel(o.status) }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
+        <button type="button" class="nm-btn-primary" (click)="closeDetail(); openEdit(c)">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Modifier
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Suppression
+     ══════════════════════════════════════════════════════════ -->
+@if (deleteId() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cl-del-title" (click)="cancelDelete()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="cl-del-title" class="nm-title">Supprimer ce client ?</h2>
+          <p class="nm-sub">Cette action est irréversible.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        <p class="nm-alert">Le client et toutes ses données seront définitivement supprimés.</p>
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+            Suppression…
+          } @else { Supprimer }
+        </button>
+      </div>
+    </div>
+  </div>
+}
