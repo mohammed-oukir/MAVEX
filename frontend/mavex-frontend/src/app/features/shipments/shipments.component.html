@@ -1,17 +1,56 @@
 <!-- ── Stat cards ─────────────────────────────────────────── -->
 <div class="sp-stat-cards" role="group" aria-label="Filtrer par statut">
-  @for (opt of statusOptions; track opt.value) {
-    <button
-      type="button"
-      [class]="'sp-stat-card card-' + (opt.value || 'all').toLowerCase()"
-      [class.active]="statusFilter() === opt.value"
-      (click)="setStatus(opt.value)"
-      [attr.aria-pressed]="statusFilter() === opt.value"
-    >
-      <div class="sp-stat-num">{{ statusCounts()[opt.value] ?? 0 }}</div>
-      <div class="sp-stat-lbl">{{ opt.label }}</div>
-    </button>
-  }
+
+  <button type="button" class="sp-stat-card card-all" [class.active]="statusFilter() === ''" (click)="setStatus('')" [attr.aria-pressed]="statusFilter() === ''">
+    <div class="sp-stat-icon sp-si-all">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </div>
+    <div>
+      <div class="sp-stat-num">{{ statusCounts()[''] }}</div>
+      <div class="sp-stat-lbl">Tous</div>
+    </div>
+  </button>
+
+  <button type="button" class="sp-stat-card card-draft" [class.active]="statusFilter() === 'DRAFT'" (click)="setStatus('DRAFT')" [attr.aria-pressed]="statusFilter() === 'DRAFT'">
+    <div class="sp-stat-icon sp-si-draft">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div>
+      <div class="sp-stat-num">{{ statusCounts()['DRAFT'] }}</div>
+      <div class="sp-stat-lbl">Draft</div>
+    </div>
+  </button>
+
+  <button type="button" class="sp-stat-card card-imported" [class.active]="statusFilter() === 'IMPORTED'" (click)="setStatus('IMPORTED')" [attr.aria-pressed]="statusFilter() === 'IMPORTED'">
+    <div class="sp-stat-icon sp-si-imported">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+    </div>
+    <div>
+      <div class="sp-stat-num">{{ statusCounts()['IMPORTED'] }}</div>
+      <div class="sp-stat-lbl">Imported</div>
+    </div>
+  </button>
+
+  <button type="button" class="sp-stat-card card-processing" [class.active]="statusFilter() === 'PROCESSING'" (click)="setStatus('PROCESSING')" [attr.aria-pressed]="statusFilter() === 'PROCESSING'">
+    <div class="sp-stat-icon sp-si-processing">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    </div>
+    <div>
+      <div class="sp-stat-num">{{ statusCounts()['PROCESSING'] }}</div>
+      <div class="sp-stat-lbl">Processing</div>
+    </div>
+  </button>
+
+  <button type="button" class="sp-stat-card card-closed" [class.active]="statusFilter() === 'CLOSED'" (click)="setStatus('CLOSED')" [attr.aria-pressed]="statusFilter() === 'CLOSED'">
+    <div class="sp-stat-icon sp-si-closed">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div>
+      <div class="sp-stat-num">{{ statusCounts()['CLOSED'] }}</div>
+      <div class="sp-stat-lbl">Closed</div>
+    </div>
+  </button>
+
 </div>
 
 <!-- ── Toolbar ─────────────────────────────────────────────── -->

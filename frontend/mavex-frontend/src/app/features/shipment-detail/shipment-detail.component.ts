@@ -107,10 +107,13 @@ export class ShipmentDetailComponent implements OnInit {
     });
   });
 
-  totalOrders  = computed(() => this.orders().length);
-  paidCount    = computed(() => this.orders().filter(o => o.status === 'PAID').length);
-  pendingCount = computed(() => this.orders().filter(o => o.status === 'PENDING_PAYMENT').length);
-  emailCount   = computed(() => this.orders().filter(o => o.status === 'EMAIL_SENT').length);
+  totalOrders     = computed(() => this.orders().length);
+  createdCount    = computed(() => this.orders().filter(o => o.status === 'CREATED').length);
+  emailCount      = computed(() => this.orders().filter(o => o.status === 'EMAIL_SENT').length);
+  pendingCount    = computed(() => this.orders().filter(o => o.status === 'PENDING_PAYMENT').length);
+  paidCount       = computed(() => this.orders().filter(o => o.status === 'PAID').length);
+  inDeliveryCount = computed(() => this.orders().filter(o => o.status === 'IN_DELIVERY').length);
+  deliveredCount  = computed(() => this.orders().filter(o => o.status === 'DELIVERED').length);
 
   /* ── Financial totals ─────────────────────────────────── */
   totalWeight  = computed(() => Math.round(this.orders().reduce((s, o) => s + (o.shipmentWeight ?? 0), 0) * 100) / 100);
