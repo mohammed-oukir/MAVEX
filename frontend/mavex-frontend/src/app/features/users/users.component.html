@@ -1,0 +1,317 @@
+<!-- ══════════════════════════════════════════════════════════
+     STATS BAR
+     ══════════════════════════════════════════════════════════ -->
+<div class="us-stats-bar mb-4">
+  <div class="us-stat">
+    <div class="us-stat-icon us-si-dark">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div>
+      <div class="us-stat-num">{{ statTotal() }}</div>
+      <div class="us-stat-lbl">Membres</div>
+    </div>
+  </div>
+  <div class="us-stat-divider" aria-hidden="true"></div>
+  <div class="us-stat">
+    <div class="us-stat-icon us-si-purple">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div>
+      <div class="us-stat-num">{{ statAdmins() }}</div>
+      <div class="us-stat-lbl">Admins</div>
+    </div>
+  </div>
+  <div class="us-stat-divider" aria-hidden="true"></div>
+  <div class="us-stat">
+    <div class="us-stat-icon us-si-blue">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <div class="us-stat-num">{{ statAgents() }}</div>
+      <div class="us-stat-lbl">Agents</div>
+    </div>
+  </div>
+  <div class="us-stat-divider" aria-hidden="true"></div>
+  <div class="us-stat">
+    <div class="us-stat-icon us-si-green">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div>
+      <div class="us-stat-num">{{ statActive() }}</div>
+      <div class="us-stat-lbl">Actifs</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TOOLBAR — filtres + bouton add
+     ══════════════════════════════════════════════════════════ -->
+<div class="us-toolbar mb-4">
+  <div class="us-filter-group" role="group" aria-label="Filtrer par rôle">
+    <button type="button" class="us-filter-btn" [class.us-filter-active]="roleFilter() === 'ALL'" (click)="setRole('ALL')">
+      Tous <span class="us-filter-count">{{ statTotal() }}</span>
+    </button>
+    <button type="button" class="us-filter-btn us-fb-admin" [class.us-filter-active]="roleFilter() === 'ADMIN'" (click)="setRole('ADMIN')">
+      Admins <span class="us-filter-count">{{ statAdmins() }}</span>
+    </button>
+    <button type="button" class="us-filter-btn us-fb-agent" [class.us-filter-active]="roleFilter() === 'AGENT'" (click)="setRole('AGENT')">
+      Agents <span class="us-filter-count">{{ statAgents() }}</span>
+    </button>
+    <button type="button" class="us-filter-btn us-fb-inactive" [class.us-filter-active]="roleFilter() === 'INACTIVE'" (click)="setRole('INACTIVE')">
+      Inactifs <span class="us-filter-count">{{ statTotal() - statActive() }}</span>
+    </button>
+  </div>
+
+  <div class="us-right-bar">
+    <div class="us-search-wrap">
+      <svg class="us-search-ico" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" class="us-search" placeholder="Chercher un membre…" [value]="searchQ()" (input)="setSearch($any($event.target).value)" aria-label="Rechercher" />
+    </div>
+    <button type="button" class="us-add-btn" (click)="openCreate()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un membre
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     GRILLE DE CARTES
+     ══════════════════════════════════════════════════════════ -->
+@if (loading()) {
+  <div class="row g-4">
+    @for (i of [1,2,3,4,5,6]; track $index) {
+      <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+        <div class="us-card-skeleton">
+          <div class="us-sk us-sk-header"></div>
+          <div class="d-flex flex-column align-items-center p-3 gap-2">
+            <div class="us-sk" style="width:72px;height:72px;border-radius:50%"></div>
+            <div class="us-sk" style="width:120px;height:14px"></div>
+            <div class="us-sk" style="width:160px;height:12px"></div>
+            <div class="us-sk" style="width:70px;height:24px;border-radius:100px"></div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+} @else if (filtered().length === 0) {
+  <div class="us-empty">
+    <div class="us-empty-icon" aria-hidden="true">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <p class="fw-semibold mb-1">Aucun membre trouvé</p>
+    <p class="text-muted mb-3" style="font-size:13px">Ajoutez votre premier membre à l'équipe.</p>
+    <button type="button" class="us-add-btn" (click)="openCreate()">+ Ajouter un membre</button>
+  </div>
+
+} @else {
+  <div class="row g-4">
+    @for (u of filtered(); track u.id) {
+      <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+
+        <div class="us-card" [class.us-card-inactive]="!u.active">
+
+          <!-- Bande colorée en haut selon le rôle -->
+          <div [class]="u.role === 'ADMIN' ? 'us-card-top us-top-admin' : 'us-card-top us-top-agent'">
+            <!-- Point de statut -->
+            <span [class]="u.active ? 'us-dot us-dot-on' : 'us-dot us-dot-off'" [attr.aria-label]="u.active ? 'Actif' : 'Inactif'"></span>
+            <!-- Badge rôle -->
+            <span [class]="u.role === 'ADMIN' ? 'us-role-chip us-chip-admin' : 'us-role-chip us-chip-agent'">
+              @if (u.role === 'ADMIN') {
+                <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              } @else {
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              }
+              {{ u.role === 'ADMIN' ? 'Admin' : 'Agent' }}
+            </span>
+          </div>
+
+          <!-- Avatar -->
+          <div class="us-avatar-wrap">
+            <div class="us-avatar" [style.background]="getAvatarColor(u.fullName)" [attr.aria-label]="u.fullName">
+              {{ getInitials(u.fullName) }}
+            </div>
+          </div>
+
+          <!-- Infos -->
+          <div class="us-card-info">
+            <h5 class="us-card-name">{{ u.fullName }}</h5>
+            <p class="us-card-email">{{ u.email }}</p>
+            @if (u.createdAt) {
+              <p class="us-card-date">Membre depuis {{ u.createdAt | date:'MMM yyyy' }}</p>
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="us-card-actions">
+            <button type="button" class="us-act us-act-edit" (click)="openEdit(u)" [title]="'Modifier ' + u.fullName" [attr.aria-label]="'Modifier ' + u.fullName">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Modifier
+            </button>
+            <button type="button" class="us-act" [class.us-act-deactivate]="u.active" [class.us-act-activate]="!u.active"
+              [disabled]="toggling() === u.id" (click)="toggleActive(u)"
+              [title]="u.active ? 'Désactiver' : 'Activer'" [attr.aria-label]="u.active ? 'Désactiver' : 'Activer'">
+              @if (toggling() === u.id) {
+                <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span>
+              } @else if (u.active) {
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              } @else {
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              }
+              {{ u.active ? 'Désactiver' : 'Activer' }}
+            </button>
+            <button type="button" class="us-act-icon us-act-del" (click)="confirmDelete(u.id)" [title]="'Supprimer ' + u.fullName" [attr.aria-label]="'Supprimer ' + u.fullName">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Créer / Modifier
+     ══════════════════════════════════════════════════════════ -->
+@if (formMode()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="us-form-title" (click)="closeForm()">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div [class]="formMode() === 'create' ? 'nm-icon orange' : 'nm-icon blue'" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="us-form-title" class="nm-title">{{ formMode() === 'create' ? 'Nouveau membre' : 'Modifier le membre' }}</h2>
+          <p class="nm-sub">{{ formMode() === 'create' ? 'Créer un compte pour un membre de l\'équipe.' : 'Modifier les informations du compte.' }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeForm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="saveForm()" novalidate>
+        <div class="nm-body">
+          <div class="row g-3">
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="usFullName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
+                <input id="usFullName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('fullName')"
+                  formControlName="fullName" placeholder="Mohammed Alaoui" autocomplete="name" />
+                @if (fieldInvalid('fullName')) { <div class="nm-err-msg" role="alert">Nom obligatoire (min. 2 caractères).</div> }
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="usEmail" class="nm-label">Adresse email <span class="nm-req">*</span></label>
+                <input id="usEmail" type="email" class="nm-input" [class.nm-err]="fieldInvalid('email')"
+                  formControlName="email" placeholder="membre@mavex.ma" autocomplete="email" />
+                @if (fieldInvalid('email')) { <div class="nm-err-msg" role="alert">Email valide obligatoire.</div> }
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="usPassword" class="nm-label">
+                  Mot de passe
+                  @if (formMode() === 'create') { <span class="nm-req">*</span> }
+                  @else { <span class="nm-opt">laisser vide pour ne pas modifier</span> }
+                </label>
+                <div style="position:relative">
+                  <input id="usPassword" [type]="showPwd() ? 'text' : 'password'" class="nm-input" [class.nm-err]="fieldInvalid('password')"
+                    formControlName="password" placeholder="Min. 8 caractères" autocomplete="new-password" style="padding-right:44px" />
+                  <button type="button" class="us-pwd-toggle" (click)="toggleShowPwd()" [attr.aria-label]="showPwd() ? 'Masquer' : 'Afficher'">
+                    @if (showPwd()) {
+                      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    } @else {
+                      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    }
+                  </button>
+                </div>
+                @if (fieldInvalid('password')) { <div class="nm-err-msg" role="alert">Minimum 8 caractères.</div> }
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label class="nm-label">Rôle <span class="nm-req">*</span></label>
+                <div class="us-role-picker">
+                  <label class="us-role-option" [class.us-role-selected-agent]="form.get('role')!.value === 'AGENT'">
+                    <input type="radio" formControlName="role" value="AGENT" class="visually-hidden" />
+                    <div class="us-role-opt-icon us-roi-agent">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div>
+                      <div class="us-role-opt-title">Agent</div>
+                      <div class="us-role-opt-desc">Accès opérationnel</div>
+                    </div>
+                  </label>
+                  <label class="us-role-option" [class.us-role-selected-admin]="form.get('role')!.value === 'ADMIN'">
+                    <input type="radio" formControlName="role" value="ADMIN" class="visually-hidden" />
+                    <div class="us-role-opt-icon us-roi-admin">
+                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div>
+                      <div class="us-role-opt-title">Admin</div>
+                      <div class="us-role-opt-desc">Accès complet</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+            @if (saving()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Enregistrement… }
+            @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ formMode() === 'create' ? 'Créer le compte' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Suppression
+     ══════════════════════════════════════════════════════════ -->
+@if (deleteId() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="us-del-title" (click)="cancelDelete()">
+    <div class="modal" style="max-width:400px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="us-del-title" class="nm-title">Désactiver ce membre ?</h2>
+          <p class="nm-sub">L'accès sera bloqué immédiatement.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body"><p class="nm-alert">Le membre ne pourra plus se connecter. Vous pouvez le réactiver à tout moment.</p></div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> }
+          @else { Désactiver }
+        </button>
+      </div>
+    </div>
+  </div>
+}
