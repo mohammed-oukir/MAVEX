@@ -1,0 +1,341 @@
+<!-- KPI CARDS -->
+<div class="sh-kpi-grid mb-4">
+
+  <button type="button" class="sh-kpi-card" [class.sh-kpi-selected]="fStatus() === 'all'" (click)="setStatus('all')" aria-label="Tous les shippers">
+    <div class="sh-kpi-accent sh-accent-orange"></div>
+    <div class="sh-kpi-icon sh-icon-orange">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    </div>
+    <div class="sh-kpi-body">
+      <div class="sh-kpi-num sh-num-orange">{{ kpiTotal() }}</div>
+      <div class="sh-kpi-lbl">Total shippers</div>
+    </div>
+  </button>
+
+  <button type="button" class="sh-kpi-card" [class.sh-kpi-selected]="fStatus() === 'active'" (click)="setStatus('active')" aria-label="Shippers actifs">
+    <div class="sh-kpi-accent sh-accent-green"></div>
+    <div class="sh-kpi-icon sh-icon-green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="sh-kpi-body">
+      <div class="sh-kpi-num sh-num-green">{{ kpiActive() }}</div>
+      <div class="sh-kpi-lbl">Actifs</div>
+    </div>
+  </button>
+
+  <button type="button" class="sh-kpi-card" [class.sh-kpi-selected]="fStatus() === 'inactive'" (click)="setStatus('inactive')" aria-label="Shippers inactifs">
+    <div class="sh-kpi-accent sh-accent-red"></div>
+    <div class="sh-kpi-icon sh-icon-red">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <div class="sh-kpi-body">
+      <div class="sh-kpi-num sh-num-red">{{ kpiInactive() }}</div>
+      <div class="sh-kpi-lbl">Inactifs</div>
+    </div>
+    @if (kpiInactive() > 0) { <span class="sh-kpi-alert">{{ kpiInactive() }}</span> }
+  </button>
+
+  <button type="button" class="sh-kpi-card" aria-label="Nouveaux ce mois">
+    <div class="sh-kpi-accent sh-accent-blue"></div>
+    <div class="sh-kpi-icon sh-icon-blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="sh-kpi-body">
+      <div class="sh-kpi-num sh-num-blue">{{ kpiMonth() }}</div>
+      <div class="sh-kpi-lbl">Nouveaux ce mois</div>
+    </div>
+  </button>
+
+</div>
+
+<!-- TOOLBAR -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="sh-toolbar">
+    <div class="d-flex align-items-center gap-2">
+      <span class="sh-total-badge">{{ total() }} shipper(s)</span>
+      @if (hasFilters()) {
+        <button type="button" class="sh-clear-btn" (click)="clearFilters()">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Effacer filtres
+        </button>
+      }
+    </div>
+    <button type="button" class="sh-new-btn" (click)="openCreate()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau shipper
+    </button>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table sh-table align-middle mb-0" aria-label="Liste des shippers">
+      <thead>
+        <tr class="sh-thead">
+          <th scope="col">Société</th>
+          <th scope="col">Contact</th>
+          <th scope="col">Email</th>
+          <th scope="col">Téléphone</th>
+          <th scope="col">Ville</th>
+          <th scope="col">Pays</th>
+          <th scope="col">Statut</th>
+          <th scope="col">Inscrit</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+        <tr class="sh-filter-tr" aria-label="Filtres par colonne">
+          <th scope="col">
+            <div class="sh-fi-wrap">
+              <svg class="sh-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="sh-fi-input" [value]="fCompany()" (input)="setFilter('company', $any($event.target).value)" placeholder="Société…" aria-label="Filtrer société" />
+            </div>
+          </th>
+          <th scope="col"><input class="sh-fi-input" [value]="fContact()" (input)="setFilter('contact', $any($event.target).value)" placeholder="Contact…" aria-label="Filtrer contact" /></th>
+          <th scope="col"><input class="sh-fi-input" [value]="fEmail()" (input)="setFilter('email', $any($event.target).value)" placeholder="Email…" aria-label="Filtrer email" /></th>
+          <th scope="col"><input class="sh-fi-input" [value]="fPhone()" (input)="setFilter('phone', $any($event.target).value)" placeholder="Tél…" aria-label="Filtrer téléphone" /></th>
+          <th scope="col"><input class="sh-fi-input" [value]="fCity()" (input)="setFilter('city', $any($event.target).value)" placeholder="Ville…" aria-label="Filtrer ville" /></th>
+          <th scope="col"><input class="sh-fi-input" [value]="fCountry()" (input)="setFilter('country', $any($event.target).value)" placeholder="MA…" aria-label="Filtrer pays" maxlength="2" style="width:60px" /></th>
+          <th scope="col">
+            <select class="sh-fi-select" [value]="fStatus()" (change)="setStatus($any($event.target).value)" aria-label="Filtrer statut">
+              <option value="all">Tous</option>
+              <option value="active">Actif</option>
+              <option value="inactive">Inactif</option>
+            </select>
+          </th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6]; track $index) {
+            <tr>
+              <td><div class="d-flex align-items-center gap-2"><div class="sh-sk" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div><div class="sh-sk" style="width:130px"></div></div></td>
+              @for (w of [90,140,80,70,36,60,80]; track $index) {
+                <td><div class="sh-sk" [style.width.px]="w"></div></td>
+              }
+              <td><div class="sh-sk" style="width:80px;height:28px;border-radius:8px"></div></td>
+            </tr>
+          }
+
+        } @else if (pageItems().length === 0) {
+          <tr>
+            <td colspan="9" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="sh-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucun shipper trouvé</p>
+                  @if (hasFilters()) {
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Effacer les filtres</button>
+                  } @else {
+                    <p class="text-muted mb-0" style="font-size:13px">Créez votre premier shipper</p>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        } @else {
+          @for (s of pageItems(); track s.id) {
+            <tr class="sh-row" [class.sh-row-inactive]="!s.active">
+
+              <td>
+                <div class="sh-identity">
+                  <div class="sh-avatar" [style.background]="getAvatarColor(s.companyName)" aria-hidden="true">
+                    {{ getInitials(s.companyName) }}
+                  </div>
+                  <div class="sh-company-name">{{ s.companyName }}</div>
+                </div>
+              </td>
+
+              <td class="sh-muted">{{ s.contactName || '—' }}</td>
+              <td><span class="sh-email">{{ s.email || '—' }}</span></td>
+              <td class="sh-muted">{{ s.phone || '—' }}</td>
+              <td class="sh-muted">{{ s.city || '—' }}</td>
+              <td>
+                @if (s.countryCode?.code) {
+                  <span class="sh-country-badge">{{ s.countryCode!.code }}</span>
+                } @else { <span class="sh-muted">—</span> }
+              </td>
+
+              <td>
+                <span [class]="s.active ? 'sh-badge sh-badge-active' : 'sh-badge sh-badge-inactive'">
+                  <span class="sh-badge-dot" aria-hidden="true"></span>
+                  {{ s.active ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+
+              <td class="sh-muted" style="font-size:12px">
+                {{ s.createdAt ? (s.createdAt | date:'dd/MM/yyyy') : '—' }}
+              </td>
+
+              <td>
+                <div class="sh-actions">
+                  <button type="button" class="sh-act sh-act-edit" (click)="openEdit(s)" title="Modifier" aria-label="Modifier">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button type="button" class="sh-act" [class.sh-act-activate]="!s.active" [class.sh-act-deactivate]="s.active"
+                    [disabled]="toggling() === s.id" (click)="toggleActive(s)"
+                    [title]="s.active ? 'Désactiver' : 'Activer'" [attr.aria-label]="s.active ? 'Désactiver' : 'Activer'">
+                    @if (toggling() === s.id) {
+                      <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
+                    } @else if (s.active) {
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    } @else {
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    }
+                  </button>
+                  <button type="button" class="sh-act sh-act-del" (click)="confirmDelete(s.id)" title="Supprimer" aria-label="Supprimer">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages() > 1) {
+    <div class="sh-pagination">
+      <span class="sh-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ total() }} résultats</span>
+      <div class="d-flex gap-1">
+        <button type="button" class="sh-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pages(); track p) {
+          <button type="button" class="sh-pg-btn" [class.sh-pg-active]="p === page()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+        <button type="button" class="sh-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- MODAL — Créer / Modifier -->
+@if (formMode()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sh-form-title" (click)="closeForm()">
+    <div class="modal" style="max-width:520px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="sh-form-title" class="nm-title">{{ formMode() === 'create' ? 'Nouveau shipper' : 'Modifier le shipper' }}</h2>
+          <p class="nm-sub">{{ formMode() === 'create' ? 'Ajouter un expéditeur partenaire.' : 'Modifier les informations.' }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeForm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="saveForm()" novalidate>
+        <div class="nm-body">
+          <div class="row g-3">
+
+            <div class="col-12">
+              <div class="nm-field">
+                <label for="shCompany" class="nm-label">Nom de la société <span class="nm-req">*</span></label>
+                <input id="shCompany" type="text" class="nm-input" [class.nm-err]="fieldInvalid('companyName')"
+                  formControlName="companyName" placeholder="PALAIS D'ART FES" autocomplete="organization" />
+                @if (fieldInvalid('companyName')) { <div class="nm-err-msg" role="alert">Nom obligatoire (min. 2 caractères).</div> }
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="shContact" class="nm-label">Contact <span class="nm-opt">optionnel</span></label>
+                <input id="shContact" type="text" class="nm-input" formControlName="contactName" placeholder="Mohammed Alaoui" autocomplete="name" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="shEmail" class="nm-label">Email <span class="nm-req">*</span></label>
+                <input id="shEmail" type="email" class="nm-input" [class.nm-err]="fieldInvalid('email')"
+                  formControlName="email" placeholder="contact@société.ma" autocomplete="email" />
+                @if (fieldInvalid('email')) { <div class="nm-err-msg" role="alert">Email valide obligatoire.</div> }
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="shPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
+                <input id="shPhone" type="tel" class="nm-input" formControlName="phone" placeholder="+212 6 00 00 00 00" autocomplete="tel" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="shCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
+                <input id="shCity" type="text" class="nm-input" formControlName="city" placeholder="Casablanca" autocomplete="address-level2" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-8">
+              <div class="nm-field">
+                <label for="shAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
+                <input id="shAddress" type="text" class="nm-input" formControlName="address" placeholder="123 Boulevard Hassan II" autocomplete="street-address" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <div class="nm-field">
+                <label for="shCountry" class="nm-label">Pays <span class="nm-opt">optionnel</span></label>
+                <input id="shCountry" type="text" class="nm-input" [class.nm-err]="fieldInvalid('countryCode')"
+                  formControlName="countryCode" placeholder="MA" maxlength="2" style="text-transform:uppercase" autocomplete="country" />
+                @if (fieldInvalid('countryCode')) { <div class="nm-err-msg" role="alert">2 lettres ex: MA, US.</div> }
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+            @if (saving()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Enregistrement… }
+            @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ formMode() === 'create' ? 'Créer' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- MODAL — Suppression -->
+@if (deleteId() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sh-del-title" (click)="cancelDelete()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="sh-del-title" class="nm-title">Supprimer ce shipper ?</h2>
+          <p class="nm-sub">Cette action est irréversible.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body"><p class="nm-alert">Le shipper sera définitivement supprimé de la base de données.</p></div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
+          @else { Supprimer }
+        </button>
+      </div>
+    </div>
+  </div>
+}

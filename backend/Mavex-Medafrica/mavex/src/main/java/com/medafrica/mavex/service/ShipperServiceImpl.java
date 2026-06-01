@@ -3,6 +3,8 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
 import com.medafrica.mavex.model.actor.Shipper;
+import com.medafrica.mavex.model.country.Country;
+import com.medafrica.mavex.repository.CountryRepository;
 import com.medafrica.mavex.repository.ShipperRepository;
 import com.medafrica.mavex.service.interfaces.ShipperService;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ShipperServiceImpl implements ShipperService {
 
-    private final ShipperRepository shipperRepository;
+    private final ShipperRepository  shipperRepository;
+    private final CountryRepository  countryRepository;
 
     @Override
     @Transactional
@@ -26,6 +29,8 @@ public class ShipperServiceImpl implements ShipperService {
             throw new IllegalArgumentException("Email déjà utilisé : " + req.getEmail());
         }
 
+        Country country = resolveCountry(req.getCountryCode());
+
         Shipper shipper = Shipper.builder()
                 .companyName(req.getCompanyName())
                 .contactName(req.getContactName())
@@ -33,7 +38,7 @@ public class ShipperServiceImpl implements ShipperService {
                 .phone(req.getPhone())
                 .address(req.getAddress())
                 .city(req.getCity())
-                .country(req.getCountryCode())
+                .country(country)
                 .build();
 
         return toResponse(shipperRepository.save(shipper));
@@ -69,7 +74,7 @@ public class ShipperServiceImpl implements ShipperService {
         shipper.setPhone(req.getPhone());
         shipper.setAddress(req.getAddress());
         shipper.setCity(req.getCity());
-        shipper.setCountry(req.getCountryCode());
+        shipper.setCountry(resolveCountry(req.getCountryCode()));
 
         return toResponse(shipperRepository.save(shipper));
     }
@@ -85,7 +90,7 @@ public class ShipperServiceImpl implements ShipperService {
         if (req.getPhone()       != null) shipper.setPhone(req.getPhone());
         if (req.getAddress()     != null) shipper.setAddress(req.getAddress());
         if (req.getCity()        != null) shipper.setCity(req.getCity());
-        if (req.getCountryCode() != null) shipper.setCountry(req.getCountryCode());
+        if (req.getCountryCode() != null) shipper.setCountry(resolveCountry(req.getCountryCode()));
 
         if (req.getEmail() != null && !req.getEmail().equalsIgnoreCase(shipper.getEmail())) {
             if (shipperRepository.existsByEmailAndIdNot(req.getEmail(), id)) {
@@ -122,6 +127,12 @@ public class ShipperServiceImpl implements ShipperService {
     private Shipper findOrThrow(Long id) {
         return shipperRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + id));
+    }
+
+    private Country resolveCountry(String code) {
+        if (code == null) return null;
+        return countryRepository.findById(code)
+                .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + code));
     }
 
     private ShipperResponseDTO toResponse(Shipper s) {

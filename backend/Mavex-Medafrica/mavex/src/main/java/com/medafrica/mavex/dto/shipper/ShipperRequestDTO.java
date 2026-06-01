@@ -1,8 +1,5 @@
 package com.medafrica.mavex.dto.shipper;
 
-import com.medafrica.mavex.model.country.Country;
-
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -27,7 +24,6 @@ public class ShipperRequestDTO {
     private String city;
 
     /** Code ISO pays ex: MA */
-@Valid
-    
-    private Country countryCode;
+    @Size(min = 2, max = 2, message = "Le code pays doit faire 2 caractères")
+    private String countryCode;
 }
