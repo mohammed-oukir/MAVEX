@@ -7,6 +7,7 @@ import com.medafrica.mavex.repository.UserRepository;
 import com.medafrica.mavex.service.interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,6 +99,12 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable avec l'id : " + id));
+
+        String connectedEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (user.getEmail().equals(connectedEmail)) {
+            throw new IllegalStateException("Vous ne pouvez pas désactiver votre propre compte");
+        }
+
         user.setActive(false);
         userRepository.save(user);
     }

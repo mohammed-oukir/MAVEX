@@ -187,7 +187,7 @@ export class ShipmentDetailComponent implements OnInit {
   }
 
   private loadClients(): void {
-    this.clientSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.clientSvc.getAllActive().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.clients.set(list),
       error: () => {},
     });

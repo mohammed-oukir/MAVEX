@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../core/services/layout.service';
 import { UserService }   from '../../core/services/user.service';
 import { ToastService }  from '../../core/services/toast.service';
+import { AuthService }   from '../../core/auth/auth.service';
 import { UserResponse, UserRole } from '../../core/models/user.model';
 
 @Component({
@@ -21,12 +22,16 @@ export class UsersComponent implements OnInit {
   private readonly layout     = inject(LayoutService);
   private readonly userSvc    = inject(UserService);
   private readonly toast      = inject(ToastService);
+  private readonly authSvc    = inject(AuthService);
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
   /* ── Data ─────────────────────────────────────────── */
   allUsers = signal<UserResponse[]>([]);
   loading  = signal(true);
+
+  /* ── Compte connecté ──────────────────────────────── */
+  isSelf = (u: UserResponse) => u.email === this.authSvc.currentEmail();
 
   /* ── Filtres ──────────────────────────────────────── */
   searchQ     = signal('');
@@ -142,6 +147,7 @@ export class UsersComponent implements OnInit {
 
   /* ── Toggle actif ─────────────────────────────────── */
   toggleActive(u: UserResponse): void {
+    if (this.isSelf(u)) return;
     this.toggling.set(u.id);
     const onNext = () => {
       this.toggling.set(null);
@@ -162,7 +168,11 @@ export class UsersComponent implements OnInit {
   }
 
   /* ── Delete ───────────────────────────────────────── */
-  confirmDelete(id: number): void { this.deleteId.set(id); }
+  confirmDelete(id: number): void {
+    const u = this.allUsers().find(x => x.id === id);
+    if (u && this.isSelf(u)) return;
+    this.deleteId.set(id);
+  }
   cancelDelete(): void            { this.deleteId.set(null); }
 
   executeDelete(): void {

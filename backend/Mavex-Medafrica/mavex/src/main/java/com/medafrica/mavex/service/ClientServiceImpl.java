@@ -34,6 +34,14 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public List<ClientResponseDTO> findAllActive() {
+        return clientRepository.findByActiveTrue()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ClientResponseDTO findById(Long id) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Client introuvable avec l'id : " + id));

@@ -26,6 +26,12 @@ public class ClientController {
         return ResponseEntity.ok(clientService.findAll());
     }
 
+    /** GET /api/clients/active */
+    @GetMapping("/active")
+    public ResponseEntity<List<ClientResponseDTO>> getAllActive() {
+        return ResponseEntity.ok(clientService.findAllActive());
+    }
+
     /** GET /api/clients/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<ClientResponseDTO> getById(@PathVariable Long id) {

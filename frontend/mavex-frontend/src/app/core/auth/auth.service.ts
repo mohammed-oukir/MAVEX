@@ -31,6 +31,7 @@ export class AuthService {
   getToken(): string | null        { return this._token(); }
   getRefreshToken(): string | null { return this._refresh(); }
   isAdmin(): boolean               { return this._role() === 'ADMIN'; }
+  currentEmail(): string | null    { return this._email(); }
   isRefreshing = false;
 
   login(email: string, password: string): Observable<ApiResponse<LoginResponse>> {

@@ -10,6 +10,8 @@ public interface ClientService {
 
     List<ClientResponseDTO> findAll();
 
+    List<ClientResponseDTO> findAllActive();
+
     ClientResponseDTO findById(Long id);
 
     ClientResponseDTO create(ClientRequestDTO dto);
