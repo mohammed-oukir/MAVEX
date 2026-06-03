@@ -38,8 +38,8 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private final EmailLogRepository      emailLogRepository;
     private final OrderRepository         orderRepository;
 
-    @Value("${app.base-url:http://localhost:1111}")
-    private String baseUrl;
+    @Value("${app.frontend-url:http://localhost:4200}")
+    private String frontendUrl;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -208,7 +208,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             vars.put("shipperName", "—");
         }
 
-        vars.put("paymentLink", baseUrl + "/pay/" + order.getPaymentToken());
+        vars.put("paymentLink", frontendUrl + "/pay/" + order.getPaymentToken());
 
         return vars;
     }

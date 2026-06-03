@@ -1,0 +1,67 @@
+<div class="pr-page">
+
+  <!-- HEADER -->
+  <header class="pr-header">
+    <div class="pr-logo">MAVEX</div>
+    <div class="pr-logo-sub">MED AFRICA LOGISTICS</div>
+  </header>
+
+  <!-- CARD -->
+  <div class="pr-card">
+
+    <!-- Icône état -->
+    <div class="pr-icon-wrap" [style.background]="config().bg" [style.color]="config().color">
+
+      @if (config().icon === 'success') {
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      }
+
+      @if (config().icon === 'error') {
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      }
+
+      @if (config().icon === 'cancelled') {
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      }
+
+    </div>
+
+    <!-- Titre -->
+    <h1 class="pr-title" [style.color]="config().color">
+      {{ config().title }}
+    </h1>
+
+    <!-- Message -->
+    <p class="pr-message">{{ config().message }}</p>
+
+    <!-- Séparateur -->
+    <div class="pr-divider"></div>
+
+    <!-- Contact -->
+    <div class="pr-contact">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      <span>Pour toute question : <strong>contact&#64;medafrica-logistics.com</strong></span>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="pr-footer">
+    <p>Med Africa Logistics — Service client</p>
+    <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+  </footer>
+
+</div>

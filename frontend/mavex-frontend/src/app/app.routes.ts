@@ -65,5 +65,29 @@ export const routes: Routes = [
     ],
   },
 
+  {
+    path: 'pay/:token',
+    loadComponent: () =>
+      import('./features/payment-page/payment-page.component').then(m => m.PaymentPageComponent),
+  },
+  {
+    path: 'pay-success',
+    data: { type: 'success' },
+    loadComponent: () =>
+      import('./features/payment-result/payment-result.component').then(m => m.PaymentResultComponent),
+  },
+  {
+    path: 'pay-error',
+    data: { type: 'error' },
+    loadComponent: () =>
+      import('./features/payment-result/payment-result.component').then(m => m.PaymentResultComponent),
+  },
+  {
+    path: 'pay-cancelled',
+    data: { type: 'cancelled' },
+    loadComponent: () =>
+      import('./features/payment-result/payment-result.component').then(m => m.PaymentResultComponent),
+  },
+
   { path: '**', redirectTo: 'dashboard' },
 ];

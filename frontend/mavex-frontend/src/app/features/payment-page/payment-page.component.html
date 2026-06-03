@@ -1,0 +1,180 @@
+<div class="pp-page">
+
+  <!-- HEADER -->
+  <header class="pp-header">
+    <div class="pp-logo">MAVEX</div>
+    <div class="pp-logo-sub">MED AFRICA LOGISTICS</div>
+  </header>
+
+  <!-- ══════ LOADING ══════ -->
+  @if (state() === 'loading') {
+    <div class="pp-card">
+      <div class="pp-sk pp-sk-title mb-3"></div>
+      <div class="pp-sk pp-sk-line mb-2"></div>
+      <div class="pp-sk pp-sk-line mb-4" style="width:70%"></div>
+      <div class="pp-sk pp-sk-box mb-3"></div>
+      <div class="pp-sk pp-sk-amount mb-3"></div>
+      <div class="pp-sk pp-sk-btn"></div>
+    </div>
+  }
+
+  <!-- ══════ LIEN EXPIRÉ ══════ -->
+  @if (state() === 'expired') {
+    <div class="pp-card pp-state-card">
+      <div class="pp-state-icon pp-icon-expired" aria-hidden="true">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h2 class="pp-state-title">Lien expiré</h2>
+      <p class="pp-state-desc">Ce lien de paiement n'est plus valide ou a expiré.<br/>Veuillez contacter Med Africa Logistics pour obtenir un nouveau lien.</p>
+      <div class="pp-contact-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        contact&#64;medafrica-logistics.com
+      </div>
+    </div>
+  }
+
+  <!-- ══════ DÉJÀ PAYÉ ══════ -->
+  @if (state() === 'paid') {
+    <div class="pp-card pp-state-card">
+      <div class="pp-state-icon pp-icon-paid" aria-hidden="true">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2 class="pp-state-title pp-title-green">Paiement confirmé</h2>
+      <p class="pp-state-desc">Votre paiement pour le colis <strong>{{ order()!.hawb }}</strong> a été enregistré avec succès.<br/>Votre livraison est en cours de traitement.</p>
+    </div>
+  }
+
+  <!-- ══════ ERREUR ══════ -->
+  @if (state() === 'error') {
+    <div class="pp-card pp-state-card">
+      <div class="pp-state-icon pp-icon-error" aria-hidden="true">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <h2 class="pp-state-title">Une erreur est survenue</h2>
+      <p class="pp-state-desc">{{ errMsg() }}</p>
+    </div>
+  }
+
+  <!-- ══════ REDIRECTION ══════ -->
+  @if (state() === 'redirecting') {
+    <div class="pp-card pp-state-card">
+      <div class="pp-redirect-spinner" aria-hidden="true">
+        <span class="spinner-border" style="width:48px;height:48px;border-width:3px;color:#e8c97e"></span>
+      </div>
+      <h2 class="pp-state-title">Redirection en cours…</h2>
+      <p class="pp-state-desc">Vous allez être redirigé vers la page de paiement sécurisé.</p>
+    </div>
+  }
+
+  <!-- ══════ PRÊT À PAYER ══════ -->
+  @if (state() === 'ready' || state() === 'initiating') {
+    @if (order(); as o) {
+      <div class="pp-card">
+
+        <!-- Banner -->
+        <div class="pp-banner">
+          <h1 class="pp-banner-title">Votre colis est arrivé !</h1>
+          <p class="pp-banner-sub">Un paiement des frais de douane est requis pour la livraison.</p>
+        </div>
+
+        <!-- Greeting -->
+        <div class="pp-body">
+          <p class="pp-greeting">Bonjour <strong>{{ o.clientFullName || 'Client' }}</strong>,</p>
+          <p class="pp-intro">
+            Votre colis expédié par <strong>{{ o.companyName || 'votre expéditeur' }}</strong> est arrivé
+            et est en attente de dédouanement. Veuillez procéder au paiement des frais de douane.
+          </p>
+
+          <!-- Détails colis -->
+          <div class="pp-info-box">
+            <div class="pp-info-title">Détails du colis</div>
+            <div class="pp-info-row">
+              <span class="pp-info-lbl">Numéro de connote</span>
+              <span class="pp-info-val">{{ o.hawb }}</span>
+            </div>
+            @if (o.goodsDescription) {
+              <div class="pp-info-row">
+                <span class="pp-info-lbl">Description</span>
+                <span class="pp-info-val">{{ o.goodsDescription }}</span>
+              </div>
+            }
+            @if (o.shipmentWeight) {
+              <div class="pp-info-row">
+                <span class="pp-info-lbl">Poids</span>
+                <span class="pp-info-val">{{ o.shipmentWeight }} kg</span>
+              </div>
+            }
+            @if (o.customsValue) {
+              <div class="pp-info-row">
+                <span class="pp-info-lbl">Valeur douanière</span>
+                <span class="pp-info-val">{{ fmtCustoms }}</span>
+              </div>
+            }
+            @if (o.dutyAmount) {
+              <div class="pp-info-row">
+                <span class="pp-info-lbl">Frais de douane</span>
+                <span class="pp-info-val">{{ fmtDuty }}</span>
+              </div>
+            }
+            @if (o.bankCharges) {
+              <div class="pp-info-row">
+                <span class="pp-info-lbl">Frais bancaires</span>
+                <span class="pp-info-val">{{ o.bankCharges | number:'1.2-2' }} {{ o.customsCurrency }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Montant total -->
+          <div class="pp-total-box">
+            <div>
+              <div class="pp-total-lbl">Montant total à payer</div>
+              <div class="pp-total-sub">Frais de douane + frais bancaires</div>
+            </div>
+            <div class="pp-total-amount">{{ fmtTotal }}</div>
+          </div>
+
+          <!-- Message d'erreur paiement -->
+          @if (errMsg()) {
+            <div class="pp-pay-error" role="alert">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ errMsg() }}
+            </div>
+          }
+
+          <!-- Bouton paiement -->
+          <button type="button" class="pp-pay-btn" [disabled]="state() === 'initiating'" (click)="pay()">
+            @if (state() === 'initiating') {
+              <span class="spinner-border" style="width:16px;height:16px;border-width:2px" aria-hidden="true"></span>
+              Initialisation…
+            } @else {
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              Payer maintenant
+            }
+          </button>
+
+          <p class="pp-expiry">⏱ Ce lien est valable 7 jours à compter de l'envoi de cet email</p>
+
+          <!-- Adresse livraison -->
+          @if (o.clientAddress || o.clientCity) {
+            <div class="pp-address-box">
+              <div class="pp-address-title">Adresse de livraison</div>
+              @if (o.clientAddress) { <div>{{ o.clientAddress }}</div> }
+              @if (o.clientCity || o.clientState || o.clientZipCode) {
+                <div>{{ [o.clientCity, o.clientState, o.clientZipCode].filter(x => !!x).join(', ') }}</div>
+              }
+              @if (o.clientCountry) { <div class="pp-address-country">{{ o.clientCountry }}</div> }
+            </div>
+          }
+
+        </div>
+      </div>
+    }
+  }
+
+  <!-- FOOTER -->
+  <footer class="pp-footer">
+    <p>Med Africa Logistics — Service client</p>
+    <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+  </footer>
+
+</div>

@@ -1,0 +1,503 @@
+<!-- ═══════════════════════════════════════════════════════
+     KPI CARDS
+     ═══════════════════════════════════════════════════════ -->
+<div class="pm-kpi-grid mb-4">
+
+  <div class="pm-kpi-card pm-kpi-dark">
+    <div class="pm-kpi-accent pm-acc-orange"></div>
+    <div class="pm-kpi-icon pm-ico-orange">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    </div>
+    <div class="pm-kpi-body">
+      <div class="pm-kpi-num pm-n-orange">{{ kpiTotal() }}</div>
+      <div class="pm-kpi-lbl">Manifests total</div>
+    </div>
+  </div>
+
+  <div class="pm-kpi-card">
+    <div class="pm-kpi-accent pm-acc-blue"></div>
+    <div class="pm-kpi-icon pm-ico-blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    </div>
+    <div class="pm-kpi-body">
+      <div class="pm-kpi-num pm-n-blue">{{ kpiActive() }}</div>
+      <div class="pm-kpi-lbl">En cours de traitement</div>
+    </div>
+  </div>
+
+  <div class="pm-kpi-card">
+    <div class="pm-kpi-accent pm-acc-green"></div>
+    <div class="pm-kpi-icon pm-ico-green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <div class="pm-kpi-body">
+      <div class="pm-kpi-num pm-n-green">{{ kpiClosed() }}</div>
+      <div class="pm-kpi-lbl">Manifests fermés</div>
+    </div>
+  </div>
+
+  <div class="pm-kpi-card pm-kpi-gateway">
+    <div class="pm-kpi-accent pm-acc-purple"></div>
+    <div class="pm-kpi-icon pm-ico-purple">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <div class="pm-kpi-body">
+      <div class="pm-kpi-num pm-n-purple">{{ kpiGateway() }}</div>
+      <div class="pm-kpi-lbl">Gateway actif</div>
+    </div>
+    <button type="button" class="pm-kpi-config-btn" (click)="activeTab.set('gateways')" aria-label="Configurer les gateways">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TABS
+     ═══════════════════════════════════════════════════════ -->
+<div class="pm-tabs-bar mb-3">
+  <button type="button" class="pm-tab" [class.pm-tab-active]="activeTab() === 'manifests'" (click)="activeTab.set('manifests')">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    Suivi des paiements
+  </button>
+  <button type="button" class="pm-tab" [class.pm-tab-active]="activeTab() === 'gateways'" (click)="activeTab.set('gateways')">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Gateways de paiement
+    <span class="pm-tab-count">{{ gateways().length }}</span>
+  </button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 1 — SUIVI DES PAIEMENTS PAR MANIFEST
+     ═══════════════════════════════════════════════════════ -->
+@if (activeTab() === 'manifests') {
+
+  <!-- Toolbar -->
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="pm-toolbar">
+      <div class="pm-filter-pills" role="group" aria-label="Filtrer par statut">
+        <button type="button" class="pm-pill" [class.pm-pill-active]="statusFilter() === ''" (click)="statusFilter.set('')">Tous</button>
+        <button type="button" class="pm-pill pm-pill-blue" [class.pm-pill-active]="statusFilter() === 'IMPORTED'" (click)="statusFilter.set('IMPORTED')">Importés</button>
+        <button type="button" class="pm-pill pm-pill-orange" [class.pm-pill-active]="statusFilter() === 'PROCESSING'" (click)="statusFilter.set('PROCESSING')">En cours</button>
+        <button type="button" class="pm-pill pm-pill-green" [class.pm-pill-active]="statusFilter() === 'CLOSED'" (click)="statusFilter.set('CLOSED')">Fermés</button>
+      </div>
+      <div class="pm-search-wrap">
+        <svg class="pm-search-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" class="pm-search" placeholder="MAWB, shipper…" [value]="searchQ()" (input)="searchQ.set($any($event.target).value)" aria-label="Rechercher un manifest" />
+      </div>
+      <span class="pm-total-badge">{{ filtered().length }} manifest(s)</span>
+    </div>
+  </div>
+
+  <!-- Shipment cards -->
+  @if (loadingShips()) {
+    <div class="d-flex flex-column gap-3">
+      @for (i of [1,2,3]; track $index) {
+        <div class="pm-ship-card-sk">
+          <div class="pm-sk" style="width:200px;height:18px;margin-bottom:10px"></div>
+          <div class="pm-sk" style="width:100%;height:8px;border-radius:4px"></div>
+        </div>
+      }
+    </div>
+  } @else if (filtered().length === 0) {
+    <div class="pm-empty">
+      <div class="pm-empty-icon" aria-hidden="true">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      </div>
+      <p>Aucun manifest trouvé</p>
+    </div>
+  } @else {
+    <div class="d-flex flex-column gap-3">
+      @for (s of filtered(); track s.id) {
+        <div class="pm-ship-card" [class.pm-ship-expanded]="isExpanded(s.id)">
+
+          <!-- Card header -->
+          <div class="pm-ship-hd" (click)="toggleExpand(s.id)" role="button" [attr.aria-expanded]="isExpanded(s.id)" [attr.aria-label]="'Détail paiements ' + s.mawb" tabindex="0" (keydown.enter)="toggleExpand(s.id)">
+            <div class="pm-ship-left">
+              <div [class]="'pm-ship-dot ' + statusClass(s.status)"></div>
+              <div>
+                <div class="pm-ship-mawb">{{ s.mawb }}</div>
+                <div class="pm-ship-shipper">{{ s.shipper?.companyName || '—' }}</div>
+              </div>
+            </div>
+            <div class="pm-ship-right">
+              @if (s.importDate) {
+                <span class="pm-date-badge">{{ s.importDate | date:'dd/MM/yyyy' }}</span>
+              }
+              <span [class]="'pm-status-badge ' + statusClass(s.status)">{{ statusLabel(s.status) }}</span>
+              <span class="pm-orders-pill">{{ s.totalOrders ?? 0 }} orders</span>
+              <button type="button" class="pm-chevron" [class.pm-chevron-open]="isExpanded(s.id)" [attr.aria-label]="isExpanded(s.id) ? 'Réduire' : 'Développer'">
+                @if (isLoadingOrders(s.id)) {
+                  <span class="spinner-border" style="width:12px;height:12px;border-width:1.5px" aria-hidden="true"></span>
+                } @else {
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <!-- Progress bar (always visible if orders loaded) -->
+          @if (getStats(s.id); as stats) {
+            <div class="pm-progress-wrap">
+              <div class="pm-progress-track" role="progressbar" [attr.aria-valuenow]="stats.pct" aria-valuemin="0" aria-valuemax="100">
+                <div class="pm-progress-fill" [style.width.%]="stats.pct"></div>
+              </div>
+              <div class="pm-progress-stats">
+                <div class="pm-ps-item pm-ps-paid">
+                  <span class="pm-ps-dot"></span>
+                  <span>{{ stats.paid }} payés</span>
+                </div>
+                <div class="pm-ps-item pm-ps-pending">
+                  <span class="pm-ps-dot"></span>
+                  <span>{{ stats.pending }} en attente</span>
+                </div>
+                <div class="pm-ps-item pm-ps-email">
+                  <span class="pm-ps-dot"></span>
+                  <span>{{ stats.email }} emails</span>
+                </div>
+                <div class="pm-ps-amounts ms-auto">
+                  <span class="pm-collected">{{ fmtAmt(stats.collected) }}</span>
+                  <span class="pm-total-due"> / {{ fmtAmt(stats.total) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Orders table (expanded) -->
+          @if (isExpanded(s.id) && !isLoadingOrders(s.id)) {
+            @if (getOrders(s.id).length === 0) {
+              <div class="pm-no-orders">Aucun order pour ce manifest.</div>
+            } @else {
+              <div class="table-responsive pm-orders-table-wrap">
+                <table class="table pm-orders-table mb-0" [attr.aria-label]="'Orders de ' + s.mawb">
+                  <thead>
+                    <tr>
+                      <th scope="col">HAWB</th>
+                      <th scope="col">Client</th>
+                      <th scope="col" class="text-end">Montant dû</th>
+                      <th scope="col">Statut paiement</th>
+                      <th scope="col" class="text-end">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (o of getOrders(s.id); track o.id) {
+                      <tr [class.pm-row-paid]="o.status === 'PAID'">
+                        <td class="pm-hawb-cell">{{ o.hawb }}</td>
+                        <td>
+                          <div class="pm-client-name">{{ o.clientFullName || '—' }}</div>
+                          @if (o.clientEmail) { <div class="pm-client-email">{{ o.clientEmail }}</div> }
+                        </td>
+                        <td class="text-end pm-amount-cell">
+                          {{ o.totalAmount != null ? fmtAmt(o.totalAmount) : '—' }}
+                        </td>
+                        <td>
+                          <span [class]="'pm-os-badge ' + orderStatusClass(o.status)">
+                            {{ orderStatusLabel(o.status) }}
+                          </span>
+                        </td>
+                        <td class="text-end">
+                          @if (o.status === 'PAID' || o.status === 'DELIVERED') {
+                            <button type="button" class="pm-tx-btn" (click)="showTransaction(o.id, o.hawb)" [attr.aria-label]="'Voir transaction de ' + o.hawb">
+                              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              Transaction
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          }
+
+        </div>
+      }
+    </div>
+  }
+
+}
+
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 2 — GATEWAYS DE PAIEMENT
+     ═══════════════════════════════════════════════════════ -->
+@if (activeTab() === 'gateways') {
+
+  <div class="pm-gw-header mb-3">
+    <div>
+      <h2 class="pm-gw-title">Gateways de paiement</h2>
+      <p class="pm-gw-sub">Configurez et activez le gateway utilisé pour les paiements clients.</p>
+    </div>
+    <button type="button" class="pm-add-gw-btn" (click)="openCreateGw()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un gateway
+    </button>
+  </div>
+
+  @if (loadingGways()) {
+    <div class="row g-3">
+      @for (i of [1,2,3]; track $index) {
+        <div class="col-md-4">
+          <div class="pm-gw-card-sk">
+            <div class="pm-sk" style="width:60px;height:60px;border-radius:50%;margin-bottom:12px"></div>
+            <div class="pm-sk" style="width:120px;height:16px;margin-bottom:8px"></div>
+            <div class="pm-sk" style="width:80px;height:12px"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (gateways().length === 0) {
+    <div class="pm-gw-empty">
+      <div class="pm-empty-icon" aria-hidden="true">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <p class="fw-semibold mb-1">Aucun gateway configuré</p>
+      <p class="text-muted mb-3" style="font-size:13px">Ajoutez votre premier gateway pour commencer à accepter les paiements.</p>
+      <button type="button" class="pm-add-gw-btn" (click)="openCreateGw()">+ Ajouter un gateway</button>
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (g of gateways(); track g.id) {
+        <div class="col-xl-4 col-md-6 col-12">
+          <div class="pm-gw-card" [class.pm-gw-active]="g.active">
+
+            <!-- Active ribbon -->
+            @if (g.active) {
+              <div class="pm-gw-ribbon" aria-label="Gateway actif">ACTIF</div>
+            }
+
+            <!-- Header -->
+            <div class="pm-gw-card-hd">
+              <div [class]="'pm-gw-logo pm-gw-logo-' + g.type.toLowerCase()">
+                @if (g.type === 'PAYPAL') {
+                  <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c1.379 3.332-.448 6.74-4.955 7.496l-2.42.386-.96 6.058h2.513c.524 0 .968-.382 1.05-.9l.072-.457.944-5.985.061-.332a1.063 1.063 0 0 1 1.05-.9h.663c4.3 0 7.664-1.745 8.647-6.797.338-1.74.15-3.197-.058-4.024z"/></svg>
+                }
+                @if (g.type === 'STRIPE') {
+                  <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z"/></svg>
+                }
+                @if (g.type === 'CMI') {
+                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                }
+              </div>
+              <div>
+                <div class="pm-gw-name">{{ g.name }}</div>
+                <div class="pm-gw-type">{{ g.type }}</div>
+              </div>
+            </div>
+
+            <!-- Infos -->
+            <div class="pm-gw-info">
+              <div class="pm-gw-info-row">
+                <span class="pm-gw-info-lbl">Mode</span>
+                <span [class]="g.mode === 'PRODUCTION' ? 'pm-mode-prod' : 'pm-mode-test'">
+                  {{ g.mode === 'PRODUCTION' ? '🟢 Production' : '🧪 Sandbox' }}
+                </span>
+              </div>
+              <div class="pm-gw-info-row">
+                <span class="pm-gw-info-lbl">Clé API</span>
+                <span class="pm-gw-key">{{ g.apiKeyMasked || 'Non configurée' }}</span>
+              </div>
+              <div class="pm-gw-info-row">
+                <span class="pm-gw-info-lbl">Devises</span>
+                <span>{{ g.supportedCurrencies || '—' }}</span>
+              </div>
+              @if (g.webhookSecretSet) {
+                <div class="pm-gw-webhook-badge">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Webhook configuré
+                </div>
+              }
+            </div>
+
+            <!-- Actions -->
+            <div class="pm-gw-actions">
+              <button type="button" class="pm-gw-btn pm-gw-btn-edit" (click)="openEditGw(g)" aria-label="Modifier">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Modifier
+              </button>
+              <button type="button" class="pm-gw-btn" [class.pm-gw-btn-activate]="!g.active" [class.pm-gw-btn-deactivate]="g.active"
+                [disabled]="togglingId() === g.id" (click)="toggleGateway(g)"
+                [attr.aria-label]="g.active ? 'Désactiver' : 'Activer'">
+                @if (togglingId() === g.id) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+                @else { {{ g.active ? 'Désactiver' : 'Activer' }} }
+              </button>
+              @if (!g.active) {
+                <button type="button" class="pm-gw-btn pm-gw-btn-del" [disabled]="deletingId() === g.id" (click)="deleteGw(g.id)" aria-label="Supprimer">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+              }
+            </div>
+
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+}
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — Détail transaction
+     ═══════════════════════════════════════════════════════ -->
+@if (txModal() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pm-tx-title" (click)="closeTransaction()">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="pm-tx-title" class="nm-title">Transaction PayPal</h2>
+          <p class="nm-sub">HAWB : <strong>{{ txModalHawb() }}</strong></p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeTransaction()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        @if (loadingTx()) {
+          <div class="text-center py-3">
+            <span class="spinner-border" style="width:24px;height:24px;border-width:2px;color:#F97316" aria-label="Chargement"></span>
+          </div>
+        } @else if (txModal()!.length === 0) {
+          <p class="text-muted text-center mb-0" style="font-size:13px">Aucune transaction trouvée.</p>
+        } @else {
+          @for (tx of txModal()!; track tx.id) {
+            <div class="pm-tx-detail">
+              <div class="pm-tx-detail-row">
+                <span class="pm-tx-lbl">Référence</span>
+                <span class="pm-tx-val pm-tx-ref">{{ tx.gatewayRef || '—' }}</span>
+              </div>
+              <div class="pm-tx-detail-row">
+                <span class="pm-tx-lbl">Gateway</span>
+                <span class="pm-tx-val">{{ tx.gateway }}</span>
+              </div>
+              <div class="pm-tx-detail-row">
+                <span class="pm-tx-lbl">Montant</span>
+                <span class="pm-tx-val fw-bold">{{ fmtAmt(tx.amount) }}</span>
+              </div>
+              <div class="pm-tx-detail-row">
+                <span class="pm-tx-lbl">Statut</span>
+                <span [class]="'pm-tx-status-badge ' + txStatusClass(tx.status)">{{ tx.status }}</span>
+              </div>
+              @if (tx.paidAt) {
+                <div class="pm-tx-detail-row">
+                  <span class="pm-tx-lbl">Payé le</span>
+                  <span class="pm-tx-val">{{ tx.paidAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+              }
+              @if (tx.ipAddress) {
+                <div class="pm-tx-detail-row">
+                  <span class="pm-tx-lbl">IP client</span>
+                  <span class="pm-tx-val">{{ tx.ipAddress }}</span>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeTransaction()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — Ajouter / Modifier gateway
+     ═══════════════════════════════════════════════════════ -->
+@if (gwFormMode()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pm-gw-form-title" (click)="closeGwForm()">
+    <div class="modal" style="max-width:500px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="pm-gw-form-title" class="nm-title">{{ gwFormMode() === 'create' ? 'Nouveau gateway' : 'Modifier le gateway' }}</h2>
+          <p class="nm-sub">Configurez les credentials du gateway de paiement.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeGwForm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form [formGroup]="gwForm" (ngSubmit)="saveGw()" novalidate>
+        <div class="nm-body">
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="nm-field">
+                <label class="nm-label">Type <span class="nm-req">*</span></label>
+                <select class="nm-select" formControlName="type">
+                  <option value="PAYPAL">PayPal</option>
+                  <option value="STRIPE">Stripe</option>
+                  <option value="CMI">CMI</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nm-field">
+                <label class="nm-label">Mode <span class="nm-req">*</span></label>
+                <select class="nm-select" formControlName="mode">
+                  <option value="TEST">Sandbox / Test</option>
+                  <option value="PRODUCTION">Production</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="nm-field">
+                <label class="nm-label">Nom affiché <span class="nm-req">*</span></label>
+                <input type="text" class="nm-input" [class.nm-err]="gwFieldInvalid('name')" formControlName="name" placeholder="ex: PayPal Sandbox Med Africa" />
+                @if (gwFieldInvalid('name')) { <div class="nm-err-msg" role="alert">Nom obligatoire.</div> }
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="nm-field">
+                <label class="nm-label">Client ID / API Key</label>
+                <input type="text" class="nm-input" formControlName="apiKey" placeholder="Client ID ou clé publique" autocomplete="off" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="nm-field">
+                <label class="nm-label">Secret Key</label>
+                <input type="password" class="nm-input" formControlName="secretKey" placeholder="Laisser vide pour ne pas modifier" autocomplete="new-password" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="nm-field">
+                <label class="nm-label">Webhook Secret</label>
+                <input type="password" class="nm-input" formControlName="webhookSecret" placeholder="Laisser vide pour ne pas modifier" autocomplete="new-password" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nm-field">
+                <label class="nm-label">Devises</label>
+                <input type="text" class="nm-input" formControlName="supportedCurrencies" placeholder="USD,EUR,MAD" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="nm-field">
+                <label class="nm-label">Description</label>
+                <input type="text" class="nm-input" formControlName="description" placeholder="Notes internes" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeGwForm()">Annuler</button>
+          <button type="submit" class="nm-btn-primary" [disabled]="gwSaving()">
+            @if (gwSaving()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Enregistrement… }
+            @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ gwFormMode() === 'create' ? 'Créer' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

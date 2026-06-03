@@ -61,10 +61,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
 
                  // ── Paiement : publique (accès via lien email sans JWT)
-                // /api/payments/pay/{token}/initiate  → le client initie le paiement
-                // /api/payments/success               → retour PayPal après approbation
-                // /api/payments/cancel                → retour PayPal après annulation
                 .requestMatchers("/api/payments/**").permitAll()
+
+                // ── Order par token de paiement : public (lien email client)
+                .requestMatchers("/api/orders/pay/**").permitAll()
+
+                // ── Pages paiement frontend : publiques
+                .requestMatchers("/pay/**", "/pay-success", "/pay-error", "/pay-cancelled").permitAll()
 
                 // ── Swagger : public
                 .requestMatchers(

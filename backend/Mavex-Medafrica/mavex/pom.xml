@@ -130,6 +130,13 @@
     <version>5.2.5</version>
 </dependency>
 
+<!-- PayPal Checkout SDK -->
+<dependency>
+    <groupId>com.paypal.sdk</groupId>
+    <artifactId>checkout-sdk</artifactId>
+    <version>1.0.5</version>
+</dependency>
+
 
 	</dependencies>
 

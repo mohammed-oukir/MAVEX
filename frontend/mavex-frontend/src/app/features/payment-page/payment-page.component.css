@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════
+   PAGE WRAPPER
+   ═══════════════════════════════════════ */
+.pp-page {
+  min-height: 100vh;
+  background: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* ═══════════════════════════════════════
+   HEADER — même style que le template email
+   ═══════════════════════════════════════ */
+.pp-header {
+  width: 100%;
+  background: #0a0f1e;
+  padding: 28px 40px;
+  text-align: center;
+}
+.pp-logo {
+  font-size: 26px;
+  font-weight: 900;
+  color: #e8c97e;
+  letter-spacing: 0.12em;
+}
+.pp-logo-sub {
+  font-size: 11px;
+  color: #7a8099;
+  letter-spacing: 0.15em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   CARD
+   ═══════════════════════════════════════ */
+.pp-card {
+  width: 100%;
+  max-width: 580px;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.10);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════
+   BANNER
+   ═══════════════════════════════════════ */
+.pp-banner {
+  background: linear-gradient(135deg, #1a2540, #0f1628);
+  padding: 28px 36px;
+  border-bottom: 3px solid #e8c97e;
+}
+.pp-banner-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f0ece0;
+  margin: 0 0 6px;
+}
+.pp-banner-sub {
+  font-size: 13.5px;
+  color: #7a8099;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════
+   BODY
+   ═══════════════════════════════════════ */
+.pp-body { padding: 28px 36px; }
+
+.pp-greeting {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+}
+.pp-intro {
+  font-size: 13.5px;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+/* ═══════════════════════════════════════
+   INFO BOX
+   ═══════════════════════════════════════ */
+.pp-info-box {
+  background: #f8f8f8;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.pp-info-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a8099;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+.pp-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13.5px;
+  gap: 16px;
+}
+.pp-info-row:last-child { border-bottom: none; }
+.pp-info-lbl { color: #888; flex-shrink: 0; }
+.pp-info-val { font-weight: 600; color: #333; text-align: right; }
+
+/* ═══════════════════════════════════════
+   TOTAL BOX
+   ═══════════════════════════════════════ */
+.pp-total-box {
+  background: #0a0f1e;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.pp-total-lbl { font-size: 13px; color: #7a8099; margin-bottom: 3px; }
+.pp-total-sub { font-size: 11px; color: #555; }
+.pp-total-amount {
+  font-size: 26px;
+  font-weight: 900;
+  color: #e8c97e;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════
+   BOUTON PAIEMENT
+   ═══════════════════════════════════════ */
+.pp-pay-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #e8c97e;
+  color: #0a0f1e;
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 4px 16px rgba(232,201,126,.35);
+  margin-bottom: 12px;
+}
+.pp-pay-btn:hover:not(:disabled) {
+  background: #d4b560;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(232,201,126,.5);
+}
+.pp-pay-btn:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pp-expiry {
+  text-align: center;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════
+   ERREUR PAIEMENT
+   ═══════════════════════════════════════ */
+.pp-pay-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #DC2626;
+  margin-bottom: 14px;
+}
+
+/* ═══════════════════════════════════════
+   ADRESSE
+   ═══════════════════════════════════════ */
+.pp-address-box {
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+  border: 1px solid #eee;
+}
+.pp-address-title {
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #7a8099;
+}
+.pp-address-country { color: #888; font-size: 12px; }
+
+/* ═══════════════════════════════════════
+   ÉTATS (expired, paid, error, redirecting)
+   ═══════════════════════════════════════ */
+.pp-state-card { padding: 48px 36px; text-align: center; }
+
+.pp-state-icon {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.pp-icon-expired  { background: #FEF3C7; color: #D97706; }
+.pp-icon-paid     { background: #DCFCE7; color: #16A34A; }
+.pp-icon-error    { background: #FEE2E2; color: #DC2626; }
+
+.pp-state-title {
+  font-size: 20px; font-weight: 700; color: #1F2937; margin-bottom: 12px;
+}
+.pp-title-green { color: #15803D; }
+
+.pp-state-desc {
+  font-size: 14px; color: #6B7280; line-height: 1.7; margin-bottom: 20px;
+}
+
+.pp-contact-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #F3F4F6; border-radius: 100px;
+  padding: 8px 16px; font-size: 13px; color: #374151;
+}
+
+.pp-redirect-spinner {
+  display: flex; justify-content: center; margin-bottom: 20px;
+}
+
+/* ═══════════════════════════════════════
+   SKELETON
+   ═══════════════════════════════════════ */
+.pp-sk {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #F3F4F6 25%, #E9ECEF 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: pp-shimmer 1.4s infinite;
+}
+.pp-sk-title  { height: 20px; width: 60%; margin: 28px auto 0; }
+.pp-sk-line   { height: 14px; width: 80%; margin: 0 auto; }
+.pp-sk-box    { height: 140px; margin: 20px 28px; border-radius: 10px; }
+.pp-sk-amount { height: 72px; margin: 0 28px; border-radius: 10px; background: #1a2540; }
+.pp-sk-btn    { height: 52px; margin: 16px 28px 28px; border-radius: 10px; background: #e8c97e44; }
+
+@keyframes pp-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ═══════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════ */
+.pp-footer {
+  width: 100%;
+  max-width: 580px;
+  text-align: center;
+  padding: 0 20px 40px;
+}
+.pp-footer p {
+  font-size: 11.5px;
+  color: #9CA3AF;
+  line-height: 1.7;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .pp-body, .pp-banner, .pp-state-card { padding: 20px; }
+  .pp-total-amount { font-size: 20px; }
+}
