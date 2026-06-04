@@ -94,6 +94,17 @@ export class ClientsComponent implements OnInit {
     this.fStatus() !== 'all'
   );
 
+  /* ── Sélection bulk ──────────────────────────────── */
+  selectedIds   = signal<Set<number>>(new Set());
+  bulkActing    = signal(false);
+  bulkDeleteConfirm = signal(false);
+
+  allSelected = computed(() => {
+    const items = this.pageItems();
+    return items.length > 0 && items.every(c => this.selectedIds().has(c.id));
+  });
+  selectedCount = computed(() => this.selectedIds().size);
+
   /* ── Modals ───────────────────────────────────────── */
   formMode      = signal<'create' | 'edit' | null>(null);
   editingId     = signal<number | null>(null);
@@ -262,6 +273,85 @@ export class ClientsComponent implements OnInit {
           this.toast.success('Client supprimé.');
         },
         error: () => { this.deleting.set(false); this.toast.error('Erreur suppression.'); },
+      });
+  }
+
+  /* ── Sélection bulk ──────────────────────────────── */
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  toggleSelectAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        this.pageItems().forEach(c => next.delete(c.id));
+        return next;
+      });
+    } else {
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        this.pageItems().forEach(c => next.add(c.id));
+        return next;
+      });
+    }
+  }
+
+  clearSelection(): void { this.selectedIds.set(new Set()); }
+
+  openBulkDeleteConfirm(): void { this.bulkDeleteConfirm.set(true); }
+  closeBulkDeleteConfirm(): void { this.bulkDeleteConfirm.set(false); }
+
+  executeBulkDelete(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.clientSvc.bulkDelete(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: res => {
+          this.bulkActing.set(false);
+          this.bulkDeleteConfirm.set(false);
+          this.selectedIds.set(new Set());
+          this.allClients.update(list => list.filter(c => !ids.includes(c.id)));
+          this.toast.success(`${res.deleted} client(s) supprimé(s).`);
+        },
+        error: () => { this.bulkActing.set(false); this.toast.error('Erreur suppression en masse.'); },
+      });
+  }
+
+  executeBulkActivate(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.clientSvc.bulkActivate(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: res => {
+          this.bulkActing.set(false);
+          this.allClients.update(list => list.map(c => ids.includes(c.id) ? { ...c, active: true } : c));
+          this.selectedIds.set(new Set());
+          this.toast.success(`${res.activated} client(s) activé(s).`);
+        },
+        error: () => { this.bulkActing.set(false); this.toast.error('Erreur activation en masse.'); },
+      });
+  }
+
+  executeBulkDeactivate(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.clientSvc.bulkDeactivate(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: res => {
+          this.bulkActing.set(false);
+          this.allClients.update(list => list.map(c => ids.includes(c.id) ? { ...c, active: false } : c));
+          this.selectedIds.set(new Set());
+          this.toast.success(`${res.deactivated} client(s) désactivé(s).`);
+        },
+        error: () => { this.bulkActing.set(false); this.toast.error('Erreur désactivation en masse.'); },
       });
   }
 

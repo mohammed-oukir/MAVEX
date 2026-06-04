@@ -1,5 +1,6 @@
 package com.medafrica.mavex.controller;
 
+import com.medafrica.mavex.dto.client.BulkActionRequest;
 import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -62,5 +64,26 @@ public ResponseEntity<ClientResponseDTO> patch(@PathVariable Long id,
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /** POST /api/clients/bulk-delete */
+    @PostMapping("/bulk-delete")
+    public ResponseEntity<Map<String, Integer>> bulkDelete(@Valid @RequestBody BulkActionRequest req) {
+        int count = clientService.bulkDelete(req);
+        return ResponseEntity.ok(Map.of("deleted", count));
+    }
+
+    /** POST /api/clients/bulk-activate */
+    @PostMapping("/bulk-activate")
+    public ResponseEntity<Map<String, Integer>> bulkActivate(@Valid @RequestBody BulkActionRequest req) {
+        int count = clientService.bulkActivate(req);
+        return ResponseEntity.ok(Map.of("activated", count));
+    }
+
+    /** POST /api/clients/bulk-deactivate */
+    @PostMapping("/bulk-deactivate")
+    public ResponseEntity<Map<String, Integer>> bulkDeactivate(@Valid @RequestBody BulkActionRequest req) {
+        int count = clientService.bulkDeactivate(req);
+        return ResponseEntity.ok(Map.of("deactivated", count));
     }
 }

@@ -1,5 +1,6 @@
 package com.medafrica.mavex.service;
 
+import com.medafrica.mavex.dto.client.BulkActionRequest;
 import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
@@ -132,6 +133,32 @@ public class ClientServiceImpl implements ClientService {
             throw new EntityNotFoundException("Client introuvable avec l'id : " + id);
         }
         clientRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public int bulkDelete(BulkActionRequest req) {
+        List<Client> clients = clientRepository.findAllById(req.getIds());
+        clientRepository.deleteAll(clients);
+        return clients.size();
+    }
+
+    @Override
+    @Transactional
+    public int bulkActivate(BulkActionRequest req) {
+        List<Client> clients = clientRepository.findAllById(req.getIds());
+        clients.forEach(c -> c.setActive(true));
+        clientRepository.saveAll(clients);
+        return clients.size();
+    }
+
+    @Override
+    @Transactional
+    public int bulkDeactivate(BulkActionRequest req) {
+        List<Client> clients = clientRepository.findAllById(req.getIds());
+        clients.forEach(c -> c.setActive(false));
+        clientRepository.saveAll(clients);
+        return clients.size();
     }
 
     private ClientResponseDTO toResponseDTO(Client client) {

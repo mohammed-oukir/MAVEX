@@ -115,6 +115,44 @@
 .cl-new-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(249,115,22,.5); }
 
 /* ═══════════════════════════════════════════════════════════
+   BULK ACTION BAR
+   ═══════════════════════════════════════════════════════════ */
+.cl-bulk-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+  border-top: 1px solid #FED7AA;
+  border-radius: 0 0 12px 12px;
+}
+
+.cl-bulk-count {
+  display: flex; align-items: center; gap-6px; gap: 6px;
+  font-size: 13px; font-weight: 700; color: #C2410C;
+}
+
+.cl-bulk-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px;
+  font-size: 12.5px; font-weight: 700;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: all .15s;
+}
+.cl-bulk-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.cl-bulk-activate  { background: #ECFDF5; color: #059669; border-color: #6EE7B7; }
+.cl-bulk-activate:hover:not(:disabled)  { background: #D1FAE5; transform: translateY(-1px); }
+
+.cl-bulk-deactivate { background: #F3F4F6; color: #6B7280; border-color: #D1D5DB; }
+.cl-bulk-deactivate:hover:not(:disabled) { background: #E5E7EB; transform: translateY(-1px); }
+
+.cl-bulk-delete    { background: #FEF2F2; color: #DC2626; border-color: #FCA5A5; }
+.cl-bulk-delete:hover:not(:disabled)    { background: #FEE2E2; transform: translateY(-1px); }
+
+.cl-bulk-cancel    { background: #fff; color: #6B7280; border-color: #E5E7EB; }
+.cl-bulk-cancel:hover { background: #F9FAFB; transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════════════════════
    TABLE
    ═══════════════════════════════════════════════════════════ */
 .cl-table { font-size: 13px; }
@@ -156,7 +194,19 @@
 }
 .cl-fi-select:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,.12); }
 
+/* Checkbox column */
+.cl-th-check, .cl-td-check {
+  width: 44px; padding: 0 8px 0 16px !important; text-align: center;
+}
+
+.cl-checkbox {
+  width: 16px; height: 16px; cursor: pointer;
+  accent-color: #F97316; border-radius: 4px;
+}
+
 /* Rows */
+.cl-row-selected td { background: #FFF7ED !important; }
+
 .cl-row td {
   padding: 13px 16px; border-bottom: 1px solid #F3F4F6;
   vertical-align: middle; transition: background .1s;

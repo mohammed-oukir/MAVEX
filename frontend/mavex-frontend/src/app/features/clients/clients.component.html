@@ -72,6 +72,36 @@
       Nouveau client
     </button>
   </div>
+
+  <!-- Barre d'actions bulk (visible seulement si sélection) -->
+  @if (selectedCount() > 0) {
+    <div class="cl-bulk-bar" role="toolbar" aria-label="Actions sur la sélection">
+      <span class="cl-bulk-count">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ selectedCount() }} sélectionné(s)
+      </span>
+      <div class="d-flex gap-2">
+        <button type="button" class="cl-bulk-btn cl-bulk-activate" [disabled]="bulkActing()" (click)="executeBulkActivate()" aria-label="Activer la sélection">
+          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+          Activer
+        </button>
+        <button type="button" class="cl-bulk-btn cl-bulk-deactivate" [disabled]="bulkActing()" (click)="executeBulkDeactivate()" aria-label="Désactiver la sélection">
+          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+          Désactiver
+        </button>
+        <button type="button" class="cl-bulk-btn cl-bulk-delete" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()" aria-label="Supprimer la sélection">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Supprimer
+        </button>
+        <button type="button" class="cl-bulk-btn cl-bulk-cancel" (click)="clearSelection()" aria-label="Annuler la sélection">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Annuler
+        </button>
+      </div>
+    </div>
+  }
 </div>
 
 
@@ -85,6 +115,9 @@
 
         <!-- Header row -->
         <tr class="cl-thead">
+          <th scope="col" class="cl-th-check">
+            <input type="checkbox" class="cl-checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" aria-label="Sélectionner tout" />
+          </th>
           <th scope="col">Nom</th>
           <th scope="col">Email</th>
           <th scope="col">Téléphone</th>
@@ -98,6 +131,7 @@
 
         <!-- Filter row -->
         <tr class="cl-filter-tr" aria-label="Filtres par colonne">
+          <th scope="col"></th>
           <th scope="col">
             <div class="cl-fi-wrap">
               <svg class="cl-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -136,6 +170,7 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5,6,7,8]; track $index) {
             <tr>
+              <td class="cl-td-check"><div class="cl-sk" style="width:16px;height:16px;border-radius:4px"></div></td>
               <td>
                 <div class="d-flex align-items-center gap-2">
                   <div class="cl-sk" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div>
@@ -151,7 +186,7 @@
 
         } @else if (pageItems().length === 0) {
           <tr>
-            <td colspan="9" class="py-5 text-center">
+            <td colspan="10" class="py-5 text-center">
               <div class="d-flex flex-column align-items-center gap-3">
                 <div class="cl-empty-icon" aria-hidden="true">
                   <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -171,7 +206,12 @@
 
         } @else {
           @for (c of pageItems(); track c.id) {
-            <tr class="cl-row" [class.cl-row-inactive]="!c.active">
+            <tr class="cl-row" [class.cl-row-inactive]="!c.active" [class.cl-row-selected]="selectedIds().has(c.id)">
+
+              <!-- Checkbox -->
+              <td class="cl-td-check">
+                <input type="checkbox" class="cl-checkbox" [checked]="selectedIds().has(c.id)" (change)="toggleSelect(c.id)" [attr.aria-label]="'Sélectionner ' + c.fullName" />
+              </td>
 
               <!-- Nom + avatar -->
               <td>
@@ -518,6 +558,41 @@
             <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
             Suppression…
           } @else { Supprimer }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Suppression en masse
+     ══════════════════════════════════════════════════════════ -->
+@if (bulkDeleteConfirm()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cl-bulk-del-title" (click)="closeBulkDeleteConfirm()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="cl-bulk-del-title" class="nm-title">Supprimer {{ selectedCount() }} client(s) ?</h2>
+          <p class="nm-sub">Cette action est irréversible.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeBulkDeleteConfirm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        <p class="nm-alert">Les {{ selectedCount() }} clients sélectionnés et toutes leurs données seront définitivement supprimés.</p>
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeBulkDeleteConfirm()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="bulkActing()" (click)="executeBulkDelete()">
+          @if (bulkActing()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+            Suppression…
+          } @else { Supprimer tout }
         </button>
       </div>
     </div>

@@ -36,6 +36,9 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional
     public ShipmentResponseDTO create(ShipmentRequestDTO req) {
+        if (req.getMawb() != null && shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(req.getMawb()).isPresent()) {
+            throw new IllegalArgumentException("Un shipment avec le MAWB '" + req.getMawb() + "' existe déjà.");
+        }
         Shipper shipper = null;
         if (req.getShipperId() != null) {
             shipper = shipperRepository.findById(req.getShipperId())

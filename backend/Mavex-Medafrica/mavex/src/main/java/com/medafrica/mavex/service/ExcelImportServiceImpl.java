@@ -292,6 +292,13 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         importLog.setRowLogs(rowLogs);
         importLogRepository.save(importLog);
 
+        if (successRows > 0 && mawbFound != null) {
+            shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(mawbFound).ifPresent(s -> {
+                s.setStatus(com.medafrica.mavex.model.enums.ShipmentStatus.IMPORTED);
+                shipmentRepository.save(s);
+            });
+        }
+
         log.info("Import terminé — total={}, succès={}, ignorées={}, erreurs={}",
                 totalRows, successRows, skippedRows, failedRows);
 
@@ -510,6 +517,13 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         importLog.setStatus(resolveStatus(successRows, failedRows, skippedRows, totalRows));
         importLog.setRowLogs(rowLogs);
         importLogRepository.save(importLog);
+
+        if (successRows > 0 && mawbFound != null) {
+            shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(mawbFound).ifPresent(s -> {
+                s.setStatus(com.medafrica.mavex.model.enums.ShipmentStatus.IMPORTED);
+                shipmentRepository.save(s);
+            });
+        }
 
         return buildResponse(importLog);
     }

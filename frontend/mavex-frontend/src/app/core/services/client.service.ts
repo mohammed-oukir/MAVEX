@@ -34,4 +34,16 @@ export class ClientService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`/api/clients/${id}`);
   }
+
+  bulkDelete(ids: number[]): Observable<{ deleted: number }> {
+    return this.http.post<{ deleted: number }>('/api/clients/bulk-delete', { ids });
+  }
+
+  bulkActivate(ids: number[]): Observable<{ activated: number }> {
+    return this.http.post<{ activated: number }>('/api/clients/bulk-activate', { ids });
+  }
+
+  bulkDeactivate(ids: number[]): Observable<{ deactivated: number }> {
+    return this.http.post<{ deactivated: number }>('/api/clients/bulk-deactivate', { ids });
+  }
 }
