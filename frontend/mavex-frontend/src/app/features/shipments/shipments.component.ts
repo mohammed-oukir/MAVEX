@@ -62,6 +62,36 @@ export class ShipmentsComponent implements OnInit {
   creatingShipment = signal(false);
   creating         = signal(false);
 
+  /* ── Shipper autocomplete (create) ───────────────────── */
+  shipperSearch       = signal('');
+  showShipperDropdown = signal(false);
+  selectedShipperName = signal('');
+
+  filteredShippers = computed(() => {
+    const q = this.shipperSearch().toLowerCase().trim();
+    if (!q) return this.shippers().slice(0, 50);
+    return this.shippers().filter(s =>
+      s.companyName?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      s.city?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  });
+
+  /* ── Shipper autocomplete (edit) ─────────────────────── */
+  editShipperSearch       = signal('');
+  showEditShipperDropdown = signal(false);
+  selectedEditShipperName = signal('');
+
+  filteredEditShippers = computed(() => {
+    const q = this.editShipperSearch().toLowerCase().trim();
+    if (!q) return this.shippers().slice(0, 50);
+    return this.shippers().filter(s =>
+      s.companyName?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      s.city?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  });
+
   /* ── Status chips config ──────────────────────────────── */
   protected readonly statusOptions = [
     { value: '',           label: 'Tous' },
@@ -192,6 +222,104 @@ export class ShipmentsComponent implements OnInit {
   isLoadingExpand(id: number):   boolean         { return this.loadingOrders().has(id); }
   getExpandedOrders(id: number): OrderResponse[] { return this.expandedOrders().get(id) ?? []; }
 
+  /* ── Mini formulaire nouveau shipper ─────────────────── */
+  showNewShipperForm  = signal(false);
+  savingNewShipper    = signal(false);
+  newShipperForm = this.fb.group({
+    companyName: ['', [Validators.required, Validators.minLength(2)]],
+    contactName: [''],
+    email:       ['', [Validators.required, Validators.email]],
+    phone:       [''],
+    city:        [''],
+    address:     [''],
+    countryCode: ['MA', Validators.pattern(/^[A-Z]{0,2}$/)],
+  });
+
+  openNewShipperForm(): void {
+    this.showShipperDropdown.set(false);
+    this.newShipperForm.reset({ countryCode: 'MA' });
+    if (this.shipperSearch()) {
+      this.newShipperForm.patchValue({ companyName: this.shipperSearch() });
+    }
+    this.showNewShipperForm.set(true);
+  }
+
+  closeNewShipperForm(): void { this.showNewShipperForm.set(false); }
+
+  newShipperFieldInvalid(f: string): boolean {
+    const c = this.newShipperForm.get(f);
+    return !!(c?.invalid && c?.touched);
+  }
+
+  createAndSelectShipper(): void {
+    if (this.newShipperForm.invalid) { this.newShipperForm.markAllAsTouched(); return; }
+    this.savingNewShipper.set(true);
+    const v = this.newShipperForm.getRawValue();
+    this.shipperSvc.create({
+      companyName: v.companyName!,
+      email:       v.email!,
+      contactName: v.contactName || undefined,
+      phone:       v.phone       || undefined,
+      city:        v.city        || undefined,
+      address:     v.address     || undefined,
+      countryCode: v.countryCode || undefined,
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.savingNewShipper.set(false);
+        this.showNewShipperForm.set(false);
+        const created = res.data;
+        this.shippers.update(list => [...list, created]);
+        this.createForm.patchValue({ shipperId: created.id });
+        this.selectedShipperName.set(created.companyName);
+        this.shipperSearch.set('');
+        this.toast.success(`Shipper "${created.companyName}" créé et sélectionné.`);
+      },
+      error: err => {
+        this.savingNewShipper.set(false);
+        this.toast.error(err?.error?.message || 'Erreur lors de la création du shipper.');
+      },
+    });
+  }
+
+  /* ── Shipper autocomplete helpers ────────────────────── */
+  selectShipper(s: ShipperResponse): void {
+    this.createForm.patchValue({ shipperId: s.id });
+    this.selectedShipperName.set(s.companyName);
+    this.shipperSearch.set('');
+    this.showShipperDropdown.set(false);
+  }
+
+  clearShipper(): void {
+    this.createForm.patchValue({ shipperId: null });
+    this.selectedShipperName.set('');
+    this.shipperSearch.set('');
+  }
+
+  onShipperSearchInput(val: string): void {
+    this.shipperSearch.set(val);
+    this.showShipperDropdown.set(true);
+    if (!val) this.clearShipper();
+  }
+
+  selectEditShipper(s: ShipperResponse): void {
+    this.editForm.patchValue({ shipperId: s.id });
+    this.selectedEditShipperName.set(s.companyName);
+    this.editShipperSearch.set('');
+    this.showEditShipperDropdown.set(false);
+  }
+
+  clearEditShipper(): void {
+    this.editForm.patchValue({ shipperId: null });
+    this.selectedEditShipperName.set('');
+    this.editShipperSearch.set('');
+  }
+
+  onEditShipperSearchInput(val: string): void {
+    this.editShipperSearch.set(val);
+    this.showEditShipperDropdown.set(true);
+    if (!val) this.clearEditShipper();
+  }
+
   /* ── Create ───────────────────────────────────────────── */
   openCreate(): void {
     this.createForm.reset({
@@ -200,11 +328,15 @@ export class ShipmentsComponent implements OnInit {
       importingCarrier: '', modeOfTransport: '', portCode: '',
     });
     this.detectedAirline.set(null);
+    this.selectedShipperName.set('');
+    this.shipperSearch.set('');
+    this.showShipperDropdown.set(false);
     this.creatingShipment.set(true);
   }
   closeCreate(): void {
     this.creatingShipment.set(false);
     this.detectedAirline.set(null);
+    this.selectedShipperName.set('');
   }
 
   onMawbInput(mawb: string): void {
@@ -279,8 +411,14 @@ export class ShipmentsComponent implements OnInit {
       portCode:         s.portCode ?? '',
       status:           s.status,
     });
+    this.selectedEditShipperName.set(s.shipper?.companyName ?? '');
+    this.editShipperSearch.set('');
+    this.showEditShipperDropdown.set(false);
   }
-  closeEdit(): void { this.editingShipment.set(null); }
+  closeEdit(): void {
+    this.editingShipment.set(null);
+    this.selectedEditShipperName.set('');
+  }
 
   saveEdit(): void {
     const s = this.editingShipment();

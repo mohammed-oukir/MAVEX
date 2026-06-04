@@ -11,6 +11,7 @@ import com.medafrica.mavex.model.enums.ImportStatus;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.imports.ImportLog;
 import com.medafrica.mavex.model.imports.ImportRowLog;
+import com.medafrica.mavex.model.logistics.Airline;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
@@ -43,6 +44,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     private final ClientRepository       clientRepository;
     private final OrderRepository        orderRepository;
     private final CountryRepository      countryRepository;
+    private final AirlineRepository      airlineRepository;
 
     // ---------------------------------------------------------------
     // INDEX LOGIQUES — constantes utilisées comme clés dans cols[]
@@ -785,11 +787,21 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
     private Shipment findOrCreateShipment(String mawb, User createdBy) {
         return shipmentRepository.findFirstByMawbOrderByCreatedAtDesc(mawb).orElseGet(() -> {
-            Shipment s = Shipment.builder()
+            Shipment.ShipmentBuilder builder = Shipment.builder()
                     .mawb(mawb)
-                    .createdBy(createdBy)
-                    .build();
-            return shipmentRepository.save(s);
+                    .createdBy(createdBy);
+
+            // Détecter la compagnie aérienne depuis le préfixe MAWB
+            String clean = mawb.replaceAll("[^0-9]", "");
+            if (clean.length() >= 3) {
+                airlineRepository.findById(clean.substring(0, 3)).ifPresent(airline -> {
+                    builder.importingCarrier(airline.getName());
+                    builder.modeOfTransport(airline.getMode());
+                    log.info("Compagnie détectée depuis MAWB {} → {} ({})", mawb, airline.getName(), airline.getMode());
+                });
+            }
+
+            return shipmentRepository.save(builder.build());
         });
     }
 

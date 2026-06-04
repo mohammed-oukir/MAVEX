@@ -1,4 +1,100 @@
 /* =====================================================
+   SHIPPER COMBOBOX
+   ===================================================== */
+.sp-combo {
+  position: relative;
+  border: 1.5px solid #D1D5DB; border-radius: 10px;
+  background: #fff; transition: border-color .15s, box-shadow .15s;
+}
+.sp-combo:focus-within {
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+}
+.sp-combo-search-wrap {
+  display: flex; align-items: center; padding: 0 10px;
+}
+.sp-combo-ico { color: #9CA3AF; flex-shrink: 0; margin-right: 6px; }
+.sp-combo-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  padding: 9px 0; font-size: 13px; color: #111827; width: 100%;
+}
+.sp-combo-input::placeholder { color: #9CA3AF; }
+.sp-combo-selected {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; gap: 8px;
+}
+.sp-combo-name {
+  font-size: 13px; font-weight: 600; color: #111827;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sp-combo-clear {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid #E5E7EB; background: #F9FAFB;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #9CA3AF; flex-shrink: 0; transition: all .15s;
+}
+.sp-combo-clear:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+.sp-combo-list {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff; border: 1.5px solid #E5E7EB; border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  max-height: 220px; overflow-y: auto; z-index: 1000;
+}
+.sp-combo-item {
+  display: flex; flex-direction: column; align-items: flex-start;
+  width: 100%; padding: 9px 14px; border: none; background: transparent;
+  cursor: pointer; text-align: left; transition: background .1s;
+  border-bottom: 1px solid #F3F4F6;
+}
+.sp-combo-item:last-child { border-bottom: none; }
+.sp-combo-item:hover { background: #FFF7ED; }
+.sp-combo-item-name { font-size: 13px; font-weight: 600; color: #111827; }
+.sp-combo-item-sub  { font-size: 11.5px; color: #9CA3AF; margin-top: 1px; }
+.sp-combo-empty {
+  padding: 14px; text-align: center; font-size: 12.5px; color: #9CA3AF;
+}
+
+.sp-combo-new-item {
+  display: flex; align-items: center; gap: 7px;
+  width: 100%; padding: 10px 14px;
+  border: none; border-top: 1.5px dashed #FED7AA;
+  background: #FFF7ED; cursor: pointer;
+  font-size: 12.5px; font-weight: 700; color: #F97316;
+  transition: background .15s;
+}
+.sp-combo-new-item:hover { background: #FFEDD5; }
+
+/* ── Mini formulaire nouveau shipper ─────────────── */
+.sp-new-form {
+  margin-top: 10px; padding: 16px;
+  background: linear-gradient(135deg, #F8FAFF, #EFF6FF);
+  border: 1.5px solid #BFDBFE;
+  border-radius: 12px;
+}
+
+.sp-nf-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px; font-weight: 700; color: #1D4ED8;
+}
+.sp-nf-header svg { color: #3B82F6; flex-shrink: 0; }
+.sp-nf-header span { flex: 1; }
+
+.sp-nf-close {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid #BFDBFE; background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #9CA3AF; transition: all .15s;
+}
+.sp-nf-close:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+
+.sp-nf-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  margin-top: 14px; padding-top: 12px;
+  border-top: 1px solid #DBEAFE;
+}
+
+/* =====================================================
    AIRLINE DETECTION BADGE
    ===================================================== */
 .sp-airline-detecting {

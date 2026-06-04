@@ -383,15 +383,121 @@
             <!-- Shipper -->
             <div class="col-12">
               <div class="nm-field">
-                <label for="cShipper" class="nm-label">
-                  Shipper <span class="nm-opt">optionnel</span>
-                </label>
-                <select id="cShipper" class="nm-select" formControlName="shipperId">
-                  <option [ngValue]="null">— Sélectionner un shipper —</option>
-                  @for (sh of shippers(); track sh.id) {
-                    <option [ngValue]="sh.id">{{ sh.companyName }}</option>
+                <label for="cShipper" class="nm-label">Shipper <span class="nm-opt">optionnel</span></label>
+                <div class="sp-combo">
+                  @if (selectedShipperName()) {
+                    <div class="sp-combo-selected">
+                      <span class="sp-combo-name">{{ selectedShipperName() }}</span>
+                      <button type="button" class="sp-combo-clear" (click)="clearShipper()" aria-label="Effacer">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="sp-combo-search-wrap">
+                      <svg class="sp-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <input id="cShipper" type="text" class="sp-combo-input"
+                        [value]="shipperSearch()"
+                        (input)="onShipperSearchInput($any($event.target).value)"
+                        (focus)="showShipperDropdown.set(true)"
+                        placeholder="Rechercher un shipper…"
+                        autocomplete="off" />
+                    </div>
                   }
-                </select>
+                  @if (showShipperDropdown() && !selectedShipperName()) {
+                    <div class="sp-combo-list" role="listbox">
+                      @if (filteredShippers().length === 0) {
+                        <div class="sp-combo-empty">Aucun shipper trouvé</div>
+                      } @else {
+                        @for (sh of filteredShippers(); track sh.id) {
+                          <button type="button" class="sp-combo-item" (click)="selectShipper(sh)">
+                            <span class="sp-combo-item-name">{{ sh.companyName }}</span>
+                            @if (sh.email) { <span class="sp-combo-item-sub">{{ sh.email }}</span> }
+                          </button>
+                        }
+                      }
+                      <button type="button" class="sp-combo-new-item" (click)="openNewShipperForm()">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Nouveau shipper
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                <!-- Mini formulaire nouveau shipper -->
+                @if (showNewShipperForm()) {
+                  <div class="sp-new-form" [formGroup]="newShipperForm">
+                    <div class="sp-nf-header">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg>
+                      <span>Nouveau shipper</span>
+                      <button type="button" class="sp-nf-close" (click)="closeNewShipperForm()" aria-label="Fermer">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                    <div class="row g-2 mt-1">
+
+                      <div class="col-12">
+                        <label for="nsfCompany" class="nm-label">Nom de la société <span class="nm-req">*</span></label>
+                        <input id="nsfCompany" type="text" class="nm-input" [class.nm-err]="newShipperFieldInvalid('companyName')"
+                          formControlName="companyName" placeholder="PALAIS D'ART FES" autocomplete="off" />
+                        @if (newShipperFieldInvalid('companyName')) {
+                          <div class="nm-err-msg" role="alert">Nom de société obligatoire.</div>
+                        }
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label for="nsfContact" class="nm-label">Contact <span class="nm-opt">optionnel</span></label>
+                        <input id="nsfContact" type="text" class="nm-input" formControlName="contactName"
+                          placeholder="Mohammed Alaoui" autocomplete="off" />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label for="nsfEmail" class="nm-label">Email <span class="nm-req">*</span></label>
+                        <input id="nsfEmail" type="email" class="nm-input" [class.nm-err]="newShipperFieldInvalid('email')"
+                          formControlName="email" placeholder="contact@société.ma" autocomplete="off" />
+                        @if (newShipperFieldInvalid('email')) {
+                          <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
+                        }
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label for="nsfPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
+                        <input id="nsfPhone" type="tel" class="nm-input" formControlName="phone"
+                          placeholder="+212 6 00 00 00 00" autocomplete="off" />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label for="nsfCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
+                        <input id="nsfCity" type="text" class="nm-input" formControlName="city"
+                          placeholder="Casablanca" autocomplete="off" />
+                      </div>
+
+                      <div class="col-12 col-md-8">
+                        <label for="nsfAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
+                        <input id="nsfAddress" type="text" class="nm-input" formControlName="address"
+                          placeholder="123 Boulevard Hassan II" autocomplete="off" />
+                      </div>
+
+                      <div class="col-12 col-md-4">
+                        <label for="nsfCountry" class="nm-label">Pays <span class="nm-opt">optionnel</span></label>
+                        <input id="nsfCountry" type="text" class="nm-input" formControlName="countryCode"
+                          placeholder="MA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                      </div>
+
+                    </div>
+                    <div class="sp-nf-footer">
+                      <button type="button" class="nm-btn-cancel" (click)="closeNewShipperForm()">Annuler</button>
+                      <button type="button" class="nm-btn-primary" [disabled]="savingNewShipper()" (click)="createAndSelectShipper()">
+                        @if (savingNewShipper()) {
+                          <span class="spinner-border" style="width:12px;height:12px;border-width:2px" aria-hidden="true"></span>
+                          Création…
+                        } @else {
+                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                          Créer et sélectionner
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
 
@@ -525,15 +631,41 @@
             <!-- Shipper -->
             <div class="col-12">
               <div class="nm-field">
-                <label for="eShipper" class="nm-label">
-                  Shipper <span class="nm-opt">optionnel</span>
-                </label>
-                <select id="eShipper" class="nm-select" formControlName="shipperId">
-                  <option [ngValue]="null">— Sélectionner un shipper —</option>
-                  @for (sh of shippers(); track sh.id) {
-                    <option [ngValue]="sh.id">{{ sh.companyName }}</option>
+                <label for="eShipper" class="nm-label">Shipper <span class="nm-opt">optionnel</span></label>
+                <div class="sp-combo">
+                  @if (selectedEditShipperName()) {
+                    <div class="sp-combo-selected">
+                      <span class="sp-combo-name">{{ selectedEditShipperName() }}</span>
+                      <button type="button" class="sp-combo-clear" (click)="clearEditShipper()" aria-label="Effacer">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="sp-combo-search-wrap">
+                      <svg class="sp-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <input id="eShipper" type="text" class="sp-combo-input"
+                        [value]="editShipperSearch()"
+                        (input)="onEditShipperSearchInput($any($event.target).value)"
+                        (focus)="showEditShipperDropdown.set(true)"
+                        placeholder="Rechercher un shipper…"
+                        autocomplete="off" />
+                    </div>
                   }
-                </select>
+                  @if (showEditShipperDropdown() && !selectedEditShipperName()) {
+                    <div class="sp-combo-list" role="listbox">
+                      @if (filteredEditShippers().length === 0) {
+                        <div class="sp-combo-empty">Aucun shipper trouvé</div>
+                      } @else {
+                        @for (sh of filteredEditShippers(); track sh.id) {
+                          <button type="button" class="sp-combo-item" (click)="selectEditShipper(sh)">
+                            <span class="sp-combo-item-name">{{ sh.companyName }}</span>
+                            @if (sh.email) { <span class="sp-combo-item-sub">{{ sh.email }}</span> }
+                          </button>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
               </div>
             </div>
 
