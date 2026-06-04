@@ -1,0 +1,124 @@
+/* ═══════════════════════════════════════════════════════════
+   TOOLBAR
+   ═══════════════════════════════════════════════════════════ */
+.al-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding: 16px 20px;
+}
+
+.al-total-badge {
+  background: linear-gradient(135deg, #F97316, #FB923C);
+  color: #fff; border-radius: 100px;
+  padding: 5px 14px; font-size: 12.5px; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(249,115,22,.3);
+  white-space: nowrap;
+}
+
+.al-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 9px;
+  border: 1.5px solid #E5E7EB; background: #fff;
+  font-size: 12px; font-weight: 600; color: #6B7280;
+  cursor: pointer; transition: all .15s;
+}
+.al-chip:hover { border-color: #F97316; color: #F97316; }
+.al-chip-active { background: #FFF7ED; border-color: #F97316; color: #C2410C; }
+
+.al-search-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.al-search-ico { position: absolute; left: 10px; color: #9CA3AF; pointer-events: none; }
+.al-search-input {
+  padding: 7px 12px 7px 30px; border: 1.5px solid #E5E7EB;
+  border-radius: 9px; font-size: 12.5px; outline: none; background: #fff;
+  min-width: 200px; transition: border-color .15s, box-shadow .15s;
+}
+.al-search-input:focus { border-color: #F97316; box-shadow: 0 0 0 3px rgba(249,115,22,.1); }
+
+.al-new-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #F97316, #FB923C);
+  color: #fff; border: none; border-radius: 11px;
+  font-size: 13.5px; font-weight: 700;
+  cursor: pointer; transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 14px rgba(249,115,22,.4);
+  white-space: nowrap;
+}
+.al-new-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(249,115,22,.5); }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════════════════ */
+.al-table { font-size: 13px; }
+
+.al-thead th {
+  font-size: 10.5px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; color: #6B7280; padding: 14px 16px;
+  border-bottom: 2px solid #F3F4F6; white-space: nowrap;
+  background: linear-gradient(to bottom, #FAFAFA, #fff);
+}
+
+.al-row td {
+  padding: 12px 16px; border-bottom: 1px solid #F3F4F6;
+  vertical-align: middle;
+}
+.al-row:last-child td { border-bottom: none; }
+.al-row:hover td { background: #FFF7ED; }
+
+.al-prefix {
+  display: inline-block; padding: 4px 10px;
+  background: linear-gradient(135deg, #1E293B, #334155);
+  color: #F8FAFC; border-radius: 8px;
+  font-size: 13px; font-weight: 800; letter-spacing: .08em;
+  font-family: monospace;
+}
+
+.al-name { font-weight: 600; color: #111827; font-size: 13.5px; }
+.al-muted { color: #9CA3AF; font-size: 12.5px; }
+
+.al-code-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 6px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .05em;
+}
+.al-iata { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); color: #C2410C; border: 1px solid #FED7AA; }
+.al-icao { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); color: #1D4ED8; border: 1px solid #BFDBFE; }
+
+.al-mode-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11.5px; font-weight: 700;
+}
+.al-air   { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #065F46; border: 1px solid #6EE7B7; }
+.al-cargo { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #92400E; border: 1px solid #FCD34D; }
+
+.al-actions { display: flex; gap: 5px; justify-content: flex-end; }
+
+.al-act {
+  width: 32px; height: 32px; border-radius: 9px;
+  border: 1.5px solid #E5E7EB; background: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; color: #9CA3AF;
+}
+.al-act-edit:hover { color: #D97706; border-color: #FCD34D; background: #FFFBEB; transform: scale(1.1); }
+.al-act-del:hover  { color: #DC2626; border-color: #FCA5A5; background: #FEF2F2; transform: scale(1.1); }
+
+/* Skeleton */
+.al-sk {
+  height: 14px; border-radius: 7px;
+  background: linear-gradient(90deg, #F3F4F6 25%, #E9ECEF 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: al-shimmer 1.4s infinite;
+}
+@keyframes al-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Empty */
+.al-empty-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFF7ED, #FED7AA);
+  color: #F97316;
+  display: flex; align-items: center; justify-content: center;
+}

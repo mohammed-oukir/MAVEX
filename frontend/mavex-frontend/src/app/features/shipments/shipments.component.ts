@@ -10,10 +10,12 @@ import { ShipmentService } from '../../core/services/shipment.service';
 import { ShipperService }  from '../../core/services/shipper.service';
 import { OrderService }    from '../../core/services/order.service';
 import { ToastService }    from '../../core/services/toast.service';
+import { AirlineService }  from '../../core/services/airline.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
 import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus } from '../../core/models/shipment.model';
 import { ShipperResponse } from '../../core/models/shipper.model';
 import { OrderResponse }   from '../../core/models/order.model';
+import { Airline }         from '../../core/models/airline.model';
 
 @Component({
   selector: 'app-shipments',
@@ -23,14 +25,19 @@ import { OrderResponse }   from '../../core/models/order.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShipmentsComponent implements OnInit {
-  private readonly router     = inject(Router);
-  private readonly layout     = inject(LayoutService);
-  private readonly shipSvc    = inject(ShipmentService);
-  private readonly shipperSvc = inject(ShipperService);
-  private readonly orderSvc   = inject(OrderService);
-  private readonly toast      = inject(ToastService);
-  private readonly fb         = inject(FormBuilder);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly router      = inject(Router);
+  private readonly layout      = inject(LayoutService);
+  private readonly shipSvc     = inject(ShipmentService);
+  private readonly shipperSvc  = inject(ShipperService);
+  private readonly orderSvc    = inject(OrderService);
+  private readonly toast       = inject(ToastService);
+  private readonly airlineSvc  = inject(AirlineService);
+  private readonly fb          = inject(FormBuilder);
+  private readonly destroyRef  = inject(DestroyRef);
+
+  /* ── Airline detection ────────────────────────────────── */
+  detectedAirline = signal<Airline | null>(null);
+  detectingAirline = signal(false);
 
   /* ── Data ─────────────────────────────────────────────── */
   allShipments = signal<ShipmentResponse[]>([]);
@@ -192,9 +199,40 @@ export class ShipmentsComponent implements OnInit {
       exportDate: '', importDate: '',
       importingCarrier: '', modeOfTransport: '', portCode: '',
     });
+    this.detectedAirline.set(null);
     this.creatingShipment.set(true);
   }
-  closeCreate(): void { this.creatingShipment.set(false); }
+  closeCreate(): void {
+    this.creatingShipment.set(false);
+    this.detectedAirline.set(null);
+  }
+
+  onMawbInput(mawb: string): void {
+    this.createForm.patchValue({ mawb });
+    const prefix = mawb.replace(/[^0-9]/g, '').substring(0, 3);
+    if (prefix.length < 3) { this.detectedAirline.set(null); return; }
+
+    this.detectingAirline.set(true);
+    this.airlineSvc.getByMawb(prefix)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: airline => {
+          this.detectedAirline.set(airline);
+          this.detectingAirline.set(false);
+          // Pré-remplir Carrier et Mode SEULEMENT si les champs sont vides
+          if (!this.createForm.value.importingCarrier) {
+            this.createForm.patchValue({ importingCarrier: airline.name });
+          }
+          if (!this.createForm.value.modeOfTransport) {
+            this.createForm.patchValue({ modeOfTransport: airline.mode ?? 'AIR' });
+          }
+        },
+        error: () => {
+          this.detectedAirline.set(null);
+          this.detectingAirline.set(false);
+        },
+      });
+  }
 
   create(): void {
     if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }

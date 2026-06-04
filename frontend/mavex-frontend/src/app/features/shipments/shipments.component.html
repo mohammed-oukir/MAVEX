@@ -345,9 +345,10 @@
                   class="nm-input"
                   [class.nm-err]="createFieldInvalid('mawb')"
                   formControlName="mawb"
-                  placeholder="ex : MX-2024-001"
+                  placeholder="ex : 147-44480365"
                   autocomplete="off"
                   aria-describedby="cMawbErr"
+                  (input)="onMawbInput($any($event.target).value)"
                 />
                 @if (createFieldInvalid('mawb')) {
                   <div class="nm-err-msg" id="cMawbErr" role="alert">
@@ -355,6 +356,25 @@
                       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
                     MAWB obligatoire — minimum 3 caractères.
+                  </div>
+                }
+                <!-- Badge compagnie détectée -->
+                @if (detectingAirline()) {
+                  <div class="sp-airline-detecting">
+                    <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span>
+                    Détection en cours…
+                  </div>
+                } @else if (detectedAirline()) {
+                  <div class="sp-airline-badge" role="status">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                    <span><strong>{{ detectedAirline()!.name }}</strong></span>
+                    @if (detectedAirline()!.iataCode) {
+                      <span class="sp-airline-code">{{ detectedAirline()!.iataCode }}</span>
+                    }
+                    @if (detectedAirline()!.country) {
+                      <span class="sp-airline-country">· {{ detectedAirline()!.country }}</span>
+                    }
+                    <span class="sp-airline-mode">{{ detectedAirline()!.mode ?? 'AIR' }}</span>
                   </div>
                 }
               </div>

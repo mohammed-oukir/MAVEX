@@ -1,0 +1,258 @@
+<!-- ═══════════════════════════════════════════════════════════
+     TOOLBAR
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="al-toolbar">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="al-total-badge">{{ total() }} compagnie(s)</span>
+
+      <!-- Filtre mode -->
+      <div class="d-flex gap-1">
+        <button type="button" class="al-chip" [class.al-chip-active]="fMode() === ''" (click)="fMode.set('')">Tous</button>
+        <button type="button" class="al-chip" [class.al-chip-active]="fMode() === 'AIR'" (click)="fMode.set('AIR')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+          Passagers
+        </button>
+        <button type="button" class="al-chip" [class.al-chip-active]="fMode() === 'CARGO'" (click)="fMode.set('CARGO')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
+          Cargo
+        </button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="al-search-wrap">
+        <svg class="al-search-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="al-search-input" [value]="fSearch()" (input)="fSearch.set($any($event.target).value)" placeholder="Rechercher…" aria-label="Rechercher une compagnie" />
+      </div>
+    </div>
+
+    <button type="button" class="al-new-btn" (click)="openCreate()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter une compagnie
+    </button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     TABLE
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table al-table align-middle mb-0" aria-label="Liste des compagnies aériennes">
+      <thead>
+        <tr class="al-thead">
+          <th scope="col">Préfixe</th>
+          <th scope="col">Compagnie</th>
+          <th scope="col">IATA</th>
+          <th scope="col">ICAO</th>
+          <th scope="col">Pays</th>
+          <th scope="col">Mode</th>
+          <th scope="col" class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6,7,8]; track $index) {
+            <tr>
+              @for (w of [50,160,40,40,100,60,80]; track $index) {
+                <td><div class="al-sk" [style.width.px]="w"></div></td>
+              }
+            </tr>
+          }
+
+        } @else if (filtered().length === 0) {
+          <tr>
+            <td colspan="7" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="al-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucune compagnie trouvée</p>
+                  <p class="text-muted mb-0" style="font-size:13px">Modifiez votre recherche ou ajoutez une compagnie.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        } @else {
+          @for (a of filtered(); track a.prefix) {
+            <tr class="al-row">
+              <td>
+                <span class="al-prefix">{{ a.prefix }}</span>
+              </td>
+              <td>
+                <span class="al-name">{{ a.name }}</span>
+              </td>
+              <td>
+                @if (a.iataCode) { <span class="al-code-badge al-iata">{{ a.iataCode }}</span> }
+                @else { <span class="al-muted">—</span> }
+              </td>
+              <td>
+                @if (a.icaoCode) { <span class="al-code-badge al-icao">{{ a.icaoCode }}</span> }
+                @else { <span class="al-muted">—</span> }
+              </td>
+              <td class="al-muted">{{ a.country || '—' }}</td>
+              <td>
+                <span [class]="a.mode === 'CARGO' ? 'al-mode-badge al-cargo' : 'al-mode-badge al-air'">
+                  {{ modeLabel(a.mode) }}
+                </span>
+              </td>
+              <td>
+                <div class="al-actions">
+                  <button type="button" class="al-act al-act-edit" (click)="openEdit(a)" title="Modifier" [attr.aria-label]="'Modifier ' + a.name">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button type="button" class="al-act al-act-del" (click)="confirmDelete(a.prefix)" title="Supprimer" [attr.aria-label]="'Supprimer ' + a.name">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL — Créer / Modifier
+     ═══════════════════════════════════════════════════════════ -->
+@if (formMode()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="al-form-title" (click)="closeForm()">
+    <div class="modal" style="max-width:500px" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="al-form-title" class="nm-title">
+            {{ formMode() === 'create' ? 'Ajouter une compagnie' : 'Modifier la compagnie' }}
+          </h2>
+          <p class="nm-sub">Les 3 chiffres du préfixe MAWB identifient la compagnie.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeForm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="nm-body">
+          <div class="row g-3">
+
+            <div class="col-12 col-md-4">
+              <div class="nm-field">
+                <label for="alPrefix" class="nm-label">Préfixe <span class="nm-req">*</span></label>
+                <input id="alPrefix" type="text" class="nm-input" [class.nm-err]="fieldInvalid('prefix')"
+                  formControlName="prefix" placeholder="147" maxlength="3" />
+                @if (fieldInvalid('prefix')) {
+                  <div class="nm-err-msg" role="alert">3 chiffres exactement (ex: 147).</div>
+                }
+              </div>
+            </div>
+
+            <div class="col-12 col-md-8">
+              <div class="nm-field">
+                <label for="alName" class="nm-label">Nom de la compagnie <span class="nm-req">*</span></label>
+                <input id="alName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('name')"
+                  formControlName="name" placeholder="ex : Royal Air Maroc" />
+                @if (fieldInvalid('name')) {
+                  <div class="nm-err-msg" role="alert">Nom obligatoire.</div>
+                }
+              </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <div class="nm-field">
+                <label for="alIata" class="nm-label">Code IATA <span class="nm-opt">opt.</span></label>
+                <input id="alIata" type="text" class="nm-input" formControlName="iataCode"
+                  placeholder="AT" maxlength="2" style="text-transform:uppercase" />
+              </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+              <div class="nm-field">
+                <label for="alIcao" class="nm-label">Code ICAO <span class="nm-opt">opt.</span></label>
+                <input id="alIcao" type="text" class="nm-input" formControlName="icaoCode"
+                  placeholder="RAM" maxlength="3" style="text-transform:uppercase" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="alCountry" class="nm-label">Pays <span class="nm-opt">opt.</span></label>
+                <input id="alCountry" type="text" class="nm-input" formControlName="country"
+                  placeholder="ex : Maroc" />
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="nm-field">
+                <label for="alMode" class="nm-label">Mode <span class="nm-req">*</span></label>
+                <select id="alMode" class="nm-select" formControlName="mode">
+                  <option value="AIR">Passagers (AIR)</option>
+                  <option value="CARGO">Cargo (CARGO)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+              Enregistrement…
+            } @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ formMode() === 'create' ? 'Ajouter' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL — Suppression
+     ═══════════════════════════════════════════════════════════ -->
+@if (deletePrefix() !== null) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="al-del-title" (click)="cancelDelete()">
+    <div class="modal" style="max-width:400px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="al-del-title" class="nm-title">Supprimer la compagnie ?</h2>
+          <p class="nm-sub">Préfixe : <strong>{{ deletePrefix() }}</strong></p>
+        </div>
+        <button type="button" class="nm-close" (click)="cancelDelete()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        <p class="nm-alert">Ce préfixe ne sera plus reconnu automatiquement lors de la création de shipments.</p>
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+          @if (deleting()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+            Suppression…
+          } @else { Supprimer }
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -62,6 +62,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/users/users.component').then(m => m.UsersComponent),
       },
+      {
+        path: 'airlines',
+        loadComponent: () =>
+          import('./features/airlines/airlines.component').then(m => m.AirlinesComponent),
+      },
     ],
   },
 
