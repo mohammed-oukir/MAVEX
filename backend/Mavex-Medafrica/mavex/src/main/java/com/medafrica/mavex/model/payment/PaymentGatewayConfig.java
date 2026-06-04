@@ -91,4 +91,8 @@ public class PaymentGatewayConfig {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+
 }
+

@@ -1,4 +1,83 @@
 /* =====================================================
+   CLIENT COMBOBOX / AUTOCOMPLETE
+   ===================================================== */
+.sd-combo {
+  position: relative;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+.sd-combo:focus-within {
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249,115,22,.12);
+}
+.sd-combo-err { border-color: #EF4444 !important; }
+.sd-combo-err:focus-within { box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important; }
+
+.sd-combo-search-wrap {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 10px;
+}
+.sd-combo-ico { color: #9CA3AF; flex-shrink: 0; margin-right: 6px; }
+
+.sd-combo-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  padding: 9px 0; font-size: 13px; color: #111827;
+  width: 100%;
+}
+.sd-combo-input::placeholder { color: #9CA3AF; }
+
+.sd-combo-selected {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; gap: 8px;
+}
+.sd-combo-name {
+  font-size: 13px; font-weight: 600; color: #111827;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sd-combo-clear {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid #E5E7EB; background: #F9FAFB;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #9CA3AF; flex-shrink: 0;
+  transition: all .15s;
+}
+.sd-combo-clear:hover { background: #FEE2E2; border-color: #FCA5A5; color: #DC2626; }
+
+.sd-combo-list {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  max-height: 220px; overflow-y: auto;
+  z-index: 1000;
+}
+.sd-combo-list::-webkit-scrollbar { width: 4px; }
+.sd-combo-list::-webkit-scrollbar-track { background: #F9FAFB; border-radius: 4px; }
+.sd-combo-list::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+
+.sd-combo-item {
+  display: flex; flex-direction: column; align-items: flex-start;
+  width: 100%; padding: 9px 14px;
+  border: none; background: transparent;
+  cursor: pointer; text-align: left;
+  transition: background .1s;
+  border-bottom: 1px solid #F3F4F6;
+}
+.sd-combo-item:last-child { border-bottom: none; }
+.sd-combo-item:hover { background: #FFF7ED; }
+
+.sd-combo-item-name { font-size: 13px; font-weight: 600; color: #111827; }
+.sd-combo-item-sub  { font-size: 11.5px; color: #9CA3AF; margin-top: 1px; }
+
+.sd-combo-empty {
+  padding: 14px; text-align: center;
+  font-size: 12.5px; color: #9CA3AF;
+}
+
+/* =====================================================
    BACK LINK
    ===================================================== */
 .sd-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: #6B7280; text-decoration: none; padding: 6px 12px; border: 1px solid #E5E7EB; border-radius: 8px; background: #fff; transition: border-color .15s, color .15s; margin-bottom: 20px; }

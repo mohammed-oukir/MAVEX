@@ -64,6 +64,36 @@ export class ShipmentDetailComponent implements OnInit {
   creatingOrder = signal(false);
   creating      = signal(false);
 
+  /* ── Client autocomplete (create form) ───────────────── */
+  clientSearch        = signal('');
+  showClientDropdown  = signal(false);
+  selectedClientName  = signal('');
+
+  filteredClients = computed(() => {
+    const q = this.clientSearch().toLowerCase().trim();
+    if (!q) return this.clients().slice(0, 50);
+    return this.clients().filter(c =>
+      c.fullName?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.city?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  });
+
+  /* ── Client autocomplete (edit form) ─────────────────── */
+  editClientSearch        = signal('');
+  showEditClientDropdown  = signal(false);
+  selectedEditClientName  = signal('');
+
+  filteredEditClients = computed(() => {
+    const q = this.editClientSearch().toLowerCase().trim();
+    if (!q) return this.clients().slice(0, 50);
+    return this.clients().filter(c =>
+      c.fullName?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.city?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  });
+
   /* ── Edit order ───────────────────────────────────────── */
   editingOrder = signal<OrderResponse | null>(null);
   savingOrder  = signal(false);
@@ -129,7 +159,7 @@ export class ShipmentDetailComponent implements OnInit {
     goodsDescription: [''],
     shipmentWeight:   [null as number | null],
     htsusCode:        [''],
-    customsValue:     [null as number | null],
+    customsValue:     [null as number | null, [Validators.required, Validators.min(0.01)]],
     customsCurrency:  ['USD'],
     dutyRate:         [null as number | null],
     bankCharges:      [null as number | null],
@@ -142,7 +172,7 @@ export class ShipmentDetailComponent implements OnInit {
     goodsDescription: [''],
     shipmentWeight:   [null as number | null],
     htsusCode:        [''],
-    customsValue:     [null as number | null],
+    customsValue:     [null as number | null, [Validators.required, Validators.min(0.01)]],
     customsCurrency:  ['USD'],
     dutyRate:         [null as number | null],
     bankCharges:      [null as number | null],
@@ -247,6 +277,45 @@ export class ShipmentDetailComponent implements OnInit {
     });
   }
 
+  /* ── Client autocomplete helpers ─────────────────────── */
+  selectClient(c: ClientResponse): void {
+    this.orderForm.patchValue({ clientId: c.id });
+    this.selectedClientName.set(c.fullName);
+    this.clientSearch.set('');
+    this.showClientDropdown.set(false);
+  }
+
+  clearClient(): void {
+    this.orderForm.patchValue({ clientId: null });
+    this.selectedClientName.set('');
+    this.clientSearch.set('');
+  }
+
+  onClientSearchInput(val: string): void {
+    this.clientSearch.set(val);
+    this.showClientDropdown.set(true);
+    if (!val) this.clearClient();
+  }
+
+  selectEditClient(c: ClientResponse): void {
+    this.editOrderForm.patchValue({ clientId: c.id });
+    this.selectedEditClientName.set(c.fullName);
+    this.editClientSearch.set('');
+    this.showEditClientDropdown.set(false);
+  }
+
+  clearEditClient(): void {
+    this.editOrderForm.patchValue({ clientId: null });
+    this.selectedEditClientName.set('');
+    this.editClientSearch.set('');
+  }
+
+  onEditClientSearchInput(val: string): void {
+    this.editClientSearch.set(val);
+    this.showEditClientDropdown.set(true);
+    if (!val) this.clearEditClient();
+  }
+
   /* ── Create Order ─────────────────────────────────────── */
   openCreateOrder(): void {
     const s = this.shipment();
@@ -258,6 +327,9 @@ export class ShipmentDetailComponent implements OnInit {
       dutyRate: defaultDuty,
       bankCharges: null,
     });
+    this.selectedClientName.set('');
+    this.clientSearch.set('');
+    this.showClientDropdown.set(false);
     this.creatingOrder.set(true);
   }
   closeCreateOrder(): void { this.creatingOrder.set(false); }
@@ -315,6 +387,9 @@ export class ShipmentDetailComponent implements OnInit {
       dutyRate:         o.dutyRate != null ? Math.round(o.dutyRate * 10000) / 100 : null,
       bankCharges:      o.bankCharges ?? null,
     });
+    this.selectedEditClientName.set(o.clientFullName ?? '');
+    this.editClientSearch.set('');
+    this.showEditClientDropdown.set(false);
   }
   closeEditOrder(): void { this.editingOrder.set(null); }
 

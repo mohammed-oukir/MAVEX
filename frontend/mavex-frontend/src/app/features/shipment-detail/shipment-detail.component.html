@@ -401,10 +401,43 @@
               <div class="col-md-6">
                 <div class="nm-field">
                   <label for="oClient" class="nm-label">Client <span class="nm-req">Requis</span></label>
-                  <select id="oClient" class="nm-select" [class.nm-err]="orderFieldInvalid('clientId')" formControlName="clientId">
-                    <option [ngValue]="null">— Sélectionner —</option>
-                    @for (c of clients(); track c.id) { <option [ngValue]="c.id">{{ c.fullName }}</option> }
-                  </select>
+                  <div class="sd-combo" [class.sd-combo-err]="orderFieldInvalid('clientId')">
+                    @if (selectedClientName()) {
+                      <div class="sd-combo-selected">
+                        <span class="sd-combo-name">{{ selectedClientName() }}</span>
+                        <button type="button" class="sd-combo-clear" (click)="clearClient()" aria-label="Effacer">
+                          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="sd-combo-search-wrap">
+                        <svg class="sd-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input id="oClient" type="text" class="sd-combo-input" [class.nm-err]="orderFieldInvalid('clientId')"
+                          [value]="clientSearch()"
+                          (input)="onClientSearchInput($any($event.target).value)"
+                          (focus)="showClientDropdown.set(true)"
+                          placeholder="Rechercher un client…"
+                          autocomplete="off"
+                          aria-autocomplete="list"
+                          aria-haspopup="listbox"
+                          [attr.aria-expanded]="showClientDropdown()" />
+                      </div>
+                    }
+                    @if (showClientDropdown() && !selectedClientName()) {
+                      <div class="sd-combo-list" role="listbox" aria-label="Clients">
+                        @if (filteredClients().length === 0) {
+                          <div class="sd-combo-empty">Aucun client trouvé</div>
+                        } @else {
+                          @for (c of filteredClients(); track c.id) {
+                            <button type="button" class="sd-combo-item" role="option" (click)="selectClient(c)">
+                              <span class="sd-combo-item-name">{{ c.fullName }}</span>
+                              @if (c.email) { <span class="sd-combo-item-sub">{{ c.email }}</span> }
+                            </button>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
                   @if (orderFieldInvalid('clientId')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Client obligatoire.</div> }
                 </div>
               </div>
@@ -436,8 +469,9 @@
               <div class="col-12 pt-1"><div class="nm-section">Valeurs douanières</div></div>
               <div class="col-md-5">
                 <div class="nm-field">
-                  <label for="oCustomsVal" class="nm-label">Valeur customs <span class="nm-opt">optionnel</span></label>
-                  <input id="oCustomsVal" type="number" class="nm-input" formControlName="customsValue" min="0" step="0.01" placeholder="ex : 500.00" />
+                  <label for="oCustomsVal" class="nm-label">Valeur customs <span class="nm-req">Requis</span></label>
+                  <input id="oCustomsVal" type="number" class="nm-input" [class.nm-err]="orderFieldInvalid('customsValue')" formControlName="customsValue" min="0.01" step="0.01" placeholder="ex : 500.00" />
+                  @if (orderFieldInvalid('customsValue')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Valeur customs obligatoire (> 0).</div> }
                 </div>
               </div>
               <div class="col-md-3">
@@ -512,10 +546,43 @@
               <div class="col-md-6">
                 <div class="nm-field">
                   <label for="eClient" class="nm-label">Client <span class="nm-req">Requis</span></label>
-                  <select id="eClient" class="nm-select" [class.nm-err]="editOrderFieldInvalid('clientId')" formControlName="clientId">
-                    <option [ngValue]="null">— Sélectionner —</option>
-                    @for (c of clients(); track c.id) { <option [ngValue]="c.id">{{ c.fullName }}</option> }
-                  </select>
+                  <div class="sd-combo" [class.sd-combo-err]="editOrderFieldInvalid('clientId')">
+                    @if (selectedEditClientName()) {
+                      <div class="sd-combo-selected">
+                        <span class="sd-combo-name">{{ selectedEditClientName() }}</span>
+                        <button type="button" class="sd-combo-clear" (click)="clearEditClient()" aria-label="Effacer">
+                          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </div>
+                    } @else {
+                      <div class="sd-combo-search-wrap">
+                        <svg class="sd-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input id="eClient" type="text" class="sd-combo-input"
+                          [value]="editClientSearch()"
+                          (input)="onEditClientSearchInput($any($event.target).value)"
+                          (focus)="showEditClientDropdown.set(true)"
+                          placeholder="Rechercher un client…"
+                          autocomplete="off"
+                          aria-autocomplete="list"
+                          aria-haspopup="listbox"
+                          [attr.aria-expanded]="showEditClientDropdown()" />
+                      </div>
+                    }
+                    @if (showEditClientDropdown() && !selectedEditClientName()) {
+                      <div class="sd-combo-list" role="listbox" aria-label="Clients">
+                        @if (filteredEditClients().length === 0) {
+                          <div class="sd-combo-empty">Aucun client trouvé</div>
+                        } @else {
+                          @for (c of filteredEditClients(); track c.id) {
+                            <button type="button" class="sd-combo-item" role="option" (click)="selectEditClient(c)">
+                              <span class="sd-combo-item-name">{{ c.fullName }}</span>
+                              @if (c.email) { <span class="sd-combo-item-sub">{{ c.email }}</span> }
+                            </button>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
                   @if (editOrderFieldInvalid('clientId')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Client obligatoire.</div> }
                 </div>
               </div>
@@ -547,8 +614,9 @@
               <div class="col-12 pt-1"><div class="nm-section">Valeurs douanières</div></div>
               <div class="col-md-5">
                 <div class="nm-field">
-                  <label for="eCustomsVal" class="nm-label">Valeur customs <span class="nm-opt">optionnel</span></label>
-                  <input id="eCustomsVal" type="number" class="nm-input" formControlName="customsValue" min="0" step="0.01" />
+                  <label for="eCustomsVal" class="nm-label">Valeur customs <span class="nm-req">Requis</span></label>
+                  <input id="eCustomsVal" type="number" class="nm-input" [class.nm-err]="editOrderFieldInvalid('customsValue')" formControlName="customsValue" min="0.01" step="0.01" />
+                  @if (editOrderFieldInvalid('customsValue')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Valeur customs obligatoire (> 0).</div> }
                 </div>
               </div>
               <div class="col-md-3">
