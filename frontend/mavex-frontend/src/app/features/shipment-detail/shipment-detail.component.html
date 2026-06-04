@@ -435,10 +435,95 @@
                             </button>
                           }
                         }
+                        <button type="button" class="sd-combo-new-client" (click)="openNewClientForm()">
+                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                          Nouveau client
+                        </button>
                       </div>
                     }
                   </div>
                   @if (orderFieldInvalid('clientId')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Client obligatoire.</div> }
+
+                  <!-- Mini formulaire nouveau client -->
+                  @if (showNewClientForm()) {
+                    <div class="sd-new-client-form" [formGroup]="newClientForm">
+                      <div class="sd-ncf-header">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                        <span>Nouveau client</span>
+                        <button type="button" class="sd-ncf-close" (click)="closeNewClientForm()" aria-label="Fermer">
+                          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </div>
+                      <div class="row g-2 mt-1">
+
+                        <div class="col-12 col-md-6">
+                          <label for="ncfName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
+                          <input id="ncfName" type="text" class="nm-input" [class.nm-err]="newClientFieldInvalid('fullName')"
+                            formControlName="fullName" placeholder="John Doe" autocomplete="off" />
+                          @if (newClientFieldInvalid('fullName')) {
+                            <div class="nm-err-msg" role="alert">Nom obligatoire.</div>
+                          }
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                          <label for="ncfEmail" class="nm-label">Email <span class="nm-req">*</span></label>
+                          <input id="ncfEmail" type="email" class="nm-input" [class.nm-err]="newClientFieldInvalid('email')"
+                            formControlName="email" placeholder="john@example.com" autocomplete="off" />
+                          @if (newClientFieldInvalid('email')) {
+                            <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
+                          }
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                          <label for="ncfPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
+                          <input id="ncfPhone" type="tel" class="nm-input" formControlName="phone" placeholder="+212600000000" autocomplete="off" />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                          <label for="ncfCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
+                          <input id="ncfCity" type="text" class="nm-input" formControlName="city" placeholder="Casablanca" autocomplete="off" />
+                        </div>
+
+                        <div class="col-12">
+                          <label for="ncfAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
+                          <input id="ncfAddress" type="text" class="nm-input" formControlName="address" placeholder="123 Rue Hassan II" autocomplete="off" />
+                        </div>
+
+                        <div class="col-6 col-md-4">
+                          <label for="ncfState" class="nm-label">État <span class="nm-opt">optionnel</span></label>
+                          <input id="ncfState" type="text" class="nm-input" formControlName="state"
+                            placeholder="CA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                        </div>
+
+                        <div class="col-6 col-md-4">
+                          <label for="ncfZip" class="nm-label">Code postal <span class="nm-opt">optionnel</span></label>
+                          <input id="ncfZip" type="text" class="nm-input" formControlName="zipCode" placeholder="20000" autocomplete="off" />
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                          <label for="ncfCountry" class="nm-label">Pays <span class="nm-req">*</span></label>
+                          <input id="ncfCountry" type="text" class="nm-input" [class.nm-err]="newClientFieldInvalid('countryCode')"
+                            formControlName="countryCode" placeholder="MA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                          @if (newClientFieldInvalid('countryCode')) {
+                            <div class="nm-err-msg" role="alert">Code pays 2 lettres.</div>
+                          }
+                        </div>
+
+                      </div>
+                      <div class="sd-ncf-footer">
+                        <button type="button" class="nm-btn-cancel" (click)="closeNewClientForm()">Annuler</button>
+                        <button type="button" class="nm-btn-primary" [disabled]="savingNewClient()" (click)="createAndSelectClient()">
+                          @if (savingNewClient()) {
+                            <span class="spinner-border" style="width:12px;height:12px;border-width:2px" aria-hidden="true"></span>
+                            Création…
+                          } @else {
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                            Créer et sélectionner
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  }
                 </div>
               </div>
               <div class="col-12 pt-1"><div class="nm-section">Marchandise</div></div>

@@ -69,6 +69,68 @@ export class ShipmentDetailComponent implements OnInit {
   showClientDropdown  = signal(false);
   selectedClientName  = signal('');
 
+  /* ── Mini formulaire nouveau client ──────────────────── */
+  showNewClientForm  = signal(false);
+  savingNewClient    = signal(false);
+  newClientForm = this.fb.group({
+    fullName:    ['', [Validators.required, Validators.minLength(2)]],
+    email:       ['', [Validators.required, Validators.email]],
+    phone:       [''],
+    address:     [''],
+    city:        [''],
+    state:       ['', Validators.pattern(/^[A-Z]{0,2}$/)],
+    zipCode:     [''],
+    countryCode: ['MA', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]],
+  });
+
+  openNewClientForm(): void {
+    this.showClientDropdown.set(false);
+    this.newClientForm.reset({ countryCode: 'MA' });
+    if (this.clientSearch()) {
+      this.newClientForm.patchValue({ fullName: this.clientSearch() });
+    }
+    this.showNewClientForm.set(true);
+  }
+
+  closeNewClientForm(): void {
+    this.showNewClientForm.set(false);
+  }
+
+  newClientFieldInvalid(f: string): boolean {
+    const c = this.newClientForm.get(f);
+    return !!(c?.invalid && c?.touched);
+  }
+
+  createAndSelectClient(): void {
+    if (this.newClientForm.invalid) { this.newClientForm.markAllAsTouched(); return; }
+    this.savingNewClient.set(true);
+    const v = this.newClientForm.getRawValue();
+    this.clientSvc.create({
+      fullName:    v.fullName!,
+      email:       v.email!,
+      phone:       v.phone || undefined,
+      address:     v.address || undefined,
+      city:        v.city || undefined,
+      state:       v.state || undefined,
+      zipCode:     v.zipCode || undefined,
+      countryCode: v.countryCode!,
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: created => {
+        this.savingNewClient.set(false);
+        this.showNewClientForm.set(false);
+        this.clients.update(list => [...list, created]);
+        this.orderForm.patchValue({ clientId: created.id });
+        this.selectedClientName.set(created.fullName);
+        this.clientSearch.set('');
+        this.toast.success(`Client "${created.fullName}" créé et sélectionné.`);
+      },
+      error: err => {
+        this.savingNewClient.set(false);
+        this.toast.error(err?.error?.message || 'Erreur lors de la création du client.');
+      },
+    });
+  }
+
   filteredClients = computed(() => {
     const q = this.clientSearch().toLowerCase().trim();
     if (!q) return this.clients().slice(0, 50);
