@@ -289,4 +289,18 @@ export class OrdersComponent implements OnInit {
     };
     return map[s] ?? '';
   }
+
+  timeAgo(dateStr: string | undefined): string {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins  = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days  = Math.floor(diff / 86400000);
+    const weeks = Math.floor(days / 7);
+    if (mins  < 1)  return 'à l\'instant';
+    if (mins  < 60) return `il y a ${mins}min`;
+    if (hours < 24) return `il y a ${hours}h`;
+    if (days  < 7)  return `il y a ${days}j`;
+    return `il y a ${weeks}sem`;
+  }
 }

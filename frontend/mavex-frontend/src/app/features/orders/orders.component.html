@@ -213,13 +213,16 @@
 
               <td><span [class]="'or-status-badge ' + statusClass(o.status)">{{ statusLabel(o.status) }}</span></td>
 
-              <td style="text-align:center">
-                @if (o.emailSentAt) {
-                  <span class="or-email-sent" [title]="(o.emailSentAt | date:'dd/MM/yy HH:mm') ?? ''" aria-label="Email envoyé">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  </span>
+              <td>
+                @if (o.emailSentAt && (o.emailSentCount ?? 0) > 0) {
+                  <div class="or-email-counter" [class.or-email-multi]="(o.emailSentCount ?? 0) > 1"
+                    [title]="'Dernier envoi : ' + ((o.emailSentAt | date:'dd/MM/yyyy à HH:mm') ?? '')">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span class="or-email-count">{{ o.emailSentCount }}×</span>
+                    <span class="or-email-ago">{{ timeAgo(o.emailSentAt) }}</span>
+                  </div>
                 } @else {
-                  <span class="or-email-none" aria-label="Email non envoyé">–</span>
+                  <span class="or-email-none" aria-label="Email non envoyé">—</span>
                 }
               </td>
 

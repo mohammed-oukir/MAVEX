@@ -368,6 +368,7 @@ public class OrderServiceImpl implements OrderService {
                 .clientCountry(clientCountry)
                 .companyName(companyName)
                 .emailSentAt(o.getEmailSentAt())
+                .emailSentCount(o.getEmailSentCount())
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

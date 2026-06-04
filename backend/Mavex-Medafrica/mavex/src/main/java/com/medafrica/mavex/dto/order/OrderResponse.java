@@ -49,6 +49,7 @@ private String clientCountry;
  private String companyName;
 
     private LocalDateTime emailSentAt;
+    private int           emailSentCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

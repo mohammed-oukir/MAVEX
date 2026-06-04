@@ -86,6 +86,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             emailLogRepository.save(emailLog);
 
             order.setEmailSentAt(LocalDateTime.now());
+            order.setEmailSentCount(order.getEmailSentCount() + 1);
             if (order.getStatus() == OrderStatus.CREATED) {
                 order.setStatus(OrderStatus.EMAIL_SENT);
             }

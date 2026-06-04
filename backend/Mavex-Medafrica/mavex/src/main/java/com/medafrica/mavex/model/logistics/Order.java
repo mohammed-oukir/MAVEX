@@ -122,6 +122,10 @@ public class Order {
     @Column(name = "email_sent_at")
     private LocalDateTime emailSentAt;
 
+    @Column(name = "email_sent_count", nullable = false)
+    @Builder.Default
+    private int emailSentCount = 0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
