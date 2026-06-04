@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ShipperServiceImpl implements ShipperService {
@@ -122,6 +124,32 @@ public class ShipperServiceImpl implements ShipperService {
     @Transactional
     public void delete(Long id) {
         shipperRepository.delete(findOrThrow(id));
+    }
+
+    @Override
+    @Transactional
+    public int bulkDelete(List<Long> ids) {
+        List<Shipper> shippers = shipperRepository.findAllById(ids);
+        shipperRepository.deleteAll(shippers);
+        return shippers.size();
+    }
+
+    @Override
+    @Transactional
+    public int bulkActivate(List<Long> ids) {
+        List<Shipper> shippers = shipperRepository.findAllById(ids);
+        shippers.forEach(s -> s.setActive(true));
+        shipperRepository.saveAll(shippers);
+        return shippers.size();
+    }
+
+    @Override
+    @Transactional
+    public int bulkDeactivate(List<Long> ids) {
+        List<Shipper> shippers = shipperRepository.findAllById(ids);
+        shippers.forEach(s -> s.setActive(false));
+        shipperRepository.saveAll(shippers);
+        return shippers.size();
     }
 
     private Shipper findOrThrow(Long id) {

@@ -565,6 +565,9 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         final String finalState = state;
 
         return shipperRepository.findByCompanyNameIgnoreCase(finalName).map(existing -> {
+            if (!existing.isActive()) {
+                throw new IllegalArgumentException("Le shipper '" + existing.getCompanyName() + "' est désactivé. Veuillez le réactiver avant d'importer.");
+            }
             existing.setContactName(d.getSenderContact());
             existing.setPhone(d.getSenderPhone());
             existing.setAddress(d.getSenderAddress());
@@ -816,6 +819,9 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         final String finalState = state;
 
         return shipperRepository.findByCompanyNameIgnoreCase(name).map(existing -> {
+            if (!existing.isActive()) {
+                throw new IllegalArgumentException("Le shipper '" + existing.getCompanyName() + "' est désactivé. Veuillez le réactiver avant d'importer.");
+            }
             existing.setContactName(getCellString(row, cols[COL_SENDER_CONTACT]));
             existing.setPhone(getCellString(row, cols[COL_SENDER_PHONE]));
             existing.setAddress(getCellString(row, cols[COL_SENDER_ADDRESS]));

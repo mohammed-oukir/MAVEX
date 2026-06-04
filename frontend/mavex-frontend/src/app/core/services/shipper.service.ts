@@ -16,6 +16,13 @@ export class ShipperService {
     );
   }
 
+  getAllActive(size = 200): Observable<ShipperResponse[]> {
+    const params = new HttpParams().set('size', size);
+    return this.http.get<Page<ShipperResponse>>('/api/shippers', { params }).pipe(
+      map(page => page.content.filter(s => s.active)),
+    );
+  }
+
   getById(id: number): Observable<ShipperResponse> {
     return this.http.get<ShipperResponse>(`/api/shippers/${id}`);
   }
@@ -38,5 +45,17 @@ export class ShipperService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`/api/shippers/${id}`);
+  }
+
+  bulkDelete(ids: number[]): Observable<{ deleted: number }> {
+    return this.http.post<{ deleted: number }>('/api/shippers/bulk-delete', { ids });
+  }
+
+  bulkActivate(ids: number[]): Observable<{ activated: number }> {
+    return this.http.post<{ activated: number }>('/api/shippers/bulk-activate', { ids });
+  }
+
+  bulkDeactivate(ids: number[]): Observable<{ deactivated: number }> {
+    return this.http.post<{ deactivated: number }>('/api/shippers/bulk-deactivate', { ids });
   }
 }

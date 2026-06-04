@@ -147,7 +147,7 @@ export class ShipmentsComponent implements OnInit {
   }
 
   private loadShippers(): void {
-    this.shipperSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.shipperSvc.getAllActive().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.shippers.set(list),
       error: () => {},
     });

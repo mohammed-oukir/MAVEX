@@ -15,6 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/shippers")
 @RequiredArgsConstructor
@@ -104,5 +107,26 @@ public ResponseEntity<ApiResponse<Void>> activate(@PathVariable Long id) {
                 .data(null)
                 .build()
         );
+    }
+
+    /** POST /api/shippers/bulk-delete */
+    @PostMapping("/bulk-delete")
+    public ResponseEntity<Map<String, Integer>> bulkDelete(@RequestBody Map<String, List<Long>> body) {
+        int count = shipperService.bulkDelete(body.get("ids"));
+        return ResponseEntity.ok(Map.of("deleted", count));
+    }
+
+    /** POST /api/shippers/bulk-activate */
+    @PostMapping("/bulk-activate")
+    public ResponseEntity<Map<String, Integer>> bulkActivate(@RequestBody Map<String, List<Long>> body) {
+        int count = shipperService.bulkActivate(body.get("ids"));
+        return ResponseEntity.ok(Map.of("activated", count));
+    }
+
+    /** POST /api/shippers/bulk-deactivate */
+    @PostMapping("/bulk-deactivate")
+    public ResponseEntity<Map<String, Integer>> bulkDeactivate(@RequestBody Map<String, List<Long>> body) {
+        int count = shipperService.bulkDeactivate(body.get("ids"));
+        return ResponseEntity.ok(Map.of("deactivated", count));
     }
 }

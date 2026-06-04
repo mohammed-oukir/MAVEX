@@ -65,6 +65,35 @@
       Nouveau shipper
     </button>
   </div>
+
+  @if (selectedCount() > 0) {
+    <div class="sh-bulk-bar" role="toolbar" aria-label="Actions sur la sélection">
+      <span class="sh-bulk-count">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ selectedCount() }} sélectionné(s)
+      </span>
+      <div class="d-flex gap-2">
+        <button type="button" class="sh-bulk-btn sh-bulk-activate" [disabled]="bulkActing()" (click)="executeBulkActivate()">
+          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+          Activer
+        </button>
+        <button type="button" class="sh-bulk-btn sh-bulk-deactivate" [disabled]="bulkActing()" (click)="executeBulkDeactivate()">
+          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+          Désactiver
+        </button>
+        <button type="button" class="sh-bulk-btn sh-bulk-delete" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Supprimer
+        </button>
+        <button type="button" class="sh-bulk-btn sh-bulk-cancel" (click)="clearSelection()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Annuler
+        </button>
+      </div>
+    </div>
+  }
 </div>
 
 <!-- TABLE -->
@@ -73,6 +102,9 @@
     <table class="table sh-table align-middle mb-0" aria-label="Liste des shippers">
       <thead>
         <tr class="sh-thead">
+          <th scope="col" class="sh-th-check">
+            <input type="checkbox" class="sh-checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" aria-label="Sélectionner tout" />
+          </th>
           <th scope="col">Société</th>
           <th scope="col">Contact</th>
           <th scope="col">Email</th>
@@ -84,6 +116,7 @@
           <th scope="col" class="text-end">Actions</th>
         </tr>
         <tr class="sh-filter-tr" aria-label="Filtres par colonne">
+          <th scope="col"></th>
           <th scope="col">
             <div class="sh-fi-wrap">
               <svg class="sh-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -111,6 +144,7 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5,6]; track $index) {
             <tr>
+              <td class="sh-td-check"><div class="sh-sk" style="width:16px;height:16px;border-radius:4px"></div></td>
               <td><div class="d-flex align-items-center gap-2"><div class="sh-sk" style="width:36px;height:36px;border-radius:50%;flex-shrink:0"></div><div class="sh-sk" style="width:130px"></div></div></td>
               @for (w of [90,140,80,70,36,60,80]; track $index) {
                 <td><div class="sh-sk" [style.width.px]="w"></div></td>
@@ -121,7 +155,7 @@
 
         } @else if (pageItems().length === 0) {
           <tr>
-            <td colspan="9" class="py-5 text-center">
+            <td colspan="10" class="py-5 text-center">
               <div class="d-flex flex-column align-items-center gap-3">
                 <div class="sh-empty-icon" aria-hidden="true">
                   <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/></svg>
@@ -140,8 +174,10 @@
 
         } @else {
           @for (s of pageItems(); track s.id) {
-            <tr class="sh-row" [class.sh-row-inactive]="!s.active">
-
+            <tr class="sh-row" [class.sh-row-inactive]="!s.active" [class.sh-row-selected]="selectedIds().has(s.id)">
+              <td class="sh-td-check">
+                <input type="checkbox" class="sh-checkbox" [checked]="selectedIds().has(s.id)" (change)="toggleSelect(s.id)" [attr.aria-label]="'Sélectionner ' + s.companyName" />
+              </td>
               <td>
                 <div class="sh-identity">
                   <div class="sh-avatar" [style.background]="getAvatarColor(s.companyName)" aria-hidden="true">
@@ -334,6 +370,36 @@
         <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
           @if (deleting()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
           @else { Supprimer }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL — Suppression en masse -->
+@if (bulkDeleteConfirm()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sh-bulk-del-title" (click)="closeBulkDeleteConfirm()">
+    <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
+        <div class="nm-icon red" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="sh-bulk-del-title" class="nm-title">Supprimer {{ selectedCount() }} shipper(s) ?</h2>
+          <p class="nm-sub">Cette action est irréversible.</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeBulkDeleteConfirm()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="nm-body">
+        <p class="nm-alert">Les {{ selectedCount() }} shippers sélectionnés seront définitivement supprimés.</p>
+      </div>
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeBulkDeleteConfirm()">Annuler</button>
+        <button type="button" class="nm-btn-danger" [disabled]="bulkActing()" (click)="executeBulkDelete()">
+          @if (bulkActing()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Suppression… }
+          @else { Supprimer tout }
         </button>
       </div>
     </div>

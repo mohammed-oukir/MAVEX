@@ -43,6 +43,9 @@ public class ShipmentServiceImpl implements ShipmentService {
         if (req.getShipperId() != null) {
             shipper = shipperRepository.findById(req.getShipperId())
                     .orElseThrow(() -> new EntityNotFoundException("Shipper introuvable : " + req.getShipperId()));
+            if (!shipper.isActive()) {
+                throw new IllegalArgumentException("Le shipper '" + shipper.getCompanyName() + "' est désactivé. Veuillez le réactiver avant de créer un shipment.");
+            }
         }
         Shipment shipment = Shipment.builder()
                 .mawb(req.getMawb())

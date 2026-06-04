@@ -90,6 +90,17 @@ export class ShippersComponent implements OnInit {
     this.fStatus() !== 'all'
   );
 
+  /* ── Sélection bulk ──────────────────────────────── */
+  selectedIds       = signal<Set<number>>(new Set());
+  bulkActing        = signal(false);
+  bulkDeleteConfirm = signal(false);
+
+  allSelected = computed(() => {
+    const items = this.pageItems();
+    return items.length > 0 && items.every(s => this.selectedIds().has(s.id));
+  });
+  selectedCount = computed(() => this.selectedIds().size);
+
   /* ── Modals ───────────────────────────────────────── */
   formMode   = signal<'create' | 'edit' | null>(null);
   editingId  = signal<number | null>(null);
@@ -240,6 +251,79 @@ export class ShippersComponent implements OnInit {
         },
         error: () => { this.deleting.set(false); this.toast.error('Erreur suppression.'); },
       });
+  }
+
+  /* ── Bulk actions ────────────────────────────────── */
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  toggleSelectAll(): void {
+    if (this.allSelected()) {
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        this.pageItems().forEach(sh => next.delete(sh.id));
+        return next;
+      });
+    } else {
+      this.selectedIds.update(s => {
+        const next = new Set(s);
+        this.pageItems().forEach(sh => next.add(sh.id));
+        return next;
+      });
+    }
+  }
+
+  clearSelection(): void { this.selectedIds.set(new Set()); }
+
+  openBulkDeleteConfirm(): void  { this.bulkDeleteConfirm.set(true); }
+  closeBulkDeleteConfirm(): void { this.bulkDeleteConfirm.set(false); }
+
+  executeBulkDelete(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.shipperSvc.bulkDelete(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.bulkActing.set(false);
+        this.bulkDeleteConfirm.set(false);
+        this.selectedIds.set(new Set());
+        this.allShippers.update(list => list.filter(s => !ids.includes(s.id)));
+        this.toast.success(`${res.deleted} shipper(s) supprimé(s).`);
+      },
+      error: () => { this.bulkActing.set(false); this.toast.error('Erreur suppression en masse.'); },
+    });
+  }
+
+  executeBulkActivate(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.shipperSvc.bulkActivate(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.bulkActing.set(false);
+        this.allShippers.update(list => list.map(s => ids.includes(s.id) ? { ...s, active: true } : s));
+        this.selectedIds.set(new Set());
+        this.toast.success(`${res.activated} shipper(s) activé(s).`);
+      },
+      error: () => { this.bulkActing.set(false); this.toast.error('Erreur activation en masse.'); },
+    });
+  }
+
+  executeBulkDeactivate(): void {
+    const ids = [...this.selectedIds()];
+    this.bulkActing.set(true);
+    this.shipperSvc.bulkDeactivate(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.bulkActing.set(false);
+        this.allShippers.update(list => list.map(s => ids.includes(s.id) ? { ...s, active: false } : s));
+        this.selectedIds.set(new Set());
+        this.toast.success(`${res.deactivated} shipper(s) désactivé(s).`);
+      },
+      error: () => { this.bulkActing.set(false); this.toast.error('Erreur désactivation en masse.'); },
+    });
   }
 
   /* ── Pagination ───────────────────────────────────── */

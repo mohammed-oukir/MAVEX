@@ -5,6 +5,8 @@ import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface ShipperService {
 
     ShipperResponseDTO create(ShipperRequestDTO req);
@@ -22,4 +24,10 @@ public interface ShipperService {
     void activate(Long id);
 
     void delete(Long id);
+
+    int bulkDelete(List<Long> ids);
+
+    int bulkActivate(List<Long> ids);
+
+    int bulkDeactivate(List<Long> ids);
 }
