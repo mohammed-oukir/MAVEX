@@ -612,6 +612,9 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         final String finalState = state;
 
         return clientRepository.findByEmail(email).map(existing -> {
+            if (!existing.isActive()) {
+                throw new IllegalArgumentException("Le client '" + existing.getEmail() + "' est désactivé. Veuillez le réactiver avant d'importer.");
+            }
             existing.setFullName(fullName);
             existing.setPhone(d.getReceiverPhone());
             existing.setAddress(d.getReceiverAddress());
@@ -893,6 +896,9 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         final String finalState = state;
 
         return clientRepository.findByEmail(email).map(existing -> {
+            if (!existing.isActive()) {
+                throw new IllegalArgumentException("Le client '" + existing.getEmail() + "' est désactivé. Veuillez le réactiver avant d'importer.");
+            }
             existing.setFullName(fullName);
             existing.setPhone(getCellString(row, cols[COL_RECEIVER_PHONE]));
             existing.setAddress(getCellString(row, cols[COL_RECEIVER_ADDRESS]));
