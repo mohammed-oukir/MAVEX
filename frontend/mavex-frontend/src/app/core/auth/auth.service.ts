@@ -15,6 +15,9 @@ export class AuthService {
   private readonly _email      = signal<string | null>(localStorage.getItem('userEmail'));
   private readonly _fullName   = signal<string | null>(localStorage.getItem('userFullName'));
   private readonly _role       = signal<string | null>(localStorage.getItem('userRole'));
+  private readonly _userId     = signal<number | null>(
+    localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null
+  );
 
   readonly isAuthenticated = computed(() => !!this._token());
 
@@ -32,6 +35,7 @@ export class AuthService {
   getRefreshToken(): string | null { return this._refresh(); }
   isAdmin(): boolean               { return this._role() === 'ADMIN'; }
   currentEmail(): string | null    { return this._email(); }
+  currentUserId(): number | null   { return this._userId(); }
   isRefreshing = false;
 
   login(email: string, password: string): Observable<ApiResponse<LoginResponse>> {
@@ -69,11 +73,13 @@ export class AuthService {
     this._email.set(data.email);
     this._fullName.set(data.fullName);
     this._role.set(data.role);
+    this._userId.set(data.userId);
     localStorage.setItem('accessToken',  data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
     localStorage.setItem('userEmail',    data.email);
     localStorage.setItem('userFullName', data.fullName);
     localStorage.setItem('userRole',     data.role);
+    localStorage.setItem('userId',       String(data.userId));
   }
 
   private clearSession(): void {
@@ -82,6 +88,7 @@ export class AuthService {
     this._email.set(null);
     this._fullName.set(null);
     this._role.set(null);
+    this._userId.set(null);
     localStorage.clear();
     this.router.navigate(['/login']);
   }

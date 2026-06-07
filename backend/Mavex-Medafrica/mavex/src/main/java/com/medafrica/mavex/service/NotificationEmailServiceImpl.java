@@ -211,9 +211,11 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         if (order.getClient() != null) {
             vars.put("receiverName",    safe(order.getClient().getFullName()));
             vars.put("deliveryAddress", buildAddress(order));
+            vars.put("clientPhone",     safe(order.getClient().getPhone()));
         } else {
             vars.put("receiverName",    "—");
             vars.put("deliveryAddress", "—");
+            vars.put("clientPhone",     "—");
         }
 
         if (order.getShipment() != null && order.getShipment().getShipper() != null) {

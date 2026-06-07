@@ -1,72 +1,227 @@
-<!-- ── Toolbar ──────────────────────────────────────────────── -->
-<div class="dk-toolbar">
-  <button type="button" class="dk-refresh" [class.spinning]="loading()" (click)="refresh()" [disabled]="loading()" aria-label="Actualiser">
-    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="dk-header">
+  <div class="dk-header-left">
+    <h1 class="dk-greeting">{{ greeting() }}, <span class="dk-greeting-name">{{ userName() }}</span> </h1>
+    <p class="dk-header-sub">Voici un aperçu de votre activité en temps réel.</p>
+  </div>
+  <button type="button" class="dk-refresh" [class.spinning]="loading()" [disabled]="loading()" (click)="refresh()" aria-label="Actualiser">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+      <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+    </svg>
     Actualiser
   </button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
-     ZONE 1 — KPI Strip
+     KPI CARDS
      ═══════════════════════════════════════════════════════════ -->
 <div class="dk-kpi-grid">
 
-  <!-- Shipments actifs -->
+  <!-- Shipments -->
   <div class="dk-kpi">
-    <div class="dk-kpi-icon" style="background:#FFF7ED;color:#F97316" aria-hidden="true">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <div class="dk-kpi-top">
+      <span class="dk-kpi-label">Shipments</span>
+      <div class="dk-kpi-icon ico-orange" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
     </div>
-    <div class="dk-kpi-body">
-      @if (loading()) { <div class="sk-kpi-val"></div><div class="sk-row" style="width:80px"></div> }
-      @else {
-        <div class="dk-kpi-value">{{ kpis()?.totalShipments ?? 0 }}</div>
-        <div class="dk-kpi-label">Shipments</div>
-        <div class="dk-kpi-sub">{{ kpis()?.activeShipments ?? 0 }} actifs</div>
-      }
-    </div>
+    @if (loading()) {
+      <div class="dk-sk-val"></div>
+      <div class="dk-sk-sub"></div>
+    } @else {
+      <div class="dk-kpi-val">{{ kpis()?.totalShipments ?? 0 }}</div>
+      <div class="dk-kpi-sub">
+        <span class="dk-badge-green">{{ kpis()?.activeShipments ?? 0 }} actifs</span>
+      </div>
+    }
   </div>
 
-  <!-- Total orders -->
+  <!-- Orders -->
   <div class="dk-kpi">
-    <div class="dk-kpi-icon" style="background:#EFF6FF;color:#3B82F6" aria-hidden="true">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <div class="dk-kpi-top">
+      <span class="dk-kpi-label">Orders</span>
+      <div class="dk-kpi-icon ico-blue" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
     </div>
-    <div class="dk-kpi-body">
-      @if (loading()) { <div class="sk-kpi-val"></div><div class="sk-row" style="width:80px"></div> }
-      @else {
-        <div class="dk-kpi-value">{{ kpis()?.totalOrders ?? 0 }}</div>
-        <div class="dk-kpi-label">Orders</div>
-        <div class="dk-kpi-sub">{{ kpis()?.paidOrders ?? 0 }} payés · {{ kpis()?.pendingOrders ?? 0 }} en attente</div>
+    @if (loading()) {
+      <div class="dk-sk-val"></div>
+      <div class="dk-sk-sub"></div>
+    } @else {
+      <div class="dk-kpi-val">{{ kpis()?.totalOrders ?? 0 }}</div>
+      <div class="dk-kpi-sub">
+        <span class="dk-badge-green">{{ kpis()?.paidOrders ?? 0 }} payés</span>
+        <span class="dk-badge-amber">{{ kpis()?.pendingOrders ?? 0 }} en attente</span>
+      </div>
+    }
+  </div>
+
+  <!-- Encaissé -->
+  <div class="dk-kpi dk-kpi--accent">
+    <div class="dk-kpi-top">
+      <span class="dk-kpi-label">Total encaissé</span>
+      <div class="dk-kpi-icon ico-green" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+    </div>
+    @if (loading()) {
+      <div class="dk-sk-val"></div>
+      <div class="dk-sk-sub"></div>
+    } @else {
+      <div class="dk-kpi-val dk-kpi-val--green">{{ fmtUsd(kpis()?.totalPaidAmount ?? 0) }}</div>
+      <div class="dk-kpi-sub"><span class="dk-kpi-currency">USD · orders PAID</span></div>
+    }
+  </div>
+
+  <!-- En attente -->
+  <div class="dk-kpi">
+    <div class="dk-kpi-top">
+      <span class="dk-kpi-label">En attente</span>
+      <div class="dk-kpi-icon ico-amber" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+    </div>
+    @if (loading()) {
+      <div class="dk-sk-val"></div>
+      <div class="dk-sk-sub"></div>
+    } @else {
+      <div class="dk-kpi-val dk-kpi-val--amber">{{ fmtUsd(kpis()?.totalPendingAmount ?? 0) }}</div>
+      <div class="dk-kpi-sub"><span class="dk-kpi-currency">USD · à encaisser</span></div>
+    }
+  </div>
+
+  <!-- Taux de paiement -->
+  <div class="dk-kpi">
+    <div class="dk-kpi-top">
+      <span class="dk-kpi-label">Taux de paiement</span>
+      <div class="dk-kpi-icon ico-purple" aria-hidden="true">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+    </div>
+    @if (loading()) {
+      <div class="dk-sk-val"></div>
+      <div class="dk-sk-sub"></div>
+    } @else {
+      <div class="dk-kpi-val" [style.color]="paymentRateColor()">{{ paymentRate() }}<span class="dk-pct">%</span></div>
+      <div class="dk-progress-wrap" role="progressbar" [attr.aria-valuenow]="paymentRate()" aria-valuemin="0" aria-valuemax="100">
+        <div class="dk-progress-track">
+          <div class="dk-progress-bar" [style.width.%]="paymentRate()" [style.background]="paymentRateColor()"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ALERTES
+     ═══════════════════════════════════════════════════════════ -->
+@if (!loading() && totalAlerts() > 0) {
+  <div class="dk-alerts" role="alert">
+    <div class="dk-alerts-icon" aria-hidden="true">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+    <span class="dk-alerts-title">{{ totalAlerts() }} point(s) d'attention</span>
+    <div class="dk-alerts-chips">
+      @if ((alerts()?.ordersNeverEmailed ?? 0) > 0) {
+        <a routerLink="/orders" class="dk-alert-chip dk-alert-chip--amber">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          {{ alerts()!.ordersNeverEmailed }} sans email
+        </a>
+      }
+      @if ((alerts()?.stuckShipments ?? 0) > 0) {
+        <a routerLink="/shipments" class="dk-alert-chip dk-alert-chip--orange">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          {{ alerts()!.stuckShipments }} shipments bloqués
+        </a>
+      }
+      @if ((alerts()?.overduePayments ?? 0) > 0) {
+        <a routerLink="/orders" class="dk-alert-chip dk-alert-chip--red">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ alerts()!.overduePayments }} paiements +7j
+        </a>
+      }
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     GRAPHES — ligne 1 : Area (2/3) + Radial (1/3)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="dk-row dk-row--7030">
+
+  <!-- Area — revenus -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Revenus encaissés</div>
+        <div class="dk-panel-sub">6 derniers mois · USD</div>
+      </div>
+      @if (!loading()) {
+        <div class="dk-panel-badge">
+          {{ fmtUsd(kpis()?.totalPaidAmount ?? 0) }}
+        </div>
+      }
+    </div>
+    <div class="dk-chart-wrap">
+      @if (loading() || monthlyRev().length === 0) {
+        <div class="dk-sk-chart">
+          <div class="dk-sk-line"></div>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="areaSeries()"
+          [chart]="areaChart"
+          [xaxis]="{ categories: areaCategories(), labels: areaXAxis.labels, axisBorder: areaXAxis.axisBorder, axisTicks: areaXAxis.axisTicks }"
+          [yaxis]="areaYAxis"
+          [fill]="areaFill"
+          [stroke]="areaStroke"
+          [grid]="areaGrid"
+          [tooltip]="areaTooltip"
+          [colors]="areaColors"
+          [dataLabels]="areaDataLabels"
+        />
       }
     </div>
   </div>
 
-  <!-- Montant encaissé -->
-  <div class="dk-kpi dk-kpi-green">
-    <div class="dk-kpi-icon" style="background:#DCFCE7;color:#22C55E" aria-hidden="true">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  <!-- Radial — taux de paiement -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Taux de paiement</div>
+        <div class="dk-panel-sub">Orders payés / total</div>
+      </div>
     </div>
-    <div class="dk-kpi-body">
-      @if (loading()) { <div class="sk-kpi-val"></div><div class="sk-row" style="width:90px"></div> }
-      @else {
-        <div class="dk-kpi-value dk-val-green">{{ fmtAmount(kpis()?.totalPaidAmount ?? 0) }}<span>USD</span></div>
-        <div class="dk-kpi-label">Total encaissé</div>
-        <div class="dk-kpi-sub">Orders PAID</div>
-      }
-    </div>
-  </div>
-
-  <!-- Montant en attente -->
-  <div class="dk-kpi dk-kpi-amber">
-    <div class="dk-kpi-icon" style="background:#FEF3C7;color:#F59E0B" aria-hidden="true">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
-    <div class="dk-kpi-body">
-      @if (loading()) { <div class="sk-kpi-val"></div><div class="sk-row" style="width:90px"></div> }
-      @else {
-        <div class="dk-kpi-value dk-val-amber">{{ fmtAmount(kpis()?.totalPendingAmount ?? 0) }}<span>USD</span></div>
-        <div class="dk-kpi-label">En attente</div>
-        <div class="dk-kpi-sub">À encaisser</div>
+    <div class="dk-chart-wrap">
+      @if (loading()) {
+        <div class="dk-sk-chart dk-sk-chart--radial">
+          <div class="dk-sk-circle"></div>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="radialSeries()"
+          [chart]="radialChart"
+          [plotOptions]="radialPlotOptions"
+          [colors]="radialColors()"
+          [labels]="radialLabels"
+        />
       }
     </div>
   </div>
@@ -74,39 +229,22 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
-     ZONE 2 — Alertes + Taux paiement
+     GRAPHES — ligne 2 : Donut (1/2) + Bar (1/2)
      ═══════════════════════════════════════════════════════════ -->
-@if (!loading() && totalAlerts() > 0) {
-  <div class="dk-alerts-bar">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span class="dk-alerts-title">{{ totalAlerts() }} point(s) d'attention —</span>
-    @if ((alerts()?.ordersNeverEmailed ?? 0) > 0) {
-      <span class="dk-alert-chip">📧 {{ alerts()!.ordersNeverEmailed }} orders sans email</span>
-    }
-    @if ((alerts()?.stuckShipments ?? 0) > 0) {
-      <span class="dk-alert-chip">📦 {{ alerts()!.stuckShipments }} shipments en processing</span>
-    }
-    @if ((alerts()?.overduePayments ?? 0) > 0) {
-      <span class="dk-alert-chip">⏰ {{ alerts()!.overduePayments }} paiements en retard +7j</span>
-    }
-    <a routerLink="/orders" class="dk-alerts-link">Voir les orders →</a>
-  </div>
-}
+<div class="dk-row dk-row--5050">
 
-<!-- ═══════════════════════════════════════════════════════════
-     ZONE 3 — Graphes
-     ═══════════════════════════════════════════════════════════ -->
-<div class="dk-charts-grid">
-
-  <!-- Donut — répartition orders par statut -->
-  <div class="dk-section">
-    <div class="dk-section-hd">
-      <span class="dk-section-title">Répartition des orders</span>
+  <!-- Donut — orders par statut -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Répartition des orders</div>
+        <div class="dk-panel-sub">Par statut</div>
+      </div>
     </div>
-    <div class="dk-chart-body">
+    <div class="dk-chart-wrap">
       @if (loading() || statusCounts().length === 0) {
-        <div class="dk-chart-placeholder">
-          <div class="sk-circle" aria-hidden="true"></div>
+        <div class="dk-sk-chart dk-sk-chart--radial">
+          <div class="dk-sk-circle"></div>
         </div>
       } @else {
         <apx-chart
@@ -124,16 +262,24 @@
   </div>
 
   <!-- Bar — shipments par mois -->
-  <div class="dk-section">
-    <div class="dk-section-hd">
-      <span class="dk-section-title">Shipments — 6 derniers mois</span>
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Volume de shipments</div>
+        <div class="dk-panel-sub">6 derniers mois</div>
+      </div>
+      @if (!loading()) {
+        <div class="dk-panel-badge">
+          {{ kpis()?.totalShipments ?? 0 }} total
+        </div>
+      }
     </div>
-    <div class="dk-chart-body">
+    <div class="dk-chart-wrap">
       @if (loading() || monthlyShips().length === 0) {
-        <div class="dk-chart-placeholder">
-          <div class="sk-bars" aria-hidden="true">
+        <div class="dk-sk-chart">
+          <div class="dk-sk-bars" aria-hidden="true">
             @for (h of [60,90,45,110,70,85]; track h) {
-              <div class="sk-bar" [style.height.px]="h"></div>
+              <div class="dk-sk-bar" [style.height.px]="h"></div>
             }
           </div>
         </div>
@@ -154,61 +300,113 @@
     </div>
   </div>
 
-  <!-- Area — revenue par mois -->
-  <div class="dk-section">
-    <div class="dk-section-hd">
-      <span class="dk-section-title">Revenus encaissés — 6 derniers mois</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TABLEAUX — Shipments + Imports
+     ═══════════════════════════════════════════════════════════ -->
+<div class="dk-row dk-row--5050">
+
+  <!-- Derniers shipments -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Derniers shipments</div>
+        <div class="dk-panel-sub">5 plus récents</div>
+      </div>
+      <a routerLink="/shipments" class="dk-link-more">Voir tout →</a>
     </div>
-    <div class="dk-chart-body">
-      @if (loading() || monthlyRev().length === 0) {
-        <div class="dk-chart-placeholder">
-          <div class="sk-line" aria-hidden="true"></div>
-        </div>
-      } @else {
-        <apx-chart
-          [series]="areaSeries()"
-          [chart]="areaChart"
-          [xaxis]="{ categories: areaCategories(), labels: areaXAxis.labels, axisBorder: areaXAxis.axisBorder, axisTicks: areaXAxis.axisTicks }"
-          [yaxis]="areaYAxis"
-          [fill]="areaFill"
-          [stroke]="areaStroke"
-          [grid]="areaGrid"
-          [tooltip]="areaTooltip"
-          [colors]="areaColors"
-          [dataLabels]="{ enabled: false }"
-        />
-      }
+    <div class="table-responsive">
+      <table class="table dk-table mb-0" aria-label="Derniers shipments">
+        <thead>
+          <tr>
+            <th scope="col">MAWB</th>
+            <th scope="col">Orders</th>
+            <th scope="col">Duty</th>
+            <th scope="col">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            @for (i of [1,2,3,4,5]; track i) {
+              <tr>
+                <td><div class="dk-sk-row" style="width:80%"></div></td>
+                <td><div class="dk-sk-row" style="width:30%"></div></td>
+                <td><div class="dk-sk-row" style="width:40%"></div></td>
+                <td><div class="dk-sk-row" style="width:55%"></div></td>
+              </tr>
+            }
+          } @else if (recentShipments().length === 0) {
+            <tr>
+              <td colspan="4">
+                <div class="dk-empty">
+                  <p>Aucun shipment</p>
+                  <a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Commencer un import</a>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (s of recentShipments(); track s.id) {
+              <tr [routerLink]="['/shipments', s.id]" [attr.aria-label]="'Shipment ' + s.mawb">
+                <td>
+                  <div class="dk-mawb-cell">
+                    <span class="dk-dot" [class]="'dot-' + s.status.toLowerCase()" aria-hidden="true"></span>
+                    <span class="dk-mawb">{{ s.mawb }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="dk-pill" [class.dk-pill--active]="(s.totalOrders ?? 0) > 0">{{ s.totalOrders ?? 0 }}</span>
+                </td>
+                <td class="dk-muted">{{ fmtDuty(s.dutyRate) }}</td>
+                <td><app-badge [status]="s.status" /></td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Activité récente -->
-  <div class="dk-section">
-    <div class="dk-section-hd">
-      <span class="dk-section-title">Imports récents</span>
-      <a routerLink="/imports" class="dk-section-link">Voir tout →</a>
+  <!-- Imports récents -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Imports récents</div>
+        <div class="dk-panel-sub">6 derniers manifestes</div>
+      </div>
+      <a routerLink="/imports" class="dk-link-more">Voir tout →</a>
     </div>
     @if (loading()) {
-      @for (i of [1,2,3,4]; track i) {
+      @for (i of [1,2,3,4,5,6]; track i) {
         <div class="dk-feed-item">
           <div class="dk-feed-icon" aria-hidden="true"></div>
-          <div style="flex:1"><div class="sk-row mb-1" style="width:80%"></div><div class="sk-row" style="width:50%;height:10px"></div></div>
+          <div style="flex:1">
+            <div class="dk-sk-row mb-1" style="width:75%"></div>
+            <div class="dk-sk-row" style="width:45%;height:10px"></div>
+          </div>
         </div>
       }
     } @else if (recentImports().length === 0) {
       <div class="dk-empty">
-        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
         <p>Aucun import</p>
-        <a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Importer</a>
+        <a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Importer un manifeste</a>
       </div>
     } @else {
       @for (imp of recentImports(); track imp.id) {
         <div class="dk-feed-item">
           <div class="dk-feed-icon" aria-hidden="true">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
           </div>
-          <div style="flex:1;min-width:0">
+          <div class="dk-feed-body">
             <div class="dk-feed-name" [title]="imp.fileName">{{ imp.fileName }}</div>
-            <div class="dk-feed-date">{{ imp.importedAt }}</div>
+            <div class="dk-feed-date">{{ fmtDate(imp.importedAt) }}</div>
           </div>
           <app-badge [status]="imp.status" />
         </div>
@@ -216,63 +414,4 @@
     }
   </div>
 
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     ZONE 4 — Derniers shipments
-     ═══════════════════════════════════════════════════════════ -->
-<div class="dk-section" style="margin-top:16px">
-  <div class="dk-section-hd">
-    <span class="dk-section-title">Derniers shipments</span>
-    <a routerLink="/shipments" class="dk-section-link">Voir tout →</a>
-  </div>
-  <div class="table-responsive">
-    <table class="table mb-0" aria-label="Derniers shipments">
-      <thead>
-        <tr>
-          <th scope="col">MAWB</th>
-          <th scope="col">Shipper</th>
-          <th scope="col">Orders</th>
-          <th scope="col">Duty</th>
-          <th scope="col">Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading()) {
-          @for (i of [1,2,3,4,5]; track i) {
-            <tr>
-              <td><div class="sk-row" style="width:85%"></div></td>
-              <td><div class="sk-row" style="width:65%"></div></td>
-              <td><div class="sk-row" style="width:30%"></div></td>
-              <td><div class="sk-row" style="width:40%"></div></td>
-              <td><div class="sk-row" style="width:55%"></div></td>
-            </tr>
-          }
-        } @else if (recentShipments().length === 0) {
-          <tr><td colspan="5" style="padding:0;border:none">
-            <div class="dk-empty"><p>Aucun shipment</p><a routerLink="/imports" class="btn btn-sm btn-primary mt-1">Commencer un import</a></div>
-          </td></tr>
-        } @else {
-          @for (s of recentShipments(); track s.id) {
-            <tr [routerLink]="['/shipments', s.id]" [attr.aria-label]="'Shipment ' + s.mawb">
-              <td>
-                <div class="dk-mawb-cell">
-                  <span class="dk-mawb-dot" [class]="'dot-' + s.status.toLowerCase()" aria-hidden="true"></span>
-                  <span class="td-bold">{{ s.mawb }}</span>
-                </div>
-              </td>
-              <td class="td-muted">{{ s.shipper?.companyName || '—' }}</td>
-              <td>
-                <span class="dk-pill" [class.dk-pill-active]="(s.totalOrders ?? 0) > 0">
-                  {{ s.totalOrders ?? 0 }}
-                </span>
-              </td>
-              <td class="td-muted">{{ s.dutyRate != null ? (s.dutyRate * 100) + ' %' : '—' }}</td>
-              <td><app-badge [status]="s.status" /></td>
-            </tr>
-          }
-        }
-      </tbody>
-    </table>
-  </div>
 </div>

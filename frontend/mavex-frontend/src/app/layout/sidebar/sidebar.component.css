@@ -175,6 +175,20 @@
 
 .sb-user:hover { background: rgba(255, 255, 255, .07); }
 
+.sb-user-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.sb-user-link--active .sb-avatar {
+  outline: 2px solid #F97316;
+  outline-offset: 2px;
+}
+
 .sb-avatar {
   width: 30px;
   height: 30px;

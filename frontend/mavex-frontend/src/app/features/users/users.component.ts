@@ -65,6 +65,11 @@ export class UsersComponent implements OnInit {
   toggling    = signal<number | null>(null);
   showPwd     = signal(false);
 
+  /* ── Drawer profil ────────────────────────────────── */
+  profileUser = signal<UserResponse | null>(null);
+  openProfile(u: UserResponse): void  { this.profileUser.set(u); }
+  closeProfile(): void                { this.profileUser.set(null); }
+
   /* ── Form ─────────────────────────────────────────── */
   form = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(2)]],
@@ -192,6 +197,15 @@ export class UsersComponent implements OnInit {
   }
 
   /* ── Helpers ──────────────────────────────────────── */
+  fmtDate(d?: string): string {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  fmtRole(role?: string): string {
+    return role === 'ADMIN' ? 'Administrateur' : 'Agent';
+  }
+
   getInitials(name: string): string {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }

@@ -9,6 +9,7 @@ export interface AuthTokens {
 }
 
 export interface LoginResponse extends AuthTokens {
+  userId: number;
   email: string;
   fullName: string;
   role: string;

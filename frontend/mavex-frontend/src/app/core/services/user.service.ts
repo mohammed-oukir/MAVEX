@@ -12,6 +12,10 @@ export class UserService {
     return this.http.get<UserResponse[]>('/api/users');
   }
 
+  getById(id: number): Observable<UserResponse> {
+    return this.http.get<UserResponse>(`/api/users/${id}`);
+  }
+
   create(req: UserRequest): Observable<ApiResponse<UserResponse>> {
     return this.http.post<ApiResponse<UserResponse>>('/api/users', req);
   }

@@ -1,0 +1,179 @@
+@if (loading()) {
+  <div class="pf-state">
+    <div class="pf-spinner" aria-label="Chargement..."></div>
+  </div>
+}
+
+@else if (error()) {
+  <div class="pf-state">
+    <div class="pf-error-box">
+      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p>Impossible de charger le profil.</p>
+    </div>
+  </div>
+}
+
+@else if (profile(); as u) {
+<div class="pf-root">
+
+  <!-- ══ LEFT PANEL ══════════════════════════════════════ -->
+  <aside class="pf-left">
+
+    <div class="pf-identity">
+      <div class="pf-avatar-wrap">
+        <div class="pf-avatar" aria-hidden="true">{{ avatar }}</div>
+        <span
+          class="pf-online-dot"
+          [class.pf-online-dot--active]="u.active"
+          [attr.aria-label]="u.active ? 'Compte actif' : 'Compte inactif'"
+        ></span>
+      </div>
+
+      <h1 class="pf-name">{{ u.fullName }}</h1>
+      <p class="pf-email-sub">{{ u.email }}</p>
+
+      <span class="pf-role-pill" [class.pf-role-pill--admin]="u.role === 'ADMIN'">
+        @if (u.role === 'ADMIN') {
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        } @else {
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        }
+        {{ fmtRole(u.role) }}
+      </span>
+    </div>
+
+    <div class="pf-left-divider"></div>
+
+    <ul class="pf-meta-list">
+      <li class="pf-meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div>
+          <div class="pf-meta-label">Membre depuis</div>
+          <div class="pf-meta-val">{{ fmtDate(u.createdAt) }}</div>
+        </div>
+      </li>
+      <li class="pf-meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div>
+          <div class="pf-meta-label">Mis à jour le</div>
+          <div class="pf-meta-val">{{ fmtDate(u.updatedAt) }}</div>
+        </div>
+      </li>
+      <li class="pf-meta-item">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div>
+          <div class="pf-meta-label">Statut du compte</div>
+          <div class="pf-meta-val" [class.pf-active-text]="u.active" [class.pf-inactive-text]="!u.active">
+            {{ u.active ? 'Actif' : 'Inactif' }}
+          </div>
+        </div>
+      </li>
+    </ul>
+
+  </aside>
+
+  <!-- ══ RIGHT PANEL ═════════════════════════════════════ -->
+  <main class="pf-right">
+
+    <!-- Section : Informations personnelles -->
+    <section class="pf-section" aria-labelledby="pf-sec-personal">
+      <div class="pf-section-hd">
+        <div class="pf-section-icon pf-ico-orange" aria-hidden="true">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h2 id="pf-sec-personal" class="pf-section-title">Informations personnelles</h2>
+          <p class="pf-section-sub">Identité et coordonnées du compte</p>
+        </div>
+      </div>
+
+      <div class="pf-fields">
+        <div class="pf-field-row">
+          <div class="pf-field">
+            <label class="pf-field-label">Nom complet</label>
+            <div class="pf-field-val">{{ u.fullName }}</div>
+          </div>
+          <div class="pf-field">
+            <label class="pf-field-label">Adresse email</label>
+            <div class="pf-field-val">{{ u.email }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="pf-section-divider"></div>
+
+    <!-- Section : Accès & permissions -->
+    <section class="pf-section" aria-labelledby="pf-sec-access">
+      <div class="pf-section-hd">
+        <div class="pf-section-icon pf-ico-purple" aria-hidden="true">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h2 id="pf-sec-access" class="pf-section-title">Accès & permissions</h2>
+          <p class="pf-section-sub">Niveau d'accès au système MAVEX</p>
+        </div>
+      </div>
+
+      <div class="pf-fields">
+        <div class="pf-field-row">
+          <div class="pf-field">
+            <label class="pf-field-label">Rôle</label>
+            <div class="pf-field-val">
+              <span class="pf-role-pill pf-role-pill--inline" [class.pf-role-pill--admin]="u.role === 'ADMIN'">
+                @if (u.role === 'ADMIN') {
+                  <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                } @else {
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                }
+                {{ fmtRole(u.role) }}
+              </span>
+            </div>
+          </div>
+          <div class="pf-field">
+            <label class="pf-field-label">Statut</label>
+            <div class="pf-field-val">
+              <span class="pf-status-chip" [class.pf-status-chip--active]="u.active">
+                <span class="pf-status-dot" aria-hidden="true"></span>
+                {{ u.active ? 'Compte actif' : 'Compte inactif' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </section>
+
+    <div class="pf-section-divider"></div>
+
+    <!-- Section : Activité du compte -->
+    <section class="pf-section" aria-labelledby="pf-sec-activity">
+      <div class="pf-section-hd">
+        <div class="pf-section-icon pf-ico-blue" aria-hidden="true">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <h2 id="pf-sec-activity" class="pf-section-title">Activité du compte</h2>
+          <p class="pf-section-sub">Historique et dates importantes</p>
+        </div>
+      </div>
+
+      <div class="pf-fields">
+        <div class="pf-field-row">
+          <div class="pf-field">
+            <label class="pf-field-label">Création du compte</label>
+            <div class="pf-field-val">{{ fmtDate(u.createdAt) }}</div>
+          </div>
+          <div class="pf-field">
+            <label class="pf-field-label">Dernière modification</label>
+            <div class="pf-field-val">{{ fmtDate(u.updatedAt) }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+}

@@ -146,6 +146,10 @@
 
           <!-- Actions -->
           <div class="us-card-actions">
+            <button type="button" class="us-act us-act-profile" (click)="openProfile(u)" [title]="'Voir le profil de ' + u.fullName" [attr.aria-label]="'Voir le profil de ' + u.fullName">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              Profil
+            </button>
             <button type="button" class="us-act us-act-edit" (click)="openEdit(u)" [title]="'Modifier ' + u.fullName" [attr.aria-label]="'Modifier ' + u.fullName">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               Modifier
@@ -287,6 +291,66 @@
       </form>
     </div>
   </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     DRAWER — Profil utilisateur
+     ══════════════════════════════════════════════════════════ -->
+@if (profileUser(); as u) {
+  <div class="us-drawer-backdrop" (click)="closeProfile()" aria-hidden="true"></div>
+  <aside class="us-drawer" role="dialog" aria-modal="true" [attr.aria-label]="'Profil de ' + u.fullName">
+
+    <!-- Header -->
+    <div class="us-drawer-header">
+      <span class="us-drawer-title">Profil utilisateur</span>
+      <button type="button" class="nm-close" (click)="closeProfile()" aria-label="Fermer">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Hero -->
+    <div class="us-drawer-hero">
+      <div class="us-drawer-avatar" [style.background]="getAvatarColor(u.fullName)" aria-hidden="true">
+        {{ getInitials(u.fullName) }}
+      </div>
+      <div>
+        <div class="us-drawer-name">{{ u.fullName }}</div>
+        <div class="us-drawer-email">{{ u.email }}</div>
+        <span
+          class="us-drawer-role-badge"
+          [class.us-drawer-role-badge--admin]="u.role === 'ADMIN'"
+        >{{ fmtRole(u.role) }}</span>
+      </div>
+    </div>
+
+    <div class="us-drawer-divider"></div>
+
+    <!-- Champs -->
+    <div class="us-drawer-fields">
+      <div class="us-drawer-field">
+        <div class="us-drawer-field-label">Statut</div>
+        <div class="us-drawer-field-val">
+          <span class="us-drawer-status" [class.us-drawer-status--active]="u.active">
+            {{ u.active ? 'Actif' : 'Inactif' }}
+          </span>
+        </div>
+      </div>
+      <div class="us-drawer-field">
+        <div class="us-drawer-field-label">Rôle</div>
+        <div class="us-drawer-field-val">{{ fmtRole(u.role) }}</div>
+      </div>
+      <div class="us-drawer-field">
+        <div class="us-drawer-field-label">Membre depuis</div>
+        <div class="us-drawer-field-val">{{ fmtDate(u.createdAt) }}</div>
+      </div>
+      <div class="us-drawer-field">
+        <div class="us-drawer-field-label">Dernière mise à jour</div>
+        <div class="us-drawer-field-val">{{ fmtDate(u.updatedAt) }}</div>
+      </div>
+    </div>
+
+  </aside>
 }
 
 

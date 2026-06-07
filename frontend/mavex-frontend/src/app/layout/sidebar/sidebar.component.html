@@ -130,6 +130,21 @@
       Compagnies
     </a>
 
+    <div class="sb-label">Compte</div>
+
+    <a
+      class="sb-item"
+      routerLink="/profile"
+      routerLinkActive="active"
+      aria-label="Mon profil"
+    >
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      Mon profil
+    </a>
+
     @if (auth.isAdmin()) {
       <div class="sb-label">Administration</div>
       <a
@@ -151,11 +166,18 @@
   <!-- ── User card ─────────────────────────────────────── -->
   <div class="sb-footer">
     <div class="sb-user">
-      <div class="sb-avatar" aria-hidden="true">{{ auth.currentUser().avatar }}</div>
-      <div style="flex:1;min-width:0">
-        <div class="sb-user-name">{{ auth.currentUser().fullName || auth.currentUser().email }}</div>
-        <div class="sb-user-role">{{ auth.currentUser().role }}</div>
-      </div>
+      <a
+        class="sb-user-link"
+        routerLink="/profile"
+        routerLinkActive="sb-user-link--active"
+        aria-label="Mon profil"
+      >
+        <div class="sb-avatar" aria-hidden="true">{{ auth.currentUser().avatar }}</div>
+        <div style="flex:1;min-width:0">
+          <div class="sb-user-name">{{ auth.currentUser().fullName || auth.currentUser().email }}</div>
+          <div class="sb-user-role">{{ auth.currentUser().role }}</div>
+        </div>
+      </a>
       <button
         type="button"
         class="sb-logout"
