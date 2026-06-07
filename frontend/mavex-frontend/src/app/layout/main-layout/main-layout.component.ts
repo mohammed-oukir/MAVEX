@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { ToastService, Toast } from '../../core/services/toast.service';
+import { LayoutService } from '../../core/services/layout.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -11,7 +12,8 @@ import { ToastService, Toast } from '../../core/services/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
-  protected readonly toast = inject(ToastService);
+  protected readonly toast  = inject(ToastService);
+  protected readonly layout = inject(LayoutService);
 
   toastIcon(type: Toast['type']): string {
     return type === 'success' ? '✓' : type === 'error' ? '✕' : 'i';

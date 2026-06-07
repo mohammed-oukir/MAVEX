@@ -75,3 +75,29 @@
   outline: 2px solid #F97316;
   outline-offset: 2px;
 }
+
+/* ── Sidebar toggle button ───────────────────────────────── */
+.tb-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: #6B7280;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .14s, color .14s;
+}
+
+.tb-menu-toggle:hover {
+  background: #F3F4F6;
+  color: #111827;
+}
+
+.tb-menu-toggle:focus-visible {
+  outline: 2px solid #F97316;
+  outline-offset: 2px;
+}

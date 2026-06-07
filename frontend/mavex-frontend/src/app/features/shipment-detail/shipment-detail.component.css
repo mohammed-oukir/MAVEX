@@ -1,4 +1,95 @@
 /* =====================================================
+   EMAIL MODAL — PIÈCES JOINTES
+   ===================================================== */
+.em-drop-zone {
+  border: 2px dashed #E5E7EB;
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #9CA3AF;
+  margin-bottom: 16px;
+}
+.em-drop-zone:hover,
+.em-drop-zone:focus-visible {
+  border-color: #F97316;
+  background: #FFF7ED;
+  color: #F97316;
+  outline: none;
+}
+.em-drop-zone--over {
+  border-color: #F97316;
+  background: #FFF7ED;
+  color: #F97316;
+}
+.em-drop-label {
+  font-size: 13px;
+  color: #4B5563;
+  margin: 0;
+}
+.em-drop-link {
+  color: #F97316;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.em-drop-hint {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin: 0;
+}
+
+.em-file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.em-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F8F8F8;
+  border: 1px solid #EEEEEE;
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+.em-file-name {
+  flex: 1;
+  font-size: 13px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.em-file-size {
+  font-size: 11px;
+  color: #9CA3AF;
+  white-space: nowrap;
+}
+.em-file-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  color: #9CA3AF;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color .15s, background .15s;
+}
+.em-file-remove:hover {
+  color: #EF4444;
+  background: #FEF2F2;
+}
+
+/* =====================================================
    CLIENT COMBOBOX / AUTOCOMPLETE
    ===================================================== */
 .sd-combo {

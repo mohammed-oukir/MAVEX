@@ -1,5 +1,5 @@
-<div class="mavex-layout">
-  <app-sidebar />
+<div class="mavex-layout" [class.sidebar-closed]="!layout.sidebarOpen()">
+  <app-sidebar [class.sb-hidden]="!layout.sidebarOpen()" />
 
   <div class="mavex-main">
     <app-topbar />

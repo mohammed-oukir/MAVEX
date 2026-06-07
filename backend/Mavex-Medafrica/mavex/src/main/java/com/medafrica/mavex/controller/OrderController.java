@@ -12,9 +12,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -104,10 +106,12 @@ public class OrderController {
     }
 
     // ─────────── POST /api/orders/bulk/email ───────────
-    @PostMapping("/bulk/email")
+    @PostMapping(value = "/bulk/email", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    public ResponseEntity<BulkEmailResult> bulkEmail(@RequestBody BulkEmailRequest request) {
-        return ResponseEntity.ok(emailService.sendBulkEmails(request.getIds()));
+    public ResponseEntity<BulkEmailResult> bulkEmail(
+            @RequestPart("request") BulkEmailRequest request,
+            @RequestParam(value = "files", required = false) MultipartFile[] files) {
+        return ResponseEntity.ok(emailService.sendBulkEmails(request.getIds(), files));
     }
 
     // ─────────── POST /api/orders/bulk/status ───────────

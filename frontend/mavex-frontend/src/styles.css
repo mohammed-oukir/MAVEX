@@ -48,8 +48,11 @@ body { font-family: 'DM Sans', sans-serif; }
 
 /* ── App shell (main layout structure) ───────────────────── */
 .mavex-layout  { display: flex; min-height: 100vh; }
-.mavex-main    { margin-left: var(--mavex-sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.mavex-main    { margin-left: var(--mavex-sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left .25s cubic-bezier(.4, 0, .2, 1); }
 .mavex-content { padding: 28px; flex: 1; }
+
+/* Sidebar closed — slide content to the left */
+.mavex-layout.sidebar-closed .mavex-main { margin-left: 0; }
 
 /* ── Status badges ───────────────────────────────────────── */
 .badge-status {
@@ -176,7 +179,7 @@ body { font-family: 'DM Sans', sans-serif; }
 
 /* ── Responsive shell ────────────────────────────────────── */
 @media (max-width: 768px) {
-  .mavex-main { margin-left: 0; }
+  .mavex-main { margin-left: 0 !important; }
 }
 
 /* Skeleton - shared across pages */

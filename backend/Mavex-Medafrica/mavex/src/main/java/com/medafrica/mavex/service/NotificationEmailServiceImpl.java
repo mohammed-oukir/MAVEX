@@ -23,6 +23,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     @Override
     @Transactional
-    public SendEmailResponse sendPaymentEmail(Long orderId) {
+    public SendEmailResponse sendPaymentEmail(Long orderId, MultipartFile[] attachments) {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order introuvable id=" + orderId));
@@ -80,7 +81,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         emailLogRepository.save(emailLog);
 
         try {
-            sendHtmlEmail(order.getClient().getEmail(), subject, htmlContent);
+            sendHtmlEmail(order.getClient().getEmail(), subject, htmlContent, attachments);
 
             emailLog.markSent();
             emailLogRepository.save(emailLog);
@@ -121,7 +122,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     @Override
     @Transactional
-    public Map<String, Object> sendAllPaymentEmails(Long shipmentId) {
+    public Map<String, Object> sendAllPaymentEmails(Long shipmentId, MultipartFile[] attachments) {
         var orders = orderRepository.findByShipmentId(shipmentId);
 
         int sent   = 0;
@@ -129,7 +130,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
         for (Order order : orders) {
             try {
-                SendEmailResponse result = sendPaymentEmail(order.getId());
+                SendEmailResponse result = sendPaymentEmail(order.getId(), attachments);
                 if (result.isSuccess()) sent++;
                 else failed++;
             } catch (Exception e) {
@@ -147,11 +148,11 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     @Override
     @Transactional
-    public BulkEmailResult sendBulkEmails(List<Long> orderIds) {
+    public BulkEmailResult sendBulkEmails(List<Long> orderIds, MultipartFile[] attachments) {
         int sent = 0, failed = 0;
         for (Long id : orderIds) {
             try {
-                SendEmailResponse result = sendPaymentEmail(id);
+                SendEmailResponse result = sendPaymentEmail(id, attachments);
                 if (result.isSuccess()) sent++;
                 else                    failed++;
             } catch (Exception e) {
@@ -170,13 +171,25 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     // ENVOI SMTP — méthode interne, non exposée dans l'interface
     // ---------------------------------------------------------------
 
-    private void sendHtmlEmail(String to, String subject, String html) throws Exception {
+    private void sendHtmlEmail(String to, String subject, String html, MultipartFile[] attachments) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
         helper.setFrom(fromEmail);
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(html, true);
+
+        if (attachments != null) {
+            for (MultipartFile file : attachments) {
+                if (file != null && !file.isEmpty()) {
+                    helper.addAttachment(
+                        file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment",
+                        file
+                    );
+                }
+            }
+        }
+
         mailSender.send(message);
     }
 

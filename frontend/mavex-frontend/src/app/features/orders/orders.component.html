@@ -270,24 +270,17 @@
 
 
 <!-- ══════════════════════════════════════════════════════════
-     MODAL — Bulk confirm
+     MODAL — Bulk confirm (paid uniquement)
      ══════════════════════════════════════════════════════════ -->
-@if (bulkConfirm()) {
+@if (bulkConfirm() === 'paid') {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="bulk-title" (click)="closeBulkConfirm()">
     <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
       <div class="nm-header">
-        <div [class]="bulkConfirm() === 'email' ? 'nm-icon blue' : 'nm-icon green'" aria-hidden="true">
-          @if (bulkConfirm() === 'email') {
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          } @else {
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          }
+        <div class="nm-icon green" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div style="flex:1;min-width:0">
-          <h2 id="bulk-title" class="nm-title">
-            @if (bulkConfirm() === 'email') { Envoyer {{ selCount() }} email(s) }
-            @else { Marquer {{ selCount() }} order(s) comme payés }
-          </h2>
+          <h2 id="bulk-title" class="nm-title">Marquer {{ selCount() }} order(s) comme payés</h2>
           <p class="nm-sub">Action appliquée à tous les orders sélectionnés.</p>
         </div>
         <button type="button" class="nm-close" (click)="closeBulkConfirm()" aria-label="Fermer">
@@ -295,26 +288,111 @@
         </button>
       </div>
       <div class="nm-body">
-        @if (bulkConfirm() === 'email') {
-          <p class="mb-0" style="font-size:13px">Un email avec le lien de paiement sera envoyé à chaque destinataire des {{ selCount() }} orders sélectionnés.</p>
-        } @else {
-          <p class="nm-alert">Les {{ selCount() }} orders passeront au statut <strong>Payé</strong>.</p>
-        }
+        <p class="nm-alert">Les {{ selCount() }} orders passeront au statut <strong>Payé</strong>.</p>
       </div>
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeBulkConfirm()">Annuler</button>
-        @if (bulkConfirm() === 'email') {
-          <button type="button" class="nm-btn-primary" [disabled]="bulkLoading()" (click)="executeBulkEmail()">
-            @if (bulkLoading()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Envoi… }
-            @else { Envoyer les emails }
-          </button>
-        } @else {
-          <button type="button" class="nm-btn-primary" [disabled]="bulkLoading()" (click)="executeBulkPaid()">
-            @if (bulkLoading()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Mise à jour… }
-            @else { Confirmer }
-          </button>
+        <button type="button" class="nm-btn-primary" [disabled]="bulkLoading()" (click)="executeBulkPaid()">
+          @if (bulkLoading()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Mise à jour… }
+          @else { Confirmer }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Email + pièces jointes
+     ══════════════════════════════════════════════════════════ -->
+@if (emailModalOpen()) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="emailModalTitle" (click)="closeEmailModal()">
+    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="nm-icon blue" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="emailModalTitle" class="nm-title">{{ emailModalTitle() }}</h2>
+          <p class="nm-sub">{{ emailModalSubtitle() }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeEmailModal()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="nm-body">
+        <p style="font-size:13px;color:#6B7280;margin-bottom:16px">
+          Ajoutez des pièces jointes à envoyer avec l'email (optionnel).
+        </p>
+
+        <!-- Zone drag & drop -->
+        <div
+          class="em-drop-zone"
+          [class.em-drop-zone--over]="emailModalDragOver()"
+          (dragover)="onEmailModalDragOver($event)"
+          (dragleave)="onEmailModalDragLeave()"
+          (drop)="onEmailModalDrop($event)"
+          (click)="emailFileInput.click()"
+          role="button"
+          tabindex="0"
+          aria-label="Zone de dépôt de fichiers"
+          (keydown.enter)="emailFileInput.click()"
+          (keydown.space)="emailFileInput.click()">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          <p class="em-drop-label">Glisser-déposer ici ou <span class="em-drop-link">cliquer</span></p>
+          <p class="em-drop-hint">PDF, JPG, PNG, XLSX, DOCX — max 10 MB — {{ emailModalFiles().length }}/{{ MAX_FILES }}</p>
+          <input
+            #emailFileInput
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png,.xls,.xlsx,.doc,.docx"
+            style="display:none"
+            (change)="onEmailModalFileInput($event)"
+            aria-hidden="true" />
+        </div>
+
+        <!-- Liste des fichiers -->
+        @if (emailModalFiles().length > 0) {
+          <ul class="em-file-list" aria-label="Fichiers joints">
+            @for (f of emailModalFiles(); track f.name; let i = $index) {
+              <li class="em-file-item">
+                <svg width="14" height="14" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+                <span class="em-file-name" [title]="f.name">{{ f.name }}</span>
+                <span class="em-file-size">{{ (f.size / 1024 / 1024).toFixed(1) }} MB</span>
+                <button type="button" class="em-file-remove" (click)="removeAttachment(i)" [attr.aria-label]="'Supprimer ' + f.name">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </li>
+            }
+          </ul>
         }
       </div>
+
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeEmailModal()">Annuler</button>
+        <button type="button" class="nm-btn-primary" [disabled]="emailModalSending()" (click)="confirmSendEmail()">
+          @if (emailModalSending()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+            Envoi…
+          } @else {
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Envoyer
+          }
+        </button>
+      </div>
+
     </div>
   </div>
 }

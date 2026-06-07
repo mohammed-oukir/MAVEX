@@ -19,6 +19,7 @@
   z-index: 200;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, .055);
+  transition: transform .25s cubic-bezier(.4, 0, .2, 1);
 }
 
 /* Subtle top glow — brand continuity with login page */
@@ -232,7 +233,20 @@
   outline-offset: 2px;
 }
 
+/* ── Hidden state (toggle) ───────────────────────────────── */
+:host(.sb-hidden) .sb {
+  transform: translateX(-100%);
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .sb { display: none; }
+  /* Sur mobile le sidebar est fermé par défaut, s'ouvre en overlay */
+  .sb {
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0,0,0,.35);
+  }
+
+  :host(:not(.sb-hidden)) .sb {
+    transform: translateX(0);
+  }
 }

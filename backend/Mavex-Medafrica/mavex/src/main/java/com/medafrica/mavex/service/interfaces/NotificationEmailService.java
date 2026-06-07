@@ -2,16 +2,16 @@ package com.medafrica.mavex.service.interfaces;
 
 import com.medafrica.mavex.dto.email.SendEmailResponse;
 import com.medafrica.mavex.dto.order.BulkEmailResult;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
 
 public interface NotificationEmailService {
 
-    SendEmailResponse sendPaymentEmail(Long orderId);
+    SendEmailResponse sendPaymentEmail(Long orderId, MultipartFile[] attachments);
 
-    Map<String, Object> sendAllPaymentEmails(Long shipmentId);
+    Map<String, Object> sendAllPaymentEmails(Long shipmentId, MultipartFile[] attachments);
 
-    /** Envoie les emails à une sélection précise d'orders */
-    BulkEmailResult sendBulkEmails(List<Long> orderIds);
+    BulkEmailResult sendBulkEmails(List<Long> orderIds, MultipartFile[] attachments);
 }

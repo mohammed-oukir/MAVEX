@@ -1,5 +1,19 @@
 <header class="tb" role="banner">
 
+  <button
+    type="button"
+    class="tb-menu-toggle"
+    (click)="layout.toggleSidebar()"
+    [attr.aria-label]="layout.sidebarOpen() ? 'Fermer le menu' : 'Ouvrir le menu'"
+    [attr.aria-expanded]="layout.sidebarOpen()"
+  >
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24" aria-hidden="true">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
   <span class="tb-title">{{ layout.title() }}</span>
 
   @if (layout.action(); as act) {
