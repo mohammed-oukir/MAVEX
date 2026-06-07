@@ -207,7 +207,7 @@
               </td>
 
               <td class="text-end">
-                <span class="or-total-amount">{{ fmtAmount(o.totalAmount) }}</span>
+                <span class="or-total-amount">{{ fmtAmount(o.totalAmount, o.customsCurrency) }}</span>
                 @if (o.dutyRate) { <div class="or-duty-rate">{{ fmtDuty(o.dutyRate) }}</div> }
               </td>
 
@@ -445,9 +445,9 @@
             <div class="or-finance-grid">
               <div class="or-finance-row"><span>Valeur douanière</span><span class="fw-semibold">{{ o.customsValue?.toLocaleString('fr-FR') ?? '—' }} {{ o.customsCurrency }}</span></div>
               <div class="or-finance-row"><span>Taux de douane</span><span>× {{ fmtDuty(o.dutyRate) }}</span></div>
-              <div class="or-finance-row"><span>Montant droits</span><span>{{ fmtAmount(o.dutyAmount) }}</span></div>
-              @if (o.bankCharges) { <div class="or-finance-row"><span>Frais bancaires</span><span>+ {{ fmtAmount(o.bankCharges) }}</span></div> }
-              <div class="or-finance-total"><span>Total à payer</span><span class="or-finance-num">{{ fmtAmount(o.totalAmount) }}</span></div>
+              <div class="or-finance-row"><span>Montant droits</span><span>{{ fmtAmount(o.dutyAmount, o.customsCurrency) }}</span></div>
+              @if (o.bankCharges) { <div class="or-finance-row"><span>Frais bancaires</span><span>+ {{ fmtAmount(o.bankCharges, o.customsCurrency) }}</span></div> }
+              <div class="or-finance-total"><span>Total à payer</span><span class="or-finance-num">{{ fmtAmount(o.totalAmount, o.customsCurrency) }}</span></div>
             </div>
           </div>
           <div class="col-12">

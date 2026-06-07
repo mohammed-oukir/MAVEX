@@ -79,7 +79,6 @@
         <tr>
           <th scope="col" style="width:44px"></th>
           <th scope="col">MAWB</th>
-          <th scope="col">Shipper</th>
           <th scope="col">Date arrivée</th>
           <th scope="col">Carrier</th>
           <th scope="col">Mode</th>
@@ -96,7 +95,6 @@
             <tr>
               <td><div class="sk-row" style="width:26px;height:26px;border-radius:6px"></div></td>
               <td><div class="sk-row" style="width:88%"></div></td>
-              <td><div class="sk-row" style="width:72%"></div></td>
               <td><div class="sk-row" style="width:70%"></div></td>
               <td><div class="sk-row" style="width:60%"></div></td>
               <td><div class="sk-row" style="width:50%"></div></td>
@@ -109,7 +107,7 @@
 
         } @else if (pageItems().length === 0) {
           <tr>
-            <td colspan="10" style="padding:0;border:none">
+            <td colspan="9" style="padding:0;border:none">
               <div class="sp-empty">
                 <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -162,7 +160,6 @@
                   <span class="sp-mawb">{{ s.mawb }}</span>
                 </div>
               </td>
-              <td class="sp-muted">{{ s.shipper?.companyName || '—' }}</td>
               <td>
                 <div class="sp-date-cell">
                   @if (s.importDate) {
@@ -231,7 +228,7 @@
             <!-- Expanded orders -->
             @if (isExpanded(s.id)) {
               <tr class="sp-expand-row">
-                <td colspan="10">
+                <td colspan="9">
                   <div class="sp-expand-panel">
                     @if (getExpandedOrders(s.id).length === 0) {
                       <p class="text-center sp-muted py-3 mb-0" style="font-size:13px">Aucun order pour ce shipment.</p>
@@ -242,6 +239,7 @@
                             <tr>
                               <th scope="col">HAWB</th>
                               <th scope="col">Client</th>
+                              <th scope="col">Shipper</th>
                               <th scope="col">Description</th>
                               <th scope="col">Poids</th>
                               <th scope="col">Total</th>
@@ -253,6 +251,7 @@
                               <tr>
                                 <td><strong>{{ o.hawb }}</strong></td>
                                 <td>{{ o.clientFullName || '—' }}</td>
+                                <td>{{ o.companyName || '—' }}</td>
                                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
                                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
                                 <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>

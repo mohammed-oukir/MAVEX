@@ -72,10 +72,6 @@
   <div class="sd-panel">
     <div class="sd-grid">
       <div>
-        <div class="sd-key">Shipper</div>
-        <div class="sd-val">{{ shipment()!.shipper?.companyName || '—' }}</div>
-      </div>
-      <div>
         <div class="sd-key">Carrier</div>
         <div class="sd-val">{{ shipment()!.importingCarrier || '—' }}</div>
       </div>
@@ -298,6 +294,7 @@
             <tr>
               <th scope="col">HAWB</th>
               <th scope="col">Client</th>
+              <th scope="col">Shipper</th>
               <th scope="col">Description</th>
               <th scope="col">Poids</th>
               <th scope="col">Items</th>
@@ -329,6 +326,7 @@
                   </div>
                 </td>
                 <td>{{ o.clientFullName || '—' }}</td>
+                <td class="sd-muted">{{ o.companyName || '—' }}</td>
                 <td class="sd-muted" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
                 <td>{{ o.numberOfItems ?? '—' }}</td>

@@ -351,9 +351,10 @@ export class OrdersComponent implements OnInit {
   pagesArray(): number[]    { return Array.from({ length: this.totalPages() }, (_, i) => i); }
 
   /* ── Helpers ──────────────────────────────────────────── */
-  fmtAmount(n?: number | null): string {
+  fmtAmount(n?: number | null, currency?: string | null): string {
     if (n == null) return '—';
-    return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' MAD';
+    const cur = currency ?? 'MAD';
+    return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ' + cur;
   }
 
   fmtWeight(n?: number | null): string {
