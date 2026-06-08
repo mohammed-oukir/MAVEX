@@ -64,6 +64,15 @@ public class EmailTemplate {
     @Column(name = "builder_json", columnDefinition = "TEXT")
     private String builderJson;
 
+    /**
+     * Contenu modifiable par Quill editor (section body uniquement).
+     * Le htmlContent complet est reconstruit a partir de ce champ
+     * en l'injectant dans le layout fixe EMAIL_LAYOUT.
+     */
+    @Lob
+    @Column(name = "body_content", columnDefinition = "TEXT")
+    private String bodyContent;
+
     /** Seul le template actif est utilise par type */
     @Column(nullable = false)
     @Builder.Default

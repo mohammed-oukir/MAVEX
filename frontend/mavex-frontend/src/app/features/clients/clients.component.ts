@@ -207,11 +207,17 @@ export class ClientsComponent implements OnInit {
       : this.clientSvc.create(req);
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: (saved) => {
         this.saving.set(false);
         this.formMode.set(null);
-        this.toast.success(this.editingId() ? 'Client modifié.' : 'Client créé.');
-        this.loadClients();
+        const isEdit = !!this.editingId();
+        this.toast.success(isEdit ? 'Client modifié.' : 'Client créé.');
+        if (isEdit) {
+          this.allClients.update(list => list.map(c => c.id === saved.id ? saved : c));
+        } else {
+          this.allClients.update(list => [saved, ...list]);
+          this.page.set(0);
+        }
       },
       error: err => {
         this.saving.set(false);

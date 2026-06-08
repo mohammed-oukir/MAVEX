@@ -28,7 +28,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public List<ClientResponseDTO> findAll() {
-        return clientRepository.findAll()
+        return clientRepository.findAllByOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());

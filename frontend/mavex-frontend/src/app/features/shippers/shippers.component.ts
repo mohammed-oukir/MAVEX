@@ -198,11 +198,17 @@ export class ShippersComponent implements OnInit {
       : this.shipperSvc.create(req);
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: res => {
+      next: ({ data }) => {
         this.saving.set(false);
         this.formMode.set(null);
-        this.toast.success(this.editingId() ? 'Shipper modifié.' : 'Shipper créé.');
-        this.loadShippers();
+        const isEdit = !!this.editingId();
+        this.toast.success(isEdit ? 'Shipper modifié.' : 'Shipper créé.');
+        if (isEdit) {
+          this.allShippers.update(list => list.map(s => s.id === data.id ? data : s));
+        } else {
+          this.allShippers.update(list => [data, ...list]);
+          this.page.set(0);
+        }
       },
       error: err => {
         this.saving.set(false);

@@ -1,4 +1,4 @@
-package com.medafrica.mavex.payment.strategy;
+ package com.medafrica.mavex.payment.strategy;
 
 import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.logistics.Order;

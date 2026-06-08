@@ -3,6 +3,9 @@
 /* ── Bootstrap ───────────────────────────────────────────── */
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+/* ── Quill WYSIWYG editor ────────────────────────────────── */
+@import 'quill/dist/quill.snow.css';
+
 /* ── Design tokens ───────────────────────────────────────── */
 :root {
   --bs-font-sans-serif:  'DM Sans', system-ui, sans-serif;

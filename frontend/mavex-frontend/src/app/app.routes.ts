@@ -72,6 +72,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/profile/profile.component').then(m => m.ProfileComponent),
       },
+      {
+        path: 'settings/email-template',
+        loadComponent: () =>
+          import('./features/email-template/email-template.component').then(m => m.EmailTemplateComponent),
+      },
     ],
   },
 
