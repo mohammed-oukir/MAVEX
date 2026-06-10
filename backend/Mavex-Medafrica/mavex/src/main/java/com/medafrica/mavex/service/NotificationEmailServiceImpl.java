@@ -19,7 +19,6 @@ import com.sendgrid.helpers.mail.objects.Email;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
-import org.springframework.core.io.ClassPathResource;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
@@ -195,21 +194,6 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         mail.addPersonalization(personalization);
 
         mail.addContent(new Content("text/html", html));
-
-        // Logo inline — cid:logo
-        try {
-            ClassPathResource logoResource = new ClassPathResource("static/medafrica-logo.jpeg");
-            byte[] logoBytes = logoResource.getInputStream().readAllBytes();
-            Attachments logoAttachment = new Attachments();
-            logoAttachment.setContent(Base64.getEncoder().encodeToString(logoBytes));
-            logoAttachment.setType("image/jpeg");
-            logoAttachment.setFilename("medafrica-logo.jpeg");
-            logoAttachment.setDisposition("inline");
-            logoAttachment.setContentId("logo");
-            mail.addAttachments(logoAttachment);
-        } catch (Exception e) {
-            log.warn("Logo introuvable, envoi sans logo : {}", e.getMessage());
-        }
 
         if (attachments != null) {
             for (MultipartFile file : attachments) {
