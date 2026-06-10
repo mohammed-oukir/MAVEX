@@ -183,7 +183,16 @@
               </td>
 
               <td>
-                <button type="button" class="or-hawb-btn" (click)="openDetail(o)">{{ o.hawb }}</button>
+                <div style="display:flex;align-items:center;gap:5px">
+                  <button type="button" class="or-hawb-btn" (click)="openDetail(o)">{{ o.hawb }}</button>
+                  @if (o.emailSentCount && o.emailSentCount > 0) {
+                    <span
+                      [title]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'"
+                      [style.color]="o.emailOpened ? '#22C55E' : '#EF4444'"
+                      style="font-size:13px;line-height:1"
+                      [attr.aria-label]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'">★</span>
+                  }
+                </div>
                 @if (o.alternateReference) { <div class="or-alt-ref">{{ o.alternateReference }}</div> }
               </td>
 

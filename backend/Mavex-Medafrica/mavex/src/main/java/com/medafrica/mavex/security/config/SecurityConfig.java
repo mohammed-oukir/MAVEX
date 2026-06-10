@@ -66,6 +66,9 @@ public class SecurityConfig {
                 // ── Order par token de paiement : public (lien email client)
                 .requestMatchers("/api/orders/pay/**").permitAll()
 
+                // ── Webhook SendGrid : public (appelé par SendGrid, pas de JWT)
+                .requestMatchers("/api/webhooks/sendgrid").permitAll()
+
                 // ── Pages paiement frontend : publiques
                 .requestMatchers("/pay/**", "/pay-success", "/pay-error", "/pay-cancelled").permitAll()
 

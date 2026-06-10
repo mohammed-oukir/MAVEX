@@ -369,6 +369,8 @@ public class OrderServiceImpl implements OrderService {
                 .companyName(companyName)
                 .emailSentAt(o.getEmailSentAt())
                 .emailSentCount(o.getEmailSentCount())
+                .emailOpened(emailLogRepository.findByOrderId(o.getId()).stream()
+                        .anyMatch(log -> log.getOpenedAt() != null))
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

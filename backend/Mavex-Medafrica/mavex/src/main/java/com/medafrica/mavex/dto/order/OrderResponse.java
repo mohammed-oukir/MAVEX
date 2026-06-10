@@ -50,6 +50,7 @@ private String clientCountry;
 
     private LocalDateTime emailSentAt;
     private int           emailSentCount;
+    private boolean       emailOpened;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

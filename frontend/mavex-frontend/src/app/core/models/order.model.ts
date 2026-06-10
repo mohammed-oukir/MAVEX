@@ -41,6 +41,7 @@ export interface OrderResponse {
   tokenValid?:     boolean;
   emailSentAt?:    string;
   emailSentCount?: number;
+  emailOpened?:    boolean;
   createdAt?:      string;
   updatedAt?:      string;
 }
