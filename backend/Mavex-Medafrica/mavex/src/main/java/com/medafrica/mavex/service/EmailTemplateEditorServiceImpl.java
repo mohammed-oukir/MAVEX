@@ -22,7 +22,7 @@ public class EmailTemplateEditorServiceImpl implements EmailTemplateEditorServic
     private final EmailTemplateRepository templateRepository;
 
     private static final Pattern CONTENT_PATTERN = Pattern.compile(
-            "(<div class=\"content\">)(.*?)(</div>)",
+            "(<!-- BODY_START -->)(.*?)(<!-- BODY_END -->)",
             Pattern.DOTALL
     );
 
@@ -34,7 +34,7 @@ public class EmailTemplateEditorServiceImpl implements EmailTemplateEditorServic
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Aucun template actif trouvé pour le type : " + type));
 
-        String body = template.getBodyContent() != null
+        String body = (template.getBodyContent() != null && !template.getBodyContent().isBlank())
                 ? template.getBodyContent()
                 : extraireBodyContent(template.getHtmlContent());
 

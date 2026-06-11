@@ -50,7 +50,7 @@ SET html_content = '<!DOCTYPE html>
   </div>
 
   <div class="content">
-
+<!-- BODY_START -->
     <p class="greeting">Dear <strong>{{receiverName}}</strong>,</p>
 
     <p class="body-text">
@@ -124,7 +124,7 @@ SET html_content = '<!DOCTYPE html>
       <span>CS Manager</span>
       <span>Med Africa Logistics</span>
     </div>
-
+<!-- BODY_END -->
   </div>
 
   <div class="footer">

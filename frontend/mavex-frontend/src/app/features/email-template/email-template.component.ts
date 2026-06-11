@@ -124,7 +124,7 @@ export class EmailTemplateComponent implements OnInit {
         // Remplacer le bodyContent dans le htmlContent complet
         const newBody = this.quill.root.innerHTML;
         html = html.replace(
-          /(<div class="content">)([\s\S]*?)(<\/div>)/,
+          /(<!-- BODY_START -->)([\s\S]*?)(<!-- BODY_END -->)/,
           `$1\n${newBody}\n$3`
         );
       } else {
