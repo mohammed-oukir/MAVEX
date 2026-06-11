@@ -6,8 +6,11 @@ import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
 import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.country.Country;
+import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.repository.CountryRepository;
+import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.service.interfaces.ClientService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +28,7 @@ public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
     private final CountryRepository countryRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     public List<ClientResponseDTO> findAll() {
@@ -81,6 +85,8 @@ public class ClientServiceImpl implements ClientService {
             throw new IllegalArgumentException("Un client avec cet email existe déjà : " + dto.getEmail());
         }
 
+        String ancienEmail = client.getEmail();
+
         Country country = countryRepository.findById(dto.getCountryCode())
                 .orElseThrow(() -> new EntityNotFoundException("Pays introuvable : " + dto.getCountryCode()));
         client.setFullName(dto.getFullName());
@@ -92,7 +98,13 @@ public class ClientServiceImpl implements ClientService {
         client.setZipCode(dto.getZipCode());
         client.setCountry(country);
 
-        return toResponseDTO(clientRepository.save(client));
+        clientRepository.save(client);
+
+        if (!ancienEmail.equals(dto.getEmail())) {
+            markOrdersOutdated(client.getId(), ancienEmail);
+        }
+
+        return toResponseDTO(client);
     }
 
     @Override
@@ -106,6 +118,8 @@ public class ClientServiceImpl implements ClientService {
                 && clientRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Un client avec cet email existe déjà : " + dto.getEmail());
         }
+
+        String ancienEmail = client.getEmail();
 
         if (dto.getFullName()  != null) client.setFullName(dto.getFullName());
         if (dto.getEmail()     != null) client.setEmail(dto.getEmail());
@@ -123,7 +137,13 @@ public class ClientServiceImpl implements ClientService {
 
         if (dto.getActive() != null) client.setActive(dto.getActive());
 
-        return toResponseDTO(clientRepository.save(client));
+        clientRepository.save(client);
+
+        if (dto.getEmail() != null && !ancienEmail.equals(dto.getEmail())) {
+            markOrdersOutdated(client.getId(), ancienEmail);
+        }
+
+        return toResponseDTO(client);
     }
 
     @Override
@@ -159,6 +179,18 @@ public class ClientServiceImpl implements ClientService {
         clients.forEach(c -> c.setActive(false));
         clientRepository.saveAll(clients);
         return clients.size();
+    }
+
+    private void markOrdersOutdated(Long clientId, String ancienEmail) {
+        List<Order> orders = orderRepository.findByClientId(clientId);
+        for (Order order : orders) {
+            if (order.getStatus() == OrderStatus.EMAIL_SENT
+                    && ancienEmail.equals(order.getEmailSentToAddress())) {
+                order.setStatus(OrderStatus.EMAIL_OUTDATED);
+                order.setEmailOutdatedReason("L'email du client a changé depuis le dernier envoi.");
+            }
+        }
+        orderRepository.saveAll(orders);
     }
 
     private ClientResponseDTO toResponseDTO(Client client) {

@@ -1,6 +1,7 @@
 export type OrderStatus =
   | 'CREATED'
   | 'EMAIL_SENT'
+  | 'EMAIL_OUTDATED'
   | 'PENDING_PAYMENT'
   | 'PAID'
   | 'IN_DELIVERY'
@@ -39,10 +40,11 @@ export interface OrderResponse {
   paymentToken?:   string;
   tokenExpiresAt?: string;
   tokenValid?:     boolean;
-  emailSentAt?:    string;
-  emailSentCount?: number;
-  emailOpened?:    boolean;
-  createdAt?:      string;
+  emailSentAt?:          string;
+  emailSentCount?:       number;
+  emailSentToAddress?:   string;
+  emailOutdatedReason?:  string;
+  createdAt?:            string;
   updatedAt?:      string;
 }
 
@@ -90,4 +92,16 @@ export interface BulkEmailResult {
   total:  number;
   sent:   number;
   failed: number;
+}
+
+export type EmailLogStatus = 'PENDING' | 'SENT' | 'FAILED' | 'RETRYING';
+
+export interface EmailLogResponse {
+  id:           number;
+  toEmail:      string;
+  subject?:     string;
+  status:       EmailLogStatus;
+  errorMessage?: string;
+  retryCount:   number;
+  sentAt?:      string;
 }

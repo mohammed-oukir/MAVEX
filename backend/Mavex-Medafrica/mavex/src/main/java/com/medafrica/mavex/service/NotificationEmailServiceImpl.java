@@ -8,29 +8,23 @@ import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.logistics.Order;
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.Response;
-import com.sendgrid.SendGrid;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Attachments;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
-
-import java.time.LocalDateTime;
-import java.util.Base64;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,17 +37,15 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private final EmailTemplateRepository templateRepository;
     private final EmailLogRepository      emailLogRepository;
     private final OrderRepository         orderRepository;
+    private final JavaMailSender          mailSender;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
 
-    @Value("${sendgrid.api.key}")
-    private String sendgridApiKey;
-
-    @Value("${sendgrid.from.email}")
+    @Value("${app.mail.from.email}")
     private String fromEmail;
 
-    @Value("${sendgrid.from.name:MAVEX}")
+    @Value("${app.mail.from.name:MAVEX}")
     private String fromName;
 
     @Override
@@ -92,15 +84,17 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         emailLogRepository.save(emailLog);
 
         try {
-            String messageId = sendHtmlEmail(order.getClient().getEmail(), subject, htmlContent, attachments);
+            sendHtmlEmail(order.getClient().getEmail(), subject, htmlContent, attachments);
 
             emailLog.markSent();
-            emailLog.setSendgridMessageId(messageId);
             emailLogRepository.save(emailLog);
 
             order.setEmailSentAt(LocalDateTime.now());
             order.setEmailSentCount(order.getEmailSentCount() + 1);
-            if (order.getStatus() == OrderStatus.CREATED) {
+            order.setEmailSentToAddress(order.getClient().getEmail());
+            order.setEmailOutdatedReason(null);
+            if (order.getStatus() == OrderStatus.CREATED
+                    || order.getStatus() == OrderStatus.EMAIL_OUTDATED) {
                 order.setStatus(OrderStatus.EMAIL_SENT);
             }
             orderRepository.save(order);
@@ -180,54 +174,35 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     }
 
     // ---------------------------------------------------------------
-    // ENVOI SENDGRID — retourne le message-id pour le tracking
+    // ENVOI GMAIL SMTP
     // ---------------------------------------------------------------
 
-    private String sendHtmlEmail(String to, String subject, String html, MultipartFile[] attachments) throws Exception {
-        Mail mail = new Mail();
-        mail.setFrom(new Email(fromEmail, fromName));
-        mail.setSubject(subject);
+    private void sendHtmlEmail(String to, String subject, String html, MultipartFile[] attachments) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        com.sendgrid.helpers.mail.objects.Personalization personalization =
-                new com.sendgrid.helpers.mail.objects.Personalization();
-        personalization.addTo(new Email(to));
-        mail.addPersonalization(personalization);
-
-        mail.addContent(new Content("text/html", html));
+        helper.setFrom(fromName + " <" + fromEmail + ">");
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(html, true);
 
         if (attachments != null) {
             for (MultipartFile file : attachments) {
                 if (file != null && !file.isEmpty()) {
-                    Attachments attachment = new Attachments();
-                    attachment.setContent(Base64.getEncoder().encodeToString(file.getBytes()));
-                    attachment.setType(file.getContentType());
-                    attachment.setFilename(file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment");
-                    attachment.setDisposition("attachment");
-                    mail.addAttachments(attachment);
+                    helper.addAttachment(
+                        file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment",
+                        file
+                    );
                 }
             }
         }
 
-        SendGrid sg = new SendGrid(sendgridApiKey);
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        request.setBody(mail.build());
-
-        Response response = sg.api(request);
-
-        if (response.getStatusCode() >= 400) {
-            throw new RuntimeException("SendGrid error " + response.getStatusCode() + " : " + response.getBody());
-        }
-
-        // SendGrid retourne l'ID dans le header X-Message-Id
-        String messageId = response.getHeaders().get("X-Message-Id");
-        log.debug("SendGrid message-id={}, status={}", messageId, response.getStatusCode());
-        return messageId;
+        mailSender.send(message);
+        log.debug("Email SMTP envoyé à {}", to);
     }
 
     // ---------------------------------------------------------------
-    // CONSTRUCTION DES VARIABLES — méthode interne
+    // CONSTRUCTION DES VARIABLES
     // ---------------------------------------------------------------
 
     private Map<String, String> buildVariables(Order order) {

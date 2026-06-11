@@ -60,11 +60,6 @@ public class EmailLog {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
-    /** ID retourné par SendGrid — lien avec les webhooks d'événements */
-    @Column(name = "sendgrid_message_id", length = 255)
-    private String sendgridMessageId;
-
-    /** Rempli quand SendGrid notifie que le client a ouvert l'email */
     @Column(name = "opened_at")
     private LocalDateTime openedAt;
 

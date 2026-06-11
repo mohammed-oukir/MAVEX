@@ -192,6 +192,7 @@ export class ShipmentDetailComponent implements OnInit {
   readonly statusOptions: ReadonlyArray<{ value: OrderStatus; label: string; color: string; bg: string }> = [
     { value: 'CREATED',          label: 'Created',                color: '#6B7280', bg: '#F3F4F6' },
     { value: 'EMAIL_SENT',       label: 'Email envoyé',           color: '#3B82F6', bg: '#EFF6FF' },
+    { value: 'EMAIL_OUTDATED',   label: 'Email obsolète',         color: '#F97316', bg: '#FFF7ED' },
     { value: 'PENDING_PAYMENT',  label: 'En attente de paiement', color: '#F59E0B', bg: '#FFFBEB' },
     { value: 'PAID',             label: 'Payé',                   color: '#22C55E', bg: '#F0FDF4' },
     { value: 'IN_DELIVERY',      label: 'En livraison',           color: '#F97316', bg: '#FFF7ED' },

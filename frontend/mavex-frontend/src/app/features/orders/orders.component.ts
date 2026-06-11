@@ -4,20 +4,23 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe }   from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject }    from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { forkJoin }   from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService }  from '../../core/services/layout.service';
 import { OrderService }   from '../../core/services/order.service';
+import { ClientService }  from '../../core/services/client.service';
 import { EmailService }   from '../../core/services/email.service';
 import { ToastService }   from '../../core/services/toast.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
-import { BulkEmailResult, OrderResponse, OrderStatus } from '../../core/models/order.model';
+import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderStatus } from '../../core/models/order.model';
+import { ClientResponse } from '../../core/models/client.model';
 
 @Component({
   selector: 'app-orders',
-  imports: [RouterLink, DatePipe, BadgeComponent],
+  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule],
   templateUrl: './orders.component.html',
   styleUrl:    './orders.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,8 +28,10 @@ import { BulkEmailResult, OrderResponse, OrderStatus } from '../../core/models/o
 export class OrdersComponent implements OnInit {
   private readonly layout     = inject(LayoutService);
   private readonly orderSvc   = inject(OrderService);
+  private readonly clientSvc  = inject(ClientService);
   private readonly emailSvc   = inject(EmailService);
   private readonly toast      = inject(ToastService);
+  private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly searchSubject = new Subject<string>();
@@ -84,6 +89,43 @@ export class OrdersComponent implements OnInit {
   detail   = signal<OrderResponse | null>(null);
   deleteId = signal<number | null>(null);
   deleting = signal(false);
+
+  /* ── Historique emails ────────────────────────────────── */
+  emailHistory      = signal<EmailLogResponse[]>([]);
+  emailHistoryOrder = signal<OrderResponse | null>(null);
+  loadingHistory    = signal(false);
+
+  /* ── Edit order ───────────────────────────────────────── */
+  editingOrder = signal<OrderResponse | null>(null);
+  savingOrder  = signal(false);
+  clients      = signal<ClientResponse[]>([]);
+
+  editClientSearch       = signal('');
+  showEditClientDropdown = signal(false);
+  selectedEditClientName = signal('');
+
+  filteredEditClients = computed(() => {
+    const q = this.editClientSearch().toLowerCase().trim();
+    if (!q) return this.clients().slice(0, 50);
+    return this.clients().filter(c =>
+      c.fullName?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.city?.toLowerCase().includes(q)
+    ).slice(0, 50);
+  });
+
+  editOrderForm = this.fb.group({
+    hawb:             ['', [Validators.required, Validators.minLength(2)]],
+    clientId:         [null as number | null, Validators.required],
+    numberOfItems:    [null as number | null],
+    goodsDescription: [''],
+    shipmentWeight:   [null as number | null],
+    htsusCode:        [''],
+    customsValue:     [null as number | null, [Validators.required, Validators.min(0.01)]],
+    customsCurrency:  ['USD'],
+    dutyRate:         [null as number | null],
+    bankCharges:      [null as number | null],
+  });
 
   /* ── Computed ─────────────────────────────────────────── */
   totalPages  = computed(() => Math.ceil(this.total() / this.pageSize));
@@ -325,9 +367,111 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  /* ── Edit order ───────────────────────────────────────── */
+  openEditOrder(o: OrderResponse): void {
+    if (this.clients().length === 0) {
+      this.clientSvc.getAllActive().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: list => this.clients.set(list),
+      });
+    }
+    this.editingOrder.set(o);
+    this.editOrderForm.patchValue({
+      hawb:             o.hawb,
+      clientId:         o.clientId ?? null,
+      numberOfItems:    o.numberOfItems ?? null,
+      goodsDescription: o.goodsDescription ?? '',
+      shipmentWeight:   o.shipmentWeight ?? null,
+      htsusCode:        o.htsusCode ?? '',
+      customsValue:     o.customsValue ?? null,
+      customsCurrency:  o.customsCurrency ?? 'USD',
+      dutyRate:         o.dutyRate != null ? Math.round(o.dutyRate * 10000) / 100 : null,
+      bankCharges:      o.bankCharges ?? null,
+    });
+    this.selectedEditClientName.set(o.clientFullName ?? '');
+    this.editClientSearch.set('');
+    this.showEditClientDropdown.set(false);
+  }
+
+  closeEditOrder(): void { this.editingOrder.set(null); }
+
+  selectEditClient(c: ClientResponse): void {
+    this.editOrderForm.patchValue({ clientId: c.id });
+    this.selectedEditClientName.set(c.fullName);
+    this.editClientSearch.set('');
+    this.showEditClientDropdown.set(false);
+  }
+
+  clearEditClient(): void {
+    this.editOrderForm.patchValue({ clientId: null });
+    this.selectedEditClientName.set('');
+    this.editClientSearch.set('');
+  }
+
+  onEditClientSearchInput(val: string): void {
+    this.editClientSearch.set(val);
+    this.showEditClientDropdown.set(true);
+    if (!val) this.clearEditClient();
+  }
+
+  saveOrder(): void {
+    if (this.editOrderForm.invalid) { this.editOrderForm.markAllAsTouched(); return; }
+    const o = this.editingOrder();
+    if (!o) return;
+    this.savingOrder.set(true);
+    const v = this.editOrderForm.value;
+    const req: OrderPatch = {
+      hawb:             v.hawb!,
+      clientId:         v.clientId ?? undefined,
+      numberOfItems:    v.numberOfItems ?? undefined,
+      goodsDescription: v.goodsDescription || undefined,
+      shipmentWeight:   v.shipmentWeight ?? undefined,
+      htsusCode:        v.htsusCode || undefined,
+      customsValue:     v.customsValue ?? undefined,
+      customsCurrency:  v.customsCurrency || undefined,
+      dutyRate:         v.dutyRate != null ? v.dutyRate / 100 : undefined,
+      bankCharges:      v.bankCharges ?? undefined,
+    };
+    this.orderSvc.patch(o.id, req).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.savingOrder.set(false);
+        this.editingOrder.set(null);
+        this.toast.success('Order mis à jour.');
+        this.loadOrders();
+        this.loadKpis();
+      },
+      error: err => {
+        this.savingOrder.set(false);
+        this.toast.error(err?.error?.message || 'Erreur lors de la mise à jour.');
+      },
+    });
+  }
+
+  editOrderFieldInvalid(name: string): boolean {
+    const c = this.editOrderForm.get(name);
+    return !!(c?.invalid && c?.touched);
+  }
+
   /* ── Detail ───────────────────────────────────────────── */
   openDetail(o: OrderResponse): void { this.detail.set(o); }
   closeDetail(): void                { this.detail.set(null); }
+
+  /* ── Historique emails ────────────────────────────────── */
+  openEmailHistory(o: OrderResponse): void {
+    this.emailHistoryOrder.set(o);
+    this.emailHistory.set([]);
+    this.loadingHistory.set(true);
+    this.orderSvc.getEmailLogs(o.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next:  logs => { this.emailHistory.set(logs); this.loadingHistory.set(false); },
+        error: ()   => { this.loadingHistory.set(false); },
+      });
+  }
+
+  closeEmailHistory(): void {
+    this.emailHistoryOrder.set(null);
+    this.emailHistory.set([]);
+  }
 
   /* ── Suppression ──────────────────────────────────────── */
   confirmDelete(id: number): void { this.deleteId.set(id); }
@@ -371,6 +515,7 @@ export class OrdersComponent implements OnInit {
     const labels: Record<OrderStatus, string> = {
       CREATED:         'Créé',
       EMAIL_SENT:      'Email envoyé',
+      EMAIL_OUTDATED:  'Email obsolète',
       PENDING_PAYMENT: 'En attente',
       PAID:            'Payé',
       IN_DELIVERY:     'En livraison',
@@ -384,6 +529,7 @@ export class OrdersComponent implements OnInit {
     const map: Record<OrderStatus, string> = {
       CREATED:         'or-s-created',
       EMAIL_SENT:      'or-s-email',
+      EMAIL_OUTDATED:  'or-s-outdated',
       PENDING_PAYMENT: 'or-s-pending',
       PAID:            'or-s-paid',
       IN_DELIVERY:     'or-s-delivery',
@@ -397,6 +543,7 @@ export class OrdersComponent implements OnInit {
     const map: Record<OrderStatus, string> = {
       CREATED:         'or-row-created',
       EMAIL_SENT:      'or-row-email',
+      EMAIL_OUTDATED:  'or-row-outdated',
       PENDING_PAYMENT: 'or-row-pending',
       PAID:            'or-row-paid',
       IN_DELIVERY:     'or-row-delivery',

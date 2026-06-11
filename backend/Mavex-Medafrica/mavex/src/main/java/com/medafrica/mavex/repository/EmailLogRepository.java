@@ -5,7 +5,6 @@ import com.medafrica.mavex.model.enums.EmailStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
 
@@ -15,5 +14,4 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
 
     void deleteByOrderId(Long orderId);
 
-    Optional<EmailLog> findBySendgridMessageId(String sendgridMessageId);
 }

@@ -1,4 +1,4 @@
--- Fix logo: use public URL from medafrica-log.com (works in all email clients, no blocking)
+-- Fix anti-spam: remove external image, soften urgent wording, fix href="#"
 UPDATE email_templates
 SET html_content = '<!DOCTYPE html>
 <html lang="en">
@@ -10,10 +10,10 @@ SET html_content = '<!DOCTYPE html>
   body { font-family: Arial, sans-serif; background:#f4f4f4; color:#333; }
   .wrapper { max-width:600px; margin:0 auto; background:#fff; }
   .header { background:#4B5563; padding:28px 40px; text-align:center; }
-  .header img { max-height:60px; width:auto; }
-  .header-sub { font-size:12px; color:#D1D5DB; letter-spacing:0.15em; margin-top:8px; }
-  .banner { background:linear-gradient(135deg,#6B7280,#4B5563); padding:28px 40px; border-bottom:3px solid #F97316; }
-  .banner h1 { font-size:22px; color:#ffffff; margin-bottom:8px; }
+  .header-title { font-size:20px; font-weight:bold; color:#ffffff; letter-spacing:0.05em; }
+  .header-sub { font-size:12px; color:#D1D5DB; letter-spacing:0.15em; margin-top:6px; }
+  .banner { background:#4B5563; padding:24px 40px; border-bottom:3px solid #F97316; }
+  .banner h1 { font-size:20px; color:#ffffff; margin-bottom:6px; }
   .banner p { font-size:14px; color:#E5E7EB; line-height:1.6; }
   .content { padding:32px 40px; }
   .greeting { font-size:16px; margin-bottom:24px; color:#333; }
@@ -33,20 +33,19 @@ SET html_content = '<!DOCTYPE html>
   .signature span { font-size:12px; color:#888; letter-spacing:0.05em; text-transform:uppercase; display:block; }
   .footer { background:#4B5563; padding:24px 40px; text-align:center; }
   .footer p { font-size:12px; color:#D1D5DB; line-height:1.7; }
-  .footer a { color:#F97316; text-decoration:none; }
 </style>
 </head>
 <body>
 <div class="wrapper">
 
   <div class="header">
-    <img src="https://medafrica-log.com/wp-content/uploads/2023/03/MEDAF-WWEXPRESS10.png" alt="Med Africa Logistics" style="max-height:60px;width:auto;"/>
-    <div class="header-sub">MED AFRICA LOGISTICS</div>
+    <div class="header-title">MED AFRICA LOGISTICS</div>
+    <div class="header-sub">CUSTOMER SERVICE</div>
   </div>
 
   <div class="banner">
     <h1>Payment Notice</h1>
-    <p>Action required — please review the details below.</p>
+    <p>Please review the details below regarding your shipment.</p>
   </div>
 
   <div class="content">
@@ -59,20 +58,19 @@ SET html_content = '<!DOCTYPE html>
     </p>
 
     <p class="body-text">
-      Please note that your shipment purchased from Morocco is subject to
-      <strong>customs duties and taxes</strong> required by U.S. Customs.
+      Please note that your shipment is subject to
+      <strong>customs fees</strong> required by U.S. Customs.
     </p>
 
     <p class="body-text">
-      To avoid any delay, we have proceeded with the payment on your behalf
-      while awaiting reimbursement from you. Kindly note that the total amount
-      of duties and taxes is:
+      To avoid any delay, we have covered the customs fees on your behalf
+      and kindly ask for reimbursement. The total amount is:
     </p>
 
     <div class="total-box">
       <div class="total-left">
         <div class="total-label">Total Amount Due</div>
-        <div style="font-size:12px;color:#D1D5DB;margin-top:4px;">Customs duties &amp; taxes</div>
+        <div style="font-size:12px;color:#D1D5DB;margin-top:4px;">Customs fees</div>
       </div>
       <div class="total-right">
         <div class="total-amount">{{totalAmount}} {{customsCurrency}}</div>
@@ -80,8 +78,8 @@ SET html_content = '<!DOCTYPE html>
     </div>
 
     <p class="body-text">
-      We would appreciate your <strong>urgent payment</strong> of this amount
-      to Med Africa Logistics.
+      We kindly ask you to arrange the payment of this amount
+      to Med Africa Logistics at your earliest convenience.
     </p>
 
     <p class="body-text">
@@ -91,16 +89,16 @@ SET html_content = '<!DOCTYPE html>
     </p>
 
     <p class="body-text">
-      Please kindly advise us once the payment has been made.
+      Please let us know once the payment has been arranged.
     </p>
 
     <p class="body-text" style="margin-bottom:0;">
-      Please find below the details of your shipment:
+      Shipment details:
     </p>
 
     <div class="info-box">
       <div class="info-row">
-        <span class="info-label">Your tracking number is</span>
+        <span class="info-label">Tracking number</span>
         <span class="info-value" style="color:#EF4444;">{{hawb}}</span>
       </div>
       <div class="info-row">
@@ -118,7 +116,7 @@ SET html_content = '<!DOCTYPE html>
     </div>
 
     <div class="signature">
-      <p>Best regards / Meilleures salutations,</p>
+      <p>Best regards,</p>
       <br/>
       <strong>Ghita DAHBI</strong>
       <span>CS Manager</span>
@@ -130,8 +128,7 @@ SET html_content = '<!DOCTYPE html>
   <div class="footer">
     <p>
       Med Africa Logistics — Customer Service<br/>
-      This email was sent automatically, please do not reply.<br/>
-      <a href="#">Privacy Policy</a>
+      This email was sent automatically. Please do not reply directly to this message.
     </p>
   </div>
 

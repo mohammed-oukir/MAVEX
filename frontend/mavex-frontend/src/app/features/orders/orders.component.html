@@ -86,6 +86,7 @@
         Non envoyés @if (kpiNoEmail() > 0) { <span class="or-tab-pill">{{ kpiNoEmail() }}</span> }
       </button>
       <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="statusTab() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" role="tab">Email envoyé</button>
+      <button type="button" class="or-tab or-tab-orange" [class.or-tab-active]="statusTab() === 'EMAIL_OUTDATED'" (click)="setTab('EMAIL_OUTDATED')" role="tab">Email obsolète</button>
       <button type="button" class="or-tab or-tab-pending" [class.or-tab-active]="statusTab() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" role="tab">
         En attente @if (kpiPending() > 0) { <span class="or-tab-pill or-tab-pill-amber">{{ kpiPending() }}</span> }
       </button>
@@ -185,13 +186,6 @@
               <td>
                 <div style="display:flex;align-items:center;gap:5px">
                   <button type="button" class="or-hawb-btn" (click)="openDetail(o)">{{ o.hawb }}</button>
-                  @if (o.emailSentCount && o.emailSentCount > 0) {
-                    <span
-                      [title]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'"
-                      [style.color]="o.emailOpened ? '#22C55E' : '#EF4444'"
-                      style="font-size:13px;line-height:1"
-                      [attr.aria-label]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'">★</span>
-                  }
                 </div>
                 @if (o.alternateReference) { <div class="or-alt-ref">{{ o.alternateReference }}</div> }
               </td>
@@ -240,7 +234,10 @@
                   <button type="button" class="or-act-btn or-act-view" (click)="openDetail(o)" title="Voir le détail" aria-label="Détail">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
-                  @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'PENDING_PAYMENT') {
+                  <button type="button" class="or-act-btn or-act-edit" (click)="openEditOrder(o)" title="Modifier" aria-label="Modifier">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED' || o.status === 'PENDING_PAYMENT') {
                     <button type="button" class="or-act-btn or-act-email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer l'email" [attr.aria-label]="'Envoyer email à ' + o.clientFullName">
                       @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
                       @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> }
@@ -461,15 +458,27 @@
           </div>
           <div class="col-12">
             <p class="or-detail-section">Email</p>
-            @if (o.emailSentAt) {
-              <div class="or-email-info or-email-sent-info">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                Email envoyé le {{ o.emailSentAt | date:'dd/MM/yyyy à HH:mm' }}
-              </div>
-            } @else {
-              <div class="or-email-info or-email-none-info">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                Aucun email envoyé
+            <div class="or-email-summary">
+              @if (o.emailSentAt) {
+                <div class="or-email-info or-email-sent-info">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <span>{{ o.emailSentCount }} envoi(s) — dernier le {{ o.emailSentAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+              } @else {
+                <div class="or-email-info or-email-none-info">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  Aucun email envoyé
+                </div>
+              }
+              <button type="button" class="or-history-btn" (click)="closeDetail(); openEmailHistory(o)">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Historique
+              </button>
+            </div>
+            @if (o.status === 'EMAIL_OUTDATED') {
+              <div class="or-email-outdated-warn">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {{ o.emailOutdatedReason ?? 'Email obsolète — veuillez renvoyer.' }}
               </div>
             }
           </div>
@@ -485,6 +494,201 @@
           </button>
         }
       </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Historique emails
+     ══════════════════════════════════════════════════════════ -->
+@if (emailHistoryOrder(); as o) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="historyTitle" (click)="closeEmailHistory()">
+    <div class="modal or-history-modal" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="nm-icon blue" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="historyTitle" class="nm-title">Historique emails</h2>
+          <p class="nm-sub">{{ o.hawb }} — {{ o.clientFullName }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeEmailHistory()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="nm-body">
+        @if (loadingHistory()) {
+          <div class="or-history-loading">
+            <span class="spinner-border" style="width:20px;height:20px;border-width:2px" aria-hidden="true"></span>
+            Chargement…
+          </div>
+        } @else if (emailHistory().length === 0) {
+          <div class="or-history-empty">
+            <svg width="32" height="32" fill="none" stroke="#D1D5DB" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <p>Aucun email envoyé pour cet order.</p>
+          </div>
+        } @else {
+          <div class="or-history-list">
+            @for (log of emailHistory(); track log.id) {
+              <div class="or-history-item" [class.or-history-item-failed]="log.status === 'FAILED'">
+                <div class="or-history-status">
+                  @if (log.status === 'SENT') {
+                    <svg width="15" height="15" fill="none" stroke="#22C55E" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  } @else if (log.status === 'FAILED') {
+                    <svg width="15" height="15" fill="none" stroke="#EF4444" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  } @else {
+                    <svg width="15" height="15" fill="none" stroke="#F59E0B" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  }
+                </div>
+                <div class="or-history-body">
+                  <div class="or-history-top">
+                    <span class="or-history-to">{{ log.toEmail }}</span>
+                    <span class="or-history-date">{{ (log.sentAt ?? '') | date:'dd/MM/yyyy à HH:mm' }}</span>
+                  </div>
+                  @if (log.subject) {
+                    <div class="or-history-subject">{{ log.subject }}</div>
+                  }
+                  @if (log.status === 'FAILED' && log.errorMessage) {
+                    <div class="or-history-error">{{ log.errorMessage }}</div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeEmailHistory()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — Edit order
+     ══════════════════════════════════════════════════════════ -->
+@if (editingOrder(); as o) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editOrderTitle" (click)="closeEditOrder()">
+    <div class="modal" style="max-width:560px" (click)="$event.stopPropagation()">
+
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="editOrderTitle" class="nm-title">Modifier l'order</h2>
+          <p class="nm-sub">{{ o.hawb }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closeEditOrder()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="nm-body" [formGroup]="editOrderForm">
+        <div class="row g-3">
+
+          <!-- HAWB -->
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-hawb">HAWB *</label>
+            <input id="edit-hawb" type="text" class="eo-input" formControlName="hawb"
+              [class.eo-input-err]="editOrderFieldInvalid('hawb')" />
+            @if (editOrderFieldInvalid('hawb')) { <div class="eo-error">HAWB requis</div> }
+          </div>
+
+          <!-- Client -->
+          <div class="col-12 col-md-6" style="position:relative">
+            <label class="eo-label">Client *</label>
+            @if (selectedEditClientName()) {
+              <div class="eo-client-selected">
+                <span class="eo-client-name">{{ selectedEditClientName() }}</span>
+                <button type="button" class="eo-client-clear" (click)="clearEditClient()" aria-label="Changer de client">✕</button>
+              </div>
+            } @else {
+              <input type="text" class="eo-input" placeholder="Rechercher un client…"
+                [value]="editClientSearch()"
+                (input)="onEditClientSearchInput($any($event.target).value)"
+                (focus)="showEditClientDropdown.set(true)"
+                autocomplete="off" />
+              @if (showEditClientDropdown() && filteredEditClients().length > 0) {
+                <ul class="eo-dropdown" role="listbox">
+                  @for (c of filteredEditClients(); track c.id) {
+                    <li class="eo-dropdown-item" role="option" (mousedown)="selectEditClient(c)">
+                      <span class="eo-dropdown-name">{{ c.fullName }}</span>
+                      @if (c.email) { <span class="eo-dropdown-sub">{{ c.email }}</span> }
+                    </li>
+                  }
+                </ul>
+              }
+            }
+            @if (editOrderFieldInvalid('clientId')) { <div class="eo-error">Client requis</div> }
+          </div>
+
+          <!-- Goods description -->
+          <div class="col-12">
+            <label class="eo-label" for="edit-goods">Description des marchandises</label>
+            <input id="edit-goods" type="text" class="eo-input" formControlName="goodsDescription" />
+          </div>
+
+          <!-- Poids / Items -->
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-weight">Poids (kg)</label>
+            <input id="edit-weight" type="number" class="eo-input" formControlName="shipmentWeight" min="0" step="0.01" />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-items">Nombre d'articles</label>
+            <input id="edit-items" type="number" class="eo-input" formControlName="numberOfItems" min="1" />
+          </div>
+
+          <!-- Valeur douanière / Devise -->
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-customs">Valeur douanière *</label>
+            <input id="edit-customs" type="number" class="eo-input" formControlName="customsValue" min="0" step="0.01"
+              [class.eo-input-err]="editOrderFieldInvalid('customsValue')" />
+            @if (editOrderFieldInvalid('customsValue')) { <div class="eo-error">Valeur requise</div> }
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-currency">Devise</label>
+            <select id="edit-currency" class="eo-input" formControlName="customsCurrency">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="MAD">MAD</option>
+            </select>
+          </div>
+
+          <!-- Taux douane / Frais bancaires -->
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-duty">Taux de douane (%)</label>
+            <input id="edit-duty" type="number" class="eo-input" formControlName="dutyRate" min="0" step="0.01" />
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-bank">Frais bancaires</label>
+            <input id="edit-bank" type="number" class="eo-input" formControlName="bankCharges" min="0" step="0.01" />
+          </div>
+
+          <!-- HTSUS -->
+          <div class="col-12 col-md-6">
+            <label class="eo-label" for="edit-htsus">Code HTSUS</label>
+            <input id="edit-htsus" type="text" class="eo-input" formControlName="htsusCode" />
+          </div>
+
+        </div>
+      </div>
+
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closeEditOrder()">Annuler</button>
+        <button type="button" class="nm-btn-primary" [disabled]="savingOrder()" (click)="saveOrder()">
+          @if (savingOrder()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+            Enregistrement…
+          } @else {
+            Enregistrer
+          }
+        </button>
+      </div>
+
     </div>
   </div>
 }

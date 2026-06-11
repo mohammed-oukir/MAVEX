@@ -312,13 +312,6 @@
                 <td>
                   <div class="sd-hawb-cell">
                     <span class="sd-hawb">{{ o.hawb }}</span>
-                    @if (o.emailSentCount && o.emailSentCount > 0) {
-                      <span
-                        [title]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'"
-                        [style.color]="o.emailOpened ? '#22C55E' : '#EF4444'"
-                        style="font-size:13px;line-height:1"
-                        [attr.aria-label]="o.emailOpened ? 'Email ouvert' : 'Email non ouvert'">★</span>
-                    }
                     <button type="button" class="sd-copy-btn"
                       [class.copied]="copiedText() === o.hawb"
                       (click)="copyToClipboard(o.hawb)"

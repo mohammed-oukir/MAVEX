@@ -195,9 +195,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (request.getClientId() != null) {
+            Long ancienClientId = order.getClient() != null ? order.getClient().getId() : null;
+            boolean clientChanged = !request.getClientId().equals(ancienClientId);
+
             Client client = clientRepository.findById(request.getClientId())
                     .orElseThrow(() -> new EntityNotFoundException("Client introuvable id=" + request.getClientId()));
             order.setClient(client);
+
+            if (clientChanged && order.getStatus() == OrderStatus.EMAIL_SENT) {
+                order.setStatus(OrderStatus.EMAIL_OUTDATED);
+                order.setEmailOutdatedReason("Le client de cet order a changé depuis le dernier envoi.");
+            }
         }
 
         return toResponse(orderRepository.save(order));
@@ -369,8 +377,8 @@ public class OrderServiceImpl implements OrderService {
                 .companyName(companyName)
                 .emailSentAt(o.getEmailSentAt())
                 .emailSentCount(o.getEmailSentCount())
-                .emailOpened(emailLogRepository.findByOrderId(o.getId()).stream()
-                        .anyMatch(log -> log.getOpenedAt() != null))
+                .emailSentToAddress(o.getEmailSentToAddress())
+                .emailOutdatedReason(o.getEmailOutdatedReason())
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

@@ -1,7 +1,9 @@
 package com.medafrica.mavex.controller;
 
+import com.medafrica.mavex.dto.email.EmailLogDTO;
 import com.medafrica.mavex.dto.order.*;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ public class OrderController {
 
     private final OrderService            orderService;
     private final NotificationEmailService emailService;
+    private final EmailLogRepository      emailLogRepository;
 
     // ─────────── POST /api/orders ───────────
     @PostMapping
@@ -133,6 +136,17 @@ public class OrderController {
     @GetMapping("/pay/{token}")
     public ResponseEntity<OrderResponse> getByPaymentToken(@PathVariable String token) {
         return ResponseEntity.ok(orderService.getByPaymentToken(token));
+    }
+
+    // ─────────── GET /api/orders/{id}/email-logs ───────────
+    @GetMapping("/{id}/email-logs")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    public ResponseEntity<List<EmailLogDTO>> getEmailLogs(@PathVariable Long id) {
+        List<EmailLogDTO> logs = emailLogRepository.findByOrderId(id)
+                .stream()
+                .map(EmailLogDTO::from)
+                .toList();
+        return ResponseEntity.ok(logs);
     }
 
     // ─────────── DELETE /api/orders/{id} ───────────

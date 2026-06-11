@@ -126,6 +126,14 @@ public class Order {
     @Builder.Default
     private int emailSentCount = 0;
 
+    /** Email utilisé lors du dernier envoi — comparé à client.email pour détecter EMAIL_OUTDATED */
+    @Column(name = "email_sent_to_address")
+    private String emailSentToAddress;
+
+    /** Raison du statut EMAIL_OUTDATED — affiché dans l'UI */
+    @Column(name = "email_outdated_reason")
+    private String emailOutdatedReason;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

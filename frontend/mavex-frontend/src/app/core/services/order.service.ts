@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
 import {
-  BulkEmailResult, OrderPatch, OrderRequest, OrderResponse,
+  BulkEmailResult, EmailLogResponse, OrderPatch, OrderRequest, OrderResponse,
   OrderSearchParams, OrderStatus, OrderStatusUpdate,
 } from '../models/order.model';
 
@@ -58,6 +58,10 @@ export class OrderService {
 
   bulkStatus(ids: number[], newStatus: OrderStatus, note?: string): Observable<void> {
     return this.http.post<void>('/api/orders/bulk/status', { ids, newStatus, note });
+  }
+
+  getEmailLogs(id: number): Observable<EmailLogResponse[]> {
+    return this.http.get<EmailLogResponse[]>(`/api/orders/${id}/email-logs`);
   }
 
   delete(id: number): Observable<void> {
