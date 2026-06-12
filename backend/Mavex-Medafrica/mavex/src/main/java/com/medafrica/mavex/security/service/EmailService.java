@@ -17,7 +17,7 @@ public class EmailService {
     @Value("${app.mail.from.email}")
     private String fromEmail;
 
-    @Value("${app.mail.from.name:MAVEX}")
+    @Value("${app.mail.from.name:MedAfrica}")
     private String fromName;
 
     public void sendOtpEmail(String toEmail, String fullName, String otp) {
@@ -25,13 +25,13 @@ public class EmailService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromName + " <" + fromEmail + ">");
             message.setTo(toEmail);
-            message.setSubject("Mavex - Code de réinitialisation de mot de passe");
+            message.setSubject("MedAfrica - Code de réinitialisation de mot de passe");
             message.setText(
                 "Bonjour " + fullName + ",\n\n" +
                 "Votre code de réinitialisation est : " + otp + "\n\n" +
                 "Ce code est valable 15 minutes.\n\n" +
                 "Si vous n'avez pas demandé ce code, ignorez cet email.\n\n" +
-                "L'équipe Mavex"
+                "L'équipe MedAfrica"
             );
 
             mailSender.send(message);
