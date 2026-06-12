@@ -417,11 +417,15 @@ export class ShipmentDetailComponent implements OnInit {
     if (orderId !== null) {
       this.sendingId.set(orderId);
       this.emailSvc.sendToOrder(orderId, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: () => {
+        next: res => {
           this.sendingId.set(null);
           this.emailModalSending.set(false);
           this.closeEmailModal();
-          this.toast.success('Email envoyé.');
+          if (res.success) {
+            this.toast.success('Email envoyé.');
+          } else {
+            this.toast.error(res.message || 'Échec envoi email.');
+          }
           this.reloadOrders();
         },
         error: err => {
@@ -434,11 +438,15 @@ export class ShipmentDetailComponent implements OnInit {
       if (!shipment) return;
       this.sendingAll.set(true);
       this.emailSvc.sendToShipment(shipment.id, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: () => {
+        next: res => {
           this.sendingAll.set(false);
           this.emailModalSending.set(false);
           this.closeEmailModal();
-          this.toast.success('Emails envoyés.');
+          if (res.failed > 0) {
+            this.toast.error(`${res.sent}/${res.total} email(s) envoyé(s) — ${res.failed} échec(s).`);
+          } else {
+            this.toast.success(`${res.sent}/${res.total} email(s) envoyé(s).`);
+          }
           this.reloadOrders();
         },
         error: err => {

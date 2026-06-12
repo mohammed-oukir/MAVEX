@@ -302,11 +302,15 @@ export class OrdersComponent implements OnInit {
     if (orderId !== null) {
       this.sendingId.set(orderId);
       this.emailSvc.sendToOrder(orderId, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: () => {
+        next: res => {
           this.sendingId.set(null);
           this.emailModalSending.set(false);
           this.closeEmailModal();
-          this.toast.success('Email envoyé avec succès.');
+          if (res.success) {
+            this.toast.success('Email envoyé avec succès.');
+          } else {
+            this.toast.error(res.message || 'Échec envoi email.');
+          }
           this.loadOrders(); this.loadKpis();
         },
         error: err => {
@@ -319,13 +323,15 @@ export class OrdersComponent implements OnInit {
       const ids = Array.from(this.selectedIds());
       this.bulkLoading.set(true);
       this.emailSvc.sendBulkEmail(ids, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (r: any) => {
+        next: r => {
           this.bulkLoading.set(false);
           this.emailModalSending.set(false);
           this.lastBulkResult.set(r);
           this.closeEmailModal();
           this.clearSelection();
-          this.toast.success(`${r.sent}/${r.total} email(s) envoyé(s)${r.failed > 0 ? ` — ${r.failed} échec(s)` : ''}.`);
+          const msg = `${r.sent}/${r.total} email(s) envoyé(s)${r.failed > 0 ? ` — ${r.failed} échec(s)` : ''}.`;
+          if (r.failed > 0) this.toast.error(msg);
+          else              this.toast.success(msg);
           this.loadOrders(); this.loadKpis();
         },
         error: () => {
