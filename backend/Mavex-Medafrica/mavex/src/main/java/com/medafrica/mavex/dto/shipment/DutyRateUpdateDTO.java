@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 public class DutyRateUpdateDTO {
 
     @NotNull(message = "Le taux douanier est obligatoire")
-    @DecimalMin(value = "0.001", message = "Le taux doit être supérieur à 0")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Le taux ne peut pas être négatif")
     @DecimalMax(value = "1.0",   message = "Le taux ne peut pas dépasser 100% (1.0)")
     private BigDecimal dutyRate;
 }

@@ -177,7 +177,7 @@
           </tr>
         } @else {
           @for (o of orders(); track o.id) {
-            <tr [class]="'or-row ' + rowClass(o.status)" [class.or-row-selected]="isSelected(o.id)">
+            <tr [class]="'or-row ' + rowClass(o.status)" [class.or-row-selected]="isSelected(o.id)" [class.or-row--saved]="lastSavedId() === o.id">
 
               <td style="text-align:center">
                 <input type="checkbox" class="form-check-input or-check" [checked]="isSelected(o.id)" (change)="toggleSelect(o.id)" [attr.aria-label]="'Sélectionner ' + o.hawb" />

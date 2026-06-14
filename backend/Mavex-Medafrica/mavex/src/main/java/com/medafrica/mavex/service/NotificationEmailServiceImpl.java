@@ -2,42 +2,40 @@ package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.dto.email.SendEmailResponse;
 import com.medafrica.mavex.dto.order.BulkEmailResult;
-import com.medafrica.mavex.model.email.EmailLog;
 import com.medafrica.mavex.model.email.EmailTemplate;
-import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.NotificationType;
-import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.logistics.Order;
-import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Orchestrateur : charge les données, envoie le SMTP, délègue les écritures BDD
+ * à EmailPersistenceService (bean séparé → @Transactional fonctionne réellement).
+ *
+ * Aucun @Transactional ici : l'envoi SMTP ne doit pas être dans une transaction BDD.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationEmailServiceImpl implements NotificationEmailService {
 
-    private final EmailTemplateRepository templateRepository;
-    private final EmailLogRepository      emailLogRepository;
-    private final OrderRepository         orderRepository;
-    private final JavaMailSender          mailSender;
+    private final EmailTemplateRepository  templateRepository;
+    private final OrderRepository          orderRepository;
+    private final JavaMailSender           mailSender;
+    private final EmailPersistenceService  persistence;   // bean séparé → proxy Spring actif
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -48,22 +46,16 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     @Value("${app.mail.from.name:MAVEX}")
     private String fromName;
 
+    // ---------------------------------------------------------------
+    // API PUBLIQUE
+    // ---------------------------------------------------------------
+
     @Override
-    @Transactional
     public SendEmailResponse sendPaymentEmail(Long orderId, MultipartFile[] attachments) {
 
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order introuvable id=" + orderId));
-
-        if (order.getClient() == null || order.getClient().getEmail() == null) {
-            throw new IllegalStateException("Le client n'a pas d'adresse email.");
-        }
-
-        if (!order.isTokenValid()) {
-            order.generatePaymentToken();
-            orderRepository.save(order);
-        }
-
+        // 1. Lecture + préparation BDD (transaction propre dans EmailPersistenceService)
+        Order order = persistence.loadAndPrepareOrder(orderId);
+            
         EmailTemplate template = templateRepository
                 .findByTypeAndActiveTrue(NotificationType.PAYMENT_INVOICE_WITH_AMOUNT)
                 .orElseThrow(() -> new IllegalStateException(
@@ -73,53 +65,38 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         Map<String, String> variables = buildVariables(order);
         String htmlContent = template.resolveHtml(variables);
         String subject     = template.resolveSubject(variables);
+        String toEmail     = order.getClient().getEmail();
 
-        EmailLog emailLog = EmailLog.builder()
-                .toEmail(order.getClient().getEmail())
-                .subject(subject)
-                .status(EmailStatus.PENDING)
-                .emailTemplate(template)
-                .order(order)
-                .build();
-        emailLogRepository.save(emailLog);
+        // 2. Log PENDING en BDD — commit immédiat, avant d'envoyer le SMTP
+        Long emailLogId = persistence.createPendingLog(toEmail, subject, template, order.getId());
 
         try {
-            sendHtmlEmail(order.getClient().getEmail(), subject, htmlContent, attachments);
+            // 3. Envoi SMTP — hors transaction BDD intentionnellement
+            sendHtmlEmail(toEmail, subject, htmlContent, attachments);
 
-            emailLog.markSent();
-            emailLogRepository.save(emailLog);
+            // 4. Mise à jour BDD → SENT (recharge les entités fraîches par ID)
+            persistence.markSuccess(emailLogId, order.getId());
 
-            order.setEmailSentAt(LocalDateTime.now());
-            order.setEmailSentCount(order.getEmailSentCount() + 1);
-            order.setEmailSentToAddress(order.getClient().getEmail());
-            order.setEmailOutdatedReason(null);
-            if (order.getStatus() == OrderStatus.CREATED
-                    || order.getStatus() == OrderStatus.EMAIL_OUTDATED) {
-                order.setStatus(OrderStatus.EMAIL_SENT);
-            }
-            orderRepository.save(order);
-
-            log.info("Email envoyé avec succès → {} (Order HAWB={})",
-                    order.getClient().getEmail(), order.getHawb());
+            log.info("Email envoyé avec succès → {} (Order HAWB={})", toEmail, order.getHawb());
 
             return SendEmailResponse.builder()
                     .success(true)
                     .message("Email envoyé avec succès")
-                    .toEmail(order.getClient().getEmail())
+                    .toEmail(toEmail)
                     .hawb(order.getHawb())
                     .orderStatus(order.getStatus().name())
                     .build();
 
         } catch (Exception e) {
-            emailLog.markFailed(e.getMessage());
-            emailLogRepository.save(emailLog);
+            // 5. Mise à jour BDD → FAILED (recharge le log frais par ID)
+            persistence.markFailed(emailLogId, e.getMessage());
 
-            log.error("Échec envoi email → {} : {}", order.getClient().getEmail(), e.getMessage());
+            log.error("Échec envoi email → {} : {}", toEmail, e.getMessage());
 
             return SendEmailResponse.builder()
                     .success(false)
                     .message("Échec envoi email : " + e.getMessage())
-                    .toEmail(order.getClient().getEmail())
+                    .toEmail(toEmail)
                     .hawb(order.getHawb())
                     .orderStatus(order.getStatus().name())
                     .build();
@@ -127,34 +104,22 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     }
 
     @Override
-    @Transactional
-    public Map<String, Object> sendAllPaymentEmails(Long shipmentId, MultipartFile[] attachments) {
-        var orders = orderRepository.findByShipmentId(shipmentId);
-
-        int sent   = 0;
-        int failed = 0;
-
-        for (Order order : orders) {
-            try {
-                SendEmailResponse result = sendPaymentEmail(order.getId(), attachments);
-                if (result.isSuccess()) sent++;
-                else failed++;
-            } catch (Exception e) {
-                log.error("Erreur order {} : {}", order.getHawb(), e.getMessage());
-                failed++;
-            }
-        }
-
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("total",  orders.size());
-        summary.put("sent",   sent);
-        summary.put("failed", failed);
-        return summary;
+    public BulkEmailResult sendAllPaymentEmails(Long shipmentId, MultipartFile[] attachments) {
+        List<Long> orderIds = orderRepository.findByShipmentId(shipmentId)
+                .stream().map(Order::getId).toList();
+        return executeBulk(orderIds, attachments);
     }
 
     @Override
-    @Transactional
     public BulkEmailResult sendBulkEmails(List<Long> orderIds, MultipartFile[] attachments) {
+        return executeBulk(orderIds, attachments);
+    }
+
+    // ---------------------------------------------------------------
+    // LOGIQUE BULK COMMUNE (évite la duplication)
+    // ---------------------------------------------------------------
+
+    private BulkEmailResult executeBulk(List<Long> orderIds, MultipartFile[] attachments) {
         int sent = 0, failed = 0;
         for (Long id : orderIds) {
             try {
@@ -174,10 +139,11 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     }
 
     // ---------------------------------------------------------------
-    // ENVOI GMAIL SMTP
+    // ENVOI SMTP — purement technique, aucune logique métier
     // ---------------------------------------------------------------
 
-    private void sendHtmlEmail(String to, String subject, String html, MultipartFile[] attachments) throws MessagingException {
+    private void sendHtmlEmail(String to, String subject, String html,
+                                MultipartFile[] attachments) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -202,44 +168,33 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     }
 
     // ---------------------------------------------------------------
-    // CONSTRUCTION DES VARIABLES
+    // CONSTRUCTION DES VARIABLES TEMPLATE
     // ---------------------------------------------------------------
 
     private Map<String, String> buildVariables(Order order) {
-        Map<String, String> vars = new HashMap<>();
+        var client   = order.getClient();
+        var shipment = order.getShipment();
 
-        vars.put("hawb",            safe(order.getHawb()));
-        vars.put("goodsDescription",safe(order.getGoodsDescription()));
-        vars.put("shipmentWeight",  order.getShipmentWeight() != null ? order.getShipmentWeight().toPlainString() : "—");
-        vars.put("customsValue",    order.getCustomsValue()   != null ? order.getCustomsValue().toPlainString()   : "—");
-        vars.put("dutyAmount",      order.getDutyAmount()     != null ? order.getDutyAmount().toPlainString()     : "—");
-        vars.put("totalAmount",     order.getTotalAmount()    != null ? order.getTotalAmount().toPlainString()    : "—");
-        vars.put("customsCurrency", safe(order.getCustomsCurrency()));
-
-        if (order.getClient() != null) {
-            vars.put("receiverName",    safe(order.getClient().getFullName()));
-            vars.put("deliveryAddress", buildAddress(order));
-            vars.put("clientPhone",     safe(order.getClient().getPhone()));
-        } else {
-            vars.put("receiverName",    "—");
-            vars.put("deliveryAddress", "—");
-            vars.put("clientPhone",     "—");
-        }
-
-        if (order.getShipment() != null && order.getShipment().getShipper() != null) {
-            vars.put("shipperName", safe(order.getShipment().getShipper().getCompanyName()));
-        } else {
-            vars.put("shipperName", "—");
-        }
-
-        vars.put("paymentLink", frontendUrl + "/pay/" + order.getPaymentToken());
-
-        return vars;
+        return Map.ofEntries(
+            Map.entry("hawb",             safe(order.getHawb())),
+            Map.entry("goodsDescription", safe(order.getGoodsDescription())),
+            Map.entry("shipmentWeight",   decimal(order.getShipmentWeight())),
+            Map.entry("customsValue",     decimal(order.getCustomsValue())),
+            Map.entry("dutyAmount",       decimal(order.getDutyAmount())),
+            Map.entry("totalAmount",      decimal(order.getTotalAmount())),
+            Map.entry("customsCurrency",  safe(order.getCustomsCurrency())),
+            Map.entry("receiverName",     client != null ? safe(client.getFullName())  : "—"),
+            Map.entry("deliveryAddress",  client != null ? buildAddress(order)         : "—"),
+            Map.entry("clientPhone",      client != null ? safe(client.getPhone())     : "—"),
+            Map.entry("shipperName",      shipment != null && shipment.getShipper() != null
+                                              ? safe(shipment.getShipper().getCompanyName()) : "—"),
+            Map.entry("paymentLink",      frontendUrl + "/pay/" + order.getPaymentToken())
+        );
     }
 
     private String buildAddress(Order order) {
-        var c = order.getClient();
-        StringBuilder sb = new StringBuilder();
+        var c  = order.getClient();
+        var sb = new StringBuilder();
         if (c.getAddress() != null) sb.append(c.getAddress()).append(", ");
         if (c.getCity()    != null) sb.append(c.getCity()).append(", ");
         if (c.getState()   != null) sb.append(c.getState()).append(" ");
@@ -249,5 +204,9 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     private String safe(String val) {
         return val != null ? val : "—";
+    }
+
+    private String decimal(java.math.BigDecimal val) {
+        return val != null ? val.toPlainString() : "—";
     }
 }

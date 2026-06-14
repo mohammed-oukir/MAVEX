@@ -152,6 +152,12 @@ public class ClientServiceImpl implements ClientService {
         if (!clientRepository.existsById(id)) {
             throw new EntityNotFoundException("Client introuvable avec l'id : " + id);
         }
+        long orderCount = orderRepository.countByClientId(id);
+        if (orderCount > 0) {
+            throw new IllegalStateException(
+                "Ce client possède " + orderCount + " order(s) et ne peut pas être supprimé."
+            );
+        }
         clientRepository.deleteById(id);
     }
 
@@ -159,6 +165,16 @@ public class ClientServiceImpl implements ClientService {
     @Transactional
     public int bulkDelete(BulkActionRequest req) {
         List<Client> clients = clientRepository.findAllById(req.getIds());
+        List<String> blocked = clients.stream()
+            .filter(c -> orderRepository.countByClientId(c.getId()) > 0)
+            .map(c -> c.getFullName() != null ? c.getFullName() : "Client #" + c.getId())
+            .toList();
+        if (!blocked.isEmpty()) {
+            throw new IllegalStateException(
+                "Impossible de supprimer : " + String.join(", ", blocked) +
+                " possède des orders liés."
+            );
+        }
         clientRepository.deleteAll(clients);
         return clients.size();
     }

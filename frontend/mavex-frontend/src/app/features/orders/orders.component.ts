@@ -98,6 +98,7 @@ export class OrdersComponent implements OnInit {
   /* ── Edit order ───────────────────────────────────────── */
   editingOrder = signal<OrderResponse | null>(null);
   savingOrder  = signal(false);
+  lastSavedId  = signal<number | null>(null);
   clients      = signal<ClientResponse[]>([]);
 
   editClientSearch       = signal('');
@@ -441,9 +442,11 @@ export class OrdersComponent implements OnInit {
       next: () => {
         this.savingOrder.set(false);
         this.editingOrder.set(null);
-        this.toast.success('Order mis à jour.');
+        this.toast.success('Order mis à jour avec succès.');
         this.loadOrders();
         this.loadKpis();
+        this.lastSavedId.set(o.id);
+        setTimeout(() => this.lastSavedId.set(null), 1800);
       },
       error: err => {
         this.savingOrder.set(false);

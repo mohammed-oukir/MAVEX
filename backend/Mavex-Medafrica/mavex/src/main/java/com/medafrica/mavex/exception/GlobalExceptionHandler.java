@@ -38,5 +38,14 @@ public class GlobalExceptionHandler {
                 .data(null)
                 .build());
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(ApiResponse.<Void>builder()
+                .message(e.getMessage())
+                .data(null)
+                .build());
+    }
 }
 

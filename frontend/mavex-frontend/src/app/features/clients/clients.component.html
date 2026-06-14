@@ -58,8 +58,26 @@
      ══════════════════════════════════════════════════════════ -->
 <div class="card border-0 shadow-sm mb-3">
   <div class="cl-toolbar">
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
       <span class="cl-total-badge">{{ total() }} client(s)</span>
+      <div class="cl-date-range">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <input
+          type="date"
+          class="cl-date-input"
+          [value]="fDateFrom()"
+          (change)="fDateFrom.set($any($event.target).value); page.set(0)"
+          aria-label="Date de création — début"
+        />
+        <span class="cl-date-sep">→</span>
+        <input
+          type="date"
+          class="cl-date-input"
+          [value]="fDateTo()"
+          (change)="fDateTo.set($any($event.target).value); page.set(0)"
+          aria-label="Date de création — fin"
+        />
+      </div>
       @if (hasFilters()) {
         <button type="button" class="cl-clear-btn" (click)="clearFilters()">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -206,7 +224,7 @@
 
         } @else {
           @for (c of pageItems(); track c.id) {
-            <tr class="cl-row" [class.cl-row-inactive]="!c.active" [class.cl-row-selected]="selectedIds().has(c.id)">
+            <tr class="cl-row" [class.cl-row-inactive]="!c.active" [class.cl-row-selected]="selectedIds().has(c.id)" [class.cl-row--saved]="lastSavedId() === c.id">
 
               <!-- Checkbox -->
               <td class="cl-td-check">

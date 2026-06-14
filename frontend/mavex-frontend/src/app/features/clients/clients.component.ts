@@ -34,13 +34,15 @@ export class ClientsComponent implements OnInit {
   readonly pageSize = 15;
 
   /* ── Column filters ───────────────────────────────── */
-  fName    = signal('');
-  fEmail   = signal('');
-  fPhone   = signal('');
-  fCity    = signal('');
-  fState   = signal('');
-  fCountry = signal('');
-  fStatus  = signal<'all' | 'active' | 'inactive'>('all');
+  fName      = signal('');
+  fEmail     = signal('');
+  fPhone     = signal('');
+  fCity      = signal('');
+  fState     = signal('');
+  fCountry   = signal('');
+  fStatus    = signal<'all' | 'active' | 'inactive'>('all');
+  fDateFrom  = signal('');
+  fDateTo    = signal('');
 
   /* ── KPIs ─────────────────────────────────────────── */
   kpiTotal    = computed(() => this.allClients().length);
@@ -57,13 +59,16 @@ export class ClientsComponent implements OnInit {
 
   /* ── Filtered + paginated ─────────────────────────── */
   filtered = computed(() => {
-    const n  = this.fName().toLowerCase();
-    const e  = this.fEmail().toLowerCase();
-    const p  = this.fPhone().toLowerCase();
-    const ci = this.fCity().toLowerCase();
-    const st = this.fState().toLowerCase();
-    const co = this.fCountry().toLowerCase();
-    const s  = this.fStatus();
+    const n    = this.fName().toLowerCase();
+    const e    = this.fEmail().toLowerCase();
+    const p    = this.fPhone().toLowerCase();
+    const ci   = this.fCity().toLowerCase();
+    const st   = this.fState().toLowerCase();
+    const co   = this.fCountry().toLowerCase();
+    const s    = this.fStatus();
+    const from = this.fDateFrom() ? new Date(this.fDateFrom()) : null;
+    const to   = this.fDateTo()   ? new Date(this.fDateTo())   : null;
+    if (to) to.setHours(23, 59, 59, 999);
 
     return this.allClients().filter(c => {
       if (n  && !c.fullName?.toLowerCase().includes(n))  return false;
@@ -78,6 +83,12 @@ export class ClientsComponent implements OnInit {
       }
       if (s === 'active'   && !c.active)  return false;
       if (s === 'inactive' && c.active)   return false;
+      if (from || to) {
+        const created = c.createdAt ? new Date(c.createdAt) : null;
+        if (!created) return false;
+        if (from && created < from) return false;
+        if (to   && created > to)   return false;
+      }
       return true;
     });
   });
@@ -91,7 +102,7 @@ export class ClientsComponent implements OnInit {
   hasFilters = computed(() =>
     !!this.fName() || !!this.fEmail() || !!this.fPhone() ||
     !!this.fCity() || !!this.fState() || !!this.fCountry() ||
-    this.fStatus() !== 'all'
+    this.fStatus() !== 'all' || !!this.fDateFrom() || !!this.fDateTo()
   );
 
   /* ── Sélection bulk ──────────────────────────────── */
@@ -115,6 +126,7 @@ export class ClientsComponent implements OnInit {
   saving        = signal(false);
   deleting      = signal(false);
   toggling      = signal<number | null>(null);
+  lastSavedId   = signal<number | null>(null);
 
   /* ── Form ─────────────────────────────────────────── */
   form = this.fb.group({
@@ -161,7 +173,8 @@ export class ClientsComponent implements OnInit {
   clearFilters(): void {
     this.fName.set(''); this.fEmail.set(''); this.fPhone.set('');
     this.fCity.set(''); this.fState.set(''); this.fCountry.set('');
-    this.fStatus.set('all'); this.page.set(0);
+    this.fStatus.set('all'); this.fDateFrom.set(''); this.fDateTo.set('');
+    this.page.set(0);
   }
 
   /* ── Create / Edit ────────────────────────────────── */
@@ -211,13 +224,15 @@ export class ClientsComponent implements OnInit {
         this.saving.set(false);
         this.formMode.set(null);
         const isEdit = !!this.editingId();
-        this.toast.success(isEdit ? 'Client modifié.' : 'Client créé.');
+        this.toast.success(isEdit ? 'Client modifié avec succès.' : 'Client créé avec succès.');
         if (isEdit) {
           this.allClients.update(list => list.map(c => c.id === saved.id ? saved : c));
         } else {
           this.allClients.update(list => [saved, ...list]);
           this.page.set(0);
         }
+        this.lastSavedId.set(saved.id);
+        setTimeout(() => this.lastSavedId.set(null), 1800);
       },
       error: err => {
         this.saving.set(false);
@@ -278,7 +293,7 @@ export class ClientsComponent implements OnInit {
           this.allClients.update(list => list.filter(c => c.id !== id));
           this.toast.success('Client supprimé.');
         },
-        error: () => { this.deleting.set(false); this.toast.error('Erreur suppression.'); },
+        error: (err: any) => { this.deleting.set(false); this.toast.error(err?.error?.message || 'Erreur lors de la suppression.'); },
       });
   }
 
@@ -325,7 +340,7 @@ export class ClientsComponent implements OnInit {
           this.allClients.update(list => list.filter(c => !ids.includes(c.id)));
           this.toast.success(`${res.deleted} client(s) supprimé(s).`);
         },
-        error: () => { this.bulkActing.set(false); this.toast.error('Erreur suppression en masse.'); },
+        error: (err: any) => { this.bulkActing.set(false); this.toast.error(err?.error?.message || 'Erreur lors de la suppression en masse.'); },
       });
   }
 
