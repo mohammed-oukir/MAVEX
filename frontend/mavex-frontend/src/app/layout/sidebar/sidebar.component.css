@@ -9,7 +9,9 @@
 
 .sb {
   width: 240px;
-  background: #0C0C0E;
+  /* Noir-slate légèrement bleuté avec dégradé vertical pour la profondeur
+     (style Linear / Vercel) — plus doux que le noir pur #0C0C0E */
+  background: linear-gradient(180deg, #16181D 0%, #121317 55%, #0E0F12 100%);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -18,7 +20,7 @@
   bottom: 0;
   z-index: 200;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, .055);
+  border-right: 1px solid rgba(255, 255, 255, .07);
   transition: transform .25s cubic-bezier(.4, 0, .2, 1);
 }
 
@@ -30,7 +32,7 @@
   left: -60px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(249, 115, 22, .16) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(249, 115, 22, .18) 0%, transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -84,7 +86,7 @@
   position: relative;
   z-index: 1;
   flex: 1;
-  padding: 10px 10px;
+  padding: 14px 12px;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -95,26 +97,27 @@
 .sb-label {
   font-size: 10px;
   font-weight: 700;
-  color: rgba(255, 255, 255, .22);
-  letter-spacing: .12em;
+  color: rgba(255, 255, 255, .3);
+  letter-spacing: .13em;
   text-transform: uppercase;
-  padding: 10px 10px 4px;
+  padding: 18px 10px 6px;
   user-select: none;
 }
+.sb-label:first-child { padding-top: 4px; }
 
 /* Nav item */
 .sb-item {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 10px;
-  border-radius: 7px;
-  color: rgba(255, 255, 255, .42);
+  gap: 11px;
+  padding: 10px 11px;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, .58);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
   transition: background .14s, color .14s;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
   position: relative;
   cursor: pointer;
   outline: none;
@@ -123,12 +126,15 @@
 .sb-item svg {
   flex-shrink: 0;
   transition: color .14s;
+  color: rgba(255, 255, 255, .45);
 }
 
 .sb-item:hover {
   background: rgba(255, 255, 255, .065);
-  color: rgba(255, 255, 255, .82);
+  color: rgba(255, 255, 255, .92);
 }
+.sb-item:hover svg { color: rgba(255, 255, 255, .75); }
+.sb-item.active svg { color: #F97316; }
 
 .sb-item:focus-visible {
   box-shadow: 0 0 0 2px #F97316;
@@ -145,9 +151,9 @@
 .sb-item.active::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 7px;
-  bottom: 7px;
+  left: -12px;
+  top: 8px;
+  bottom: 8px;
   width: 3px;
   background: #F97316;
   border-radius: 0 3px 3px 0;

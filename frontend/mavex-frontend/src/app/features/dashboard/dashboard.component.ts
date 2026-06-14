@@ -11,12 +11,12 @@ import { ShipmentService }  from '../../core/services/shipment.service';
 import { ImportService }    from '../../core/services/import.service';
 import { AuthService }      from '../../core/auth/auth.service';
 import { BadgeComponent }   from '../../shared/badge/badge.component';
-import { DashboardKpi, StatusCount, MonthlyCount, MonthlyRevenue, DashboardAlerts } from '../../core/models/dashboard.model';
+import { DashboardKpi, StatusCount, MonthlyRevenue, DashboardAlerts } from '../../core/models/dashboard.model';
 import { ShipmentResponse } from '../../core/models/shipment.model';
 import { ImportLogResponse } from '../../core/models/import.model';
 import type {
-  ApexChart, ApexNonAxisChartSeries, ApexDataLabels, ApexLegend,
-  ApexPlotOptions, ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis,
+  ApexChart, ApexDataLabels,
+  ApexStroke, ApexTooltip, ApexXAxis, ApexYAxis,
   ApexFill, ApexGrid,
 } from 'ng-apexcharts';
 
@@ -38,7 +38,6 @@ export class DashboardComponent implements OnInit {
   /* ── Data signals ─────────────────────────────────────── */
   kpis            = signal<DashboardKpi | null>(null);
   statusCounts    = signal<StatusCount[]>([]);
-  monthlyShips    = signal<MonthlyCount[]>([]);
   monthlyRev      = signal<MonthlyRevenue[]>([]);
   alerts          = signal<DashboardAlerts | null>(null);
   recentShipments = signal<ShipmentResponse[]>([]);
@@ -76,74 +75,40 @@ export class DashboardComponent implements OnInit {
     return a.ordersNeverEmailed + a.stuckShipments + a.overduePayments;
   });
 
-  /* ── Donut — orders by status ─────────────────────────── */
-  donutSeries  = computed<ApexNonAxisChartSeries>(() => this.statusCounts().map(s => s.count));
-  donutLabels  = computed(() => this.statusCounts().map(s => this.fmtStatus(s.status)));
-  donutColors  = computed(() => this.statusCounts().map(s => this.statusColor(s.status)));
+  /* ── Funnel — pipeline des orders (ordre du workflow) ─────
+     Montre OÙ les colis se bloquent dans le cycle de vie.
+     Les statuts sont rangés dans l'ordre métier, pas par volume. */
+  private readonly funnelOrder = [
+    'CREATED', 'EMAIL_SENT', 'PENDING_PAYMENT', 'PAID', 'IN_DELIVERY', 'DELIVERED',
+  ];
 
-  readonly donutChart: ApexChart = {
-    type: 'donut', height: 280,
-    fontFamily: 'DM Sans, sans-serif',
-    toolbar: { show: false },
-    animations: { enabled: true, speed: 700, animateGradually: { enabled: true, delay: 80 } },
-  };
-  readonly donutDataLabels: ApexDataLabels = {
-    enabled: false,
-  };
-  readonly donutLegend: ApexLegend = {
-    position: 'bottom', fontSize: '12px',
-    fontFamily: 'DM Sans, sans-serif',
-    markers: { size: 7 },
-    itemMargin: { horizontal: 10, vertical: 4 },
-    labels: { colors: '#6B7280' },
-  };
-  readonly donutStroke: ApexStroke = { width: 3, colors: ['#fff'] };
-  readonly donutPlotOptions: ApexPlotOptions = {
-    pie: {
-      donut: {
-        size: '72%',
-        labels: {
-          show: true,
-          name: { show: true, fontSize: '13px', fontFamily: 'DM Sans', color: '#9CA3AF', offsetY: -8 },
-          value: { show: true, fontSize: '28px', fontFamily: 'Inter Tight, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: 6 },
-          total: {
-            show: true, label: 'Total orders',
-            fontSize: '12px', fontFamily: 'DM Sans', fontWeight: '600', color: '#9CA3AF',
-            formatter: (w: { globals: { seriesTotals: number[] } }) =>
-              w.globals.seriesTotals.reduce((a, b) => a + b, 0).toString(),
-          },
-        },
-      },
-    },
-  };
+  funnel = computed(() => {
+    const counts = new Map(this.statusCounts().map(s => [s.status, s.count]));
+    const steps = this.funnelOrder
+      .map(status => ({
+        status,
+        label: this.fmtStatus(status),
+        color: this.statusColor(status),
+        count: counts.get(status) ?? 0,
+      }))
+      .filter(s => s.count > 0);
 
-  /* ── Bar — shipments by month ─────────────────────────── */
-  barSeries      = computed(() => [{ name: 'Shipments', data: this.monthlyShips().map(m => m.count) }]);
-  barCategories  = computed(() => this.monthlyShips().map(m => m.month));
+    const max = Math.max(1, ...steps.map(s => s.count));
+    const total = steps.reduce((a, s) => a + s.count, 0);
 
-  readonly barChart: ApexChart = {
-    type: 'bar', height: 280,
-    fontFamily: 'DM Sans, sans-serif',
-    toolbar: { show: false },
-    animations: { enabled: true, speed: 700 },
-    sparkline: { enabled: false },
-  };
-  readonly barXAxis: ApexXAxis = {
-    labels: { style: { fontSize: '11px', fontFamily: 'DM Sans', colors: '#9CA3AF' } },
-    axisBorder: { show: false }, axisTicks: { show: false },
-  };
-  readonly barYAxis: ApexYAxis = {
-    labels: { style: { fontSize: '11px', colors: '#9CA3AF' }, formatter: (v: number) => Math.round(v).toString() },
-    min: 0, tickAmount: 4,
-  };
-  readonly barFill: ApexFill = {
-    type: 'gradient',
-    gradient: { shade: 'light', type: 'vertical', shadeIntensity: 0.3, gradientToColors: ['#FDBA74'], opacityFrom: 1, opacityTo: 0.75, stops: [0, 100] },
-  };
-  readonly barGrid: ApexGrid = { borderColor: '#F3F4F6', strokeDashArray: 4, xaxis: { lines: { show: false } } };
-  readonly barTooltip: ApexTooltip = { theme: 'light', y: { formatter: (v: number) => v + ' shipment(s)' } };
-  readonly barColors  = ['#F97316'];
-  readonly barPlotOptions: ApexPlotOptions = { bar: { borderRadius: 6, columnWidth: '50%' } };
+    return steps.map(s => ({
+      ...s,
+      // largeur de barre relative à l'étape la plus chargée
+      width: Math.round((s.count / max) * 100),
+      // part du total (pour le %)
+      share: total > 0 ? Math.round((s.count / total) * 100) : 0,
+    }));
+  });
+
+  /* Annulés affichés à part (hors du flux normal) */
+  cancelledCount = computed(() =>
+    this.statusCounts().find(s => s.status === 'CANCELLED')?.count ?? 0,
+  );
 
   /* ── Area — revenue by month ──────────────────────────── */
   areaSeries     = computed(() => [{ name: 'Revenus (USD)', data: this.monthlyRev().map(m => +m.amount) }]);
@@ -176,30 +141,6 @@ export class DashboardComponent implements OnInit {
   readonly areaColors = ['#F97316'];
   readonly areaDataLabels: ApexDataLabels = { enabled: false };
 
-  /* ── Radial — payment rate ────────────────────────────── */
-  radialSeries  = computed(() => [this.paymentRate()]);
-  radialColors  = computed(() => [this.paymentRateColor()]);
-
-  readonly radialChart: ApexChart = {
-    type: 'radialBar', height: 280,
-    fontFamily: 'DM Sans, sans-serif',
-    toolbar: { show: false },
-    animations: { enabled: true, speed: 800 },
-  };
-  readonly radialPlotOptions: ApexPlotOptions = {
-    radialBar: {
-      startAngle: -130, endAngle: 130,
-      hollow: { size: '60%', background: 'transparent' },
-      track: { background: '#F3F4F6', strokeWidth: '100%' },
-      dataLabels: {
-        name: { show: true, fontSize: '13px', fontFamily: 'DM Sans', color: '#9CA3AF', offsetY: 20 },
-        value: { show: true, fontSize: '32px', fontFamily: 'Inter Tight, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: -10,
-                 formatter: (v: number) => v + '%' },
-      },
-    },
-  };
-  readonly radialLabels = ['Taux de paiement'];
-
   /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
     this.layout.setPage('Dashboard', { label: 'Importer', routerLink: '/imports' });
@@ -210,12 +151,11 @@ export class DashboardComponent implements OnInit {
 
   private loadAll(): void {
     let done = 0;
-    const total = 7;
+    const total = 6;
     const mark = () => { if (++done === total) this.loading.set(false); };
 
     this.dashSvc.getKpis().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: d => { this.kpis.set(d); mark(); }, error: mark });
     this.dashSvc.getOrdersByStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: d => { this.statusCounts.set(d); mark(); }, error: mark });
-    this.dashSvc.getShipmentsByMonth().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: d => { this.monthlyShips.set(d); mark(); }, error: mark });
     this.dashSvc.getRevenueByMonth().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: d => { this.monthlyRev.set(d); mark(); }, error: mark });
     this.dashSvc.getAlerts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: d => { this.alerts.set(d); mark(); }, error: mark });
     this.shipSvc.getAll(0, 5, 'createdAt,desc').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: p => { this.recentShipments.set(p.content); mark(); }, error: mark });

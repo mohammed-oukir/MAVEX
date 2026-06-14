@@ -162,9 +162,60 @@
 }
 
 <!-- ═══════════════════════════════════════════════════════════
-     GRAPHES — ligne 1 : Area (2/3) + Radial (1/3)
+     GRAPHES — ligne 1 : Funnel pipeline (1/2) + Revenus (1/2)
      ═══════════════════════════════════════════════════════════ -->
-<div class="dk-row dk-row--7030">
+<div class="dk-row dk-row--5050">
+
+  <!-- Funnel — pipeline des orders -->
+  <div class="dk-panel">
+    <div class="dk-panel-hd">
+      <div>
+        <div class="dk-panel-title">Pipeline des colis</div>
+        <div class="dk-panel-sub">Où en sont les orders dans le cycle</div>
+      </div>
+      @if (!loading()) {
+        <div class="dk-panel-badge">{{ kpis()?.totalOrders ?? 0 }} orders</div>
+      }
+    </div>
+
+    <div class="dk-funnel">
+      @if (loading()) {
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="dk-funnel-sk">
+            <div class="dk-sk-row" style="width:35%;height:11px"></div>
+            <div class="dk-sk-row" [style.width.%]="[88,70,55,40,28][i-1]" style="height:22px;border-radius:6px"></div>
+          </div>
+        }
+      } @else if (funnel().length === 0) {
+        <div class="dk-empty">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p>Aucun order pour l'instant</p>
+        </div>
+      } @else {
+        @for (step of funnel(); track step.status) {
+          <a class="dk-fnl-step" routerLink="/orders" [attr.aria-label]="step.label + ' : ' + step.count + ' orders'">
+            <div class="dk-fnl-head">
+              <span class="dk-fnl-dot" [style.background]="step.color" aria-hidden="true"></span>
+              <span class="dk-fnl-label">{{ step.label }}</span>
+              <span class="dk-fnl-count">{{ step.count }}</span>
+              <span class="dk-fnl-share">{{ step.share }}%</span>
+            </div>
+            <div class="dk-fnl-track">
+              <div class="dk-fnl-bar" [style.width.%]="step.width" [style.background]="step.color"></div>
+            </div>
+          </a>
+        }
+        @if (cancelledCount() > 0) {
+          <div class="dk-fnl-cancelled">
+            <span class="dk-fnl-dot" style="background:#EF4444" aria-hidden="true"></span>
+            {{ cancelledCount() }} annulé(s) — hors du flux
+          </div>
+        }
+      }
+    </div>
+  </div>
 
   <!-- Area — revenus -->
   <div class="dk-panel">
@@ -196,105 +247,6 @@
           [tooltip]="areaTooltip"
           [colors]="areaColors"
           [dataLabels]="areaDataLabels"
-        />
-      }
-    </div>
-  </div>
-
-  <!-- Radial — taux de paiement -->
-  <div class="dk-panel">
-    <div class="dk-panel-hd">
-      <div>
-        <div class="dk-panel-title">Taux de paiement</div>
-        <div class="dk-panel-sub">Orders payés / total</div>
-      </div>
-    </div>
-    <div class="dk-chart-wrap">
-      @if (loading()) {
-        <div class="dk-sk-chart dk-sk-chart--radial">
-          <div class="dk-sk-circle"></div>
-        </div>
-      } @else {
-        <apx-chart
-          [series]="radialSeries()"
-          [chart]="radialChart"
-          [plotOptions]="radialPlotOptions"
-          [colors]="radialColors()"
-          [labels]="radialLabels"
-        />
-      }
-    </div>
-  </div>
-
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════
-     GRAPHES — ligne 2 : Donut (1/2) + Bar (1/2)
-     ═══════════════════════════════════════════════════════════ -->
-<div class="dk-row dk-row--5050">
-
-  <!-- Donut — orders par statut -->
-  <div class="dk-panel">
-    <div class="dk-panel-hd">
-      <div>
-        <div class="dk-panel-title">Répartition des orders</div>
-        <div class="dk-panel-sub">Par statut</div>
-      </div>
-    </div>
-    <div class="dk-chart-wrap">
-      @if (loading() || statusCounts().length === 0) {
-        <div class="dk-sk-chart dk-sk-chart--radial">
-          <div class="dk-sk-circle"></div>
-        </div>
-      } @else {
-        <apx-chart
-          [series]="donutSeries()"
-          [chart]="donutChart"
-          [labels]="donutLabels()"
-          [colors]="donutColors()"
-          [dataLabels]="donutDataLabels"
-          [legend]="donutLegend"
-          [stroke]="donutStroke"
-          [plotOptions]="donutPlotOptions"
-        />
-      }
-    </div>
-  </div>
-
-  <!-- Bar — shipments par mois -->
-  <div class="dk-panel">
-    <div class="dk-panel-hd">
-      <div>
-        <div class="dk-panel-title">Volume de shipments</div>
-        <div class="dk-panel-sub">6 derniers mois</div>
-      </div>
-      @if (!loading()) {
-        <div class="dk-panel-badge">
-          {{ kpis()?.totalShipments ?? 0 }} total
-        </div>
-      }
-    </div>
-    <div class="dk-chart-wrap">
-      @if (loading() || monthlyShips().length === 0) {
-        <div class="dk-sk-chart">
-          <div class="dk-sk-bars" aria-hidden="true">
-            @for (h of [60,90,45,110,70,85]; track h) {
-              <div class="dk-sk-bar" [style.height.px]="h"></div>
-            }
-          </div>
-        </div>
-      } @else {
-        <apx-chart
-          [series]="barSeries()"
-          [chart]="barChart"
-          [xaxis]="{ categories: barCategories(), labels: barXAxis.labels, axisBorder: barXAxis.axisBorder, axisTicks: barXAxis.axisTicks }"
-          [yaxis]="barYAxis"
-          [fill]="barFill"
-          [grid]="barGrid"
-          [tooltip]="barTooltip"
-          [colors]="barColors"
-          [plotOptions]="barPlotOptions"
-          [dataLabels]="{ enabled: false }"
         />
       }
     </div>
