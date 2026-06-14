@@ -34,10 +34,10 @@
   position: absolute; top: 0; left: 0; right: 0;
   height: 4px; border-radius: 16px 16px 0 0;
 }
-.cl-accent-orange { background: linear-gradient(90deg, #F97316, #FBBF24); }
-.cl-accent-green  { background: linear-gradient(90deg, #10B981, #34D399); }
-.cl-accent-red    { background: linear-gradient(90deg, #EF4444, #F87171); }
-.cl-accent-blue   { background: linear-gradient(90deg, #6366F1, #818CF8); }
+.cl-accent-orange { background: #F97316; }
+.cl-accent-green  { background: #F97316; }
+.cl-accent-red    { background: #F97316; }
+.cl-accent-blue   { background: #F97316; }
 
 /* Icône avec fond coloré doux */
 .cl-kpi-icon {
@@ -45,24 +45,25 @@
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .cl-icon-orange { background: #FFF7ED; color: #F97316; }
-.cl-icon-green  { background: #ECFDF5; color: #059669; }
-.cl-icon-red    { background: #FEF2F2; color: #DC2626; }
-.cl-icon-blue   { background: #EEF2FF; color: #4F46E5; }
+.cl-icon-green  { background: #FFF7ED; color: #F97316; }
+.cl-icon-red    { background: #FFF7ED; color: #F97316; }
+.cl-icon-blue   { background: #FFF7ED; color: #F97316; }
 
 .cl-kpi-selected .cl-icon-orange { background: #FFEDD5; }
-.cl-kpi-selected .cl-icon-green  { background: #D1FAE5; }
-.cl-kpi-selected .cl-icon-red    { background: #FEE2E2; }
-.cl-kpi-selected .cl-icon-blue   { background: #E0E7FF; }
+.cl-kpi-selected .cl-icon-green  { background: #FFEDD5; }
+.cl-kpi-selected .cl-icon-red    { background: #FFEDD5; }
+.cl-kpi-selected .cl-icon-blue   { background: #FFEDD5; }
 
 .cl-kpi-body { flex: 1; min-width: 0; }
 .cl-kpi-num  {
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: 34px; line-height: 1; color: #111827;
+  font-family: 'Inter Tight', sans-serif; font-weight: 800;
+  font-size: 32px; line-height: 1; color: #111827;
+  font-variant-numeric: tabular-nums; font-feature-settings: 'tnum';
 }
-.cl-num-orange { color: #EA6C08; }
-.cl-num-green  { color: #047857; }
-.cl-num-red    { color: #DC2626; }
-.cl-num-blue   { color: #4338CA; }
+.cl-num-orange { color: #0C0C0E; }
+.cl-num-green  { color: #0C0C0E; }
+.cl-num-red    { color: #0C0C0E; }
+.cl-num-blue   { color: #0C0C0E; }
 
 .cl-kpi-lbl { font-size: 12.5px; color: #6B7280; margin-top: 5px; font-weight: 500; }
 
@@ -246,9 +247,9 @@
 }
 .cl-country-badge {
   display: inline-block; padding: 3px 9px;
-  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
-  border-radius: 7px; font-size: 11.5px; font-weight: 700; color: #1D4ED8;
-  letter-spacing: .04em; border: 1px solid #BFDBFE;
+  background: #F3F4F6;
+  border-radius: 7px; font-size: 11.5px; font-weight: 700; color: #374151;
+  letter-spacing: .04em; border: 1px solid #E5E7EB;
 }
 
 /* Status badge */
@@ -377,9 +378,9 @@
   font-size: 11px; font-weight: 700; white-space: nowrap;
 }
 .cl-os-created   { background: #F3F4F6; color: #6B7280; }
-.cl-os-email     { background: linear-gradient(135deg,#DBEAFE,#BFDBFE); color: #1D4ED8; }
-.cl-os-pending   { background: linear-gradient(135deg,#FEF3C7,#FDE68A); color: #92400E; }
-.cl-os-paid      { background: linear-gradient(135deg,#D1FAE5,#A7F3D0); color: #065F46; }
-.cl-os-delivery  { background: linear-gradient(135deg,#EDE9FE,#DDD6FE); color: #5B21B6; }
-.cl-os-delivered { background: linear-gradient(135deg,#ECFDF5,#D1FAE5); color: #064E3B; }
-.cl-os-cancelled { background: linear-gradient(135deg,#FEE2E2,#FECACA); color: #991B1B; }
+.cl-os-email     { background: #F3F4F6; color: #6B7280; }
+.cl-os-pending   { background: #FFFBEB; color: #D97706; }
+.cl-os-paid      { background: #F0FDF4; color: #16A34A; }
+.cl-os-delivery  { background: #FFFBEB; color: #D97706; }
+.cl-os-delivered { background: #F0FDF4; color: #16A34A; }
+.cl-os-cancelled { background: #FEF2F2; color: #B91C1C; }

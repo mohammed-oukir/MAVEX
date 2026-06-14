@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit {
         labels: {
           show: true,
           name: { show: true, fontSize: '13px', fontFamily: 'DM Sans', color: '#9CA3AF', offsetY: -8 },
-          value: { show: true, fontSize: '28px', fontFamily: 'Syne, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: 6 },
+          value: { show: true, fontSize: '28px', fontFamily: 'Inter Tight, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: 6 },
           total: {
             show: true, label: 'Total orders',
             fontSize: '12px', fontFamily: 'DM Sans', fontWeight: '600', color: '#9CA3AF',
@@ -172,7 +172,7 @@ export class DashboardComponent implements OnInit {
   };
   readonly areaStroke: ApexStroke = { curve: 'smooth', width: 2.5, colors: ['#F97316'] };
   readonly areaGrid: ApexGrid  = { borderColor: '#F3F4F6', strokeDashArray: 4, xaxis: { lines: { show: false } } };
-  readonly areaTooltip: ApexTooltip = { theme: 'light', y: { formatter: (v: number) => '$' + v.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) } };
+  readonly areaTooltip: ApexTooltip = { theme: 'light', y: { formatter: (v: number) => v.toLocaleString('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) } };
   readonly areaColors = ['#F97316'];
   readonly areaDataLabels: ApexDataLabels = { enabled: false };
 
@@ -193,7 +193,7 @@ export class DashboardComponent implements OnInit {
       track: { background: '#F3F4F6', strokeWidth: '100%' },
       dataLabels: {
         name: { show: true, fontSize: '13px', fontFamily: 'DM Sans', color: '#9CA3AF', offsetY: 20 },
-        value: { show: true, fontSize: '34px', fontFamily: 'Syne, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: -10,
+        value: { show: true, fontSize: '32px', fontFamily: 'Inter Tight, sans-serif', fontWeight: '800', color: '#0C0C0E', offsetY: -10,
                  formatter: (v: number) => v + '%' },
       },
     },

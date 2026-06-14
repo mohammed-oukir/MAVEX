@@ -1,4 +1,5 @@
--- Fix anti-spam: remove external image, soften urgent wording, fix href="#"
+-- Fix: move fixed blocks (total-box, info-box, signature) outside BODY_START/BODY_END
+-- so Quill edits only the narrative text paragraphs without destroying CSS classes
 UPDATE email_templates
 SET html_content = '<!DOCTYPE html>
 <html lang="en">
@@ -27,6 +28,7 @@ SET html_content = '<!DOCTYPE html>
   .total-left { display:table-cell; vertical-align:middle; }
   .total-right { display:table-cell; vertical-align:middle; text-align:right; }
   .total-label { font-size:14px; color:#E5E7EB; }
+  .total-sub { font-size:12px; color:#D1D5DB; margin-top:4px; }
   .total-amount { font-size:28px; font-weight:900; color:#F97316; }
   .signature { border-top:1px solid #eee; padding-top:20px; margin-top:8px; font-size:13px; color:#555; line-height:1.8; }
   .signature strong { color:#333; display:block; font-size:14px; }
@@ -49,6 +51,7 @@ SET html_content = '<!DOCTYPE html>
   </div>
 
   <div class="content">
+
 <!-- BODY_START -->
     <p class="greeting">Dear <strong>{{receiverName}}</strong>,</p>
 
@@ -66,17 +69,19 @@ SET html_content = '<!DOCTYPE html>
       To avoid any delay, we have covered the customs fees on your behalf
       and kindly ask for reimbursement. The total amount is:
     </p>
+<!-- BODY_END -->
 
     <div class="total-box">
       <div class="total-left">
         <div class="total-label">Total Amount Due</div>
-        <div style="font-size:12px;color:#D1D5DB;margin-top:4px;">Customs fees</div>
+        <div class="total-sub">Customs fees</div>
       </div>
       <div class="total-right">
         <div class="total-amount">{{totalAmount}} {{customsCurrency}}</div>
       </div>
     </div>
 
+<!-- BODY_AFTER_START -->
     <p class="body-text">
       We kindly ask you to arrange the payment of this amount
       to Med Africa Logistics at your earliest convenience.
@@ -95,6 +100,7 @@ SET html_content = '<!DOCTYPE html>
     <p class="body-text" style="margin-bottom:0;">
       Shipment details:
     </p>
+<!-- BODY_AFTER_END -->
 
     <div class="info-box">
       <div class="info-row">
@@ -122,7 +128,7 @@ SET html_content = '<!DOCTYPE html>
       <span>CS Manager</span>
       <span>Med Africa Logistics</span>
     </div>
-<!-- BODY_END -->
+
   </div>
 
   <div class="footer">

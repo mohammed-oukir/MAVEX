@@ -55,7 +55,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 14px;
   color: #fff;
@@ -64,7 +64,7 @@
 }
 
 .sb-brand-name {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
   font-size: 15px;
   color: #fff;
@@ -111,7 +111,7 @@
   border-radius: 7px;
   color: rgba(255, 255, 255, .42);
   text-decoration: none;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   transition: background .14s, color .14s;
   margin-bottom: 1px;
@@ -197,7 +197,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 12px;
   color: #fff;
@@ -205,7 +205,7 @@
 }
 
 .sb-user-name {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, .82);
   overflow: hidden;

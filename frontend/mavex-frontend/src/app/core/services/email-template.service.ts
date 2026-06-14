@@ -6,6 +6,7 @@ export interface EmailTemplateDTO {
   id: number;
   subject: string;
   bodyContent: string;
+  bodyAfterContent?: string;
   htmlContent?: string;
 }
 

@@ -65,13 +65,20 @@ public class EmailTemplate {
     private String builderJson;
 
     /**
-     * Contenu modifiable par Quill editor (section body uniquement).
-     * Le htmlContent complet est reconstruit a partir de ce champ
-     * en l'injectant dans le layout fixe EMAIL_LAYOUT.
+     * Paragraphes intro (avant total-box) — modifiables par Quill.
+     * Injectes entre BODY_START et BODY_END dans htmlContent.
      */
     @Lob
     @Column(name = "body_content", columnDefinition = "TEXT")
     private String bodyContent;
+
+    /**
+     * Paragraphes apres total-box — modifiables par Quill.
+     * Injectes entre BODY_AFTER_START et BODY_AFTER_END dans htmlContent.
+     */
+    @Lob
+    @Column(name = "body_after_content", columnDefinition = "TEXT")
+    private String bodyAfterContent;
 
     /** Seul le template actif est utilise par type */
     @Column(nullable = false)

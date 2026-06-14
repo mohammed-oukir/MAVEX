@@ -82,7 +82,7 @@
   font-size: 11.5px; font-weight: 700; letter-spacing: .05em;
 }
 .al-iata { background: linear-gradient(135deg, #FFF7ED, #FFEDD5); color: #C2410C; border: 1px solid #FED7AA; }
-.al-icao { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); color: #1D4ED8; border: 1px solid #BFDBFE; }
+.al-icao { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
 
 .al-mode-badge {
   display: inline-flex; align-items: center; gap: 5px;

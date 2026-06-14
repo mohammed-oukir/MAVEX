@@ -54,23 +54,23 @@
 .sh-kpi-selected   { border-color:transparent; box-shadow:0 8px 24px rgba(0,0,0,.12); transform:translateY(-2px); }
 
 .sh-kpi-accent { position:absolute; top:0; left:0; right:0; height:4px; border-radius:16px 16px 0 0; }
-.sh-accent-orange { background:linear-gradient(90deg,#F97316,#FBBF24); }
-.sh-accent-green  { background:linear-gradient(90deg,#10B981,#34D399); }
-.sh-accent-red    { background:linear-gradient(90deg,#EF4444,#F87171); }
-.sh-accent-blue   { background:linear-gradient(90deg,#6366F1,#818CF8); }
+.sh-accent-orange { background:#F97316; }
+.sh-accent-green  { background:#F97316; }
+.sh-accent-red    { background:#F97316; }
+.sh-accent-blue   { background:#F97316; }
 
 .sh-kpi-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .sh-icon-orange { background:#FFF7ED; color:#F97316; }
-.sh-icon-green  { background:#ECFDF5; color:#059669; }
-.sh-icon-red    { background:#FEF2F2; color:#DC2626; }
-.sh-icon-blue   { background:#EEF2FF; color:#4F46E5; }
+.sh-icon-green  { background:#FFF7ED; color:#F97316; }
+.sh-icon-red    { background:#FFF7ED; color:#F97316; }
+.sh-icon-blue   { background:#FFF7ED; color:#F97316; }
 
 .sh-kpi-body { flex:1; min-width:0; }
-.sh-kpi-num  { font-family:'Syne',sans-serif; font-weight:800; font-size:34px; line-height:1; color:#111827; }
-.sh-num-orange { color:#EA6C08; }
-.sh-num-green  { color:#047857; }
-.sh-num-red    { color:#DC2626; }
-.sh-num-blue   { color:#4338CA; }
+.sh-kpi-num  { font-family:'Inter Tight',sans-serif; font-weight:800; font-size:32px; line-height:1; color:#111827; font-variant-numeric:tabular-nums; font-feature-settings:'tnum'; }
+.sh-num-orange { color:#0C0C0E; }
+.sh-num-green  { color:#0C0C0E; }
+.sh-num-red    { color:#0C0C0E; }
+.sh-num-blue   { color:#0C0C0E; }
 .sh-kpi-lbl  { font-size:12.5px; color:#6B7280; margin-top:5px; font-weight:500; }
 
 .sh-kpi-alert { background:#FEE2E2; color:#DC2626; border-radius:100px; padding:3px 10px; font-size:11.5px; font-weight:700; flex-shrink:0; margin-left:auto; animation:sh-pulse 2s infinite; }

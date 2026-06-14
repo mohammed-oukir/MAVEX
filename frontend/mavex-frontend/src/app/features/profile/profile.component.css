@@ -70,7 +70,7 @@
   border-radius: 50%;
   background: linear-gradient(135deg, #F97316 0%, #C2410C 100%);
   color: #fff;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 34px;
   display: flex;
@@ -99,7 +99,7 @@
 }
 
 .pf-name {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 18px;
   color: #0C0C0E;
@@ -122,9 +122,9 @@
   font-weight: 600;
   padding: 5px 14px;
   border-radius: 100px;
-  background: #EFF6FF;
-  color: #3B82F6;
-  border: 1px solid #BFDBFE;
+  background: #FFF7ED;
+  color: #F97316;
+  border: 1px solid #FED7AA;
 }
 .pf-role-pill--admin {
   background: #FFF7ED;
@@ -209,7 +209,7 @@
 }
 
 .pf-section-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
   font-size: 15px;
   color: #0C0C0E;
@@ -308,8 +308,8 @@
 
 /* ── Icon colors ────────────────────────────────────────── */
 .pf-ico-orange { background: #FFF7ED; color: #F97316; }
-.pf-ico-purple { background: #F5F3FF; color: #7C3AED; }
-.pf-ico-blue   { background: #EFF6FF; color: #3B82F6; }
+.pf-ico-purple { background: #FFF7ED; color: #F97316; }
+.pf-ico-blue   { background: #FFF7ED; color: #F97316; }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 900px) {

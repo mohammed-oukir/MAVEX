@@ -18,8 +18,9 @@ import Quill from 'quill';
 })
 export class EmailTemplateComponent implements OnInit {
 
-  @ViewChild('editorContainer') editorContainer!: ElementRef<HTMLDivElement>;
-  @ViewChild('previewFrame')    previewFrame!:    ElementRef<HTMLIFrameElement>;
+  @ViewChild('editorContainer')      editorContainer!:      ElementRef<HTMLDivElement>;
+  @ViewChild('editorAfterContainer') editorAfterContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('previewFrame')         previewFrame!:         ElementRef<HTMLIFrameElement>;
 
   private readonly layout      = inject(LayoutService);
   private readonly toast       = inject(ToastService);
@@ -27,6 +28,7 @@ export class EmailTemplateComponent implements OnInit {
   private readonly destroyRef  = inject(DestroyRef);
 
   private quill!: Quill;
+  private quillAfter!: Quill;
 
   /* ── State ────────────────────────────────────────────── */
   template   = signal<EmailTemplateDTO | null>(null);
@@ -74,7 +76,10 @@ export class EmailTemplateComponent implements OnInit {
           this.template.set(t);
           this.subject.set(t.subject);
           this.loading.set(false);
-          setTimeout(() => this.initQuill(t.bodyContent ?? ''), 0);
+          setTimeout(() => {
+            this.initQuill(t.bodyContent ?? '');
+            this.initQuillAfter(t.bodyAfterContent ?? '');
+          }, 0);
         },
         error: () => {
           this.loading.set(false);
@@ -83,54 +88,67 @@ export class EmailTemplateComponent implements OnInit {
       });
   }
 
+  private readonly QUILL_MODULES = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline'],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['link'],
+      ['clean'],
+    ],
+  };
+
   private initQuill(bodyContent: string): void {
     this.quill = new Quill(this.editorContainer.nativeElement, {
       theme: 'snow',
       placeholder: 'Rédigez le contenu de l\'email...',
-      modules: {
-        toolbar: [
-          [{ header: [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline'],
-          [{ color: [] }, { background: [] }],
-          [{ align: [] }],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link'],
-          ['clean'],
-        ],
-      },
+      modules: this.QUILL_MODULES,
     });
-
-    this.quill.clipboard.dangerouslyPasteHTML(bodyContent ?? '');
-
-    this.quill.on('text-change', () => {
-      this.hasChanges.set(true);
-    });
+    this.quill.clipboard.dangerouslyPasteHTML(bodyContent);
+    this.quill.on('text-change', () => this.hasChanges.set(true));
   }
 
+  private initQuillAfter(bodyAfterContent: string): void {
+    this.quillAfter = new Quill(this.editorAfterContainer.nativeElement, {
+      theme: 'snow',
+      placeholder: 'Paragraphes après le montant...',
+      modules: this.QUILL_MODULES,
+    });
+    this.quillAfter.clipboard.dangerouslyPasteHTML(bodyAfterContent);
+    this.quillAfter.on('text-change', () => this.hasChanges.set(true));
+  }
+
+  /* Insère la variable dans l'éditeur qui a le focus, sinon le premier */
   insertVariable(key: string): void {
-    const range = this.quill.getSelection(true);
-    this.quill.insertText(range.index, `{{${key}}}`);
-    this.quill.setSelection(range.index + key.length + 4);
+    const active = document.activeElement;
+    const editor = this.editorAfterContainer.nativeElement.contains(active)
+      ? this.quillAfter
+      : this.quill;
+    const range = editor.getSelection(true);
+    editor.insertText(range.index, `{{${key}}}`);
+    editor.setSelection(range.index + key.length + 4);
     this.hasChanges.set(true);
   }
 
-  /* ── Aperçu — injecte le bodyContent modifié dans le htmlContent complet */
   showPreview(): void {
     this.previewing.set(true);
     setTimeout(() => {
       const t = this.template();
       let html = t?.htmlContent ?? '';
       if (html) {
-        // Remplacer le bodyContent dans le htmlContent complet
-        const newBody = this.quill.root.innerHTML;
         html = html.replace(
           /(<!-- BODY_START -->)([\s\S]*?)(<!-- BODY_END -->)/,
-          `$1\n${newBody}\n$3`
+          `$1\n${this.quill.root.innerHTML}\n$3`
+        );
+        html = html.replace(
+          /(<!-- BODY_AFTER_START -->)([\s\S]*?)(<!-- BODY_AFTER_END -->)/,
+          `$1\n${this.quillAfter.root.innerHTML}\n$3`
         );
       } else {
-        html = this.quill.root.innerHTML;
+        html = this.quill.root.innerHTML + this.quillAfter.root.innerHTML;
       }
-      // Remplacer les variables par les fausses données
       for (const [key, val] of Object.entries(this.PREVIEW_DATA)) {
         html = html.replaceAll(`{{${key}}}`, val);
       }
@@ -147,9 +165,10 @@ export class EmailTemplateComponent implements OnInit {
     if (!t) return;
     this.saving.set(true);
     this.templateSvc.update(t.id, {
-      id:          t.id,
-      subject:     this.subject(),
-      bodyContent: this.quill.root.innerHTML,
+      id:               t.id,
+      subject:          this.subject(),
+      bodyContent:      this.quill.root.innerHTML,
+      bodyAfterContent: this.quillAfter.root.innerHTML,
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -170,6 +189,7 @@ export class EmailTemplateComponent implements OnInit {
     const t = this.template();
     if (!t) return;
     this.quill.clipboard.dangerouslyPasteHTML(t.bodyContent ?? '');
+    this.quillAfter.clipboard.dangerouslyPasteHTML(t.bodyAfterContent ?? '');
     this.subject.set(t.subject);
     this.hasChanges.set(false);
     this.toast.success('Contenu réinitialisé.');

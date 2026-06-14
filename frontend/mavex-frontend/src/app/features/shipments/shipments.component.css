@@ -158,7 +158,7 @@
   transition: all .15s;
 }
 
-.sp-stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; line-height: 1; margin-bottom: 4px; }
+.sp-stat-num { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; margin-bottom: 4px; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
 .sp-stat-lbl { font-size: 11.5px; font-weight: 600; color: #9CA3AF; letter-spacing: .03em; text-transform: uppercase; transition: color .15s; }
 
 /* Tous — orange */
@@ -177,13 +177,13 @@
 .card-draft.active .sp-stat-lbl        { color: #4B5563; }
 .card-draft.active .sp-si-draft        { background: #E5E7EB; }
 
-/* Imported — bleu vif */
-.sp-si-imported                        { background: #DBEAFE; color: #2563EB; }
-.card-imported .sp-stat-num            { color: #2563EB; }
-.card-imported:hover:not(.active)      { border-color: #93C5FD; box-shadow: 0 6px 20px rgba(37,99,235,.12); }
-.card-imported.active                  { background: linear-gradient(135deg,#EFF6FF,#DBEAFE); border-color: #60A5FA; box-shadow: 0 6px 20px rgba(37,99,235,.2); }
-.card-imported.active .sp-stat-lbl     { color: #2563EB; }
-.card-imported.active .sp-si-imported  { background: #BFDBFE; }
+/* Imported — orange marque */
+.sp-si-imported                        { background: #FFF7ED; color: #F97316; }
+.card-imported .sp-stat-num            { color: #F97316; }
+.card-imported:hover:not(.active)      { border-color: #FED7AA; box-shadow: 0 6px 20px rgba(249,115,22,.12); }
+.card-imported.active                  { background: #FFF7ED; border-color: #FED7AA; box-shadow: 0 6px 20px rgba(249,115,22,.2); }
+.card-imported.active .sp-stat-lbl     { color: #F97316; }
+.card-imported.active .sp-si-imported  { background: #FFEDD5; }
 
 /* Processing — amber chaud */
 .sp-si-processing                      { background: #FEF3C7; color: #D97706; }
@@ -197,7 +197,7 @@
 .sp-si-closed                          { background: #DCFCE7; color: #16A34A; }
 .card-closed .sp-stat-num              { color: #16A34A; }
 .card-closed:hover:not(.active)        { border-color: #86EFAC; box-shadow: 0 6px 20px rgba(22,163,74,.12); }
-.card-closed.active                    { background: linear-gradient(135deg,#F0FDF4,#DCFCE7); border-color: #4ADE80; box-shadow: 0 6px 20px rgba(22,163,74,.2); }
+.card-closed.active                    { background: #F0FDF4; border-color: #86EFAC; box-shadow: 0 6px 20px rgba(22,163,74,.2); }
 .card-closed.active .sp-stat-lbl       { color: #16A34A; }
 .card-closed.active .sp-si-closed      { background: #BBF7D0; }
 
@@ -251,11 +251,11 @@
 .dot-processing { background: #F97316; }
 .dot-closed     { background: #4ADE80; }
 
-.sp-mawb  { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #0C0C0E; }
+.sp-mawb  { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 13px; color: #0C0C0E; }
 .sp-muted { color: #9CA3AF; }
 
 /* ── Orders count pill ── */
-.sp-orders-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 8px; border-radius: 100px; background: #F3F4F6; font-size: 12px; font-weight: 700; color: #9CA3AF; font-family: 'Syne', sans-serif; }
+.sp-orders-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 8px; border-radius: 100px; background: #F3F4F6; font-size: 12px; font-weight: 700; color: #9CA3AF; font-family: 'Inter Tight', sans-serif; }
 .sp-orders-pill.has-orders { background: #FFF7ED; color: #F97316; border: 1px solid #FED7AA; }
 
 /* ── Date badge ── */

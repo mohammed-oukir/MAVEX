@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 17px;
   color: #fff;
@@ -67,7 +67,7 @@
 }
 
 .lp-logo-name {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
   font-size: 18px;
   color: #fff;
@@ -92,7 +92,7 @@
 }
 
 .lp-headline {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: clamp(2rem, 2.6vw, 2.85rem);
   line-height: 1.08;
@@ -178,7 +178,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 15px;
   color: #fff;
@@ -186,7 +186,7 @@
 }
 
 .lp-mobile-name {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
   font-size: 17px;
   color: #0C0C0E;
@@ -194,7 +194,7 @@
 
 /* Page heading */
 .lp-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 1.75rem;
   color: #0C0C0E;
@@ -345,7 +345,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   font-weight: 700;
   font-size: 14.5px;
   cursor: pointer;
@@ -429,7 +429,7 @@
   font-size: 24px;
   font-weight: 700;
   letter-spacing: .55em;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Inter Tight', sans-serif;
   padding-left: .55em;
 }
 

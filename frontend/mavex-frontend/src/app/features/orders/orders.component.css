@@ -105,14 +105,15 @@
 .or-kpi-icon {
   width: 52px; height: 52px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: #FFF7ED; color: #F97316;
 }
-.or-kpi-dark        { background: #1F2937; color: #fff; }
-.or-kpi-amber-icon  { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #D97706; }
-.or-kpi-blue-icon   { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }
-.or-kpi-green-icon  { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); color: #16A34A; }
+.or-kpi-dark        { background: #FFF7ED; color: #F97316; }
+.or-kpi-amber-icon  { background: #FFF7ED; color: #F97316; }
+.or-kpi-blue-icon   { background: #FFF7ED; color: #F97316; }
+.or-kpi-green-icon  { background: #FFF7ED; color: #F97316; }
 
 .or-kpi-body { flex: 1; min-width: 0; }
-.or-kpi-num  { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px; line-height: 1; color: #0C0C0E; }
+.or-kpi-num  { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 30px; line-height: 1; color: #0C0C0E; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
 .or-kpi-lbl  { font-size: 12px; color: #6B7280; margin-top: 4px; }
 
 .or-kpi-chevron { font-size: 20px; color: #D1D5DB; font-weight: 300; margin-left: auto; }
@@ -184,13 +185,13 @@
   display: flex; align-items: center; gap: 6px;
 }
 .or-tab:hover { background: #F9FAFB; color: #374151; }
-.or-tab.or-tab-active { background: #1F2937; color: #fff; }
+.or-tab.or-tab-active         { background: #F97316; color: #fff; }
 
-.or-tab-amber.or-tab-active  { background: #F59E0B; color: #fff; }
-.or-tab-blue.or-tab-active   { background: #3B82F6; color: #fff; }
-.or-tab-orange.or-tab-active { background: #F97316; color: #fff; }
-.or-tab-pending.or-tab-active { background: #F59E0B; color: #fff; }
-.or-tab-green.or-tab-active  { background: #22C55E; color: #fff; }
+.or-tab-amber.or-tab-active   { background: #F97316; color: #fff; }
+.or-tab-blue.or-tab-active    { background: #F97316; color: #fff; }
+.or-tab-orange.or-tab-active  { background: #F97316; color: #fff; }
+.or-tab-pending.or-tab-active { background: #F97316; color: #fff; }
+.or-tab-green.or-tab-active   { background: #F97316; color: #fff; }
 
 .or-tab-pill {
   background: #EF4444; color: #fff;
@@ -263,13 +264,13 @@
 .or-row td { padding: 12px 14px; }
 
 /* Couleur bord gauche par statut */
-.or-row-created   td:first-child { border-left: 3px solid #9CA3AF; }
-.or-row-email     td:first-child { border-left: 3px solid #3B82F6; }
+.or-row-created   td:first-child { border-left: 3px solid #D1D5DB; }
+.or-row-email     td:first-child { border-left: 3px solid #D1D5DB; }
 .or-row-outdated  td:first-child { border-left: 3px solid #F97316; }
 .or-row-pending   td:first-child { border-left: 3px solid #F59E0B; }
 .or-row-paid      td:first-child { border-left: 3px solid #22C55E; }
-.or-row-delivery  td:first-child { border-left: 3px solid #8B5CF6; }
-.or-row-delivered td:first-child { border-left: 3px solid #14B8A6; }
+.or-row-delivery  td:first-child { border-left: 3px solid #F59E0B; }
+.or-row-delivered td:first-child { border-left: 3px solid #22C55E; }
 .or-row-cancelled td:first-child { border-left: 3px solid #EF4444; opacity: .7; }
 
 .or-row-selected { background: #FFF7ED !important; }
@@ -293,9 +294,9 @@
 /* MAWB link */
 .or-mawb-link {
   font-family: 'DM Sans', monospace; font-size: 12px; font-weight: 600;
-  color: #6366F1; text-decoration: none;
+  color: #F97316; text-decoration: none;
 }
-.or-mawb-link:hover { text-decoration: underline; color: #4F46E5; }
+.or-mawb-link:hover { text-decoration: underline; color: #EA580C; }
 .or-shipper { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
 
 /* Numbers */
@@ -313,13 +314,13 @@
   font-size: 11.5px; font-weight: 600; white-space: nowrap;
 }
 .or-s-created   { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
-.or-s-email     { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+.or-s-email     { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
 .or-s-outdated  { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
-.or-s-pending   { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
-.or-s-paid      { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
-.or-s-delivery  { background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; }
-.or-s-delivered { background: #CCFBF1; color: #0F766E; border: 1px solid #99F6E4; }
-.or-s-cancelled { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+.or-s-pending   { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+.or-s-paid      { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+.or-s-delivery  { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+.or-s-delivered { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+.or-s-cancelled { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
 
 /* Email indicator */
 .or-email-sent { color: #22C55E; display: inline-flex; align-items: center; }
@@ -348,12 +349,12 @@
 .or-act-btn:hover:not(:disabled) { transform: scale(1.1); }
 .or-act-btn:disabled { opacity: .5; cursor: not-allowed; }
 
-.or-act-view  { background: #EFF6FF; color: #3B82F6; }
-.or-act-view:hover  { background: #DBEAFE; }
-.or-act-email { background: #ECFDF5; color: #22C55E; }
-.or-act-email:hover { background: #DCFCE7; }
-.or-act-paid  { background: #F0FDF4; color: #16A34A; }
-.or-act-paid:hover  { background: #DCFCE7; }
+.or-act-view  { background: #F3F4F6; color: #6B7280; }
+.or-act-view:hover  { background: #E5E7EB; color: #374151; }
+.or-act-email { background: #F3F4F6; color: #6B7280; }
+.or-act-email:hover { background: #E5E7EB; color: #374151; }
+.or-act-paid  { background: #F3F4F6; color: #6B7280; }
+.or-act-paid:hover  { background: #E5E7EB; color: #374151; }
 .or-act-edit  { background: #FFF7ED; color: #F97316; }
 .or-act-edit:hover  { background: #FFEDD5; }
 .or-act-del   { background: #FEF2F2; color: #EF4444; }
@@ -429,7 +430,7 @@
   padding: 14px 16px; background: linear-gradient(135deg, #1F2937, #374151);
   font-size: 14px; font-weight: 600; color: #fff;
 }
-.or-finance-num { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+.or-finance-num { font-family: 'Inter Tight', sans-serif; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
 
 .or-email-info {
   display: flex; align-items: center; gap: 8px;

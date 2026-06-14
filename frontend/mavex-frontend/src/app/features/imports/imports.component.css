@@ -7,7 +7,7 @@
   display: flex; align-items: center; justify-content: center;
 }
 .im-section-title {
-  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-family: 'Inter Tight', sans-serif; font-weight: 700;
   font-size: 14px; color: #0C0C0E;
 }
 .im-tpl-btn {
@@ -104,7 +104,7 @@
 .im-stat-box.im-stat-warning  { background: #FFFBEB; border-color: #FDE68A; }
 .im-stat-box.im-stat-danger   { background: #FEF2F2; border-color: #FECACA; }
 
-.im-stat-num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 36px; line-height: 1; }
+.im-stat-num { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 32px; line-height: 1; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
 .im-stat-lbl { font-size: 12px; color: #6c757d; margin-top: 4px; }
 .im-stat-sub { font-size: 11px; color: #93C5FD; margin-top: 2px; }
 .im-text-info { color: #3B82F6; }
@@ -221,7 +221,7 @@
 
 /* ── Formulaire dans modal correction ── */
 .im-form-section-title {
-  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+  font-family: 'Inter Tight', sans-serif; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: .08em;
   color: #9CA3AF; margin-bottom: 8px; margin-top: 4px;
   padding-bottom: 6px; border-bottom: 1px solid #F3F4F6;

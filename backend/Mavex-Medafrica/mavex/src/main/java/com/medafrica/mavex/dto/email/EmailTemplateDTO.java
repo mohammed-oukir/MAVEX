@@ -9,8 +9,11 @@ public class EmailTemplateDTO {
 
     private String subject;
 
-    /** Corps éditable par Quill — sans le layout (header/footer/CSS) */
+    /** Paragraphes intro (avant le total-box) — éditable par Quill */
     private String bodyContent;
+
+    /** Paragraphes après le total-box — éditable par Quill */
+    private String bodyAfterContent;
 
     /** HTML complet depuis la DB — lecture seule, pour l'aperçu */
     private String htmlContent;
