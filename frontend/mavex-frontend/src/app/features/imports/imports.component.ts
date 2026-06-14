@@ -167,8 +167,12 @@ export class ImportsComponent implements OnInit {
     });
   }
 
+  private lockScroll():   void { document.documentElement.classList.add('im-modal-open');    }
+  private unlockScroll(): void { document.documentElement.classList.remove('im-modal-open'); }
+
   /* ── Édition d'une ligne ──────────────────────────────────── */
   openEdit(row: ImportPreviewRow): void {
+    this.lockScroll();
     this.editingRow.set(row);
     this.editForm.patchValue({
       mawb:               row.mawb               ?? '',
@@ -201,8 +205,9 @@ export class ImportsComponent implements OnInit {
   }
 
   closeEdit(): void {
+    this.unlockScroll();
     this.editingRow.set(null);
-    this.editForm.markAsUntouched();  // efface les bordures rouges pour la prochaine ouverture
+    this.editForm.markAsUntouched();
   }
 
   saveEdit(): void {
@@ -252,6 +257,7 @@ export class ImportsComponent implements OnInit {
     this.previewRows.update(rows =>
       rows.map(r => r.rowNumber === original.rowNumber ? corrected : r)
     );
+    this.unlockScroll();
     this.editingRow.set(null);
 
     if (validationErrors.length > 0) {
@@ -331,18 +337,19 @@ export class ImportsComponent implements OnInit {
 
   /* ── Détail modal ─────────────────────────────────────────── */
   openDetail(id: number): void {
+    this.lockScroll();
     this.detail.set(null);
     this.loadingDetail.set(true);
     this.importSvc.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next:  d  => { this.detail.set(d);  this.loadingDetail.set(false); },
-      error: () => this.loadingDetail.set(false),
+      error: () => { this.unlockScroll(); this.loadingDetail.set(false); },
     });
   }
-  closeDetail(): void { this.detail.set(null); }
+  closeDetail(): void { this.unlockScroll(); this.detail.set(null); }
 
   /* ── Suppression ──────────────────────────────────────────── */
-  confirmDelete(id: number): void { this.deleteId.set(id); }
-  cancelDelete(): void            { this.deleteId.set(null); }
+  confirmDelete(id: number): void { this.lockScroll();   this.deleteId.set(id);   }
+  cancelDelete(): void            { this.unlockScroll(); this.deleteId.set(null); }
 
   executeDelete(): void {
     const id = this.deleteId();
@@ -350,10 +357,11 @@ export class ImportsComponent implements OnInit {
     this.deleting.set(true);
     this.importSvc.delete(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
+        this.unlockScroll();
         this.deleting.set(false); this.deleteId.set(null);
         this.toast.success('Import supprimé.'); this.loadHistory();
       },
-      error: () => { this.deleting.set(false); this.toast.error('Erreur.'); },
+      error: () => { this.unlockScroll(); this.deleting.set(false); this.toast.error('Erreur.'); },
     });
   }
 

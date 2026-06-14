@@ -1,126 +1,134 @@
 <!-- ══════════════════════════════════════════════════════════
      UPLOAD SECTION
      ══════════════════════════════════════════════════════════ -->
-<div class="card border-0 shadow-sm mb-4">
-  <div class="card-header bg-white border-bottom px-4 py-3">
-    <div class="d-flex align-items-center gap-2">
-      <div class="im-section-icon" aria-hidden="true">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-      </div>
-      <span class="im-section-title">Importer un manifeste Excel</span>
-      <button type="button" class="btn btn-outline-secondary btn-sm ms-auto im-tpl-btn"
-        (click)="downloadTemplate()" title="Télécharger le fichier Excel modèle">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
+<div class="im-upload-card mb-4">
+
+  <!-- Header -->
+  <div class="im-upload-header">
+    <div class="im-upload-header-left">
+      <div class="im-header-icon" aria-hidden="true">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
         </svg>
-        Télécharger le template
-      </button>
+      </div>
+      <div>
+        <div class="im-header-title">Importer un manifeste Excel</div>
+        <div class="im-header-sub">Glissez votre fichier ou parcourez — analyse automatique avant import</div>
+      </div>
     </div>
+    <button type="button" class="im-tpl-btn" (click)="downloadTemplate()" title="Télécharger le fichier modèle">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Template Excel
+    </button>
   </div>
 
-  <div class="card-body p-4">
+  <!-- Body -->
+  <div class="im-upload-body">
 
-    <!-- ── Drop zone ─────────────────────────────────────────── -->
     @if (!previewing() && !preview() && !confirming() && !result()) {
-      <div
-        class="im-dropzone"
-        [class.im-drag-over]="dragOver()"
-        [class.im-has-file]="!!selectedFile()"
-        (dragover)="onDragOver($event)"
-        (dragleave)="onDragLeave()"
-        (drop)="onDrop($event)"
-        (click)="!selectedFile() && fileInput.click()"
-        [attr.role]="!selectedFile() ? 'button' : null"
-        [attr.tabindex]="!selectedFile() ? 0 : null"
-        (keydown.enter)="!selectedFile() && fileInput.click()"
-        [attr.aria-label]="selectedFile() ? null : 'Cliquez ou glissez un fichier Excel'">
+      <input #fileInput type="file" accept=".xlsx,.xls" class="d-none"
+        (change)="onFileChange($event)" aria-label="Sélectionner un fichier Excel" />
 
-        <input #fileInput type="file" accept=".xlsx,.xls" class="d-none"
-          (change)="onFileChange($event)" aria-label="Sélectionner un fichier Excel" />
+      @if (!selectedFile()) {
+        <!-- Drop zone -->
+        <div
+          class="im-dropzone"
+          [class.im-drag-over]="dragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+          role="button"
+          tabindex="0"
+          (keydown.enter)="fileInput.click()"
+          aria-label="Cliquez ou glissez un fichier Excel">
 
-        @if (!selectedFile()) {
-          <div class="d-flex flex-column align-items-center gap-3">
-            <div class="im-upload-icon" aria-hidden="true">
-              <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24">
+          <div class="im-dz-content">
+            <div class="im-dz-icon-wrap" aria-hidden="true">
+              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
                 <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
               </svg>
             </div>
-            <div>
-              <p class="im-dz-title mb-1">Glissez votre manifeste Excel ici</p>
-              <p class="im-dz-sub mb-0">ou <span class="im-dz-link">cliquez pour parcourir</span></p>
+            <div class="im-dz-text">
+              <span class="im-dz-title">Glissez votre fichier ici</span>
+              <span class="im-dz-or">ou</span>
+              <span class="im-dz-link">cliquez pour parcourir</span>
             </div>
-            <div class="d-flex gap-2">
-              <span class="im-format-badge">.xlsx</span>
-              <span class="im-format-badge">.xls</span>
-              <span class="im-format-badge">max 10 MB</span>
+            <div class="im-dz-badges">
+              <span class="im-fmt-badge">.xlsx</span>
+              <span class="im-fmt-badge">.xls</span>
+              <span class="im-fmt-badge im-fmt-limit">max 10 MB</span>
             </div>
           </div>
-        } @else {
-          <div class="im-file-preview">
-            <div class="im-file-icon" aria-hidden="true">
-              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        </div>
+
+      } @else {
+        <!-- File selected state -->
+        <div class="im-file-ready">
+          <div class="im-file-ready-left">
+            <div class="im-file-ready-icon" aria-hidden="true">
+              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
               </svg>
             </div>
-            <div class="im-file-info">
-              <div class="im-file-name">{{ selectedFile()!.name }}</div>
-              <div class="im-file-size">{{ fmtSize(selectedFile()!.size) }} · prêt à analyser</div>
+            <div>
+              <div class="im-file-ready-name">{{ selectedFile()!.name }}</div>
+              <div class="im-file-ready-meta">{{ fmtSize(selectedFile()!.size) }} · Excel</div>
             </div>
-            <button type="button" class="btn-close ms-auto"
-              (click)="$event.stopPropagation(); selectedFile.set(null)"
-              aria-label="Retirer le fichier"></button>
           </div>
-        }
-      </div>
-
-      <!-- Action bar -->
-      <div class="d-flex align-items-center gap-3 mt-3">
-        @if (!selectedFile()) {
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="fileInput.click()">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Parcourir les fichiers
-          </button>
-        } @else {
-          <!-- Bouton "Analyser" — Étape 1 -->
-          <button type="button" class="btn btn-primary px-4" (click)="analyseFile()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Analyser le fichier
-          </button>
-          <span class="text-muted" style="font-size:12px">{{ selectedFile()!.name }}</span>
-        }
-      </div>
+          <div class="im-file-ready-actions">
+            <button type="button" class="im-btn-ghost" (click)="selectedFile.set(null)" aria-label="Retirer le fichier">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Retirer
+            </button>
+            <button type="button" class="im-btn-analyse" (click)="analyseFile()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Analyser le fichier
+            </button>
+          </div>
+        </div>
+      }
     }
 
-    <!-- ── Analyse en cours ───────────────────────────────────── -->
+    <!-- Analyse en cours -->
     @if (previewing()) {
-      <div class="im-uploading-state">
-        <div class="im-spinner-wrap">
-          <div class="spinner-border text-primary" style="width:48px;height:48px" role="status">
-            <span class="visually-hidden">Analyse en cours…</span>
-          </div>
+      <div class="im-state-loader">
+        <div class="im-state-spinner im-spinner-orange" role="status" aria-label="Analyse en cours">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15" stroke="#F97316" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
+          </svg>
         </div>
-        <div>
-          <p class="fw-semibold mb-1" style="font-size:16px">Analyse en cours…</p>
-          <p class="text-muted mb-0" style="font-size:13px">Lecture et validation de chaque ligne. Aucune donnée n'est encore enregistrée.</p>
+        <div class="im-state-text">
+          <div class="im-state-title">Analyse en cours…</div>
+          <div class="im-state-sub">Validation de chaque ligne — aucune donnée enregistrée pour l'instant</div>
         </div>
       </div>
     }
 
-    <!-- ── Confirmation en cours ──────────────────────────────── -->
+    <!-- Import en cours -->
     @if (confirming()) {
-      <div class="im-uploading-state">
-        <div class="im-spinner-wrap">
-          <div class="spinner-border text-success" style="width:48px;height:48px" role="status">
-            <span class="visually-hidden">Import en cours…</span>
-          </div>
+      <div class="im-state-loader">
+        <div class="im-state-spinner" role="status" aria-label="Import en cours">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+            <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15" stroke="#22C55E" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
+          </svg>
         </div>
-        <div>
-          <p class="fw-semibold mb-1" style="font-size:16px">Import en cours…</p>
-          <p class="text-muted mb-0" style="font-size:13px">Création des orders et du shipment. Veuillez patienter.</p>
+        <div class="im-state-text">
+          <div class="im-state-title">Import en cours…</div>
+          <div class="im-state-sub">Création des orders et du shipment — veuillez patienter</div>
         </div>
       </div>
     }
@@ -142,7 +150,6 @@
           </div>
           <span class="im-section-title">Prévisualisation — {{ pv.fileName }}</span>
         </div>
-        <!-- Compteurs résumé -->
         <div class="d-flex gap-2 ms-auto flex-wrap">
           <span class="im-pv-badge im-pv-valid">
             <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
@@ -164,7 +171,6 @@
       </div>
     </div>
 
-    <!-- P2.1 — bannière fichier déjà importé -->
     @if (preview()!.alreadyImported) {
       <div class="im-already-bar">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -178,15 +184,13 @@
       </div>
     }
 
-    <!-- Message guide si des invalides existent -->
     @if (invalidRows().length > 0) {
       <div class="im-guide-bar">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>{{ invalidRows().length }} ligne(s) invalide(s) détectée(s). Cliquez <strong>Corriger</strong> pour les modifier avant l'import. Les lignes non corrigées seront ignorées.</span>
+        <span>{{ invalidRows().length }} ligne(s) invalide(s) détectée(s). Cliquez <strong>Corriger</strong> pour les modifier avant l'import.</span>
       </div>
     }
 
-    <!-- Tableau des lignes -->
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0" aria-label="Prévisualisation des lignes à importer">
         <thead>
@@ -246,16 +250,13 @@
       </table>
     </div>
 
-    <!-- Footer avec bouton de confirmation -->
     <div class="card-footer bg-white border-top px-4 py-3">
       <div class="d-flex align-items-center gap-3 flex-wrap">
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="resetUpload()">
           Changer de fichier
         </button>
         @if (invalidRows().length > 0 && validRows().length === 0) {
-          <p class="text-danger mb-0" style="font-size:13px">
-            Toutes les lignes sont invalides. Corrigez-les avant de confirmer.
-          </p>
+          <p class="text-danger mb-0" style="font-size:13px">Toutes les lignes sont invalides. Corrigez-les avant de confirmer.</p>
         }
         <button type="button" class="btn btn-success px-4 ms-auto"
           [disabled]="!canConfirm() || confirming()"
@@ -325,7 +326,6 @@
           <div class="im-stat-box im-stat-info">
             <div class="im-stat-num im-text-info">{{ res.skippedRows ?? 0 }}</div>
             <div class="im-stat-lbl">Déjà importées</div>
-            <div class="im-stat-sub">aucun doublon créé</div>
           </div>
         </div>
         <div class="col-6 col-md-3">
@@ -368,9 +368,7 @@
             (click)="showRows.set(!showRows())" [attr.aria-expanded]="showRows()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
               [style.transform]="showRows() ? 'rotate(180deg)' : ''"
-              style="transition:transform .2s;margin-right:5px" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+              style="transition:transform .2s;margin-right:5px" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             {{ showRows() ? 'Masquer' : 'Voir' }} les {{ failedRowsResult().length }} erreur(s)
           </button>
         } @else if (skippedRowsResult().length > 0) {
@@ -378,9 +376,7 @@
             (click)="showRows.set(!showRows())" [attr.aria-expanded]="showRows()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
               [style.transform]="showRows() ? 'rotate(180deg)' : ''"
-              style="transition:transform .2s;margin-right:5px" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
+              style="transition:transform .2s;margin-right:5px" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             {{ showRows() ? 'Masquer' : 'Voir' }} les {{ skippedRowsResult().length }} ligne(s) déjà existantes
           </button>
         }
@@ -415,7 +411,7 @@
                     <td><code class="text-dark">{{ row.hawb || '—' }}</code></td>
                     <td class="text-muted">{{ row.receiverEmail || '—' }}</td>
                     <td><span class="badge im-badge-info">Déjà importée</span></td>
-                    <td style="font-size:12px;color:#3B82F6">{{ row.reason || 'Ordre déjà existant — ignoré pour éviter les doublons' }}</td>
+                    <td style="font-size:12px;color:#3B82F6">{{ row.reason || 'Ordre déjà existant — ignoré' }}</td>
                   </tr>
                 }
               </tbody>
@@ -441,15 +437,14 @@
         </div>
         <span class="im-section-title">Historique des imports</span>
       </div>
-      <!-- Filtre -->
       <div class="im-history-search ms-auto">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="im-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="im-search-input" placeholder="Rechercher fichier, MAWB, statut…"
+        <input type="text" class="im-search-input" placeholder="Rechercher fichier, MAWB…"
           [value]="historyFilter()"
           (input)="historyFilter.set($any($event.target).value)"
           aria-label="Rechercher dans l'historique" />
       </div>
-      <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ historyTotal() }} import(s)</span>
+      <span class="im-history-count">{{ historyTotal() }} import(s)</span>
     </div>
   </div>
 
@@ -459,7 +454,6 @@
         <tr class="im-table-head">
           <th scope="col">Fichier</th>
           <th scope="col">MAWB</th>
-          <th scope="col" style="min-width:160px">Progression</th>
           <th scope="col">Résultats</th>
           <th scope="col">Statut</th>
           <th scope="col">Par</th>
@@ -470,23 +464,25 @@
       <tbody>
         @if (historyLoading()) {
           @for (i of [1,2,3,4,5]; track i) {
-            <tr><td colspan="8"><div class="im-sk-row" [style.width.%]="[90,70,85,60,75][i-1]"></div></td></tr>
+            <tr><td colspan="7"><div class="im-sk-row" [style.width.%]="[90,70,85,60,75][i-1]"></div></td></tr>
           }
         } @else if (history().length === 0) {
           <tr>
-            <td colspan="8" class="py-5 text-center">
+            <td colspan="7" class="py-5 text-center">
               <div class="d-flex flex-column align-items-center gap-2">
-                <svg width="40" height="40" fill="none" stroke="#dee2e6" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-                </svg>
+                <div class="im-empty-icon" aria-hidden="true">
+                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                  </svg>
+                </div>
                 <p class="text-muted mb-0" style="font-size:13px">Aucun import réalisé</p>
               </div>
             </td>
           </tr>
         } @else if (filteredHistory().length === 0) {
           <tr>
-            <td colspan="8" class="py-4 text-center text-muted" style="font-size:13px">
+            <td colspan="7" class="py-4 text-center text-muted" style="font-size:13px">
               Aucun résultat pour "{{ historyFilter() }}"
             </td>
           </tr>
@@ -514,34 +510,29 @@
                 } @else { <span class="text-muted">—</span> }
               </td>
               <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="progress flex-grow-1" style="height:6px;border-radius:100px;min-width:80px">
-                    <div class="progress-bar"
-                      [class]="imp.status === 'SUCCESS' ? 'bg-success' : imp.status === 'PARTIAL' ? 'bg-warning' : 'bg-danger'"
-                      [style.width.%]="historyRate(imp)" role="progressbar"
-                      [attr.aria-valuenow]="historyRate(imp)" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <span style="font-size:11px;color:#6c757d;white-space:nowrap">{{ historyRate(imp) }}%</span>
-                </div>
-              </td>
-              <td>
-                <div class="d-flex gap-2 flex-wrap">
+                <div class="im-results-cell">
                   <span class="im-count-badge im-count-success" title="Créés">
-                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
                     {{ imp.successRows ?? 0 }}
                   </span>
                   @if ((imp.skippedRows ?? 0) > 0) {
                     <span class="im-count-badge im-count-info" title="Déjà importées">
-                      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="5 12 12 12 19 12"/></svg>
-                      {{ imp.skippedRows }}
+                      {{ imp.skippedRows }} ignoré(s)
                     </span>
                   }
                   @if ((imp.failedRows ?? 0) > 0) {
                     <span class="im-count-badge im-count-danger" title="Erreurs">
-                      <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       {{ imp.failedRows }}
                     </span>
                   }
+                  <div class="im-mini-progress">
+                    <div class="im-mini-bar"
+                      [class]="imp.status === 'SUCCESS' ? 'im-bar-success' : imp.status === 'PARTIAL' ? 'im-bar-warning' : 'im-bar-danger'"
+                      [style.width.%]="historyRate(imp)">
+                    </div>
+                  </div>
+                  <span class="im-rate-lbl">{{ historyRate(imp) }}%</span>
                 </div>
               </td>
               <td><app-badge [status]="imp.status" /></td>
@@ -566,12 +557,9 @@
     </table>
   </div>
 
-  <!-- Pagination -->
   @if (historyTotalPages > 1) {
     <div class="px-4 py-3 border-top d-flex align-items-center justify-content-between bg-white">
-      <span class="text-muted" style="font-size:12px">
-        Page {{ historyPage() + 1 }} / {{ historyTotalPages }}
-      </span>
+      <span class="text-muted" style="font-size:12px">Page {{ historyPage() + 1 }} / {{ historyTotalPages }}</span>
       <div class="d-flex gap-2">
         <button type="button" class="btn btn-sm btn-outline-secondary im-pg-btn"
           [disabled]="historyPage() === 0"
@@ -602,9 +590,8 @@
      ══════════════════════════════════════════════════════════ -->
 @if (editingRow()) {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editRowTitle" (click)="closeEdit()">
-    <div class="modal" style="max-width:680px;max-height:90vh;display:flex;flex-direction:column" (click)="$event.stopPropagation()">
-
-      <div class="nm-header" style="flex-shrink:0">
+    <div class="modal" style="max-width:680px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
         <div class="nm-icon red" aria-hidden="true">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
@@ -618,24 +605,19 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-
-      <div style="overflow-y:auto;flex:1">
+      <div style="overflow-y:auto;flex:1 1 auto;min-height:0">
         <form [formGroup]="editForm" class="nm-body">
-
-          <!-- Identification -->
           <p class="im-form-section-title">Identification</p>
           <div class="row g-3 mb-3">
             <div class="col-6">
               <label class="form-label im-form-label" for="ef-mawb">MAWB <span class="text-danger">*</span></label>
-              <input id="ef-mawb" type="text" class="form-control form-control-sm"
-                formControlName="mawb"
+              <input id="ef-mawb" type="text" class="form-control form-control-sm" formControlName="mawb"
                 [class.is-invalid]="editForm.get('mawb')!.invalid && editForm.get('mawb')!.touched" />
               <div class="invalid-feedback">MAWB obligatoire</div>
             </div>
             <div class="col-6">
               <label class="form-label im-form-label" for="ef-hawb">HAWB <span class="text-danger">*</span></label>
-              <input id="ef-hawb" type="text" class="form-control form-control-sm"
-                formControlName="hawb"
+              <input id="ef-hawb" type="text" class="form-control form-control-sm" formControlName="hawb"
                 [class.is-invalid]="editForm.get('hawb')!.invalid && editForm.get('hawb')!.touched" />
               <div class="invalid-feedback">HAWB obligatoire</div>
             </div>
@@ -644,125 +626,62 @@
               <input id="ef-altref" type="text" class="form-control form-control-sm" formControlName="alternateReference" />
             </div>
           </div>
-
-          <!-- Expéditeur -->
           <p class="im-form-section-title">Expéditeur</p>
           <div class="row g-3 mb-3">
-            <div class="col-6">
-              <label class="form-label im-form-label" for="ef-sname">Nom société</label>
-              <input id="ef-sname" type="text" class="form-control form-control-sm" formControlName="senderName" />
-            </div>
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-scountry">Pays (code)</label>
-              <input id="ef-scountry" type="text" class="form-control form-control-sm" formControlName="senderCountry" placeholder="US, FR…" />
-            </div>
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-sstate">État</label>
-              <input id="ef-sstate" type="text" class="form-control form-control-sm" formControlName="senderState" />
-            </div>
-            <div class="col-8">
-              <label class="form-label im-form-label" for="ef-saddress">Adresse</label>
-              <input id="ef-saddress" type="text" class="form-control form-control-sm" formControlName="senderAddress" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-scity">Ville</label>
-              <input id="ef-scity" type="text" class="form-control form-control-sm" formControlName="senderCity" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-scontact">Contact</label>
-              <input id="ef-scontact" type="text" class="form-control form-control-sm" formControlName="senderContact" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-sphone">Téléphone</label>
-              <input id="ef-sphone" type="text" class="form-control form-control-sm" formControlName="senderPhone" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-semail">Email expéditeur</label>
-              <input id="ef-semail" type="email" class="form-control form-control-sm" formControlName="senderEmail" />
-            </div>
+            <div class="col-6"><label class="form-label im-form-label" for="ef-sname">Nom société</label><input id="ef-sname" type="text" class="form-control form-control-sm" formControlName="senderName" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-scountry">Pays</label><input id="ef-scountry" type="text" class="form-control form-control-sm" formControlName="senderCountry" placeholder="US, FR…" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-sstate">État</label><input id="ef-sstate" type="text" class="form-control form-control-sm" formControlName="senderState" /></div>
+            <div class="col-8"><label class="form-label im-form-label" for="ef-saddress">Adresse</label><input id="ef-saddress" type="text" class="form-control form-control-sm" formControlName="senderAddress" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-scity">Ville</label><input id="ef-scity" type="text" class="form-control form-control-sm" formControlName="senderCity" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-scontact">Contact</label><input id="ef-scontact" type="text" class="form-control form-control-sm" formControlName="senderContact" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-sphone">Téléphone</label><input id="ef-sphone" type="text" class="form-control form-control-sm" formControlName="senderPhone" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-semail">Email</label><input id="ef-semail" type="email" class="form-control form-control-sm" formControlName="senderEmail" /></div>
           </div>
-
-          <!-- Destinataire -->
           <p class="im-form-section-title">Destinataire</p>
           <div class="row g-3 mb-3">
             <div class="col-6">
               <label class="form-label im-form-label" for="ef-rname">Nom complet <span class="text-danger">*</span></label>
-              <input id="ef-rname" type="text" class="form-control form-control-sm"
-                formControlName="receiverName"
+              <input id="ef-rname" type="text" class="form-control form-control-sm" formControlName="receiverName"
                 [class.is-invalid]="editForm.get('receiverName')!.invalid && editForm.get('receiverName')!.touched" />
-              <div class="invalid-feedback">Nom du destinataire obligatoire</div>
+              <div class="invalid-feedback">Nom obligatoire</div>
             </div>
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-rcountry">Pays (code)</label>
-              <input id="ef-rcountry" type="text" class="form-control form-control-sm" formControlName="receiverCountry" placeholder="MA, FR…" />
-            </div>
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-rstate">État</label>
-              <input id="ef-rstate" type="text" class="form-control form-control-sm" formControlName="receiverState" />
-            </div>
-            <div class="col-8">
-              <label class="form-label im-form-label" for="ef-raddress">Adresse</label>
-              <input id="ef-raddress" type="text" class="form-control form-control-sm" formControlName="receiverAddress" />
-            </div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-rcountry">Pays</label><input id="ef-rcountry" type="text" class="form-control form-control-sm" formControlName="receiverCountry" placeholder="MA, FR…" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-rstate">État</label><input id="ef-rstate" type="text" class="form-control form-control-sm" formControlName="receiverState" /></div>
+            <div class="col-8"><label class="form-label im-form-label" for="ef-raddress">Adresse</label><input id="ef-raddress" type="text" class="form-control form-control-sm" formControlName="receiverAddress" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-rcity">Ville</label><input id="ef-rcity" type="text" class="form-control form-control-sm" formControlName="receiverCity" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-rcontact">Contact</label><input id="ef-rcontact" type="text" class="form-control form-control-sm" formControlName="receiverContact" /></div>
+            <div class="col-4"><label class="form-label im-form-label" for="ef-rphone">Téléphone</label><input id="ef-rphone" type="text" class="form-control form-control-sm" formControlName="receiverPhone" /></div>
             <div class="col-4">
-              <label class="form-label im-form-label" for="ef-rcity">Ville</label>
-              <input id="ef-rcity" type="text" class="form-control form-control-sm" formControlName="receiverCity" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-rcontact">Contact</label>
-              <input id="ef-rcontact" type="text" class="form-control form-control-sm" formControlName="receiverContact" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-rphone">Téléphone</label>
-              <input id="ef-rphone" type="text" class="form-control form-control-sm" formControlName="receiverPhone" />
-            </div>
-            <div class="col-4">
-              <label class="form-label im-form-label" for="ef-remail">Email destinataire <span class="text-danger">*</span></label>
-              <input id="ef-remail" type="email" class="form-control form-control-sm"
-                formControlName="receiverEmail"
+              <label class="form-label im-form-label" for="ef-remail">Email <span class="text-danger">*</span></label>
+              <input id="ef-remail" type="email" class="form-control form-control-sm" formControlName="receiverEmail"
                 [class.is-invalid]="editForm.get('receiverEmail')!.invalid && editForm.get('receiverEmail')!.touched" />
               <div class="invalid-feedback">
                 @if (editForm.get('receiverEmail')!.hasError('required')) { Email obligatoire }
-                @else { Format invalide (ex: nom&#64;domaine.com) }
+                @else { Format invalide }
               </div>
             </div>
           </div>
-
-          <!-- Colis -->
           <p class="im-form-section-title">Colis</p>
           <div class="row g-3">
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-items">Nb articles</label>
-              <input id="ef-items" type="number" min="1" class="form-control form-control-sm" formControlName="numberOfItems" />
-            </div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-items">Nb articles</label><input id="ef-items" type="number" min="1" class="form-control form-control-sm" formControlName="numberOfItems" /></div>
             <div class="col-3">
               <label class="form-label im-form-label" for="ef-weight">Poids (kg) <span class="text-danger">*</span></label>
-              <input id="ef-weight" type="number" min="0.01" step="0.01" class="form-control form-control-sm"
-                formControlName="shipmentWeight"
+              <input id="ef-weight" type="number" min="0.01" step="0.01" class="form-control form-control-sm" formControlName="shipmentWeight"
                 [class.is-invalid]="editForm.get('shipmentWeight')!.invalid && editForm.get('shipmentWeight')!.touched" />
-              <div class="invalid-feedback">Poids obligatoire et doit être &gt; 0</div>
+              <div class="invalid-feedback">Poids &gt; 0 obligatoire</div>
             </div>
             <div class="col-3">
               <label class="form-label im-form-label" for="ef-customs">Valeur douanière <span class="text-danger">*</span></label>
-              <input id="ef-customs" type="number" min="0.01" step="0.01" class="form-control form-control-sm"
-                formControlName="customsValue"
+              <input id="ef-customs" type="number" min="0.01" step="0.01" class="form-control form-control-sm" formControlName="customsValue"
                 [class.is-invalid]="editForm.get('customsValue')!.invalid && editForm.get('customsValue')!.touched" />
-              <div class="invalid-feedback">Valeur obligatoire et doit être &gt; 0</div>
+              <div class="invalid-feedback">Valeur &gt; 0 obligatoire</div>
             </div>
-            <div class="col-3">
-              <label class="form-label im-form-label" for="ef-currency">Devise</label>
-              <input id="ef-currency" type="text" class="form-control form-control-sm" formControlName="customsCurrency" placeholder="USD, EUR…" />
-            </div>
-            <div class="col-12">
-              <label class="form-label im-form-label" for="ef-desc">Description des marchandises</label>
-              <input id="ef-desc" type="text" class="form-control form-control-sm" formControlName="goodsDescription" />
-            </div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-currency">Devise</label><input id="ef-currency" type="text" class="form-control form-control-sm" formControlName="customsCurrency" placeholder="USD, EUR…" /></div>
+            <div class="col-12"><label class="form-label im-form-label" for="ef-desc">Description</label><input id="ef-desc" type="text" class="form-control form-control-sm" formControlName="goodsDescription" /></div>
           </div>
-
         </form>
       </div>
-
-      <div class="nm-footer" style="flex-shrink:0">
+      <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeEdit()">Annuler</button>
         <button type="button" class="nm-btn-primary" (click)="saveEdit()">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
@@ -775,12 +694,12 @@
 
 
 <!-- ══════════════════════════════════════════════════════════
-     MODAL — Détail import (historique)
+     MODAL — Détail import
      ══════════════════════════════════════════════════════════ -->
 @if (detail() || loadingDetail()) {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle" (click)="closeDetail()">
-    <div class="modal" style="max-width:720px;max-height:85vh;display:flex;flex-direction:column" (click)="$event.stopPropagation()">
-      <div class="nm-header" style="flex-shrink:0">
+    <div class="modal" style="max-width:720px" (click)="$event.stopPropagation()">
+      <div class="nm-header">
         <div class="nm-icon blue" aria-hidden="true">
           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
@@ -792,43 +711,24 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-
       @if (loadingDetail()) {
         <div class="nm-body text-center py-5">
           <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement…</span></div>
         </div>
       } @else if (detail(); as d) {
-        <div class="nm-body" style="flex-shrink:0;border-bottom:1px solid #f3f4f6">
+        <div class="nm-body" style="border-bottom:1px solid #f3f4f6">
           <div class="row g-3">
-            <div class="col-3 text-center">
-              <div class="fw-bold fs-4" style="font-family:'Syne',sans-serif">{{ d.totalRows }}</div>
-              <div class="text-muted" style="font-size:12px">Total</div>
-            </div>
-            <div class="col-3 text-center">
-              <div class="fw-bold fs-4 text-success" style="font-family:'Syne',sans-serif">{{ d.successRows ?? 0 }}</div>
-              <div class="text-muted" style="font-size:12px">Créés</div>
-            </div>
-            <div class="col-3 text-center">
-              <div class="fw-bold fs-4 im-text-info" style="font-family:'Syne',sans-serif">{{ d.skippedRows ?? 0 }}</div>
-              <div class="text-muted" style="font-size:12px">Déjà importés</div>
-            </div>
-            <div class="col-3 text-center">
-              <div class="fw-bold fs-4 text-danger" style="font-family:'Syne',sans-serif">{{ d.failedRows ?? 0 }}</div>
-              <div class="text-muted" style="font-size:12px">Erreurs</div>
-            </div>
+            <div class="col-3 text-center"><div class="fw-bold fs-4" style="font-family:'Syne',sans-serif">{{ d.totalRows }}</div><div class="text-muted" style="font-size:12px">Total</div></div>
+            <div class="col-3 text-center"><div class="fw-bold fs-4 text-success" style="font-family:'Syne',sans-serif">{{ d.successRows ?? 0 }}</div><div class="text-muted" style="font-size:12px">Créés</div></div>
+            <div class="col-3 text-center"><div class="fw-bold fs-4 im-text-info" style="font-family:'Syne',sans-serif">{{ d.skippedRows ?? 0 }}</div><div class="text-muted" style="font-size:12px">Déjà importés</div></div>
+            <div class="col-3 text-center"><div class="fw-bold fs-4 text-danger" style="font-family:'Syne',sans-serif">{{ d.failedRows ?? 0 }}</div><div class="text-muted" style="font-size:12px">Erreurs</div></div>
           </div>
         </div>
-        <div style="overflow-y:auto;flex:1">
+        <div style="overflow-y:auto;flex:1 1 auto;min-height:0">
           <div class="table-responsive">
             <table class="table table-sm align-middle mb-0" aria-label="Détail des lignes">
               <thead class="table-light sticky-top">
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">HAWB</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Statut</th>
-                  <th scope="col">Détail</th>
-                </tr>
+                <tr><th scope="col">#</th><th scope="col">HAWB</th><th scope="col">Email</th><th scope="col">Statut</th><th scope="col">Détail</th></tr>
               </thead>
               <tbody>
                 @if (!d.rows || d.rows.length === 0) {
@@ -840,13 +740,9 @@
                       <td><code style="font-size:12px">{{ row.hawb || '—' }}</code></td>
                       <td class="text-muted" style="font-size:12px">{{ row.receiverEmail || '—' }}</td>
                       <td>
-                        @if (row.status === 'IMPORTED') {
-                          <span class="badge bg-success-subtle text-success border border-success-subtle">Importé</span>
-                        } @else if (row.status === 'SKIPPED') {
-                          <span class="badge im-badge-info">Déjà importé</span>
-                        } @else {
-                          <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Erreur</span>
-                        }
+                        @if (row.status === 'IMPORTED') { <span class="badge bg-success-subtle text-success border border-success-subtle">Importé</span> }
+                        @else if (row.status === 'SKIPPED') { <span class="badge im-badge-info">Déjà importé</span> }
+                        @else { <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Erreur</span> }
                       </td>
                       <td style="font-size:12px;max-width:260px;white-space:normal">
                         @if (row.reason) { <span class="text-danger">{{ row.reason }}</span> }
@@ -861,16 +757,12 @@
           </div>
         </div>
         @if (d.shipmentId) {
-          <div class="nm-footer" style="flex-shrink:0">
+          <div class="nm-footer">
             <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
-            <a [routerLink]="['/shipments', d.shipmentId]" class="nm-btn-primary text-decoration-none" (click)="closeDetail()">
-              Voir le shipment {{ d.mawb }} →
-            </a>
+            <a [routerLink]="['/shipments', d.shipmentId]" class="nm-btn-primary text-decoration-none" (click)="closeDetail()">Voir le shipment {{ d.mawb }} →</a>
           </div>
         } @else {
-          <div class="nm-footer" style="flex-shrink:0">
-            <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
-          </div>
+          <div class="nm-footer"><button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button></div>
         }
       }
     </div>
@@ -899,7 +791,7 @@
       <div class="nm-body">
         <p class="nm-alert">
           Tous les orders créés lors de cet import seront supprimés définitivement.<br>
-          Le shipment associé sera supprimé <strong>uniquement s'il n'a plus aucun order</strong> après cette suppression.
+          Le shipment associé sera supprimé <strong>uniquement s'il n'a plus aucun order</strong>.
         </p>
       </div>
       <div class="nm-footer">

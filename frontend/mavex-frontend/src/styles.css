@@ -28,6 +28,11 @@
 body { font-family: 'DM Sans', sans-serif; font-size: 14px; }
 .font-display { font-family: 'Inter Tight', sans-serif !important; }
 
+/* Bloque le scroll de la page quand un modal plein écran est ouvert
+   (l'overlay position:fixed gère son propre scroll) */
+html.im-modal-open,
+html.im-modal-open body { overflow: hidden; }
+
 /* ── Bootstrap primary overrides ────────────────────────── */
 .btn-primary {
   background-color: var(--mavex-accent);
@@ -244,28 +249,31 @@ body { font-family: 'DM Sans', sans-serif; font-size: 14px; }
   inset: 0;
   background: rgba(0, 0, 0, .5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;          /* l'overlay scrolle si le modal dépasse l'écran */
   z-index: 1050;
   padding: 20px;
 }
 .modal-overlay > .modal {
   /* Bootstrap's .modal is transparent by default — override everything */
-  display: block !important;
+  display: flex !important;
+  flex-direction: column;
   position: static !important;
   height: auto !important;
+  max-height: calc(100vh - 40px);   /* ne dépasse jamais l'écran */
+  margin: auto;                     /* centré verticalement s'il y a de la place */
   background: #ffffff !important;
   width: 100%;
   max-width: 560px;
-  max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden !important;      /* le scroll se fait à l'intérieur, pas sur le card */
   border-radius: 16px !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, .22) !important;
   border: none !important;
 }
 .modal-overlay > .modal.modal-lg { max-width: 720px; }
-.modal-header { position: sticky; top: 0; background: #fff; z-index: 1; border-bottom: 1px solid #F3F4F6 !important; }
-.modal-footer { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #F3F4F6 !important; }
+.modal-header { flex-shrink: 0; background: #fff; border-bottom: 1px solid #F3F4F6 !important; }
+.modal-footer { flex-shrink: 0; background: #fff; border-top: 1px solid #F3F4F6 !important; }
 
 /* ── Responsive shell ────────────────────────────────────── */
 @media (max-width: 768px) {
