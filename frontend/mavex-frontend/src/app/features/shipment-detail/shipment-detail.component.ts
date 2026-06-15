@@ -321,8 +321,13 @@ export class ShipmentDetailComponent implements OnInit {
   saveDuty(): void {
     const s = this.shipment();
     if (!s) return;
+    const pct = this.dutyRateInput();
+    if (pct < 0 || pct > 100) {
+      this.toast.error('Le taux douanier doit être entre 0% et 100%');
+      return;
+    }
     this.savingDuty.set(true);
-    this.shipSvc.updateDutyRate(s.id, { dutyRate: this.dutyRateInput() / 100 })
+    this.shipSvc.updateDutyRate(s.id, { dutyRate: pct / 100 })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: updated => {
