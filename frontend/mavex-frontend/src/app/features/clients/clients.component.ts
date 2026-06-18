@@ -11,10 +11,11 @@ import { OrderService }   from '../../core/services/order.service';
 import { ToastService }   from '../../core/services/toast.service';
 import { ClientResponse } from '../../core/models/client.model';
 import { OrderResponse }  from '../../core/models/order.model';
+import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-clients',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [ReactiveFormsModule, DatePipe, RequiresPermissionDirective],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

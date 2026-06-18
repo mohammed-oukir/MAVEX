@@ -9,7 +9,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth    = inject(AuthService);
   const backend = inject(HttpBackend);
 
-  if (req.url.includes('/api/auth/')) {
+  // Routes auth qui n'ont pas besoin de token — les exclure de l'injection Bearer.
+  // /api/auth/me/* nécessite un token valide et ne doit PAS être exclu.
+  const publicAuthPaths = ['/api/auth/login', '/api/auth/refresh', '/api/auth/forgot-password', '/api/auth/reset-password', '/api/auth/logout'];
+  if (publicAuthPaths.some(p => req.url.includes(p))) {
     return next(req);
   }
 

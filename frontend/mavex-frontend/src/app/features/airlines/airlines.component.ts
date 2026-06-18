@@ -8,10 +8,11 @@ import { LayoutService }  from '../../core/services/layout.service';
 import { AirlineService } from '../../core/services/airline.service';
 import { ToastService }   from '../../core/services/toast.service';
 import { Airline }        from '../../core/models/airline.model';
+import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-airlines',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RequiresPermissionDirective],
   templateUrl: './airlines.component.html',
   styleUrl: './airlines.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

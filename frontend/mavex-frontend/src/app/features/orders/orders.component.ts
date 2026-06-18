@@ -17,10 +17,11 @@ import { ToastService }   from '../../core/services/toast.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
+import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-orders',
-  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule],
+  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule, RequiresPermissionDirective],
   templateUrl: './orders.component.html',
   styleUrl:    './orders.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

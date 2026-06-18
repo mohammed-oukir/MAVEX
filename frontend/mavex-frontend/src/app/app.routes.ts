@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard, noAuthGuard } from './core/auth/auth.guard';
+import { adminGuard, authGuard, noAuthGuard } from './core/auth/auth.guard';
+import { permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -12,6 +13,12 @@ export const routes: Routes = [
   },
 
   {
+    path: '403',
+    loadComponent: () =>
+      import('./features/forbidden/forbidden.component').then(m => m.ForbiddenComponent),
+  },
+
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -19,36 +26,43 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [permissionGuard('DASHBOARD')],
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'shipments',
+        canActivate: [permissionGuard('SHIPMENTS')],
         loadComponent: () =>
           import('./features/shipments/shipments.component').then(m => m.ShipmentsComponent),
       },
       {
         path: 'shipments/:id',
+        canActivate: [permissionGuard('SHIPMENTS')],
         loadComponent: () =>
           import('./features/shipment-detail/shipment-detail.component').then(m => m.ShipmentDetailComponent),
       },
       {
         path: 'orders',
+        canActivate: [permissionGuard('ORDERS')],
         loadComponent: () =>
           import('./features/orders/orders.component').then(m => m.OrdersComponent),
       },
       {
         path: 'imports',
+        canActivate: [permissionGuard('IMPORTS')],
         loadComponent: () =>
           import('./features/imports/imports.component').then(m => m.ImportsComponent),
       },
       {
         path: 'clients',
+        canActivate: [permissionGuard('CLIENTS')],
         loadComponent: () =>
           import('./features/clients/clients.component').then(m => m.ClientsComponent),
       },
       {
         path: 'shippers',
+        canActivate: [permissionGuard('SHIPPERS')],
         loadComponent: () =>
           import('./features/shippers/shippers.component').then(m => m.ShippersComponent),
       },
@@ -58,14 +72,22 @@ export const routes: Routes = [
           import('./features/payments/payments.component').then(m => m.PaymentsComponent),
       },
       {
+        path: 'airlines',
+        canActivate: [permissionGuard('AIRLINES')],
+        loadComponent: () =>
+          import('./features/airlines/airlines.component').then(m => m.AirlinesComponent),
+      },
+      {
         path: 'users',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/users/users.component').then(m => m.UsersComponent),
       },
       {
-        path: 'airlines',
+        path: 'permissions',
+        canActivate: [adminGuard],
         loadComponent: () =>
-          import('./features/airlines/airlines.component').then(m => m.AirlinesComponent),
+          import('./features/permissions/permissions.component').then(m => m.PermissionsComponent),
       },
       {
         path: 'profile',
@@ -74,6 +96,7 @@ export const routes: Routes = [
       },
       {
         path: 'settings/email-template',
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/email-template/email-template.component').then(m => m.EmailTemplateComponent),
       },

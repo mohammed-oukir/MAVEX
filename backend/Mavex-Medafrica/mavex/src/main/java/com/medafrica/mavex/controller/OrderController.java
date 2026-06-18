@@ -3,7 +3,10 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.email.EmailLogDTO;
 import com.medafrica.mavex.dto.order.*;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.enums.PermissionAction;
+import com.medafrica.mavex.model.enums.PermissionModule;
 import com.medafrica.mavex.repository.EmailLogRepository;
+import com.medafrica.mavex.security.annotation.RequiresPermission;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.validation.Valid;
@@ -36,6 +39,7 @@ public class OrderController {
     // ─────────── POST /api/orders ───────────
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.CREATE)
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
     }
@@ -43,6 +47,7 @@ public class OrderController {
     // ─────────── GET /api/orders — recherche paginée avec filtres ───────────
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<Page<OrderResponse>> search(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) OrderStatus status,
@@ -59,6 +64,7 @@ public class OrderController {
     // ─────────── GET /api/orders/{id} ───────────
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getById(id));
     }
@@ -66,6 +72,7 @@ public class OrderController {
     // ─────────── GET /api/orders/hawb/{hawb} ───────────
     @GetMapping("/hawb/{hawb}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<OrderResponse> getByHawb(@PathVariable String hawb) {
         return ResponseEntity.ok(orderService.getByHawb(hawb));
     }
@@ -73,6 +80,7 @@ public class OrderController {
     // ─────────── GET /api/orders/shipment/{shipmentId} ───────────
     @GetMapping("/shipment/{shipmentId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<List<OrderResponse>> getByShipment(@PathVariable Long shipmentId) {
         return ResponseEntity.ok(orderService.getByShipment(shipmentId));
     }
@@ -80,6 +88,7 @@ public class OrderController {
     // ─────────── GET /api/orders/client/{clientId} ───────────
     @GetMapping("/client/{clientId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<List<OrderResponse>> getByClient(@PathVariable Long clientId) {
         return ResponseEntity.ok(orderService.getByClient(clientId));
     }
@@ -87,6 +96,7 @@ public class OrderController {
     // ─────────── PUT /api/orders/{id} ───────────
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<OrderResponse> update(@PathVariable Long id,
                                                 @Valid @RequestBody OrderRequest request) {
         return ResponseEntity.ok(orderService.update(id, request));
@@ -95,6 +105,7 @@ public class OrderController {
     // ─────────── PATCH /api/orders/{id} ───────────
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<OrderResponse> patch(@PathVariable Long id,
                                                @Valid @RequestBody OrderPatchRequest request) {
         return ResponseEntity.ok(orderService.patch(id, request));
@@ -103,6 +114,7 @@ public class OrderController {
     // ─────────── PATCH /api/orders/{id}/status ───────────
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id,
                                                       @Valid @RequestBody OrderStatusUpdateRequest request) {
         return ResponseEntity.ok(orderService.updateStatus(id, request));
@@ -111,6 +123,7 @@ public class OrderController {
     // ─────────── POST /api/orders/bulk/email ───────────
     @PostMapping(value = "/bulk/email", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<BulkEmailResult> bulkEmail(
             @RequestPart("request") BulkEmailRequest request,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
@@ -120,6 +133,7 @@ public class OrderController {
     // ─────────── POST /api/orders/bulk/status ───────────
     @PostMapping("/bulk/status")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<Void> bulkStatus(@RequestBody BulkStatusRequest request) {
         orderService.bulkUpdateStatus(request.getIds(), request.getNewStatus(), request.getNote());
         return ResponseEntity.noContent().build();
@@ -128,6 +142,7 @@ public class OrderController {
     // ─────────── POST /api/orders/{id}/payment-token ───────────
     @PostMapping("/{id}/payment-token")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.EDIT)
     public ResponseEntity<OrderResponse> generatePaymentToken(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.generatePaymentToken(id));
     }
@@ -141,6 +156,7 @@ public class OrderController {
     // ─────────── GET /api/orders/{id}/email-logs ───────────
     @GetMapping("/{id}/email-logs")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<List<EmailLogDTO>> getEmailLogs(@PathVariable Long id) {
         List<EmailLogDTO> logs = emailLogRepository.findByOrderId(id)
                 .stream()
@@ -152,6 +168,7 @@ public class OrderController {
     // ─────────── DELETE /api/orders/{id} ───────────
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.DELETE)
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();

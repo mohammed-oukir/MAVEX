@@ -13,6 +13,7 @@ import { ClientService }   from '../../core/services/client.service';
 import { EmailService }    from '../../core/services/email.service';
 import { ToastService }    from '../../core/services/toast.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
+import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 import { ShipmentResponse, ShipmentPatch, ShipmentStatus } from '../../core/models/shipment.model';
 import { ShipperResponse } from '../../core/models/shipper.model';
 import { OrderResponse, OrderRequest, OrderPatch, OrderStatus, OrderStatusUpdate } from '../../core/models/order.model';
@@ -20,7 +21,7 @@ import { ClientResponse }  from '../../core/models/client.model';
 
 @Component({
   selector: 'app-shipment-detail',
-  imports: [RouterLink, ReactiveFormsModule, BadgeComponent],
+  imports: [RouterLink, ReactiveFormsModule, BadgeComponent, RequiresPermissionDirective],
   templateUrl: './shipment-detail.component.html',
   styleUrl:    './shipment-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -13,10 +13,11 @@ import { BadgeComponent }  from '../../shared/badge/badge.component';
 import {
   ImportLogResponse, ImportPreviewResponse, ImportPreviewRow,
 } from '../../core/models/import.model';
+import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-imports',
-  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule],
+  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule, RequiresPermissionDirective],
   templateUrl: './imports.component.html',
   styleUrl:    './imports.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -85,7 +85,7 @@
         </button>
       }
     </div>
-    <button type="button" class="cl-new-btn" (click)="openCreate()">
+    <button type="button" class="cl-new-btn" appRequiresPermission module="CLIENTS" action="CREATE" (click)="openCreate()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Nouveau client
     </button>
@@ -99,17 +99,17 @@
         {{ selectedCount() }} sélectionné(s)
       </span>
       <div class="d-flex gap-2">
-        <button type="button" class="cl-bulk-btn cl-bulk-activate" [disabled]="bulkActing()" (click)="executeBulkActivate()" aria-label="Activer la sélection">
+        <button type="button" class="cl-bulk-btn cl-bulk-activate" appRequiresPermission module="CLIENTS" action="EDIT" [disabled]="bulkActing()" (click)="executeBulkActivate()" aria-label="Activer la sélection">
           @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
           @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
           Activer
         </button>
-        <button type="button" class="cl-bulk-btn cl-bulk-deactivate" [disabled]="bulkActing()" (click)="executeBulkDeactivate()" aria-label="Désactiver la sélection">
+        <button type="button" class="cl-bulk-btn cl-bulk-deactivate" appRequiresPermission module="CLIENTS" action="EDIT" [disabled]="bulkActing()" (click)="executeBulkDeactivate()" aria-label="Désactiver la sélection">
           @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
           @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
           Désactiver
         </button>
-        <button type="button" class="cl-bulk-btn cl-bulk-delete" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()" aria-label="Supprimer la sélection">
+        <button type="button" class="cl-bulk-btn cl-bulk-delete" appRequiresPermission module="CLIENTS" action="DELETE" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()" aria-label="Supprimer la sélection">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
           Supprimer
         </button>
@@ -275,10 +275,11 @@
                   <button type="button" class="cl-act cl-act-view" (click)="openDetail(c)" title="Voir le détail" aria-label="Voir le détail">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
-                  <button type="button" class="cl-act cl-act-edit" (click)="openEdit(c)" title="Modifier" aria-label="Modifier">
+                  <button type="button" class="cl-act cl-act-edit" appRequiresPermission module="CLIENTS" action="EDIT" (click)="openEdit(c)" title="Modifier" aria-label="Modifier">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
                   <button type="button" class="cl-act" [class.cl-act-activate]="!c.active" [class.cl-act-deactivate]="c.active"
+                    appRequiresPermission module="CLIENTS" action="EDIT"
                     [disabled]="toggling() === c.id"
                     (click)="toggleActive(c)"
                     [title]="c.active ? 'Désactiver' : 'Activer'"
@@ -291,7 +292,7 @@
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                     }
                   </button>
-                  <button type="button" class="cl-act cl-act-del" (click)="confirmDelete(c.id)" title="Supprimer" aria-label="Supprimer">
+                  <button type="button" class="cl-act cl-act-del" appRequiresPermission module="CLIENTS" action="DELETE" (click)="confirmDelete(c.id)" title="Supprimer" aria-label="Supprimer">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
                   </button>
                 </div>
@@ -434,7 +435,7 @@
 
         <div class="nm-footer">
           <button type="button" class="nm-btn-cancel" (click)="closeForm()">Annuler</button>
-          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+          <button type="submit" class="nm-btn-primary" appRequiresPermission module="CLIENTS" [action]="formMode() === 'create' ? 'CREATE' : 'EDIT'" [disabled]="saving()">
             @if (saving()) {
               <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
               Enregistrement…
@@ -538,7 +539,7 @@
 
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
-        <button type="button" class="nm-btn-primary" (click)="closeDetail(); openEdit(c)">
+        <button type="button" class="nm-btn-primary" appRequiresPermission module="CLIENTS" action="EDIT" (click)="closeDetail(); openEdit(c)">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Modifier
         </button>
@@ -571,7 +572,7 @@
       </div>
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
-        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+        <button type="button" class="nm-btn-danger" appRequiresPermission module="CLIENTS" action="DELETE" [disabled]="deleting()" (click)="executeDelete()">
           @if (deleting()) {
             <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
             Suppression…
@@ -606,7 +607,7 @@
       </div>
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeBulkDeleteConfirm()">Annuler</button>
-        <button type="button" class="nm-btn-danger" [disabled]="bulkActing()" (click)="executeBulkDelete()">
+        <button type="button" class="nm-btn-danger" appRequiresPermission module="CLIENTS" action="DELETE" [disabled]="bulkActing()" (click)="executeBulkDelete()">
           @if (bulkActing()) {
             <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
             Suppression…

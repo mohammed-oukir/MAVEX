@@ -8,6 +8,7 @@ import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.UserRepository;
 import com.medafrica.mavex.security.repository.PasswordResetOtpRepository;
 import com.medafrica.mavex.security.repository.RefreshTokenRepository;
+import com.medafrica.mavex.service.PermissionService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class AuthService {
     private final JwtService                 jwtService;
     private final PasswordEncoder            passwordEncoder;
     private final EmailService               emailService;
+    private final PermissionService          permissionService;
 
     // ─────────────────────────────────────────────
     // LOGIN
@@ -166,6 +168,7 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .permissions(permissionService.getEffectivePermissionsMap(user))
                 .build();
     }
 }

@@ -197,6 +197,7 @@
                   <button
                     type="button"
                     class="sp-act edit"
+                    appRequiresPermission module="SHIPMENTS" action="EDIT"
                     (click)="openEdit(s)"
                     [attr.aria-label]="'Modifier ' + s.mawb"
                     title="Modifier"
@@ -211,6 +212,7 @@
                   <button
                     type="button"
                     class="sp-act del"
+                    appRequiresPermission module="SHIPMENTS" action="DELETE"
                     (click)="confirmDelete(s.id)"
                     [attr.aria-label]="'Supprimer ' + s.mawb"
                     title="Supprimer"
@@ -552,7 +554,7 @@
         <!-- Footer -->
         <div class="nm-footer">
           <button type="button" class="nm-btn-cancel" (click)="closeCreate()">Annuler</button>
-          <button type="submit" class="nm-btn-primary" [disabled]="creating()">
+          <button type="submit" class="nm-btn-primary" appRequiresPermission module="SHIPMENTS" action="CREATE" [disabled]="creating()">
             @if (creating()) {
               <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
               Création…
@@ -732,7 +734,7 @@
 
         <div class="nm-footer">
           <button type="button" class="nm-btn-cancel" (click)="closeEdit()">Annuler</button>
-          <button type="submit" class="nm-btn-primary" [disabled]="saving()">
+          <button type="submit" class="nm-btn-primary" appRequiresPermission module="SHIPMENTS" action="EDIT" [disabled]="saving()">
             @if (saving()) {
               <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
               Enregistrement…
@@ -787,7 +789,7 @@
 
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="cancelDelete()">Annuler</button>
-        <button type="button" class="nm-btn-danger" [disabled]="deleting()" (click)="executeDelete()">
+        <button type="button" class="nm-btn-danger" appRequiresPermission module="SHIPMENTS" action="DELETE" [disabled]="deleting()" (click)="executeDelete()">
           @if (deleting()) {
             <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
             Suppression…

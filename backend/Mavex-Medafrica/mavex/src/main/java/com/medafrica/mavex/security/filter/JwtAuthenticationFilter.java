@@ -66,10 +66,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
 protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getServletPath();
-    // ✅ Ne pas appliquer le filtre JWT sur ces routes
+    // Routes publiques — le filtre JWT ne s'applique pas
+    // /api/auth/me/permissions est intentionnellement exclu : il nécessite un JWT
     return path.equals("/login")
-      
-        || path.startsWith("/api/auth/")
+        || path.equals("/api/auth/login")
+        || path.equals("/api/auth/refresh")
+        || path.equals("/api/auth/logout")
+        || path.equals("/api/auth/forgot-password")
+        || path.equals("/api/auth/reset-password")
         || path.startsWith("/css/")
         || path.startsWith("/js/")
         || path.startsWith("/images/");
