@@ -1,0 +1,381 @@
+/* ══════════════════════════════════════════════════
+   PAGE HEADER
+   ══════════════════════════════════════════════════ */
+.ep-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ep-page-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ep-page-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #FFF7ED;
+  color: var(--mavex-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ep-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.ep-page-sub {
+  font-size: 13px;
+  color: var(--mavex-muted, #6B7280);
+  margin: 2px 0 0;
+}
+
+/* ══════════════════════════════════════════════════
+   CARD
+   ══════════════════════════════════════════════════ */
+.ep-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+.ep-config-card {
+  margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   GRILLE PROVIDERS
+   ══════════════════════════════════════════════════ */
+.ep-providers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ══════════════════════════════════════════════════
+   CARTE PROVIDER
+   ══════════════════════════════════════════════════ */
+.ep-provider-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px 16px;
+  background: #fff;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+  text-align: center;
+  min-height: 110px;
+  width: 100%;
+}
+
+.ep-provider-card:hover {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+}
+
+.ep-provider-card:focus-visible {
+  outline: 3px solid #2563EB;
+  outline-offset: 2px;
+}
+
+.ep-provider-card--active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+}
+
+/* ── Badge ACTIF ── */
+.ep-badge-actif {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: #16A34A;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 20px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+
+/* ── Coche bleue ── */
+.ep-check-icon {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Logo provider ── */
+.ep-provider-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ep-provider-logo--brevo {
+  background: #0B7B3E;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.ep-provider-logo--smtp {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+/* ── Textes carte ── */
+.ep-provider-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.ep-provider-desc {
+  font-size: 11.5px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════════════
+   EN-TÊTE DE CONFIG
+   ══════════════════════════════════════════════════ */
+.ep-config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.ep-config-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.ep-btn-secrets {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+}
+
+.ep-btn-secrets:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+}
+
+.ep-btn-secrets:focus-visible {
+  outline: 3px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   LABELS
+   ══════════════════════════════════════════════════ */
+.ep-label-hint {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: #9CA3AF;
+  margin-left: 4px;
+}
+
+/* ══════════════════════════════════════════════════
+   TOGGLES SSL / TLS
+   ══════════════════════════════════════════════════ */
+.ep-toggles {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.ep-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ep-toggle input[type="checkbox"] {
+  width: 36px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--mavex-accent);
+}
+
+/* ══════════════════════════════════════════════════
+   PIED DE FORMULAIRE
+   ══════════════════════════════════════════════════ */
+.ep-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #F3F4F6;
+  flex-wrap: wrap;
+}
+
+.ep-test-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ep-test-input {
+  max-width: 260px;
+  font-size: 13.5px;
+}
+
+.ep-btn-test {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+
+.ep-btn-test:hover:not(:disabled) {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.ep-btn-test:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.ep-btn-test:focus-visible {
+  outline: 3px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* ── Bouton Appliquer (orange) ── */
+.ep-btn-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--mavex-accent, #F97316);
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(249,115,22,.25);
+}
+
+.ep-btn-apply:hover:not(:disabled) {
+  background: var(--mavex-accent-dark, #EA580C);
+  box-shadow: 0 4px 12px rgba(249,115,22,.35);
+}
+
+.ep-btn-apply:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ep-btn-apply:focus-visible {
+  outline: 3px solid #F97316;
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   SKELETON
+   ══════════════════════════════════════════════════ */
+.ep-skeleton {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: ep-shimmer 1.4s infinite;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+@keyframes ep-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .ep-providers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ep-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ep-test-row {
+    flex-wrap: wrap;
+  }
+
+  .ep-test-input {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .ep-btn-apply {
+    width: 100%;
+    justify-content: center;
+  }
+}

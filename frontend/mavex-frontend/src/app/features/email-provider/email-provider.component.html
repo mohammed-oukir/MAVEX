@@ -1,0 +1,364 @@
+<!-- ══════════════════════════════════════════════════════
+     PAGE HEADER
+     ══════════════════════════════════════════════════════ -->
+<div class="ep-page-header">
+  <div class="ep-page-title-wrap">
+    <div class="ep-page-icon" aria-hidden="true">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="ep-page-title">Provider Email</h1>
+      <p class="ep-page-sub">Choisissez et configurez le service d'envoi des emails</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SKELETON
+     ══════════════════════════════════════════════════════ -->
+@if (loading()) {
+  <div class="ep-card">
+    <div class="ep-skeleton" style="width:200px;height:14px;margin-bottom:20px"></div>
+    <div class="ep-providers-grid">
+      <div class="ep-skeleton" style="height:110px;border-radius:12px"></div>
+      <div class="ep-skeleton" style="height:110px;border-radius:12px"></div>
+    </div>
+    <div class="ep-skeleton" style="width:160px;height:14px;margin:28px 0 16px"></div>
+    <div class="ep-skeleton" style="height:42px;border-radius:8px;margin-bottom:12px"></div>
+    <div class="ep-skeleton" style="height:42px;border-radius:8px"></div>
+  </div>
+} @else {
+
+<!-- ══════════════════════════════════════════════════════
+     CARTES PROVIDERS
+     ══════════════════════════════════════════════════════ -->
+<div class="ep-card">
+
+  <div class="ep-providers-grid" role="radiogroup" aria-label="Sélection du provider email">
+
+    <!-- Carte BREVO -->
+    <button
+      type="button"
+      class="ep-provider-card"
+      [class.ep-provider-card--active]="selectedType() === 'BREVO'"
+      [attr.aria-pressed]="selectedType() === 'BREVO'"
+      (click)="selectProvider('BREVO')"
+    >
+      @if (activeConfig()?.providerType === 'BREVO') {
+        <span class="ep-badge-actif">ACTIF</span>
+      }
+      @if (selectedType() === 'BREVO') {
+        <span class="ep-check-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="12" fill="#2563EB"/>
+            <polyline points="7 12 10.5 15.5 17 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      }
+      <div class="ep-provider-logo ep-provider-logo--brevo" aria-hidden="true">B</div>
+      <div class="ep-provider-name">Brevo</div>
+      <div class="ep-provider-desc">API HTTP + webhooks + tracking natif</div>
+    </button>
+
+    <!-- Carte SMTP -->
+    <button
+      type="button"
+      class="ep-provider-card"
+      [class.ep-provider-card--active]="selectedType() === 'SMTP'"
+      [attr.aria-pressed]="selectedType() === 'SMTP'"
+      (click)="selectProvider('SMTP')"
+    >
+      @if (activeConfig()?.providerType === 'SMTP') {
+        <span class="ep-badge-actif">ACTIF</span>
+      }
+      @if (selectedType() === 'SMTP') {
+        <span class="ep-check-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="12" fill="#2563EB"/>
+            <polyline points="7 12 10.5 15.5 17 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      }
+      <div class="ep-provider-logo ep-provider-logo--smtp" aria-hidden="true">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+      </div>
+      <div class="ep-provider-name">SMTP / Gmail</div>
+      <div class="ep-provider-desc">Envoi SMTP classique (sans webhooks)</div>
+    </button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     FORMULAIRE DE CONFIGURATION
+     ══════════════════════════════════════════════════════ -->
+<div class="ep-card ep-config-card">
+
+  <div class="ep-config-header">
+    <h2 class="ep-config-title">
+      Configuration — {{ isBrevo() ? 'Brevo' : 'SMTP / Gmail' }}
+    </h2>
+    <button type="button" class="ep-btn-secrets" (click)="toggleSecrets()">
+      @if (showSecrets()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+        Masquer les secrets
+      } @else {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        Afficher les secrets
+      }
+    </button>
+  </div>
+
+  <!-- ── Formulaire BREVO ── -->
+  @if (isBrevo()) {
+    <form [formGroup]="brevoForm" (ngSubmit)="apply()" novalidate>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="brevo-from-email" class="form-label">Adresse expéditeur (from)</label>
+          <input
+            id="brevo-from-email"
+            type="email"
+            class="form-control"
+            [class.is-invalid]="brevoForm.get('fromEmail')!.invalid && brevoForm.get('fromEmail')!.touched"
+            formControlName="fromEmail"
+            placeholder="notifications@exemple.com"
+            autocomplete="email"
+          />
+          @if (brevoForm.get('fromEmail')!.invalid && brevoForm.get('fromEmail')!.touched) {
+            <div class="invalid-feedback">Adresse email valide requise.</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label for="brevo-from-name" class="form-label">Nom expéditeur</label>
+          <input
+            id="brevo-from-name"
+            type="text"
+            class="form-control"
+            [class.is-invalid]="brevoForm.get('fromName')!.invalid && brevoForm.get('fromName')!.touched"
+            formControlName="fromName"
+            placeholder="MedAfrica Logistics"
+            autocomplete="organization"
+          />
+          @if (brevoForm.get('fromName')!.invalid && brevoForm.get('fromName')!.touched) {
+            <div class="invalid-feedback">Nom expéditeur requis.</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label for="brevo-api-key" class="form-label">
+            Clé API
+            <span class="ep-label-hint">(laisser vide pour conserver)</span>
+          </label>
+          <input
+            id="brevo-api-key"
+            type="password"
+            class="form-control"
+            formControlName="brevoApiKey"
+            [placeholder]="hasSecret('brevoApiKey') && !showSecrets() ? '••••••• (inchangé)' : ''"
+            [attr.disabled]="hasSecret('brevoApiKey') && !showSecrets() ? '' : null"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="col-12">
+          <label for="brevo-webhook-token" class="form-label">
+            Token webhook
+            <span class="ep-label-hint">(laisser vide pour conserver)</span>
+          </label>
+          <input
+            id="brevo-webhook-token"
+            type="password"
+            class="form-control"
+            formControlName="brevoWebhookToken"
+            [placeholder]="hasSecret('brevoWebhookToken') && !showSecrets() ? '••••••• (inchangé)' : ''"
+            [attr.disabled]="hasSecret('brevoWebhookToken') && !showSecrets() ? '' : null"
+            autocomplete="new-password"
+          />
+        </div>
+      </div>
+
+    </form>
+  }
+
+  <!-- ── Formulaire SMTP ── -->
+  @if (isSmtp()) {
+    <form [formGroup]="smtpForm" (ngSubmit)="apply()" novalidate>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="smtp-from-email" class="form-label">Adresse expéditeur (from)</label>
+          <input
+            id="smtp-from-email"
+            type="email"
+            class="form-control"
+            [class.is-invalid]="smtpForm.get('fromEmail')!.invalid && smtpForm.get('fromEmail')!.touched"
+            formControlName="fromEmail"
+            placeholder="notifications@exemple.com"
+            autocomplete="email"
+          />
+          @if (smtpForm.get('fromEmail')!.invalid && smtpForm.get('fromEmail')!.touched) {
+            <div class="invalid-feedback">Adresse email valide requise.</div>
+          }
+        </div>
+
+        <div class="col-md-6">
+          <label for="smtp-from-name" class="form-label">Nom expéditeur</label>
+          <input
+            id="smtp-from-name"
+            type="text"
+            class="form-control"
+            [class.is-invalid]="smtpForm.get('fromName')!.invalid && smtpForm.get('fromName')!.touched"
+            formControlName="fromName"
+            placeholder="MedAfrica Logistics"
+            autocomplete="organization"
+          />
+          @if (smtpForm.get('fromName')!.invalid && smtpForm.get('fromName')!.touched) {
+            <div class="invalid-feedback">Nom expéditeur requis.</div>
+          }
+        </div>
+
+        <div class="col-md-8">
+          <label for="smtp-host" class="form-label">Serveur SMTP (host)</label>
+          <input
+            id="smtp-host"
+            type="text"
+            class="form-control"
+            [class.is-invalid]="smtpForm.get('smtpHost')!.invalid && smtpForm.get('smtpHost')!.touched"
+            formControlName="smtpHost"
+            placeholder="smtp.office365.com"
+            autocomplete="off"
+          />
+          @if (smtpForm.get('smtpHost')!.invalid && smtpForm.get('smtpHost')!.touched) {
+            <div class="invalid-feedback">Serveur SMTP requis.</div>
+          }
+        </div>
+
+        <div class="col-md-4">
+          <label for="smtp-port" class="form-label">Port</label>
+          <input
+            id="smtp-port"
+            type="number"
+            class="form-control"
+            [class.is-invalid]="smtpForm.get('smtpPort')!.invalid && smtpForm.get('smtpPort')!.touched"
+            formControlName="smtpPort"
+            placeholder="587"
+            min="1"
+            max="65535"
+          />
+          @if (smtpForm.get('smtpPort')!.invalid && smtpForm.get('smtpPort')!.touched) {
+            <div class="invalid-feedback">Port valide requis (1–65535).</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label for="smtp-username" class="form-label">Nom d'utilisateur</label>
+          <input
+            id="smtp-username"
+            type="text"
+            class="form-control"
+            [class.is-invalid]="smtpForm.get('smtpUsername')!.invalid && smtpForm.get('smtpUsername')!.touched"
+            formControlName="smtpUsername"
+            placeholder="user@exemple.com"
+            autocomplete="username"
+          />
+          @if (smtpForm.get('smtpUsername')!.invalid && smtpForm.get('smtpUsername')!.touched) {
+            <div class="invalid-feedback">Nom d'utilisateur requis.</div>
+          }
+        </div>
+
+        <div class="col-12">
+          <label for="smtp-password" class="form-label">
+            Mot de passe
+            <span class="ep-label-hint">(laisser vide pour conserver)</span>
+          </label>
+          <input
+            id="smtp-password"
+            type="password"
+            class="form-control"
+            formControlName="smtpPassword"
+            [placeholder]="hasSecret('smtpPassword') && !showSecrets() ? '••••••• (inchangé)' : ''"
+            [attr.disabled]="hasSecret('smtpPassword') && !showSecrets() ? '' : null"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="col-12">
+          <div class="ep-toggles">
+            <label class="ep-toggle">
+              <input type="checkbox" formControlName="smtpTlsEnabled" role="switch" />
+              <span>STARTTLS (port 587)</span>
+            </label>
+            <label class="ep-toggle">
+              <input type="checkbox" formControlName="smtpSslEnabled" role="switch" />
+              <span>SSL (port 465)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  }
+
+  <!-- ══════════════════════════════════════════════════════
+       PIED DE FORMULAIRE — TEST + APPLIQUER
+       ══════════════════════════════════════════════════════ -->
+  <div class="ep-form-footer">
+    <div class="ep-test-row">
+      <input
+        id="test-email"
+        type="email"
+        class="form-control ep-test-input"
+        [class.is-invalid]="testEmailControl.invalid && testEmailControl.touched"
+        [formControl]="testEmailControl"
+        placeholder="admin@mavex.com"
+        autocomplete="email"
+        aria-label="Adresse email de test"
+      />
+      <button
+        type="button"
+        class="ep-btn-test"
+        (click)="testConnection()"
+        [disabled]="testing()"
+      >
+        @if (testing()) {
+          <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+          Test en cours…
+        } @else {
+          Tester la connexion
+        }
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="ep-btn-apply"
+      (click)="apply()"
+      [disabled]="saving()"
+    >
+      @if (saving()) {
+        <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+        Application…
+      } @else {
+        Appliquer et activer
+      }
+    </button>
+  </div>
+
+</div>
+
+} <!-- fin @else loading -->

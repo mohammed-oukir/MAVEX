@@ -32,7 +32,7 @@ public class AuditLog {
     @Column(nullable = false)
     private AuditAction action;
 
-    /** Nom de l'entite concernee ex: "Order", "SmtpConfig", "User" */
+    /** Nom de l'entite concernee ex: "Order", "EmailProviderConfig", "User" */
     @Column(name = "entity_name")
     private String entityName;
 

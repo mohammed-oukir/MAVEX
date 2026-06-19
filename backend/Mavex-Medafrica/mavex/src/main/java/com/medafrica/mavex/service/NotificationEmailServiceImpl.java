@@ -7,19 +7,15 @@ import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
+import com.medafrica.mavex.service.email.EmailProviderResolver;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Orchestrateur : charge les données, envoie le SMTP, délègue les écritures BDD
@@ -34,17 +30,11 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     private final EmailTemplateRepository  templateRepository;
     private final OrderRepository          orderRepository;
-    private final JavaMailSender           mailSender;
-    private final EmailPersistenceService  persistence;   // bean séparé → proxy Spring actif
+    private final EmailProviderResolver    providerResolver;
+    private final EmailPersistenceService  persistence;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
-
-    @Value("${app.mail.from.email}")
-    private String fromEmail;
-
-    @Value("${app.mail.from.name:MAVEX}")
-    private String fromName;
 
     // ---------------------------------------------------------------
     // API PUBLIQUE
@@ -71,11 +61,14 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         Long emailLogId = persistence.createPendingLog(toEmail, subject, template, order.getId());
 
         try {
-            // 3. Envoi SMTP — hors transaction BDD intentionnellement
-            sendHtmlEmail(toEmail, subject, htmlContent, attachments);
+            // 3. Envoi via provider actif — hors transaction BDD intentionnellement
+            String messageId = providerResolver.resolve().send(
+                toEmail, subject, htmlContent,
+                attachments != null ? List.of(attachments) : List.of()
+            );
 
             // 4. Mise à jour BDD → SENT (recharge les entités fraîches par ID)
-            persistence.markSuccess(emailLogId, order.getId());
+            persistence.markSuccess(emailLogId, order.getId(), messageId);
 
             log.info("Email envoyé avec succès → {} (Order HAWB={})", toEmail, order.getHawb());
 
@@ -136,35 +129,6 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
                 .sent(sent)
                 .failed(failed)
                 .build();
-    }
-
-    // ---------------------------------------------------------------
-    // ENVOI SMTP — purement technique, aucune logique métier
-    // ---------------------------------------------------------------
-
-    private void sendHtmlEmail(String to, String subject, String html,
-                                MultipartFile[] attachments) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setFrom(fromName + " <" + fromEmail + ">");
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(html, true);
-
-        if (attachments != null) {
-            for (MultipartFile file : attachments) {
-                if (file != null && !file.isEmpty()) {
-                    helper.addAttachment(
-                        file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment",
-                        file
-                    );
-                }
-            }
-        }
-
-        mailSender.send(message);
-        log.debug("Email SMTP envoyé à {}", to);
     }
 
     // ---------------------------------------------------------------

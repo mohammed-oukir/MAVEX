@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
  * Table BDD : email_logs
  */
 @Entity
-@Table(name = "email_logs")
+@Table(name = "email_logs",
+       indexes = @Index(name = "idx_email_logs_message_id", columnList = "message_id"))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class EmailLog {
 
@@ -45,8 +46,8 @@ public class EmailLog {
     private LocalDateTime nextRetryAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "smtp_config_id")
-    private SmtpConfig smtpConfig;
+    @JoinColumn(name = "email_provider_config_id")
+    private EmailProviderConfig emailProviderConfig;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "email_template_id")
@@ -60,8 +61,24 @@ public class EmailLog {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
+    /** Identifiant Brevo retourné à l'envoi — sert à relier les webhooks */
+    @Column(name = "message_id")
+    private String messageId;
+
     @Column(name = "opened_at")
     private LocalDateTime openedAt;
+
+    @Column(name = "clicked_at")
+    private LocalDateTime clickedAt;
+
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
+    @Column(name = "bounced_at")
+    private LocalDateTime bouncedAt;
+
+    @Column(name = "bounce_reason", length = 100)
+    private String bounceReason;
 
     public void markSent() {
         this.status = EmailStatus.SENT;

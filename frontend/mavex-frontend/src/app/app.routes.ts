@@ -100,6 +100,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/email-template/email-template.component').then(m => m.EmailTemplateComponent),
       },
+      {
+        path: 'settings/email-provider',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/email-provider/email-provider.component').then(m => m.EmailProviderComponent),
+      },
     ],
   },
 

@@ -61,10 +61,11 @@ public class EmailPersistenceService {
     }
 
     @Transactional
-    public void markSuccess(Long emailLogId, Long orderId) {
+    public void markSuccess(Long emailLogId, Long orderId, String messageId) {
         EmailLog emailLog = emailLogRepository.findById(emailLogId)
                 .orElseThrow(() -> new EntityNotFoundException("EmailLog introuvable id=" + emailLogId));
         emailLog.markSent();
+        if (messageId != null) emailLog.setMessageId(messageId);
         emailLogRepository.save(emailLog);
 
         Order order = orderRepository.findById(orderId)

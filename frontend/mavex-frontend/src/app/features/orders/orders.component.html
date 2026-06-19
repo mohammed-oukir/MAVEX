@@ -553,6 +553,41 @@
                   @if (log.status === 'FAILED' && log.errorMessage) {
                     <div class="or-history-error">{{ log.errorMessage }}</div>
                   }
+                  @if (log.deliveredAt || log.openedAt || log.clickedAt || log.bouncedAt) {
+                    <div class="or-tracking-timeline">
+                      @if (log.deliveredAt) {
+                        <div class="or-tracking-event or-tracking-ok">
+                          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                          <span>Délivré</span>
+                          <span class="or-tracking-date">{{ log.deliveredAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      }
+                      @if (log.openedAt) {
+                        <div class="or-tracking-event or-tracking-ok">
+                          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          <span>Ouvert</span>
+                          <span class="or-tracking-date">{{ log.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      }
+                      @if (log.clickedAt) {
+                        <div class="or-tracking-event or-tracking-ok">
+                          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                          <span>Cliqué</span>
+                          <span class="or-tracking-date">{{ log.clickedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      }
+                      @if (log.bouncedAt) {
+                        <div class="or-tracking-event or-tracking-bounce">
+                          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                          <span>Rejeté</span>
+                          @if (log.bounceReason) {
+                            <span class="or-tracking-reason">{{ log.bounceReason }}</span>
+                          }
+                          <span class="or-tracking-date">{{ log.bouncedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
               </div>
             }

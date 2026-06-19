@@ -104,4 +104,9 @@ export interface EmailLogResponse {
   errorMessage?: string;
   retryCount:   number;
   sentAt?:      string;
+  deliveredAt?: string | null;
+  openedAt?:    string | null;
+  clickedAt?:   string | null;
+  bouncedAt?:   string | null;
+  bounceReason?: string | null;
 }

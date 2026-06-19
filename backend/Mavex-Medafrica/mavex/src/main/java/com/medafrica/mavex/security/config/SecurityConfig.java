@@ -69,6 +69,9 @@ public class SecurityConfig {
                 // ── Pages paiement frontend : publiques
                 .requestMatchers("/pay/**", "/pay-success", "/pay-error", "/pay-cancelled").permitAll()
 
+                // ── Webhooks Brevo : public (pas de JWT, token dans l'URL)
+                .requestMatchers("/webhooks/brevo/**").permitAll()
+
                 // ── Swagger : public
                 .requestMatchers(
                     "/swagger-ui/**",

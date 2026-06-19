@@ -1,40 +1,33 @@
 package com.medafrica.mavex.security.service;
 
+import com.medafrica.mavex.service.email.EmailProviderResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
-
-    @Value("${app.mail.from.email}")
-    private String fromEmail;
-
-    @Value("${app.mail.from.name:MedAfrica}")
-    private String fromName;
+    private final EmailProviderResolver providerResolver;
 
     public void sendOtpEmail(String toEmail, String fullName, String otp) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromName + " <" + fromEmail + ">");
-            message.setTo(toEmail);
-            message.setSubject("MedAfrica - Code de réinitialisation de mot de passe");
-            message.setText(
-                "Bonjour " + fullName + ",\n\n" +
-                "Votre code de réinitialisation est : " + otp + "\n\n" +
-                "Ce code est valable 15 minutes.\n\n" +
-                "Si vous n'avez pas demandé ce code, ignorez cet email.\n\n" +
-                "L'équipe MedAfrica"
-            );
+            String html = "<p>Bonjour " + fullName + ",</p>" +
+                          "<p>Votre code de réinitialisation est : <strong>" + otp + "</strong></p>" +
+                          "<p>Ce code est valable 15 minutes.</p>" +
+                          "<p>Si vous n'avez pas demandé ce code, ignorez cet email.</p>" +
+                          "<p>L'équipe MedAfrica</p>";
 
-            mailSender.send(message);
+            providerResolver.resolve().send(
+                toEmail,
+                "MedAfrica - Code de réinitialisation de mot de passe",
+                html,
+                List.of()
+            );
             log.info("OTP email envoyé à {}", toEmail);
 
         } catch (Exception e) {

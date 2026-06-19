@@ -17,6 +17,11 @@ public class EmailLogDTO {
     private String        errorMessage;
     private int           retryCount;
     private LocalDateTime sentAt;
+    private LocalDateTime deliveredAt;
+    private LocalDateTime openedAt;
+    private LocalDateTime clickedAt;
+    private LocalDateTime bouncedAt;
+    private String        bounceReason;
 
     public static EmailLogDTO from(EmailLog log) {
         return EmailLogDTO.builder()
@@ -27,6 +32,11 @@ public class EmailLogDTO {
                 .errorMessage(log.getErrorMessage())
                 .retryCount(log.getRetryCount())
                 .sentAt(log.getSentAt())
+                .deliveredAt(log.getDeliveredAt())
+                .openedAt(log.getOpenedAt())
+                .clickedAt(log.getClickedAt())
+                .bouncedAt(log.getBouncedAt())
+                .bounceReason(log.getBounceReason())
                 .build();
     }
 }
