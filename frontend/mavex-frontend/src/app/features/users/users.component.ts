@@ -210,10 +210,5 @@ export class UsersComponent implements OnInit {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
-  getAvatarColor(name: string): string {
-    const p = ['#7C3AED','#2563EB','#059669','#D97706','#DC2626','#0891B2','#DB2777'];
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-    return p[Math.abs(h) % p.length];
-  }
 }
+

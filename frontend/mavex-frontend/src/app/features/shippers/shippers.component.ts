@@ -342,10 +342,5 @@ export class ShippersComponent implements OnInit {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
   }
 
-  getAvatarColor(name: string): string {
-    const palette = ['#F97316','#3B82F6','#22C55E','#8B5CF6','#EC4899','#14B8A6','#F59E0B'];
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
-    return palette[Math.abs(h) % palette.length];
-  }
 }
+

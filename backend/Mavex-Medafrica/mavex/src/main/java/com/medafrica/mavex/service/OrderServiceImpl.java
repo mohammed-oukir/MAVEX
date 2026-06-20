@@ -11,6 +11,8 @@ import com.medafrica.mavex.model.logistics.OrderStatusHistory;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.ClientRepository;
+import com.medafrica.mavex.model.email.EmailLog;
+import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
@@ -311,6 +313,11 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderResponse toResponse(Order o) {
 
+        EmailLog lastLog = o.getId() != null
+                ? emailLogRepository.findTopByOrderIdAndStatusOrderBySentAtDesc(
+                        o.getId(), EmailStatus.SENT).orElse(null)
+                : null;
+
         String clientFullName = null;
         String clientEmail    = null;
         String clientPhone    = null;
@@ -379,6 +386,11 @@ public class OrderServiceImpl implements OrderService {
                 .emailSentCount(o.getEmailSentCount())
                 .emailSentToAddress(o.getEmailSentToAddress())
                 .emailOutdatedReason(o.getEmailOutdatedReason())
+                .deliveredAt(lastLog != null ? lastLog.getDeliveredAt() : null)
+                .openedAt(lastLog != null ? lastLog.getOpenedAt() : null)
+                .clickedAt(lastLog != null ? lastLog.getClickedAt() : null)
+                .bouncedAt(lastLog != null ? lastLog.getBouncedAt() : null)
+                .bounceReason(lastLog != null ? lastLog.getBounceReason() : null)
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
                 .build();

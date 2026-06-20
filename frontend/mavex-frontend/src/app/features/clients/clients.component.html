@@ -137,7 +137,6 @@
             <input type="checkbox" class="cl-checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" aria-label="Sélectionner tout" />
           </th>
           <th scope="col">Nom</th>
-          <th scope="col">Email</th>
           <th scope="col">Téléphone</th>
           <th scope="col">Ville</th>
           <th scope="col">État</th>
@@ -155,9 +154,6 @@
               <svg class="cl-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input class="cl-fi-input" [value]="fName()" (input)="setFilter('name', $any($event.target).value)" placeholder="Nom…" aria-label="Filtrer par nom" />
             </div>
-          </th>
-          <th scope="col">
-            <input class="cl-fi-input" [value]="fEmail()" (input)="setFilter('email', $any($event.target).value)" placeholder="Email…" aria-label="Filtrer par email" />
           </th>
           <th scope="col">
             <input class="cl-fi-input" [value]="fPhone()" (input)="setFilter('phone', $any($event.target).value)" placeholder="Tél…" aria-label="Filtrer par téléphone" />
@@ -195,7 +191,7 @@
                   <div class="cl-sk" style="width:120px"></div>
                 </div>
               </td>
-              @for (w of [160,90,80,40,36,60,80]; track $index) {
+              @for (w of [90,80,40,36,60,80]; track $index) {
                 <td><div class="cl-sk" [style.width.px]="w"></div></td>
               }
               <td><div class="cl-sk" style="width:90px;height:28px;border-radius:8px"></div></td>
@@ -204,7 +200,7 @@
 
         } @else if (pageItems().length === 0) {
           <tr>
-            <td colspan="10" class="py-5 text-center">
+            <td colspan="9" class="py-5 text-center">
               <div class="d-flex flex-column align-items-center gap-3">
                 <div class="cl-empty-icon" aria-hidden="true">
                   <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -231,21 +227,17 @@
                 <input type="checkbox" class="cl-checkbox" [checked]="selectedIds().has(c.id)" (change)="toggleSelect(c.id)" [attr.aria-label]="'Sélectionner ' + c.fullName" />
               </td>
 
-              <!-- Nom + avatar -->
+              <!-- Nom + avatar + email -->
               <td>
                 <div class="cl-identity">
-                  <div class="cl-avatar" [style.background]="getAvatarColor(c.fullName)" aria-hidden="true">
+                  <div class="cl-avatar" aria-hidden="true">
                     {{ getInitials(c.fullName) }}
                   </div>
                   <div>
                     <button type="button" class="cl-name-btn" (click)="openDetail(c)">{{ c.fullName }}</button>
+                    @if (c.email) { <div class="cl-email-sub">{{ c.email }}</div> }
                   </div>
                 </div>
-              </td>
-
-              <td>
-                @if (c.email) { <span class="cl-email">{{ c.email }}</span> }
-                @else { <span class="cl-muted">—</span> }
               </td>
 
               <td class="cl-muted">{{ c.phone || '—' }}</td>
@@ -459,7 +451,7 @@
     <div class="modal cl-detail-modal" (click)="$event.stopPropagation()">
 
       <div class="nm-header">
-        <div class="cl-avatar cl-avatar-lg" [style.background]="getAvatarColor(c.fullName)" aria-hidden="true">
+        <div class="cl-avatar cl-avatar-lg" aria-hidden="true">
           {{ getInitials(c.fullName) }}
         </div>
         <div style="flex:1;min-width:0">

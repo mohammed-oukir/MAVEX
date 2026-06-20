@@ -44,8 +44,13 @@ export interface OrderResponse {
   emailSentCount?:       number;
   emailSentToAddress?:   string;
   emailOutdatedReason?:  string;
+  deliveredAt?:          string | null;
+  openedAt?:             string | null;
+  clickedAt?:            string | null;
+  bouncedAt?:            string | null;
+  bounceReason?:         string | null;
   createdAt?:            string;
-  updatedAt?:      string;
+  updatedAt?:            string;
 }
 
 export interface OrderRequest {

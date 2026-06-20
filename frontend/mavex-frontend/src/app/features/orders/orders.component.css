@@ -593,3 +593,9 @@
   padding: 1px 6px;
   font-size: 10px;
 }
+
+/* ── Mini-icônes tracking inline dans la colonne email ── */
+.or-track-icon      { flex-shrink: 0; cursor: default; }
+.or-track-delivered { stroke: #16A34A; }
+.or-track-opened    { stroke: #2563EB; }
+.or-track-bounced   { stroke: #DC2626; }

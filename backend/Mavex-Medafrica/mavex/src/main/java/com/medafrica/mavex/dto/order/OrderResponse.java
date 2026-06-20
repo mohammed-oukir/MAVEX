@@ -52,6 +52,11 @@ private String clientCountry;
     private int           emailSentCount;
     private String        emailSentToAddress;
     private String        emailOutdatedReason;
+    private LocalDateTime deliveredAt;
+    private LocalDateTime openedAt;
+    private LocalDateTime clickedAt;
+    private LocalDateTime bouncedAt;
+    private String        bounceReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

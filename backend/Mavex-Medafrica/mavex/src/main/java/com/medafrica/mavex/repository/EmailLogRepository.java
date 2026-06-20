@@ -17,4 +17,6 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
 
     Optional<EmailLog> findByMessageId(String messageId);
 
+    Optional<EmailLog> findTopByOrderIdAndStatusOrderBySentAtDesc(Long orderId, EmailStatus status);
+
 }
