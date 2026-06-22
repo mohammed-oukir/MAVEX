@@ -33,6 +33,16 @@
   </div>
   <div class="us-stat-divider" aria-hidden="true"></div>
   <div class="us-stat">
+    <div class="us-stat-icon us-si-teal">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    </div>
+    <div>
+      <div class="us-stat-num">{{ statComptables() }}</div>
+      <div class="us-stat-lbl">Comptables</div>
+    </div>
+  </div>
+  <div class="us-stat-divider" aria-hidden="true"></div>
+  <div class="us-stat">
     <div class="us-stat-icon us-si-green">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
     </div>
@@ -57,6 +67,9 @@
     </button>
     <button type="button" class="us-filter-btn us-fb-agent" [class.us-filter-active]="roleFilter() === 'AGENT'" (click)="setRole('AGENT')">
       Agents <span class="us-filter-count">{{ statAgents() }}</span>
+    </button>
+    <button type="button" class="us-filter-btn us-fb-comptable" [class.us-filter-active]="roleFilter() === 'COMPTABLE'" (click)="setRole('COMPTABLE')">
+      Comptables <span class="us-filter-count">{{ statComptables() }}</span>
     </button>
     <button type="button" class="us-filter-btn us-fb-inactive" [class.us-filter-active]="roleFilter() === 'INACTIVE'" (click)="setRole('INACTIVE')">
       Inactifs <span class="us-filter-count">{{ statTotal() - statActive() }}</span>
@@ -135,8 +148,8 @@
 
             <!-- Rôle -->
             <td>
-              <span [class]="u.role === 'ADMIN' ? 'us-role-chip us-chip-admin' : 'us-role-chip us-chip-agent'">
-                {{ u.role === 'ADMIN' ? 'Admin' : 'Agent' }}
+              <span [class]="u.role === 'ADMIN' ? 'us-role-chip us-chip-admin' : u.role === 'COMPTABLE' ? 'us-role-chip us-chip-comptable' : 'us-role-chip us-chip-agent'">
+                {{ u.role === 'ADMIN' ? 'Admin' : u.role === 'COMPTABLE' ? 'Comptable' : 'Agent' }}
               </span>
             </td>
 
@@ -282,6 +295,16 @@
                       <div class="us-role-opt-desc">Accès complet</div>
                     </div>
                   </label>
+                  <label class="us-role-option" [class.us-role-selected-comptable]="form.get('role')!.value === 'COMPTABLE'">
+                    <input type="radio" formControlName="role" value="COMPTABLE" class="visually-hidden" />
+                    <div class="us-role-opt-icon us-roi-comptable">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </div>
+                    <div>
+                      <div class="us-role-opt-title">Comptable</div>
+                      <div class="us-role-opt-desc">Accès financier</div>
+                    </div>
+                  </label>
                 </div>
               </div>
             </div>
@@ -330,6 +353,7 @@
         <span
           class="us-drawer-role-badge"
           [class.us-drawer-role-badge--admin]="u.role === 'ADMIN'"
+          [class.us-drawer-role-badge--comptable]="u.role === 'COMPTABLE'"
         >{{ fmtRole(u.role) }}</span>
       </div>
     </div>

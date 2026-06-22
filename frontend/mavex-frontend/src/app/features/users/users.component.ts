@@ -38,10 +38,11 @@ export class UsersComponent implements OnInit {
   roleFilter  = signal<UserRole | 'ALL' | 'INACTIVE'>('ALL');
 
   /* ── Stats ────────────────────────────────────────── */
-  statTotal    = computed(() => this.allUsers().length);
-  statAdmins   = computed(() => this.allUsers().filter(u => u.role === 'ADMIN').length);
-  statAgents   = computed(() => this.allUsers().filter(u => u.role === 'AGENT').length);
-  statActive   = computed(() => this.allUsers().filter(u => u.active).length);
+  statTotal      = computed(() => this.allUsers().length);
+  statAdmins     = computed(() => this.allUsers().filter(u => u.role === 'ADMIN').length);
+  statAgents     = computed(() => this.allUsers().filter(u => u.role === 'AGENT').length);
+  statComptables = computed(() => this.allUsers().filter(u => u.role === 'COMPTABLE').length);
+  statActive     = computed(() => this.allUsers().filter(u => u.active).length);
 
   /* ── Filtered ─────────────────────────────────────── */
   filtered = computed(() => {
@@ -49,9 +50,10 @@ export class UsersComponent implements OnInit {
     const r = this.roleFilter();
     return this.allUsers().filter(u => {
       if (q && !u.fullName.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q)) return false;
-      if (r === 'ADMIN')    return u.role === 'ADMIN';
-      if (r === 'AGENT')    return u.role === 'AGENT';
-      if (r === 'INACTIVE') return !u.active;
+      if (r === 'ADMIN')     return u.role === 'ADMIN';
+      if (r === 'AGENT')     return u.role === 'AGENT';
+      if (r === 'COMPTABLE') return u.role === 'COMPTABLE';
+      if (r === 'INACTIVE')  return !u.active;
       return true;
     });
   });
@@ -203,7 +205,9 @@ export class UsersComponent implements OnInit {
   }
 
   fmtRole(role?: string): string {
-    return role === 'ADMIN' ? 'Administrateur' : 'Agent';
+    if (role === 'ADMIN')     return 'Administrateur';
+    if (role === 'COMPTABLE') return 'Comptable';
+    return 'Agent';
   }
 
   getInitials(name: string): string {
