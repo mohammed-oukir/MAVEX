@@ -11,7 +11,9 @@ export const authGuard: CanActivateFn = () => {
 export const noAuthGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
-  return auth.isAuthenticated() ? router.createUrlTree(['/dashboard']) : true;
+  if (!auth.isAuthenticated()) return true;
+  const dest = auth.isComptable() ? '/exchange-rates' : '/dashboard';
+  return router.createUrlTree([dest]);
 };
 
 export const adminGuard: CanActivateFn = () => {

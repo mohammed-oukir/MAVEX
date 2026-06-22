@@ -22,6 +22,7 @@
 
 /* Page title */
 .tb-title {
+  flex: 1;
   font-family: 'Inter Tight', sans-serif;
   font-weight: 800;
   font-size: 17px;
@@ -101,3 +102,154 @@
   outline: 2px solid #F97316;
   outline-offset: 2px;
 }
+
+/* ── Groupe droit ─────────────────────────────────────────── */
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Bouton cloche ────────────────────────────────────────── */
+.tb-notif-wrap { position: relative; }
+
+.tb-notif-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: #6B7280;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .14s, color .14s;
+}
+.tb-notif-btn:hover              { background: #F3F4F6; color: #111827; }
+.tb-notif-open .tb-notif-btn    { background: #F3F4F6; color: #111827; }
+.tb-notif-btn:focus-visible      { outline: 2px solid #F97316; outline-offset: 2px; }
+
+/* ── Badge rouge ──────────────────────────────────────────── */
+.tb-notif-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  background: #EF4444;
+  color: #fff;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'Inter Tight', sans-serif;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ── Backdrop ─────────────────────────────────────────────── */
+.tb-notif-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
+/* ── Dropdown ─────────────────────────────────────────────── */
+.tb-notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 340px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.1);
+  z-index: 200;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 420px;
+}
+
+.tb-nd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+.tb-nd-title { font-weight: 700; font-size: 13px; color: #111827; }
+.tb-nd-count {
+  font-size: 11px; font-weight: 600;
+  color: #F97316;
+  background: #FFF7ED;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.tb-nd-body { overflow-y: auto; flex: 1; }
+
+.tb-nd-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: #9CA3AF;
+}
+.tb-nd-empty p { font-size: 13px; margin: 0; }
+
+.tb-nd-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #F9FAFB;
+  transition: background .1s;
+}
+.tb-nd-item:last-child        { border-bottom: none; }
+.tb-nd-item:hover             { background: #F9FAFB; }
+.tb-nd-item--unread           { background: #FFFBF5; }
+.tb-nd-item--unread:hover     { background: #FFF7ED; }
+
+.tb-nd-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.tb-nd-dot--info    { background: #3B82F6; }
+.tb-nd-dot--warning { background: #F59E0B; }
+.tb-nd-dot--error   { background: #EF4444; }
+
+.tb-nd-content         { flex: 1; min-width: 0; }
+.tb-nd-item-title      { font-size: 12.5px; font-weight: 600; color: #111827; margin-bottom: 2px; }
+.tb-nd-item-msg        { font-size: 12px; color: #6B7280; line-height: 1.4; word-break: break-word; }
+.tb-nd-item-date       { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+
+.tb-nd-footer {
+  padding: 10px 16px;
+  border-top: 1px solid #F3F4F6;
+  flex-shrink: 0;
+}
+.tb-nd-mark-btn {
+  width: 100%;
+  height: 32px;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background .14s, border-color .14s;
+}
+.tb-nd-mark-btn:hover:not(:disabled) { background: #F9FAFB; border-color: #D1D5DB; }
+.tb-nd-mark-btn:disabled             { opacity: .45; cursor: default; }

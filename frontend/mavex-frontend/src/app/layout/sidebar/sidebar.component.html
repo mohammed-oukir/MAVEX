@@ -144,6 +144,23 @@
       </a>
     }
 
+    @if (auth.isAdmin() || auth.isComptable()) {
+      <div class="sb-label">Finance</div>
+      <a
+        class="sb-item"
+        routerLink="/exchange-rates"
+        routerLinkActive="active"
+        aria-label="Taux de change"
+      >
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75"
+             viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+        Taux de change
+      </a>
+    }
+
     @if (auth.isAdmin()) {
       <div class="sb-label">Administration</div>
       <a

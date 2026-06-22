@@ -4,13 +4,16 @@ import com.medafrica.mavex.dto.email.SendEmailResponse;
 import com.medafrica.mavex.dto.order.BulkEmailResult;
 import com.medafrica.mavex.model.email.EmailTemplate;
 import com.medafrica.mavex.model.enums.NotificationType;
+import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
+import com.medafrica.mavex.repository.ExchangeRateRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.service.email.EmailProviderResolver;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +35,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private final OrderRepository          orderRepository;
     private final EmailProviderResolver    providerResolver;
     private final EmailPersistenceService  persistence;
+    private final ExchangeRateRepository   exchangeRateRepository;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -42,6 +46,16 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
 
     @Override
     public SendEmailResponse sendPaymentEmail(Long orderId, MultipartFile[] attachments) {
+        Optional<ExchangeRate> activeRate = exchangeRateRepository
+            .findByIsActiveTrueAndFromCurrencyAndToCurrency("USD", "MAD");
+        if (activeRate.isEmpty()) {
+            log.warn("Aucun taux actif USD→MAD trouvé — lockedExchangeRate ne sera pas figé pour Order id={}", orderId);
+        }
+        return doSendPaymentEmail(orderId, attachments, activeRate);
+    }
+
+    private SendEmailResponse doSendPaymentEmail(Long orderId, MultipartFile[] attachments,
+                                                 Optional<ExchangeRate> activeRate) {
 
         // 1. Lecture + préparation BDD (transaction propre dans EmailPersistenceService)
         Order order = persistence.loadAndPrepareOrder(orderId);
@@ -68,7 +82,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             );
 
             // 4. Mise à jour BDD → SENT (recharge les entités fraîches par ID)
-            persistence.markSuccess(emailLogId, order.getId(), messageId);
+            persistence.markSuccess(emailLogId, order.getId(), messageId, activeRate);
 
             log.info("Email envoyé avec succès → {} (Order HAWB={})", toEmail, order.getHawb());
 
@@ -113,10 +127,15 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     // ---------------------------------------------------------------
 
     private BulkEmailResult executeBulk(List<Long> orderIds, MultipartFile[] attachments) {
+        Optional<ExchangeRate> activeRate = exchangeRateRepository
+            .findByIsActiveTrueAndFromCurrencyAndToCurrency("USD", "MAD");
+        if (activeRate.isEmpty()) {
+            log.warn("Aucun taux actif USD→MAD trouvé — lockedExchangeRate ne sera pas figé pour ce bulk de {} orders", orderIds.size());
+        }
         int sent = 0, failed = 0;
         for (Long id : orderIds) {
             try {
-                SendEmailResponse result = sendPaymentEmail(id, attachments);
+                SendEmailResponse result = doSendPaymentEmail(id, attachments, activeRate);
                 if (result.isSuccess()) sent++;
                 else                    failed++;
             } catch (Exception e) {

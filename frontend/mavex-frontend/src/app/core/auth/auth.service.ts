@@ -36,6 +36,7 @@ export class AuthService {
   getToken(): string | null        { return this._token(); }
   getRefreshToken(): string | null { return this._refresh(); }
   isAdmin(): boolean               { return this._role() === 'ADMIN'; }
+  isComptable(): boolean           { return this._role() === 'COMPTABLE'; }
   currentEmail(): string | null    { return this._email(); }
   currentUserId(): number | null   { return this._userId(); }
   isRefreshing = false;

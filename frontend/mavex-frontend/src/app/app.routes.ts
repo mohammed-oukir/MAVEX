@@ -95,6 +95,12 @@ export const routes: Routes = [
           import('./features/profile/profile.component').then(m => m.ProfileComponent),
       },
       {
+        path: 'exchange-rates',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/exchange-rates/exchange-rates.component').then(m => m.ExchangeRatesComponent),
+      },
+      {
         path: 'settings/email-template',
         canActivate: [adminGuard],
         loadComponent: () =>

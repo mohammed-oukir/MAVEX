@@ -59,7 +59,11 @@ export class LoginComponent {
     this.error.set('');
     const { email, password } = this.loginForm.value;
     this.auth.login(email!, password!).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        const role = this.auth.currentUser().role;
+        const dest = role === 'COMPTABLE' ? '/exchange-rates' : '/dashboard';
+        this.router.navigate([dest]);
+      },
       error: err => {
         this.loading.set(false);
         this.error.set(err?.error?.message || 'Email ou mot de passe incorrect.');

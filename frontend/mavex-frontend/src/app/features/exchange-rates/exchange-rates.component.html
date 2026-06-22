@@ -1,0 +1,640 @@
+<div class="er-page">
+
+  <!-- ═══════════════════════════════════════════════════════
+       KPI CARDS
+  ════════════════════════════════════════════════════════ -->
+  <div class="er-kpi-grid">
+
+    <!-- Total Rates -->
+    <div class="er-kpi-card">
+      <div class="er-kpi-icon er-kpi-icon--blue" aria-hidden="true">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+        </svg>
+      </div>
+      <div class="er-kpi-body">
+        @if (loading()) {
+          <div class="er-skel er-skel--num"></div>
+          <div class="er-skel er-skel--lbl"></div>
+        } @else {
+          <div class="er-kpi-value">{{ kpiTotal() }}</div>
+          <div class="er-kpi-label">Total Rates</div>
+        }
+      </div>
+    </div>
+
+    <!-- Active Rates -->
+    <div class="er-kpi-card">
+      <div class="er-kpi-icon er-kpi-icon--green" aria-hidden="true">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="er-kpi-body">
+        @if (loading()) {
+          <div class="er-skel er-skel--num"></div>
+          <div class="er-skel er-skel--lbl"></div>
+        } @else {
+          <div class="er-kpi-value">{{ kpiActive() }}</div>
+          <div class="er-kpi-label">Active Rates</div>
+        }
+      </div>
+    </div>
+
+    <!-- Currency Pairs -->
+    <div class="er-kpi-card">
+      <div class="er-kpi-icon er-kpi-icon--orange" aria-hidden="true">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <polyline points="17 1 21 5 17 9"/>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+          <polyline points="7 23 3 19 7 15"/>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+        </svg>
+      </div>
+      <div class="er-kpi-body">
+        @if (loading()) {
+          <div class="er-skel er-skel--num"></div>
+          <div class="er-skel er-skel--lbl"></div>
+        } @else {
+          <div class="er-kpi-value">{{ kpiPairs() }}</div>
+          <div class="er-kpi-label">Currency Pairs</div>
+        }
+      </div>
+    </div>
+
+    <!-- Last Update -->
+    <div class="er-kpi-card">
+      <div class="er-kpi-icon er-kpi-icon--purple" aria-hidden="true">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="er-kpi-body">
+        @if (loading()) {
+          <div class="er-skel er-skel--num"></div>
+          <div class="er-skel er-skel--lbl"></div>
+        } @else if (kpiLastUpdate()) {
+          <div class="er-kpi-value er-kpi-value--sm">
+            {{ kpiLastUpdate() | date:'dd/MM/yy' }}
+          </div>
+          <div class="er-kpi-label">Last Update</div>
+        } @else {
+          <div class="er-kpi-value">—</div>
+          <div class="er-kpi-label">Last Update</div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       QUICK RATE LOOKUP + ACTION BAR
+  ════════════════════════════════════════════════════════ -->
+  <div class="er-toolbar">
+
+    <!-- Quick Lookup -->
+    <div class="er-lookup" role="search" aria-label="Recherche de taux">
+      <span class="er-lookup-label">Quick Rate</span>
+
+      <select
+        class="er-lookup-sel"
+        [value]="lookupFrom()"
+        (change)="onLookupFromChange($any($event.target).value)"
+        aria-label="Devise source"
+      >
+        @for (c of CURRENCIES; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+
+      <span class="er-lookup-arrow" aria-hidden="true">→</span>
+
+      <select
+        class="er-lookup-sel"
+        [value]="lookupTo()"
+        (change)="onLookupToChange($any($event.target).value)"
+        aria-label="Devise cible"
+      >
+        @for (c of CURRENCIES; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+
+      <button
+        type="button"
+        class="er-lookup-btn"
+        (click)="doLookup()"
+        [disabled]="lookupLoading() || lookupFrom() === lookupTo()"
+        aria-label="Obtenir le taux"
+      >
+        @if (lookupLoading()) {
+          <span class="spinner-border" style="width:12px;height:12px;border-width:1.5px" aria-hidden="true"></span>
+        } @else {
+          Get Rate
+        }
+      </button>
+
+      @if (lookupResult()) {
+        <div class="er-lookup-result er-lookup-result--ok" role="status" aria-live="polite">
+          <span class="er-lookup-rate">{{ formatRate(lookupResult()!.rate) }}</span>
+          <span class="er-lookup-meta">
+            {{ lookupResult()!.fromCurrency }}/{{ lookupResult()!.toCurrency }}
+            · {{ lookupResult()!.effectiveDate | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+      }
+      @if (lookupError()) {
+        <div class="er-lookup-result er-lookup-result--err" role="alert">
+          {{ lookupError() }}
+        </div>
+      }
+    </div>
+
+    <!-- Action buttons -->
+    <div class="er-actions">
+      <input
+        #fileInput
+        type="file"
+        accept=".xlsx,.csv"
+        class="er-file-hidden"
+        (change)="onFileSelected($event)"
+        aria-label="Sélectionner un fichier à importer"
+      />
+      <button
+        type="button"
+        class="er-btn er-btn--ghost"
+        (click)="triggerFileInput()"
+        [disabled]="importing()"
+        aria-label="Importer un fichier Excel ou CSV"
+      >
+        @if (importing()) {
+          <span class="spinner-border" style="width:13px;height:13px;border-width:1.5px" aria-hidden="true"></span>
+        } @else {
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        }
+        Import Excel
+      </button>
+
+      <button
+        type="button"
+        class="er-btn er-btn--ghost"
+        (click)="downloadTemplate()"
+        aria-label="Télécharger le template CSV"
+      >
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Template
+      </button>
+
+      <button
+        type="button"
+        class="er-btn er-btn--primary"
+        (click)="openCreate()"
+        aria-label="Ajouter un taux de change"
+      >
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Rate
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Import result banner -->
+  @if (importResult()) {
+    <div
+      class="er-import-banner"
+      [class.er-import-banner--ok]="importResult()!.imported > 0"
+      [class.er-import-banner--warn]="importResult()!.errors > 0"
+      role="status"
+    >
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Importé : <strong>{{ importResult()!.imported }}</strong> &nbsp;·&nbsp;
+      Ignoré : <strong>{{ importResult()!.skipped }}</strong> &nbsp;·&nbsp;
+      Erreurs : <strong>{{ importResult()!.errors }}</strong>
+      @if (importResult()!.errorDetails.length > 0) {
+        <ul class="er-import-errors">
+          @for (e of importResult()!.errorDetails; track e) {
+            <li>{{ e }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════
+       FILTERS + TABLE
+  ════════════════════════════════════════════════════════ -->
+  <div class="er-table-card">
+
+    <!-- Filter bar -->
+    <div class="er-filter-bar">
+      <div class="er-filter-group">
+        <label class="er-filter-label" for="fFrom">FROM</label>
+        <input
+          id="fFrom"
+          type="text"
+          class="er-filter-input"
+          placeholder="USD"
+          maxlength="3"
+          [value]="fFrom()"
+          (input)="fFrom.set($any($event.target).value)"
+          aria-label="Filtrer par devise source"
+        />
+      </div>
+      <div class="er-filter-group">
+        <label class="er-filter-label" for="fTo">TO</label>
+        <input
+          id="fTo"
+          type="text"
+          class="er-filter-input"
+          placeholder="MAD"
+          maxlength="3"
+          [value]="fTo()"
+          (input)="fTo.set($any($event.target).value)"
+          aria-label="Filtrer par devise cible"
+        />
+      </div>
+      <div class="er-filter-group">
+        <label class="er-filter-label" for="fStatus">STATUT</label>
+        <select
+          id="fStatus"
+          class="er-filter-input"
+          [value]="fActive()"
+          (change)="fActive.set($any($event.target).value)"
+          aria-label="Filtrer par statut"
+        >
+          <option value="all">Tous</option>
+          <option value="active">Actif</option>
+          <option value="inactive">Inactif</option>
+        </select>
+      </div>
+      @if (hasFilters()) {
+        <button
+          type="button"
+          class="er-filter-clear"
+          (click)="clearFilters()"
+          aria-label="Effacer les filtres"
+        >
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Clear
+        </button>
+      }
+      <span class="er-filter-count" aria-live="polite">
+        {{ filtered().length }} résultat{{ filtered().length !== 1 ? 's' : '' }}
+      </span>
+    </div>
+
+    <!-- Table -->
+    <div class="er-table-wrap" role="region" aria-label="Tableau des taux de change">
+      <table class="er-table" aria-label="Taux de change">
+        <thead>
+          <tr>
+            <th scope="col">FROM</th>
+            <th scope="col">TO</th>
+            <th scope="col">RATE</th>
+            <th scope="col">DATE</th>
+            <th scope="col">SOURCE</th>
+            <th scope="col">IMPORTÉ PAR</th>
+            <th scope="col">STATUT</th>
+            <th scope="col" class="er-th-actions">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Skeleton loading -->
+          @if (loading()) {
+            @for (s of [1,2,3,4,5,6]; track s) {
+              <tr class="er-tr-skel">
+                <td><div class="er-skel er-skel--cell"></div></td>
+                <td><div class="er-skel er-skel--cell"></div></td>
+                <td><div class="er-skel er-skel--cell er-skel--wide"></div></td>
+                <td><div class="er-skel er-skel--cell"></div></td>
+                <td><div class="er-skel er-skel--cell er-skel--wide"></div></td>
+                <td><div class="er-skel er-skel--cell"></div></td>
+                <td><div class="er-skel er-skel--badge"></div></td>
+                <td><div class="er-skel er-skel--actions"></div></td>
+              </tr>
+            }
+          }
+
+          <!-- Empty state -->
+          @else if (filtered().length === 0) {
+            <tr>
+              <td colspan="8" class="er-empty">
+                <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true">
+                  <line x1="12" y1="1" x2="12" y2="23"/>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <p>{{ hasFilters() ? 'Aucun taux ne correspond aux filtres.' : 'Aucun taux de change enregistré.' }}</p>
+                @if (hasFilters()) {
+                  <button type="button" class="er-btn er-btn--ghost" (click)="clearFilters()">
+                    Effacer les filtres
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+
+          <!-- Data rows -->
+          @else {
+            @for (r of filtered(); track r.id) {
+              <tr class="er-tr">
+                <td>
+                  <span class="er-currency-chip"
+                        [style.color]="getCurrencyColor(r.fromCurrency)">{{ r.fromCurrency }}</span>
+                </td>
+                <td>
+                  <span class="er-currency-chip"
+                        [style.color]="getCurrencyColor(r.toCurrency)">{{ r.toCurrency }}</span>
+                </td>
+                <td class="er-td-rate">{{ formatRate(r.rate) }}</td>
+                <td class="er-td-date">{{ r.effectiveDate | date:'dd/MM/yyyy' }}</td>
+                <td class="er-td-source">{{ r.source || '—' }}</td>
+                <td class="er-td-by">{{ r.importedByName || '—' }}</td>
+                <td>
+                  @if (r.isActive) {
+                    <span class="er-badge er-badge--active">Actif</span>
+                  } @else {
+                    <span class="er-badge er-badge--inactive">Inactif</span>
+                  }
+                </td>
+                <td class="er-td-actions">
+                  <button
+                    type="button"
+                    class="er-icon-btn"
+                    (click)="openEdit(r)"
+                    [attr.aria-label]="'Modifier ' + r.fromCurrency + '/' + r.toCurrency"
+                    title="Modifier"
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="er-icon-btn er-icon-btn--danger"
+                    (click)="confirmDelete(r)"
+                    [attr.aria-label]="'Supprimer ' + r.fromCurrency + '/' + r.toCurrency"
+                    title="Supprimer"
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6"/><path d="M14 11v6"/>
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL ADD / EDIT
+════════════════════════════════════════════════════════ -->
+@if (formMode()) {
+  <div
+    class="er-overlay"
+    (click)="closeForm()"
+    aria-hidden="true"
+  ></div>
+
+  <div
+    class="er-modal"
+    role="dialog"
+    [attr.aria-label]="formMode() === 'create' ? 'Ajouter un taux de change' : 'Modifier le taux de change'"
+    aria-modal="true"
+  >
+    <div class="er-modal-header">
+      <h2 class="er-modal-title">
+        {{ formMode() === 'create' ? 'Add Rate' : 'Edit Rate' }}
+      </h2>
+      <button
+        type="button"
+        class="er-modal-close"
+        (click)="closeForm()"
+        aria-label="Fermer"
+      >
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="saveForm()" class="er-modal-body" novalidate>
+
+      <div class="er-form-row">
+        <div class="er-form-group">
+          <label class="er-label" for="fromCurrency">
+            FROM <span class="er-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="fromCurrency"
+            type="text"
+            class="er-input"
+            [class.er-input--err]="fieldInvalid('fromCurrency')"
+            formControlName="fromCurrency"
+            placeholder="USD"
+            maxlength="3"
+            autocomplete="off"
+            aria-required="true"
+            [attr.aria-invalid]="fieldInvalid('fromCurrency')"
+          />
+          @if (fieldInvalid('fromCurrency')) {
+            <span class="er-field-err" role="alert">Code ISO requis (2–3 lettres, ex: USD)</span>
+          }
+        </div>
+
+        <div class="er-form-group">
+          <label class="er-label" for="toCurrency">
+            TO <span class="er-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="toCurrency"
+            type="text"
+            class="er-input"
+            [class.er-input--err]="fieldInvalid('toCurrency')"
+            formControlName="toCurrency"
+            placeholder="MAD"
+            maxlength="3"
+            autocomplete="off"
+            aria-required="true"
+            [attr.aria-invalid]="fieldInvalid('toCurrency')"
+          />
+          @if (fieldInvalid('toCurrency')) {
+            <span class="er-field-err" role="alert">Code ISO requis (2–3 lettres, ex: MAD)</span>
+          }
+        </div>
+      </div>
+
+      <div class="er-form-row">
+        <div class="er-form-group">
+          <label class="er-label" for="rate">
+            RATE <span class="er-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="rate"
+            type="number"
+            class="er-input"
+            [class.er-input--err]="fieldInvalid('rate')"
+            formControlName="rate"
+            placeholder="9.9500"
+            step="0.0001"
+            min="0.000001"
+            aria-required="true"
+            [attr.aria-invalid]="fieldInvalid('rate')"
+          />
+          @if (fieldInvalid('rate')) {
+            <span class="er-field-err" role="alert">Taux requis et doit être &gt; 0</span>
+          }
+        </div>
+
+        <div class="er-form-group">
+          <label class="er-label" for="effectiveDate">
+            DATE EFFECTIVE <span class="er-req" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="effectiveDate"
+            type="date"
+            class="er-input"
+            [class.er-input--err]="fieldInvalid('effectiveDate')"
+            formControlName="effectiveDate"
+            aria-required="true"
+            [attr.aria-invalid]="fieldInvalid('effectiveDate')"
+          />
+          @if (fieldInvalid('effectiveDate')) {
+            <span class="er-field-err" role="alert">Date effective requise</span>
+          }
+        </div>
+      </div>
+
+      <div class="er-form-group">
+        <label class="er-label" for="source">
+          SOURCE <span class="er-opt">(optionnel)</span>
+        </label>
+        <input
+          id="source"
+          type="text"
+          class="er-input"
+          formControlName="source"
+          placeholder="ex : Banque Al-Maghrib"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="er-modal-footer">
+        <button type="button" class="er-btn er-btn--ghost" (click)="closeForm()">
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="er-btn er-btn--primary"
+          [disabled]="saving()"
+          [attr.aria-label]="formMode() === 'create' ? 'Créer le taux' : 'Enregistrer les modifications'"
+        >
+          @if (saving()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:1.5px" aria-hidden="true"></span>
+          }
+          {{ formMode() === 'create' ? 'Create Rate' : 'Save Changes' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL CONFIRMATION SUPPRESSION
+════════════════════════════════════════════════════════ -->
+@if (deleteId()) {
+  <div
+    class="er-overlay"
+    (click)="cancelDelete()"
+    aria-hidden="true"
+  ></div>
+
+  <div
+    class="er-modal er-modal--sm"
+    role="alertdialog"
+    aria-modal="true"
+    aria-label="Confirmer la suppression"
+    aria-describedby="del-desc"
+  >
+    <div class="er-modal-header">
+      <h2 class="er-modal-title er-modal-title--danger">Supprimer le taux</h2>
+      <button
+        type="button"
+        class="er-modal-close"
+        (click)="cancelDelete()"
+        aria-label="Annuler la suppression"
+      >
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="er-modal-body" id="del-desc">
+      <div class="er-del-icon" aria-hidden="true">
+        <svg width="28" height="28" fill="none" stroke="#EF4444" stroke-width="1.75" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <p class="er-del-text" id="del-desc">
+        Êtes-vous sûr de vouloir supprimer le taux<br/>
+        <strong>{{ deleteLabel() }}</strong> ?<br/>
+        <span class="er-del-sub">Cette action est irréversible.</span>
+      </p>
+    </div>
+
+    <div class="er-modal-footer">
+      <button type="button" class="er-btn er-btn--ghost" (click)="cancelDelete()">
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="er-btn er-btn--danger"
+        (click)="executeDelete()"
+        [disabled]="deleting()"
+        aria-label="Confirmer la suppression"
+      >
+        @if (deleting()) {
+          <span class="spinner-border" style="width:13px;height:13px;border-width:1.5px" aria-hidden="true"></span>
+        }
+        Supprimer
+      </button>
+    </div>
+  </div>
+}

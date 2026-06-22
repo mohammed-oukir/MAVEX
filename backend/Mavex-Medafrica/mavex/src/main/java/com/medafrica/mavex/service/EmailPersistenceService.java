@@ -4,6 +4,7 @@ import com.medafrica.mavex.model.email.EmailLog;
 import com.medafrica.mavex.model.email.EmailTemplate;
 import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Toutes les écritures BDD liées à l'envoi d'email.
@@ -61,7 +63,8 @@ public class EmailPersistenceService {
     }
 
     @Transactional
-    public void markSuccess(Long emailLogId, Long orderId, String messageId) {
+    public void markSuccess(Long emailLogId, Long orderId, String messageId,
+                            Optional<ExchangeRate> activeRate) {
         EmailLog emailLog = emailLogRepository.findById(emailLogId)
                 .orElseThrow(() -> new EntityNotFoundException("EmailLog introuvable id=" + emailLogId));
         emailLog.markSent();
@@ -78,6 +81,10 @@ public class EmailPersistenceService {
                 || order.getStatus() == OrderStatus.EMAIL_OUTDATED) {
             order.setStatus(OrderStatus.EMAIL_SENT);
         }
+        activeRate.ifPresent(r -> {
+            order.setLockedExchangeRate(r.getRate());
+            order.setLockedToCurrency(r.getToCurrency());
+        });
         orderRepository.save(order);
     }
 

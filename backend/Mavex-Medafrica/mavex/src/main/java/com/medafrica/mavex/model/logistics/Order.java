@@ -145,10 +145,16 @@ public class Order {
 
 
     /** Colonne Excel "Alternate Reference" */
-@Column(name = "alternate_reference")
-private String alternateReference;
+    @Column(name = "alternate_reference")
+    private String alternateReference;
 
+    /** Taux de change figé au moment de l'envoi de l'email — null avant envoi */
+    @Column(name = "locked_exchange_rate", precision = 18, scale = 6)
+    private BigDecimal lockedExchangeRate;
 
+    /** Devise cible figée au moment de l'envoi de l'email — null avant envoi */
+    @Column(name = "locked_to_currency", length = 3)
+    private String lockedToCurrency;
 
     @PrePersist
     @PreUpdate
