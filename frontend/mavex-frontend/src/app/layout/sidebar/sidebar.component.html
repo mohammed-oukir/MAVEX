@@ -12,7 +12,9 @@
   <!-- ── Navigation ───────────────────────────────────── -->
   <nav class="sb-nav" aria-label="Menu principal">
 
-    <div class="sb-label">Principal</div>
+    @if (!auth.isComptable()) {
+      <div class="sb-label">Principal</div>
+    }
 
     @if (auth.isAdmin() || perm.hasAnyPermission('DASHBOARD')) {
       <a
@@ -65,7 +67,9 @@
       </a>
     }
 
-    <div class="sb-label">Gestion</div>
+    @if (!auth.isComptable()) {
+      <div class="sb-label">Gestion</div>
+    }
 
     @if (auth.isAdmin() || perm.hasAnyPermission('CLIENTS')) {
       <a
@@ -117,18 +121,20 @@
       </a>
     }
 
-    <a
-      class="sb-item"
-      routerLink="/payments"
-      routerLinkActive="active"
-      aria-label="Paiements"
-    >
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-      Paiements
-    </a>
+    @if (!auth.isComptable()) {
+      <a
+        class="sb-item"
+        routerLink="/payments"
+        routerLinkActive="active"
+        aria-label="Paiements"
+      >
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+          <line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+        Paiements
+      </a>
+    }
 
     @if (auth.isAdmin() || perm.hasAnyPermission('AIRLINES')) {
       <a
