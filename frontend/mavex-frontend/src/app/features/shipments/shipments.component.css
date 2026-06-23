@@ -273,22 +273,14 @@
 /* 3 action icons */
 .sp-actions { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
 .sp-act {
-  width: 30px; height: 30px; border: none; border-radius: 8px; cursor: pointer;
+  width: 28px; height: 28px; border: 0.5px solid #E5E7EB; border-radius: 6px;
+  background: transparent; color: #6B7280; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   text-decoration: none; flex-shrink: 0;
-  transition: background .15s, color .15s, transform .12s, box-shadow .15s;
+  transition: background .15s, color .15s, border-color .15s;
 }
-.sp-act:hover { transform: scale(1.1); text-decoration: none; }
-
-/* Toujours visible avec fond coloré léger */
-.sp-act.view  { background: #DBEAFE; color: #3B82F6; }
-.sp-act.edit  { background: #FFEDD5; color: #F97316; }
-.sp-act.del   { background: #FEE2E2; color: #EF4444; }
-
-/* Hover : plus fort */
-.sp-act.view:hover { background: #BFDBFE; color: #1D4ED8; box-shadow: 0 2px 6px rgba(59,130,246,.25); }
-.sp-act.edit:hover { background: #FED7AA; color: #EA580C; box-shadow: 0 2px 6px rgba(249,115,22,.25); }
-.sp-act.del:hover  { background: #FECACA; color: #DC2626; box-shadow: 0 2px 6px rgba(239,68,68,.25); }
+.sp-act:hover     { background: #F3F4F6; text-decoration: none; }
+.sp-act.del:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
 
 /* Expand panel */
 .sp-expand-row > td  { padding: 0 !important; border-bottom: 1px solid #E5E7EB !important; }

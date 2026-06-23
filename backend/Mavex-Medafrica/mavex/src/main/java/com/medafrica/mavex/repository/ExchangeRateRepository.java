@@ -25,4 +25,9 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
     @Modifying
     @Query("UPDATE ExchangeRate e SET e.isActive = false WHERE e.fromCurrency = :from AND e.toCurrency = :to")
     void deactivateAll(@Param("from") String fromCurrency, @Param("to") String toCurrency);
+
+    @Query("SELECT DISTINCT e.fromCurrency FROM ExchangeRate e " +
+           "UNION SELECT DISTINCT e.toCurrency FROM ExchangeRate e " +
+           "ORDER BY 1")
+    List<String> findDistinctCurrencies();
 }

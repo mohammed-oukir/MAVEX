@@ -41,6 +41,13 @@ public class ExchangeRateController {
         return ResponseEntity.ok(exchangeRateService.findAll(fromCurrency, toCurrency, isActive));
     }
 
+    // GET /api/exchange-rates/currencies
+    @GetMapping("/currencies")
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'COMPTABLE')")
+    public ResponseEntity<List<String>> getCurrencies() {
+        return ResponseEntity.ok(exchangeRateService.getCurrencies());
+    }
+
     // GET /api/exchange-rates/active?from=USD&to=MAD
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'COMPTABLE')")

@@ -243,6 +243,10 @@ public class ExchangeRateService {
         persistenceService.delete(id);
     }
 
+    public List<String> getCurrencies() {
+        return exchangeRateRepository.findDistinctCurrencies();
+    }
+
     // ---------------------------------------------------------------
     // CRUD MANUEL — créer et modifier
     // ---------------------------------------------------------------

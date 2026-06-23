@@ -104,7 +104,7 @@
         (change)="onLookupFromChange($any($event.target).value)"
         aria-label="Devise source"
       >
-        @for (c of CURRENCIES; track c) {
+        @for (c of currencies(); track c) {
           <option [value]="c">{{ c }}</option>
         }
       </select>
@@ -117,7 +117,7 @@
         (change)="onLookupToChange($any($event.target).value)"
         aria-label="Devise cible"
       >
-        @for (c of CURRENCIES; track c) {
+        @for (c of currencies(); track c) {
           <option [value]="c">{{ c }}</option>
         }
       </select>

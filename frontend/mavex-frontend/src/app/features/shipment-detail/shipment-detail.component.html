@@ -112,101 +112,78 @@
           }
         </div>
       </div>
+      <div>
+        <div class="sd-key">Shipper</div>
+        <div class="sd-val">{{ shipment()!.shipper?.companyName || '—' }}</div>
+      </div>
     </div>
   </div>
 
-  <!-- Pipeline statuts + bouton Tous -->
-  <div class="sd-pipeline-wrap mb-3">
-
-    <!-- Bouton Tous -->
-    <button type="button" class="sd-pipe-all"
-      [class.is-active]="statusFilter() === ''"
+  <!-- Status tabs -->
+  <div class="sd-tab-bar mb-3" role="tablist">
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === ''"
       (click)="setStatusFilter('')"
-      [attr.aria-pressed]="statusFilter() === ''">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Tous <span class="sd-pipe-all-count">{{ totalOrders() }}</span>
+      [attr.aria-selected]="statusFilter() === ''">
+      Tous
+      @if (totalOrders() > 0) { <span class="sd-tab-pill">{{ totalOrders() }}</span> }
     </button>
-
-    <!-- Pipeline horizontal -->
-    <div class="sd-pipeline" role="group" aria-label="Pipeline des statuts">
-
-      <button type="button" class="sd-pipe-step sd-pipe-created"
-        [class.is-active]="statusFilter() === 'CREATED'"
-        (click)="setStatusFilter('CREATED')"
-        [attr.aria-pressed]="statusFilter() === 'CREATED'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ createdCount() }}</div>
-        <div class="sd-pipe-lbl">Créé</div>
-      </button>
-
-      <div class="sd-pipe-arrow" aria-hidden="true"></div>
-
-      <button type="button" class="sd-pipe-step sd-pipe-email"
-        [class.is-active]="statusFilter() === 'EMAIL_SENT'"
-        (click)="setStatusFilter('EMAIL_SENT')"
-        [attr.aria-pressed]="statusFilter() === 'EMAIL_SENT'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ emailCount() }}</div>
-        <div class="sd-pipe-lbl">Email envoyé</div>
-      </button>
-
-      <div class="sd-pipe-arrow" aria-hidden="true"></div>
-
-      <button type="button" class="sd-pipe-step sd-pipe-pending"
-        [class.is-active]="statusFilter() === 'PENDING_PAYMENT'"
-        (click)="setStatusFilter('PENDING_PAYMENT')"
-        [attr.aria-pressed]="statusFilter() === 'PENDING_PAYMENT'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ pendingCount() }}</div>
-        <div class="sd-pipe-lbl">En attente</div>
-      </button>
-
-      <div class="sd-pipe-arrow" aria-hidden="true"></div>
-
-      <button type="button" class="sd-pipe-step sd-pipe-paid"
-        [class.is-active]="statusFilter() === 'PAID'"
-        (click)="setStatusFilter('PAID')"
-        [attr.aria-pressed]="statusFilter() === 'PAID'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ paidCount() }}</div>
-        <div class="sd-pipe-lbl">Payé</div>
-      </button>
-
-      <div class="sd-pipe-arrow" aria-hidden="true"></div>
-
-      <button type="button" class="sd-pipe-step sd-pipe-delivery"
-        [class.is-active]="statusFilter() === 'IN_DELIVERY'"
-        (click)="setStatusFilter('IN_DELIVERY')"
-        [attr.aria-pressed]="statusFilter() === 'IN_DELIVERY'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ inDeliveryCount() }}</div>
-        <div class="sd-pipe-lbl">En livraison</div>
-      </button>
-
-      <div class="sd-pipe-arrow" aria-hidden="true"></div>
-
-      <button type="button" class="sd-pipe-step sd-pipe-delivered"
-        [class.is-active]="statusFilter() === 'DELIVERED'"
-        (click)="setStatusFilter('DELIVERED')"
-        [attr.aria-pressed]="statusFilter() === 'DELIVERED'">
-        <div class="sd-pipe-icon">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <div class="sd-pipe-num">{{ deliveredCount() }}</div>
-        <div class="sd-pipe-lbl">Livré</div>
-      </button>
-
-    </div>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'CREATED'"
+      (click)="setStatusFilter('CREATED')"
+      [attr.aria-selected]="statusFilter() === 'CREATED'">
+      Créé
+      @if (createdCount() > 0) { <span class="sd-tab-pill">{{ createdCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'EMAIL_SENT'"
+      (click)="setStatusFilter('EMAIL_SENT')"
+      [attr.aria-selected]="statusFilter() === 'EMAIL_SENT'">
+      Email envoyé
+      @if (emailCount() > 0) { <span class="sd-tab-pill">{{ emailCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'EMAIL_OUTDATED'"
+      (click)="setStatusFilter('EMAIL_OUTDATED')"
+      [attr.aria-selected]="statusFilter() === 'EMAIL_OUTDATED'">
+      Email obsolète
+      @if (emailOutdatedCount() > 0) { <span class="sd-tab-pill sd-tab-pill-amber">{{ emailOutdatedCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'PENDING_PAYMENT'"
+      (click)="setStatusFilter('PENDING_PAYMENT')"
+      [attr.aria-selected]="statusFilter() === 'PENDING_PAYMENT'">
+      En attente
+      @if (pendingCount() > 0) { <span class="sd-tab-pill sd-tab-pill-amber">{{ pendingCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'PAID'"
+      (click)="setStatusFilter('PAID')"
+      [attr.aria-selected]="statusFilter() === 'PAID'">
+      Payé
+      @if (paidCount() > 0) { <span class="sd-tab-pill sd-tab-pill-green">{{ paidCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'IN_DELIVERY'"
+      (click)="setStatusFilter('IN_DELIVERY')"
+      [attr.aria-selected]="statusFilter() === 'IN_DELIVERY'">
+      En livraison
+      @if (inDeliveryCount() > 0) { <span class="sd-tab-pill">{{ inDeliveryCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'DELIVERED'"
+      (click)="setStatusFilter('DELIVERED')"
+      [attr.aria-selected]="statusFilter() === 'DELIVERED'">
+      Livré
+      @if (deliveredCount() > 0) { <span class="sd-tab-pill sd-tab-pill-green">{{ deliveredCount() }}</span> }
+    </button>
+    <button type="button" class="sd-tab" role="tab"
+      [class.sd-tab-active]="statusFilter() === 'CANCELLED'"
+      (click)="setStatusFilter('CANCELLED')"
+      [attr.aria-selected]="statusFilter() === 'CANCELLED'">
+      Annulé
+      @if (cancelledCount() > 0) { <span class="sd-tab-pill sd-tab-pill-red">{{ cancelledCount() }}</span> }
+    </button>
   </div>
 
   <!-- Financial totals -->

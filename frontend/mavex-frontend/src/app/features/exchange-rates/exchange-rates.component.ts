@@ -111,10 +111,7 @@ export class ExchangeRatesComponent implements OnInit {
   readonly importResult = signal<ExchangeRateImportResult | null>(null);
 
   // ── Known currencies for selects ─────────────────────────
-  readonly CURRENCIES = [
-    'USD', 'EUR', 'MAD', 'GBP', 'JPY', 'CAD', 'AUD',
-    'CHF', 'CNY', 'AED', 'SAR', 'XOF', 'XAF',
-  ];
+  readonly currencies = signal<string[]>([]);
 
   // ── Lifecycle ─────────────────────────────────────────────
   ngOnInit(): void {
@@ -124,6 +121,13 @@ export class ExchangeRatesComponent implements OnInit {
     }
     this.layout.setPage('Taux de change');
     this.loadRates();
+    this.erSvc.getCurrencies()
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({
+        next: list => this.currencies.set(
+          list.length ? list : ['USD', 'EUR', 'MAD']
+        ),
+      });
   }
 
   // ── Load ──────────────────────────────────────────────────

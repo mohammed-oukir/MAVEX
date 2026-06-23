@@ -42,4 +42,8 @@ export class ExchangeRateService {
     form.append('file', file);
     return this.http.post<ExchangeRateImportResult>(`${this.base}/import`, form);
   }
+
+  getCurrencies(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/currencies`);
+  }
 }
