@@ -153,19 +153,18 @@
 
 /* Icône */
 .sp-stat-icon {
-  width: 48px; height: 48px; border-radius: 13px; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
 }
 
 .sp-stat-num { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; margin-bottom: 4px; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
-.sp-stat-lbl { font-size: 11.5px; font-weight: 600; color: #9CA3AF; letter-spacing: .03em; text-transform: uppercase; transition: color .15s; }
+.sp-stat-lbl { font-size: 12px; font-weight: 600; color: #9CA3AF; letter-spacing: .03em; text-transform: uppercase; }
 
 /* Tous — orange */
 .sp-si-all                             { background: #FFF7ED; color: #F97316; }
 .card-all .sp-stat-num                 { color: #EA6C08; }
 .card-all:hover:not(.active)           { border-color: #FED7AA; box-shadow: 0 6px 20px rgba(249,115,22,.12); }
-.card-all.active                       { background: linear-gradient(135deg,#FFF7ED,#FFEDD5); border-color: #FDBA74; box-shadow: 0 6px 20px rgba(249,115,22,.2); }
+.card-all.active                       { background: #FFF7ED; border-color: #FED7AA; }
 .card-all.active .sp-stat-lbl          { color: #F97316; }
 .card-all.active .sp-si-all            { background: #FFEDD5; }
 
@@ -173,7 +172,7 @@
 .sp-si-draft                           { background: #F3F4F6; color: #4B5563; }
 .card-draft .sp-stat-num               { color: #1F2937; }
 .card-draft:hover:not(.active)         { border-color: #D1D5DB; box-shadow: 0 6px 20px rgba(0,0,0,.08); }
-.card-draft.active                     { background: #F9FAFB; border-color: #9CA3AF; box-shadow: 0 6px 20px rgba(75,85,99,.15); }
+.card-draft.active                     { background: #F9FAFB; border-color: #D1D5DB; }
 .card-draft.active .sp-stat-lbl        { color: #4B5563; }
 .card-draft.active .sp-si-draft        { background: #E5E7EB; }
 
@@ -181,7 +180,7 @@
 .sp-si-imported                        { background: #FFF7ED; color: #F97316; }
 .card-imported .sp-stat-num            { color: #F97316; }
 .card-imported:hover:not(.active)      { border-color: #FED7AA; box-shadow: 0 6px 20px rgba(249,115,22,.12); }
-.card-imported.active                  { background: #FFF7ED; border-color: #FED7AA; box-shadow: 0 6px 20px rgba(249,115,22,.2); }
+.card-imported.active                  { background: #EFF6FF; border-color: #BFDBFE; }
 .card-imported.active .sp-stat-lbl     { color: #F97316; }
 .card-imported.active .sp-si-imported  { background: #FFEDD5; }
 
@@ -189,7 +188,7 @@
 .sp-si-processing                      { background: #FEF3C7; color: #D97706; }
 .card-processing .sp-stat-num          { color: #D97706; }
 .card-processing:hover:not(.active)    { border-color: #FCD34D; box-shadow: 0 6px 20px rgba(217,119,6,.12); }
-.card-processing.active                { background: linear-gradient(135deg,#FFFBEB,#FEF3C7); border-color: #FCD34D; box-shadow: 0 6px 20px rgba(217,119,6,.2); }
+.card-processing.active                { background: #FFFBEB; border-color: #FDE68A; }
 .card-processing.active .sp-stat-lbl   { color: #D97706; }
 .card-processing.active .sp-si-processing { background: #FDE68A; }
 
@@ -197,7 +196,7 @@
 .sp-si-closed                          { background: #DCFCE7; color: #16A34A; }
 .card-closed .sp-stat-num              { color: #16A34A; }
 .card-closed:hover:not(.active)        { border-color: #86EFAC; box-shadow: 0 6px 20px rgba(22,163,74,.12); }
-.card-closed.active                    { background: #F0FDF4; border-color: #86EFAC; box-shadow: 0 6px 20px rgba(22,163,74,.2); }
+.card-closed.active                    { background: #F0FDF4; border-color: #86EFAC; }
 .card-closed.active .sp-stat-lbl       { color: #16A34A; }
 .card-closed.active .sp-si-closed      { background: #BBF7D0; }
 
@@ -218,38 +217,23 @@
 .sp-wrap { border: 1px solid #E5E7EB; border-radius: 14px; background: #fff; overflow: hidden; }
 
 .sp-table > thead > tr > th {
-  font-size: 10px; font-weight: 700; color: #4B5563;
-  letter-spacing: .08em; text-transform: uppercase;
-  background: linear-gradient(to bottom, #F9FAFB, #F3F4F6);
-  border-bottom: 2px solid #E5E7EB;
-  padding: 13px 16px; white-space: nowrap;
+  font-size: 11px; font-weight: 700; color: #6B7280;
+  letter-spacing: .06em; text-transform: uppercase;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 11px 16px; white-space: nowrap;
 }
-.sp-table > thead > tr > th:first-child { border-left: 4px solid #F97316; }
 
 .sp-table > tbody > tr { transition: background .12s; }
 .sp-table > tbody > tr.sp-row { cursor: pointer; }
 .sp-table > tbody > tr > td { padding: 12px 16px; vertical-align: middle; font-size: 13px; color: #374151; border-bottom: 1px solid #F9FAFB; }
 .sp-table > tbody > tr:last-child > td { border-bottom: none; }
 
-/* ── Status row accent (left border on first td) ── */
-.sp-row.status-draft      > td:first-child { border-left: 4px solid #D1D5DB; }
-.sp-row.status-imported   > td:first-child { border-left: 4px solid #60A5FA; }
-.sp-row.status-processing > td:first-child { border-left: 4px solid #F97316; }
-.sp-row.status-closed     > td:first-child { border-left: 4px solid #4ADE80; }
+/* ── Row hover ── */
+.sp-row:hover { background: #F9FAFB; }
 
-/* ── Status row hover tint ── */
-.sp-row.status-draft:hover      { background: #F9FAFB; }
-.sp-row.status-imported:hover   { background: #EFF6FF; }
-.sp-row.status-processing:hover { background: #FFF7ED; }
-.sp-row.status-closed:hover     { background: #F0FDF4; }
-
-/* ── MAWB with colored dot ── */
-.sp-mawb-wrap { display: flex; align-items: center; gap: 8px; }
-.sp-mawb-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.dot-draft      { background: #9CA3AF; }
-.dot-imported   { background: #60A5FA; }
-.dot-processing { background: #F97316; }
-.dot-closed     { background: #4ADE80; }
+/* ── MAWB ── */
+.sp-mawb-wrap { display: flex; align-items: center; }
 
 .sp-mawb  { font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 13px; color: #0C0C0E; }
 .sp-muted { color: #9CA3AF; }

@@ -31,14 +31,15 @@ public class ExchangeRateController {
         return ResponseEntity.ok(exchangeRateService.importFile(file));
     }
 
-    // GET /api/exchange-rates?fromCurrency=USD&toCurrency=MAD&isActive=true
+    // GET /api/exchange-rates?fromCurrency=USD&toCurrency=MAD&isActive=true&effectiveDate=2026-06-19
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT', 'COMPTABLE')")
     public ResponseEntity<List<ExchangeRateResponse>> list(
             @RequestParam(required = false) String fromCurrency,
             @RequestParam(required = false) String toCurrency,
-            @RequestParam(required = false) Boolean isActive) {
-        return ResponseEntity.ok(exchangeRateService.findAll(fromCurrency, toCurrency, isActive));
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate effectiveDate) {
+        return ResponseEntity.ok(exchangeRateService.findAll(fromCurrency, toCurrency, isActive, effectiveDate));
     }
 
     // GET /api/exchange-rates/currencies

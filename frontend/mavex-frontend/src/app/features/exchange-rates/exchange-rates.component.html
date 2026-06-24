@@ -1,5 +1,39 @@
 <div class="er-page">
 
+  <!-- ── Toggle Vue actuelle / Historique ─────────────────── -->
+  <div class="er-view-toggle" role="group" aria-label="Mode d'affichage">
+    <button type="button"
+      class="er-toggle-btn"
+      [class.er-toggle-active]="viewMode() === 'current'"
+      (click)="switchToCurrent()"
+      [attr.aria-pressed]="viewMode() === 'current'">
+      Vue actuelle
+    </button>
+    <button type="button"
+      class="er-toggle-btn"
+      [class.er-toggle-active]="viewMode() === 'history'"
+      (click)="switchToHistory()"
+      [attr.aria-pressed]="viewMode() === 'history'">
+      Historique
+    </button>
+  </div>
+
+  @if (viewMode() === 'history') {
+    <div class="er-history-bar">
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="er-history-label" for="historyDate">Voir les taux du :</label>
+        <input id="historyDate" type="date" class="er-filter-input"
+          [value]="historyDate()"
+          (change)="onHistoryDateChange($any($event.target).value)"
+          aria-label="Date historique" />
+      </div>
+      <span class="er-readonly-badge" aria-label="Mode lecture seule">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Mode lecture seule
+      </span>
+    </div>
+  }
+
   <!-- ═══════════════════════════════════════════════════════
        KPI CARDS
   ════════════════════════════════════════════════════════ -->
@@ -105,7 +139,7 @@
         aria-label="Devise source"
       >
         @for (c of currencies(); track c) {
-          <option [value]="c">{{ c }}</option>
+          <option [value]="c" [selected]="c === lookupFrom()">{{ c }}</option>
         }
       </select>
 
@@ -118,7 +152,7 @@
         aria-label="Devise cible"
       >
         @for (c of currencies(); track c) {
-          <option [value]="c">{{ c }}</option>
+          <option [value]="c" [selected]="c === lookupTo()">{{ c }}</option>
         }
       </select>
 
@@ -154,32 +188,34 @@
 
     <!-- Action buttons -->
     <div class="er-actions">
-      <input
-        #fileInput
-        type="file"
-        accept=".xlsx,.csv"
-        class="er-file-hidden"
-        (change)="onFileSelected($event)"
-        aria-label="Sélectionner un fichier à importer"
-      />
-      <button
-        type="button"
-        class="er-btn er-btn--ghost"
-        (click)="triggerFileInput()"
-        [disabled]="importing()"
-        aria-label="Importer un fichier Excel ou CSV"
-      >
-        @if (importing()) {
-          <span class="spinner-border" style="width:13px;height:13px;border-width:1.5px" aria-hidden="true"></span>
-        } @else {
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-          </svg>
-        }
-        Import Excel
-      </button>
+      @if (viewMode() === 'current') {
+        <input
+          #fileInput
+          type="file"
+          accept=".xlsx,.csv"
+          class="er-file-hidden"
+          (change)="onFileSelected($event)"
+          aria-label="Sélectionner un fichier à importer"
+        />
+        <button
+          type="button"
+          class="er-btn er-btn--ghost"
+          (click)="triggerFileInput()"
+          [disabled]="importing()"
+          aria-label="Importer un fichier Excel ou CSV"
+        >
+          @if (importing()) {
+            <span class="spinner-border" style="width:13px;height:13px;border-width:1.5px" aria-hidden="true"></span>
+          } @else {
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="16 16 12 12 8 16"/>
+              <line x1="12" y1="12" x2="12" y2="21"/>
+              <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+            </svg>
+          }
+          Import Excel
+        </button>
+      }
 
       <button
         type="button"
@@ -195,18 +231,20 @@
         Template
       </button>
 
-      <button
-        type="button"
-        class="er-btn er-btn--primary"
-        (click)="openCreate()"
-        aria-label="Ajouter un taux de change"
-      >
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Add Rate
-      </button>
+      @if (viewMode() === 'current') {
+        <button
+          type="button"
+          class="er-btn er-btn--primary"
+          (click)="openCreate()"
+          aria-label="Ajouter un taux de change"
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Rate
+        </button>
+      }
     </div>
 
   </div>
@@ -321,7 +359,7 @@
         <tbody>
 
           <!-- Skeleton loading -->
-          @if (loading()) {
+          @if (loading() || historyLoading()) {
             @for (s of [1,2,3,4,5,6]; track s) {
               <tr class="er-tr-skel">
                 <td><div class="er-skel er-skel--cell"></div></td>
@@ -337,15 +375,28 @@
           }
 
           <!-- Empty state -->
-          @else if (filtered().length === 0) {
+          @else if (viewMode() === 'history' && !historyDate()) {
+            <tr>
+              <td colspan="8" class="er-empty">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <p>Sélectionnez une date pour voir les taux historiques.</p>
+              </td>
+            </tr>
+          }
+          @else if ((viewMode() === 'current' ? filtered() : historyRates()).length === 0) {
             <tr>
               <td colspan="8" class="er-empty">
                 <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true">
                   <line x1="12" y1="1" x2="12" y2="23"/>
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                 </svg>
-                <p>{{ hasFilters() ? 'Aucun taux ne correspond aux filtres.' : 'Aucun taux de change enregistré.' }}</p>
-                @if (hasFilters()) {
+                <p>{{ viewMode() === 'current' && hasFilters() ? 'Aucun taux ne correspond aux filtres.' : 'Aucun taux de change enregistré.' }}</p>
+                @if (viewMode() === 'current' && hasFilters()) {
                   <button type="button" class="er-btn er-btn--ghost" (click)="clearFilters()">
                     Effacer les filtres
                   </button>
@@ -356,7 +407,7 @@
 
           <!-- Data rows -->
           @else {
-            @for (r of filtered(); track r.id) {
+            @for (r of (viewMode() === 'current' ? filtered() : historyRates()); track r.id) {
               <tr class="er-tr">
                 <td>
                   <span class="er-currency-chip"
@@ -378,32 +429,36 @@
                   }
                 </td>
                 <td class="er-td-actions">
-                  <button
-                    type="button"
-                    class="er-icon-btn"
-                    (click)="openEdit(r)"
-                    [attr.aria-label]="'Modifier ' + r.fromCurrency + '/' + r.toCurrency"
-                    title="Modifier"
-                  >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    class="er-icon-btn er-icon-btn--danger"
-                    (click)="confirmDelete(r)"
-                    [attr.aria-label]="'Supprimer ' + r.fromCurrency + '/' + r.toCurrency"
-                    title="Supprimer"
-                  >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                      <path d="M10 11v6"/><path d="M14 11v6"/>
-                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                    </svg>
-                  </button>
+                  @if (viewMode() === 'current') {
+                    <button
+                      type="button"
+                      class="er-icon-btn"
+                      (click)="openEdit(r)"
+                      [attr.aria-label]="'Modifier ' + r.fromCurrency + '/' + r.toCurrency"
+                      title="Modifier"
+                    >
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="er-icon-btn er-icon-btn--danger"
+                      (click)="confirmDelete(r)"
+                      [attr.aria-label]="'Supprimer ' + r.fromCurrency + '/' + r.toCurrency"
+                      title="Supprimer"
+                    >
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                      </svg>
+                    </button>
+                  } @else {
+                    <span style="color:#D1D5DB;font-size:12px">—</span>
+                  }
                 </td>
               </tr>
             }

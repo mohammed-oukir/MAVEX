@@ -12,10 +12,11 @@ import { ToastService }   from '../../core/services/toast.service';
 import { ClientResponse } from '../../core/models/client.model';
 import { OrderResponse }  from '../../core/models/order.model';
 import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
+import { BadgeComponent } from '../../shared/badge/badge.component';
 
 @Component({
   selector: 'app-clients',
-  imports: [ReactiveFormsModule, DatePipe, RequiresPermissionDirective],
+  imports: [ReactiveFormsModule, DatePipe, RequiresPermissionDirective, BadgeComponent],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

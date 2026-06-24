@@ -88,6 +88,12 @@ export class ExchangeRatesComponent implements OnInit {
   readonly lookupError   = signal<string | null>(null);
   readonly lookupLoading = signal(false);
 
+  // ── View toggle ───────────────────────────────────────────
+  readonly viewMode       = signal<'current' | 'history'>('current');
+  readonly historyDate    = signal<string>('');
+  readonly historyRates   = signal<ExchangeRate[]>([]);
+  readonly historyLoading = signal(false);
+
   // ── Form modal ────────────────────────────────────────────
   readonly formMode  = signal<'create' | 'edit' | null>(null);
   readonly editingId = signal<number | null>(null);
@@ -164,18 +170,62 @@ export class ExchangeRatesComponent implements OnInit {
   doLookup(): void {
     const from = this.lookupFrom();
     const to   = this.lookupTo();
-    if (!from || !to || from === to) return;
+    if (!from || !to) return;
+    if (from.toLowerCase() === to.toLowerCase()) {
+      this.lookupResult.set(null);
+      this.lookupError.set('Les deux devises ne peuvent pas être identiques');
+      return;
+    }
     this.lookupLoading.set(true);
     this.lookupResult.set(null);
     this.lookupError.set(null);
-    this.erSvc.getActive(from, to)
+    const date = this.viewMode() === 'history' ? this.historyDate() : '';
+    const obs  = date
+      ? this.erSvc.lookup(from, to, date)
+      : this.erSvc.getActive(from, to);
+    obs
       .pipe(takeUntilDestroyed(this.destroy))
       .subscribe({
         next: r  => { this.lookupResult.set(r);  this.lookupLoading.set(false); },
-        error: () => {
-          this.lookupError.set(`Aucun taux actif trouvé pour ${from} → ${to}`);
+        error: (err: { error?: { message?: string } }) => {
+          this.lookupResult.set(null);
+          this.lookupError.set(err?.error?.message ?? `Aucun taux actif trouvé pour ${from} → ${to}`);
           this.lookupLoading.set(false);
         },
+      });
+  }
+
+  switchToCurrent(): void {
+    this.viewMode.set('current');
+    this.historyDate.set('');
+    this.historyRates.set([]);
+    this.lookupResult.set(null);
+    this.lookupError.set(null);
+  }
+
+  switchToHistory(): void {
+    this.viewMode.set('history');
+    this.lookupResult.set(null);
+    this.lookupError.set(null);
+  }
+
+  onHistoryDateChange(date: string): void {
+    this.historyDate.set(date);
+    if (date) {
+      this.loadHistoryRates(date);
+      if (this.lookupFrom() !== this.lookupTo()) {
+        this.doLookup();
+      }
+    }
+  }
+
+  loadHistoryRates(date: string): void {
+    this.historyLoading.set(true);
+    this.erSvc.getAll(undefined, undefined, undefined, date)
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({
+        next:  rates => { this.historyRates.set(rates); this.historyLoading.set(false); },
+        error: ()    => { this.historyLoading.set(false); },
       });
   }
 

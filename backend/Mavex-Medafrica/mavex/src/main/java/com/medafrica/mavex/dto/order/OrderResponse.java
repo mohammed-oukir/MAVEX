@@ -59,4 +59,8 @@ private String clientCountry;
     private String        bounceReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private BigDecimal lockedExchangeRate;
+    private String     lockedToCurrency;
+    private BigDecimal lockedAmountMAD;
 }

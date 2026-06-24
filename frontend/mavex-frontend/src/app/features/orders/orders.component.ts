@@ -9,11 +9,12 @@ import { Subject }    from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { forkJoin }   from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LayoutService }  from '../../core/services/layout.service';
-import { OrderService }   from '../../core/services/order.service';
-import { ClientService }  from '../../core/services/client.service';
-import { EmailService }   from '../../core/services/email.service';
-import { ToastService }   from '../../core/services/toast.service';
+import { LayoutService }       from '../../core/services/layout.service';
+import { OrderService }        from '../../core/services/order.service';
+import { ClientService }       from '../../core/services/client.service';
+import { EmailService }        from '../../core/services/email.service';
+import { ToastService }        from '../../core/services/toast.service';
+import { ExchangeRateService } from '../../core/services/exchange-rate.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
@@ -34,11 +35,19 @@ export class OrdersComponent implements OnInit {
   private readonly toast      = inject(ToastService);
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly erSvc      = inject(ExchangeRateService);
 
   private readonly searchSubject = new Subject<string>();
 
   /* ── Data ─────────────────────────────────────────────── */
   orders  = signal<OrderResponse[]>([]);
+
+  /* ── Conversion devise ───────────────────────────────────── */
+  readonly selectedCurrency = signal<string>('MAD');
+  readonly selectedRateDate = signal<string>('');
+  readonly currentRate      = signal<{ rate: number; effectiveDate: string } | null>(null);
+  readonly currencies       = signal<string[]>([]);
+  readonly rateLoading      = signal(false);
   total   = signal(0);
   page    = signal(0);
   loading = signal(true);
@@ -149,6 +158,10 @@ export class OrdersComponent implements OnInit {
 
     this.loadKpis();
     this.loadOrders();
+    this.erSvc.getCurrencies()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: list => this.currencies.set(list.length ? list : ['USD', 'EUR', 'MAD']) });
+    this.loadRate();
   }
 
   /* ── Chargement ───────────────────────────────────────── */
@@ -521,34 +534,6 @@ export class OrdersComponent implements OnInit {
     return (Math.round(rate * 10000) / 100) + ' %';
   }
 
-  statusLabel(s: OrderStatus): string {
-    const labels: Record<OrderStatus, string> = {
-      CREATED:         'Créé',
-      EMAIL_SENT:      'Email envoyé',
-      EMAIL_OUTDATED:  'Email obsolète',
-      PENDING_PAYMENT: 'En attente',
-      PAID:            'Payé',
-      IN_DELIVERY:     'En livraison',
-      DELIVERED:       'Livré',
-      CANCELLED:       'Annulé',
-    };
-    return labels[s] ?? s;
-  }
-
-  statusClass(s: OrderStatus): string {
-    const map: Record<OrderStatus, string> = {
-      CREATED:         'or-s-created',
-      EMAIL_SENT:      'or-s-email',
-      EMAIL_OUTDATED:  'or-s-outdated',
-      PENDING_PAYMENT: 'or-s-pending',
-      PAID:            'or-s-paid',
-      IN_DELIVERY:     'or-s-delivery',
-      DELIVERED:       'or-s-delivered',
-      CANCELLED:       'or-s-cancelled',
-    };
-    return map[s] ?? '';
-  }
-
   rowClass(s: OrderStatus): string {
     const map: Record<OrderStatus, string> = {
       CREATED:         'or-row-created',
@@ -561,6 +546,38 @@ export class OrdersComponent implements OnInit {
       CANCELLED:       'or-row-cancelled',
     };
     return map[s] ?? '';
+  }
+
+  loadRate(): void {
+    const from = 'USD';
+    const to   = this.selectedCurrency();
+    if (from === to) { this.currentRate.set(null); return; }
+    this.rateLoading.set(true);
+    const date = this.selectedRateDate();
+    const obs  = date
+      ? this.erSvc.lookup(from, to, date)
+      : this.erSvc.getActive(from, to);
+    obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next:  r  => { this.currentRate.set({ rate: r.rate, effectiveDate: r.effectiveDate }); this.rateLoading.set(false); },
+      error: () => { this.currentRate.set(null); this.rateLoading.set(false); },
+    });
+  }
+
+  onCurrencyChange(val: string): void {
+    this.selectedCurrency.set(val);
+    this.loadRate();
+  }
+
+  onDateChange(val: string): void {
+    this.selectedRateDate.set(val);
+    this.loadRate();
+  }
+
+  getEquivalent(totalAmount?: number | null): number | null {
+    if (totalAmount == null) return null;
+    const r = this.currentRate();
+    if (!r) return null;
+    return Math.round(totalAmount * r.rate);
   }
 
   timeAgo(dateStr: string | undefined): string {

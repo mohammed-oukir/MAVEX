@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -393,6 +394,14 @@ public class OrderServiceImpl implements OrderService {
                 .bounceReason(lastLog != null ? lastLog.getBounceReason() : null)
                 .createdAt(o.getCreatedAt())
                 .updatedAt(o.getUpdatedAt())
+                .lockedExchangeRate(o.getLockedExchangeRate())
+                .lockedToCurrency(o.getLockedToCurrency())
+                .lockedAmountMAD(
+                    o.getTotalAmount() != null && o.getLockedExchangeRate() != null
+                        ? o.getTotalAmount().multiply(o.getLockedExchangeRate())
+                               .setScale(2, RoundingMode.HALF_UP)
+                        : null
+                )
                 .build();
     }
 }

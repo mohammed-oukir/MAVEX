@@ -51,6 +51,9 @@ export interface OrderResponse {
   bounceReason?:         string | null;
   createdAt?:            string;
   updatedAt?:            string;
+  lockedExchangeRate?:   number | null;
+  lockedToCurrency?:     string | null;
+  lockedAmountMAD?:      number | null;
 }
 
 export interface OrderRequest {

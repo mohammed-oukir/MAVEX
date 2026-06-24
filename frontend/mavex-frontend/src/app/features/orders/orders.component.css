@@ -1,4 +1,46 @@
 /* ═══════════════════════════════════════════════════════════
+   BANDEAU CONVERSION DEVISE
+   ═══════════════════════════════════════════════════════════ */
+.or-rate-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  background: #fff; border: 1.5px solid #F0F0F0;
+  border-radius: 12px; padding: 10px 16px;
+  margin-bottom: 14px;
+}
+.or-rate-controls {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.or-rate-label { font-size: 12.5px; color: #6B7280; white-space: nowrap; }
+.or-rate-hint  { font-size: 11px; color: #D1D5DB; }
+.or-rate-sel {
+  height: 32px; padding: 0 8px;
+  border: 1.5px solid #E5E7EB; border-radius: 8px;
+  font-size: 13px; font-weight: 600; color: #111827;
+  background: #FAFAFA; outline: none; cursor: pointer;
+  transition: border-color .15s;
+}
+.or-rate-sel:focus { border-color: #F97316; }
+.or-rate-date {
+  height: 32px; padding: 0 8px;
+  border: 1.5px solid #E5E7EB; border-radius: 8px;
+  font-size: 12px; color: #374151; background: #FAFAFA;
+  outline: none; transition: border-color .15s;
+}
+.or-rate-date:focus { border-color: #F97316; }
+.or-rate-info {
+  font-size: 12.5px; font-weight: 600; color: #374151;
+  white-space: nowrap;
+}
+.or-rate-info--na { color: #D1D5DB; font-weight: 400; }
+.or-rate-date-lbl { font-weight: 400; color: #9CA3AF; margin-left: 4px; }
+
+.or-equiv-cell   { white-space: nowrap; }
+.or-equiv-amount { font-weight: 700; color: #111827; font-size: 14px; }
+.or-equiv-cur    { font-size: 12px; color: #6B7280; margin-left: 4px; }
+.or-equiv-na     { color: #D1D5DB; }
+
+/* ═══════════════════════════════════════════════════════════
    EMAIL MODAL — PIÈCES JOINTES
    ═══════════════════════════════════════════════════════════ */
 .em-drop-zone {
@@ -103,18 +145,17 @@
 .or-kpi-card.or-kpi-green.or-kpi-active { border-color: #22C55E; }
 
 .or-kpi-icon {
-  width: 52px; height: 52px; border-radius: 14px;
+  width: 44px; height: 44px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  background: #FFF7ED; color: #F97316;
 }
 .or-kpi-dark        { background: #FFF7ED; color: #F97316; }
-.or-kpi-amber-icon  { background: #FFF7ED; color: #F97316; }
-.or-kpi-blue-icon   { background: #FFF7ED; color: #F97316; }
-.or-kpi-green-icon  { background: #FFF7ED; color: #F97316; }
+.or-kpi-amber-icon  { background: #FEF9C3; color: #92400E; }
+.or-kpi-blue-icon   { background: #EFF6FF; color: #2563EB; }
+.or-kpi-green-icon  { background: #F0FDF4; color: #16A34A; }
 
 .or-kpi-body { flex: 1; min-width: 0; }
-.or-kpi-num  { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 30px; line-height: 1; color: #0C0C0E; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
-.or-kpi-lbl  { font-size: 12px; color: #6B7280; margin-top: 4px; }
+.or-kpi-num  { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; color: #0C0C0E; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+.or-kpi-lbl  { font-size: 12px; color: #9CA3AF; margin-top: 4px; text-transform: uppercase; font-weight: 600; letter-spacing: .03em; }
 
 .or-kpi-chevron { font-size: 20px; color: #D1D5DB; font-weight: 300; margin-left: auto; }
 .or-kpi-card:hover .or-kpi-chevron { color: #F97316; }
@@ -250,13 +291,12 @@
 .or-table { font-size: 13px; }
 
 .or-thead th {
-  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: #6B7280;
-  background: linear-gradient(to bottom, #F9FAFB, #F3F4F6);
-  border-bottom: 2px solid #E5E7EB;
-  padding: 12px 14px; white-space: nowrap;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 11px 14px; white-space: nowrap;
 }
-.or-thead th:first-child { border-left: 4px solid #F97316; }
 
 .or-row { border-bottom: 1px solid #F9FAFB; transition: background .1s; }
 .or-row:hover { background: #FAFAFA; }
@@ -315,22 +355,6 @@
 .or-total-amount { font-weight: 700; color: #0C0C0E; font-size: 14px; }
 .or-duty-rate { font-size: 11px; color: #9CA3AF; }
 
-/* ═══════════════════════════════════════════════════════════
-   STATUS BADGES
-   ═══════════════════════════════════════════════════════════ */
-.or-status-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 100px;
-  font-size: 11.5px; font-weight: 600; white-space: nowrap;
-}
-.or-s-created   { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
-.or-s-email     { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
-.or-s-outdated  { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
-.or-s-pending   { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
-.or-s-paid      { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
-.or-s-delivery  { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
-.or-s-delivered { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
-.or-s-cancelled { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
 
 /* Email indicator */
 .or-email-sent { color: #22C55E; display: inline-flex; align-items: center; }
@@ -352,23 +376,15 @@
    ACTION BUTTONS
    ═══════════════════════════════════════════════════════════ */
 .or-act-btn {
-  width: 30px; height: 30px; padding: 0; border: none; border-radius: 8px;
+  width: 28px; height: 28px; padding: 0;
+  border: 0.5px solid #E5E7EB; border-radius: 6px;
+  background: transparent; color: #6B7280;
   display: inline-flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background .15s, transform .1s;
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
 }
-.or-act-btn:hover:not(:disabled) { transform: scale(1.1); }
 .or-act-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-.or-act-view  { background: #F3F4F6; color: #6B7280; }
-.or-act-view:hover  { background: #E5E7EB; color: #374151; }
-.or-act-email { background: #F3F4F6; color: #6B7280; }
-.or-act-email:hover { background: #E5E7EB; color: #374151; }
-.or-act-paid  { background: #F3F4F6; color: #6B7280; }
-.or-act-paid:hover  { background: #E5E7EB; color: #374151; }
-.or-act-edit  { background: #FFF7ED; color: #F97316; }
-.or-act-edit:hover  { background: #FFEDD5; }
-.or-act-del   { background: #FEF2F2; color: #EF4444; }
-.or-act-del:hover   { background: #FEE2E2; }
+.or-act-btn:hover:not(:disabled)     { background: #F3F4F6; }
+.or-act-del:hover:not(:disabled)     { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
 
 /* ═══════════════════════════════════════════════════════════
    EMPTY STATE

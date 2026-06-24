@@ -64,27 +64,19 @@ html.im-modal-open body { overflow: hidden; }
 
 /* ── Status badges ───────────────────────────────────────── */
 .badge-status {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 100px;
+  padding: 3px 10px;
+  border-radius: 20px;
   white-space: nowrap;
-}
-.badge-status::before {
-  content: '';
   display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-  margin-right: 4px;
-  vertical-align: middle;
 }
 
 .bs-created         { background: #F3F4F6; color: #6B7280; }
 .bs-draft           { background: #F3F4F6; color: #6B7280; }
-.bs-imported        { background: #EFF6FF; color: #3B82F6; }
+.bs-imported        { background: #DBEAFE; color: #1D4ED8; }
 .bs-email_sent      { background: #EFF6FF; color: #3B82F6; }
+.bs-email_outdated  { background: #FEF9C3; color: #92400E; }
 .bs-paid            { background: #F0FDF4; color: #22C55E; }
 .bs-pending         { background: #FFFBEB; color: #F59E0B; }
 .bs-pending_payment { background: #FFFBEB; color: #F59E0B; }
@@ -94,8 +86,11 @@ html.im-modal-open body { overflow: hidden; }
 .bs-partial         { background: #FFF7ED; color: #F97316; }
 .bs-failed          { background: #FEF2F2; color: #EF4444; }
 .bs-skipped         { background: #F3F4F6; color: #6B7280; }
-.bs-processing      { background: #EFF6FF; color: #3B82F6; }
-.bs-closed          { background: #F3F4F6; color: #6B7280; }
+.bs-processing      { background: #FEF9C3; color: #92400E; }
+.bs-closed          { background: #D1FAE5; color: #065F46; }
+.bs-cancelled       { background: #FEF2F2; color: #DC2626; }
+.bs-active          { background: #D1FAE5; color: #065F46; }
+.bs-inactive        { background: #FEE2E2; color: #991B1B; }
 
 /* ── Table refinements ───────────────────────────────────── */
 .table > thead > tr > th {

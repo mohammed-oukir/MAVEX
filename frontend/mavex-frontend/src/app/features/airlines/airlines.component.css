@@ -53,10 +53,10 @@
 .al-table { font-size: 13px; }
 
 .al-thead th {
-  font-size: 10.5px; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .07em; color: #6B7280; padding: 14px 16px;
-  border-bottom: 2px solid #F3F4F6; white-space: nowrap;
-  background: linear-gradient(to bottom, #FAFAFA, #fff);
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: #6B7280; padding: 11px 16px;
+  border-bottom: 1px solid #E5E7EB; white-space: nowrap;
+  background: #F9FAFB;
 }
 
 .al-row td {
@@ -95,13 +95,13 @@
 .al-actions { display: flex; gap: 5px; justify-content: flex-end; }
 
 .al-act {
-  width: 32px; height: 32px; border-radius: 9px;
-  border: 1.5px solid #E5E7EB; background: #fff;
+  width: 28px; height: 28px; border-radius: 6px;
+  border: 0.5px solid #E5E7EB; background: transparent; color: #6B7280;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .15s; color: #9CA3AF;
+  transition: background .15s, color .15s, border-color .15s;
 }
-.al-act-edit:hover { color: #D97706; border-color: #FCD34D; background: #FFFBEB; transform: scale(1.1); }
-.al-act-del:hover  { color: #DC2626; border-color: #FCA5A5; background: #FEF2F2; transform: scale(1.1); }
+.al-act:hover     { background: #F3F4F6; }
+.al-act-del:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
 
 /* Skeleton */
 .al-sk {

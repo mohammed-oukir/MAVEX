@@ -12,11 +12,12 @@ export class ExchangeRateService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/exchange-rates';
 
-  getAll(fromCurrency?: string, toCurrency?: string, isActive?: boolean): Observable<ExchangeRate[]> {
+  getAll(fromCurrency?: string, toCurrency?: string, isActive?: boolean, effectiveDate?: string): Observable<ExchangeRate[]> {
     let params = new HttpParams();
-    if (fromCurrency)       params = params.set('fromCurrency', fromCurrency);
-    if (toCurrency)         params = params.set('toCurrency',   toCurrency);
-    if (isActive !== undefined) params = params.set('isActive', String(isActive));
+    if (fromCurrency)          params = params.set('fromCurrency',  fromCurrency);
+    if (toCurrency)            params = params.set('toCurrency',    toCurrency);
+    if (isActive !== undefined) params = params.set('isActive',     String(isActive));
+    if (effectiveDate)         params = params.set('effectiveDate', effectiveDate);
     return this.http.get<ExchangeRate[]>(this.base, { params });
   }
 
@@ -45,5 +46,11 @@ export class ExchangeRateService {
 
   getCurrencies(): Observable<string[]> {
     return this.http.get<string[]>(`${this.base}/currencies`);
+  }
+
+  lookup(from: string, to: string, date: string): Observable<ExchangeRate> {
+    const params = new HttpParams()
+      .set('from', from).set('to', to).set('date', date);
+    return this.http.get<ExchangeRate>(`${this.base}/lookup`, { params });
   }
 }

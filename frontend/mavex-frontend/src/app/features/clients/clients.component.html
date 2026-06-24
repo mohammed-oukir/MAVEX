@@ -251,12 +251,7 @@
                 @else { <span class="cl-muted">—</span> }
               </td>
 
-              <td>
-                <span [class]="c.active ? 'cl-badge cl-badge-active' : 'cl-badge cl-badge-inactive'">
-                  <span class="cl-badge-dot" aria-hidden="true"></span>
-                  {{ c.active ? 'Actif' : 'Inactif' }}
-                </span>
-              </td>
+              <td><app-badge [status]="c.active ? 'ACTIVE' : 'INACTIVE'" /></td>
 
               <td class="cl-muted" style="font-size:12px">
                 {{ c.createdAt ? (c.createdAt | date:'dd/MM/yyyy') : '—' }}
@@ -457,10 +452,7 @@
         <div style="flex:1;min-width:0">
           <h2 id="cl-detail-title" class="nm-title">{{ c.fullName }}</h2>
           <p class="nm-sub">
-            <span [class]="c.active ? 'cl-badge cl-badge-active' : 'cl-badge cl-badge-inactive'">
-              <span class="cl-badge-dot" aria-hidden="true"></span>
-              {{ c.active ? 'Actif' : 'Inactif' }}
-            </span>
+            <app-badge [status]="c.active ? 'ACTIVE' : 'INACTIVE'" />
             @if (c.createdAt) {
               <span class="ms-2 text-muted" style="font-size:12px">Depuis le {{ c.createdAt | date:'dd/MM/yyyy' }}</span>
             }

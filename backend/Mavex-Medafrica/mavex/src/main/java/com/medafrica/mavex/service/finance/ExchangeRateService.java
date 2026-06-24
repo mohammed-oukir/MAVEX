@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -206,20 +207,25 @@ public class ExchangeRateService {
     // LECTURE — liste et lookups
     // ---------------------------------------------------------------
 
-    public List<ExchangeRateResponse> findAll(String fromCurrency, String toCurrency, Boolean isActive) {
+    public List<ExchangeRateResponse> findAll(String fromCurrency, String toCurrency, Boolean isActive, LocalDate effectiveDate) {
         List<ExchangeRate> all = (Boolean.TRUE.equals(isActive) && fromCurrency == null && toCurrency == null)
             ? exchangeRateRepository.findAllByIsActiveTrue()
             : exchangeRateRepository.findAll();
 
         return all.stream()
-            .filter(e -> fromCurrency == null || e.getFromCurrency().equalsIgnoreCase(fromCurrency))
-            .filter(e -> toCurrency  == null || e.getToCurrency().equalsIgnoreCase(toCurrency))
-            .filter(e -> isActive    == null || e.getIsActive().equals(isActive))
+            .filter(e -> fromCurrency  == null || e.getFromCurrency().equalsIgnoreCase(fromCurrency))
+            .filter(e -> toCurrency    == null || e.getToCurrency().equalsIgnoreCase(toCurrency))
+            .filter(e -> isActive      == null || e.getIsActive().equals(isActive))
+            .filter(e -> effectiveDate == null || e.getEffectiveDate().equals(effectiveDate))
             .map(this::toResponse)
             .toList();
     }
 
     public ExchangeRateResponse findActive(String fromCurrency, String toCurrency) {
+        if (fromCurrency.equalsIgnoreCase(toCurrency))
+            throw new ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Les deux devises ne peuvent pas être identiques");
         return exchangeRateRepository
             .findByIsActiveTrueAndFromCurrencyAndToCurrency(
                 fromCurrency.toUpperCase(), toCurrency.toUpperCase())

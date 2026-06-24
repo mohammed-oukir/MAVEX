@@ -61,10 +61,6 @@
         </svg>
         Modifier
       </button>
-      <button type="button" class="sd-btn-add" appRequiresPermission module="ORDERS" action="CREATE" (click)="openCreateOrder()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nouvel order
-      </button>
     </div>
   </div>
 
@@ -310,7 +306,14 @@
                 <td>{{ o.customsValue ?? '—' }}</td>
                 <td class="sd-muted">{{ o.customsCurrency || '—' }}</td>
                 <td class="sd-muted">{{ fmtDuty(o.dutyRate) }}</td>
-                <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
+                <td>
+                  <strong>{{ o.totalAmount != null ? o.totalAmount + ' ' + (o.customsCurrency || 'USD') : '—' }}</strong>
+                  @if (o.lockedAmountMAD != null) {
+                    <div style="font-size:11px;color:#9CA3AF;margin-top:2px">
+                      ≈ {{ o.lockedAmountMAD!.toLocaleString('fr-FR', {maximumFractionDigits:0}) }} {{ o.lockedToCurrency }}
+                    </div>
+                  }
+                </td>
                 <td><app-badge [status]="o.status" /></td>
                 <td>
                   <div class="sd-actions">

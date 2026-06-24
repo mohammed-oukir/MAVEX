@@ -124,6 +124,37 @@
 }
 
 
+<!-- ── Bandeau conversion devise ──────────────────────────── -->
+<div class="or-rate-bar">
+  <div class="or-rate-controls">
+    <span class="or-rate-label">Équivalent en</span>
+    <select class="or-rate-sel"
+      [value]="selectedCurrency()"
+      (change)="onCurrencyChange($any($event.target).value)"
+      aria-label="Devise cible">
+      @for (c of currencies(); track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+    <span class="or-rate-label">au</span>
+    <input type="date" class="or-rate-date"
+      [value]="selectedRateDate()"
+      (change)="onDateChange($any($event.target).value)"
+      aria-label="Date du taux" />
+    <span class="or-rate-hint">vide = taux actif</span>
+  </div>
+  @if (rateLoading()) {
+    <span class="or-rate-info" aria-live="polite">Chargement…</span>
+  } @else if (currentRate()) {
+    <span class="or-rate-info" aria-live="polite">
+      1 USD = {{ currentRate()!.rate }} {{ selectedCurrency() }}
+      <span class="or-rate-date-lbl">({{ currentRate()!.effectiveDate | date:'dd/MM/yyyy' }})</span>
+    </span>
+  } @else {
+    <span class="or-rate-info or-rate-info--na" aria-live="polite">Taux non disponible</span>
+  }
+</div>
+
 <!-- ══════════════════════════════════════════════════════════
      TABLE
      ══════════════════════════════════════════════════════════ -->
@@ -141,6 +172,7 @@
           <th scope="col" class="text-end">Poids</th>
           <th scope="col" class="text-end">Valeur</th>
           <th scope="col" class="text-end">Total dû</th>
+          <th scope="col" class="text-end">ÉQUIVALENT</th>
           <th scope="col">Statut</th>
           <th scope="col" class="text-center">✉</th>
           <th scope="col" class="text-end">Actions</th>
@@ -158,7 +190,7 @@
           }
         } @else if (orders().length === 0) {
           <tr>
-            <td colspan="10" class="py-5 text-center">
+            <td colspan="11" class="py-5 text-center">
               <div class="d-flex flex-column align-items-center gap-3">
                 <div class="or-empty-icon" aria-hidden="true">
                   <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
@@ -214,7 +246,16 @@
                 @if (o.dutyRate) { <div class="or-duty-rate">{{ fmtDuty(o.dutyRate) }}</div> }
               </td>
 
-              <td><span [class]="'or-status-badge ' + statusClass(o.status)">{{ statusLabel(o.status) }}</span></td>
+              <td class="text-end or-equiv-cell">
+                @if (getEquivalent(o.totalAmount); as eq) {
+                  <span class="or-equiv-amount">≈ {{ eq.toLocaleString('fr-FR') }}</span>
+                  <span class="or-equiv-cur">{{ selectedCurrency() }}</span>
+                } @else {
+                  <span class="or-equiv-na">—</span>
+                }
+              </td>
+
+              <td><app-badge [status]="o.status" /></td>
 
               <td>
                 @if (o.emailSentAt && (o.emailSentCount ?? 0) > 0) {
@@ -429,7 +470,7 @@
         <div style="flex:1;min-width:0">
           <h2 id="detailTitle" class="nm-title">{{ o.hawb }}</h2>
           <p class="nm-sub">
-            <span [class]="'or-status-badge ' + statusClass(o.status)">{{ statusLabel(o.status) }}</span>
+            <app-badge [status]="o.status" />
             <span class="ms-2 text-muted" style="font-size:12px">Créé le {{ o.createdAt | date:'dd/MM/yyyy' }}</span>
           </p>
         </div>
@@ -468,6 +509,30 @@
               <div class="or-finance-total"><span>Total à payer</span><span class="or-finance-num">{{ fmtAmount(o.totalAmount, o.customsCurrency) }}</span></div>
             </div>
           </div>
+
+          @if (o.lockedExchangeRate != null) {
+            <div class="col-12">
+              <p class="or-detail-section">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" style="margin-right:5px;vertical-align:-1px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Informations comptables
+              </p>
+              <div class="or-finance-grid">
+                <div class="or-finance-row">
+                  <span>Taux utilisé</span>
+                  <span class="fw-semibold">{{ o.lockedExchangeRate }} USD / {{ o.lockedToCurrency }}</span>
+                </div>
+                <div class="or-finance-row">
+                  <span>Équivalent MAD</span>
+                  <span class="fw-semibold">{{ o.lockedAmountMAD?.toLocaleString('fr-FR', {maximumFractionDigits:0}) }} {{ o.lockedToCurrency }}</span>
+                </div>
+                <div class="or-finance-row">
+                  <span>Date de gel</span>
+                  <span>{{ o.emailSentAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
           <div class="col-12">
             <p class="or-detail-section">Email</p>
             <div class="or-email-summary">
