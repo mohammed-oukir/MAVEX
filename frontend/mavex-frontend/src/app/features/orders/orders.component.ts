@@ -51,7 +51,7 @@ export class OrdersComponent implements OnInit {
   total   = signal(0);
   page    = signal(0);
   loading = signal(true);
-  readonly pageSize = 20;
+  pageSize = signal(20);
 
   /* ── KPIs ─────────────────────────────────────────────── */
   kpiTotal   = signal(0);
@@ -139,7 +139,7 @@ export class OrdersComponent implements OnInit {
   });
 
   /* ── Computed ─────────────────────────────────────────── */
-  totalPages  = computed(() => Math.ceil(this.total() / this.pageSize));
+  totalPages  = computed(() => Math.ceil(this.total() / this.pageSize()));
   hasFilters  = computed(() => !!this.searchQ() || !!this.statusTab() || !!this.fromDate() || !!this.toDate());
 
   /* ── Lifecycle ────────────────────────────────────────── */
@@ -173,7 +173,7 @@ export class OrdersComponent implements OnInit {
       status:     this.statusTab() || undefined,
       from:       this.fromDate()  || undefined,
       to:         this.toDate()    || undefined,
-    }, this.page(), this.pageSize)
+    }, this.page(), this.pageSize())
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: p => { this.orders.set(p.content); this.total.set(p.totalElements); this.loading.set(false); },
@@ -516,6 +516,7 @@ export class OrdersComponent implements OnInit {
   /* ── Pagination ───────────────────────────────────────── */
   goToPage(p: number): void { this.page.set(p); this.loadOrders(); }
   pagesArray(): number[]    { return Array.from({ length: this.totalPages() }, (_, i) => i); }
+  onPageSizeChange(size: number): void { this.pageSize.set(size); this.page.set(0); this.loadOrders(); }
 
   /* ── Helpers ──────────────────────────────────────────── */
   fmtAmount(n?: number | null, currency?: string | null): string {

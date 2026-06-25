@@ -309,10 +309,12 @@
     </table>
   </div>
 
-  @if (totalPages() > 1) {
+  @if (total() > 0) {
     <div class="or-pagination">
-      <span class="or-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ total() }} résultats</span>
-      <div class="d-flex gap-1">
+      <div class="d-flex align-items-center gap-1">
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(0)" aria-label="Première page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
         <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
@@ -322,7 +324,16 @@
         <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(totalPages() - 1)" aria-label="Dernière page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        </button>
       </div>
+      <select class="or-pg-select" [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)" aria-label="Lignes par page">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
     </div>
   }
 </div>
