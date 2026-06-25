@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════ */
 .us-stats-bar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 1.5rem;
 }
@@ -406,14 +406,14 @@
 }
 
 .us-table thead th {
-  background: #F9FAFB;
+  background: #2D3748;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .04em;
-  color: #9CA3AF;
+  color: #fff;
   padding: 10px 16px;
-  border-bottom: 0.5px solid #E5E7EB;
+  border-bottom: none;
   text-align: left;
 }
 
@@ -468,12 +468,12 @@
   font-size: 11px;
   font-weight: 500;
 }
-.us-chip-admin     { background: #FFF3E8; color: #C2410C; }
-.us-chip-agent     { background: #F3F4F6; color: #6B7280; }
-.us-chip-comptable { background: #EFF6FF; color: #1D4ED8; }
-.us-table .us-chip-admin     { background: #FFF3E8; color: #C2410C; }
-.us-table .us-chip-agent     { background: #F3F4F6; color: #6B7280; }
-.us-table .us-chip-comptable { background: #EFF6FF; color: #1D4ED8; }
+.us-chip-admin     { background: #FFF3E0; color: #E65100; }
+.us-chip-agent     { background: #E3F2FD; color: #1565C0; }
+.us-chip-comptable { background: #E8F5E9; color: #2E7D32; }
+.us-table .us-chip-admin     { background: #FFF3E0; color: #E65100; }
+.us-table .us-chip-agent     { background: #E3F2FD; color: #1565C0; }
+.us-table .us-chip-comptable { background: #E8F5E9; color: #2E7D32; }
 
 .us-status {
   display: inline-flex;

@@ -86,14 +86,14 @@
 
 /* Table */
 .sh-table { font-size:13px; }
-.sh-thead th { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.3px; color:#6B7280; padding:12px 16px; border-bottom:1px solid #F3F4F6; white-space:nowrap; background:#F9FAFB; }
+.sh-thead th { font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:.3px; color:#fff; padding:12px 16px; border-bottom:none; white-space:nowrap; background:#2D3748; }
 
 .sh-filter-tr th { padding:8px 10px 10px; background:#F8FAFF; border-bottom:2px solid #E0EAFF; }
 .sh-fi-wrap { position:relative; display:flex; align-items:center; }
 .sh-fi-ico  { position:absolute; left:8px; color:#9CA3AF; pointer-events:none; }
 .sh-fi-input { width:100%; padding:6px 8px 6px 26px; border:1.5px solid #DBEAFE; border-radius:8px; font-size:12px; outline:none; background:#fff; transition:border-color .15s; min-width:80px; }
 .sh-fi-input:focus { border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
-.sh-filter-tr th:not(:first-child) .sh-fi-input { padding-left:8px; }
+.sh-filter-tr th:not(:nth-child(2)) .sh-fi-input { padding-left:8px; }
 .sh-fi-select { width:100%; padding:6px 8px; border:1.5px solid #DBEAFE; border-radius:8px; font-size:12px; outline:none; background:#fff; cursor:pointer; min-width:80px; }
 .sh-fi-select:focus { border-color:#3B82F6; }
 

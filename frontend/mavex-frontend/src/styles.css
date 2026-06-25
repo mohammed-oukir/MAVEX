@@ -316,3 +316,87 @@ html.im-modal-open body { overflow: hidden; }
 .nm-btn-danger { height: 38px; padding: 0 22px; border: none; border-radius: 9px; background: #EF4444; font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 600; color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 1px 3px rgba(239,68,68,.25); transition: background .15s, transform .15s; }
 .nm-btn-danger:hover:not(:disabled) { background: #DC2626; transform: translateY(-1px); }
 .nm-btn-danger:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* ── Unified table styles ────────────────────────────────── */
+.sd-table > thead > tr > th,
+.cl-table > thead > tr > th,
+.or-table > thead > tr > th,
+.al-table > thead > tr > th,
+.er-table > thead > tr > th,
+.us-table > thead > tr > th,
+.dk-table > thead > tr > th,
+.sh-table > thead > tr > th,
+.sp-table > thead > tr > th,
+.sp-expand-table > thead > tr > th {
+  background: #2D3748;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 11px 14px;
+  white-space: nowrap;
+  border-bottom: none;
+}
+
+.table-hover > thead > tr > th,
+.table-sm > thead > tr > th {
+  background: #2D3748 !important;
+  color: #fff !important;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 11px 14px;
+  white-space: nowrap;
+  border-bottom: none !important;
+}
+
+.sd-table > tbody > tr > td,
+.cl-table > tbody > tr > td,
+.or-table > tbody > tr > td,
+.al-table > tbody > tr > td,
+.er-table > tbody > tr > td,
+.us-table > tbody > tr > td,
+.dk-table > tbody > tr > td,
+.sh-table > tbody > tr > td,
+.sp-table > tbody > tr > td,
+.sp-expand-table > tbody > tr > td,
+.table-hover > tbody > tr > td,
+.table-sm > tbody > tr > td {
+  padding: 11px 14px;
+  vertical-align: middle;
+  font-size: 12.5px;
+  color: #374151;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #E2E8F0;
+  transition: background .15s;
+}
+
+.sd-table > tbody > tr:last-child > td,
+.cl-table > tbody > tr:last-child > td,
+.or-table > tbody > tr:last-child > td,
+.al-table > tbody > tr:last-child > td,
+.er-table > tbody > tr:last-child > td,
+.us-table > tbody > tr:last-child > td,
+.dk-table > tbody > tr:last-child > td,
+.sh-table > tbody > tr:last-child > td,
+.sp-table > tbody > tr:last-child > td,
+.sp-expand-table > tbody > tr:last-child > td,
+.table-hover > tbody > tr:last-child > td,
+.table-sm > tbody > tr:last-child > td { border-bottom: none; }
+
+.sd-table > tbody > tr:hover > td,
+.cl-table > tbody > tr:hover > td,
+.or-table > tbody > tr:hover > td,
+.al-table > tbody > tr:hover > td,
+.er-table > tbody > tr:hover > td,
+.us-table > tbody > tr:hover > td,
+.dk-table > tbody > tr:hover > td,
+.sh-table > tbody > tr:hover > td,
+.sp-table > tbody > tr:hover > td,
+.sp-expand-table > tbody > tr:hover > td,
+.table-hover > tbody > tr:hover > td,
+.table-sm > tbody > tr:hover > td { background: #EBF4FF; }
