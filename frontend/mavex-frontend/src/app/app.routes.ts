@@ -3,7 +3,7 @@ import { adminGuard, authGuard, noAuthGuard } from './core/auth/auth.guard';
 import { permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   {
     path: 'login',
@@ -140,5 +140,5 @@ export const routes: Routes = [
       import('./features/payment-result/payment-result.component').then(m => m.PaymentResultComponent),
   },
 
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'login' },
 ];
