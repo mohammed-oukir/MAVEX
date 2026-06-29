@@ -11,12 +11,11 @@
   box-shadow: 0 0 0 3px rgba(249,115,22,.12);
 }
 .sp-combo-search-wrap {
-  display: flex; align-items: center; padding: 0 10px;
+  position: relative; display: flex; align-items: center; padding: 0 10px;
 }
-.sp-combo-ico { color: #9CA3AF; flex-shrink: 0; margin-right: 6px; }
 .sp-combo-input {
   flex: 1; border: none; outline: none; background: transparent;
-  padding: 9px 0; font-size: 13px; color: #111827; width: 100%;
+  padding: 9px 10px 9px 28px; font-size: 13px; color: #111827; width: 100%;
 }
 .sp-combo-input::placeholder { color: #9CA3AF; }
 .sp-combo-selected {
@@ -63,6 +62,23 @@
   transition: background .15s;
 }
 .sp-combo-new-item:hover { background: #FFEDD5; }
+
+.sp-combo-chevron-btn {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+.sp-combo-chevron-btn:hover { color: #F97316; }
+.sp-combo-chevron-btn svg { transition: transform .2s; }
+.sp-combo-chevron-btn.open svg { transform: rotate(90deg); }
 
 /* ── Mini formulaire nouveau shipper ─────────────── */
 .sp-new-form {

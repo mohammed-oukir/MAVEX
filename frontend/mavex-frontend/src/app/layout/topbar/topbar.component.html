@@ -136,6 +136,62 @@
       </div>
     }
 
+    <!-- Dropdown utilisateur -->
+    <div class="tb-user-wrap" [class.tb-user-open]="isUserOpen()">
+
+      <button
+        type="button"
+        class="tb-user-btn"
+        (click)="toggleUser()"
+        [attr.aria-expanded]="isUserOpen()"
+        aria-haspopup="true"
+        aria-label="Menu utilisateur"
+      >
+        <span class="tb-user-name">{{ authSvc.currentUser().fullName || authSvc.currentUser().email }}</span>
+        <svg
+          class="tb-user-chevron"
+          [style.rotate]="isUserOpen() ? '180deg' : '0deg'"
+          width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24" aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      @if (isUserOpen()) {
+        <div class="tb-notif-backdrop" (click)="closeUser()" aria-hidden="true"></div>
+
+        <div class="tb-user-dropdown" role="menu">
+          <a
+            class="tb-user-item"
+            routerLink="/profile"
+            role="menuitem"
+            (click)="closeUser()"
+          >
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Profil
+          </a>
+          <button
+            type="button"
+            class="tb-user-item"
+            role="menuitem"
+            (click)="authSvc.logout()"
+          >
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Se déconnecter
+          </button>
+        </div>
+      }
+
+    </div>
+
   </div>
 
 </header>

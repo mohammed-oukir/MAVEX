@@ -394,7 +394,16 @@
                     </div>
                   } @else {
                     <div class="sp-combo-search-wrap">
-                      <svg class="sp-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <button type="button" class="sp-combo-chevron-btn"
+                        [class.open]="showShipperDropdown()"
+                        (click)="showShipperDropdown.set(!showShipperDropdown())"
+                        tabindex="-1"
+                        aria-label="Afficher les shippers">
+                        <svg width="13" height="13" fill="none" stroke="currentColor"
+                             stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                          <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                      </button>
                       <input id="cShipper" type="text" class="sp-combo-input"
                         [value]="shipperSearch()"
                         (input)="onShipperSearchInput($any($event.target).value)"

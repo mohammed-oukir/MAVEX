@@ -143,7 +143,7 @@ export class DashboardComponent implements OnInit {
 
   /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
-    this.layout.setPage('Dashboard', { label: 'Importer', routerLink: '/imports' });
+    this.layout.setPage('Dashboard');
     this.loadAll();
   }
 

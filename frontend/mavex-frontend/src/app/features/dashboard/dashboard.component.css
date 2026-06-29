@@ -48,6 +48,32 @@
 .dk-refresh.spinning svg { animation: dk-spin .7s linear infinite; }
 @keyframes dk-spin { to { transform: rotate(360deg); } }
 
+.dk-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dk-import {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  color: #6B7280;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color .15s, color .15s, box-shadow .15s;
+}
+.dk-import:hover { border-color: #F97316; color: #F97316; box-shadow: 0 2px 8px rgba(249,115,22,.12); }
+
 /* ═══════════════════════════════════════════════════════════
    KPI GRID
    ═══════════════════════════════════════════════════════════ */

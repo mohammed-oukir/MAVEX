@@ -1,13 +1,7 @@
 <aside class="sb" aria-label="Navigation principale">
 
   <!-- ── Logo ─────────────────────────────────────────── -->
-  <div class="sb-logo">
-    <div class="sb-mark" aria-hidden="true">M</div>
-    <div>
-      <div class="sb-brand-name">MedAfrica</div>
-      <div class="sb-brand-sub">Logistics</div>
-    </div>
-  </div>
+  <img src="medafrica-logistics.png" alt="MedAfrica Logistics" class="sb-logo">
 
   <!-- ── Navigation ───────────────────────────────────── -->
   <nav class="sb-nav" aria-label="Menu principal">
@@ -223,35 +217,5 @@
 
   </nav>
 
-  <!-- ── User card ─────────────────────────────────────── -->
-  <div class="sb-footer">
-    <div class="sb-user">
-      <a
-        class="sb-user-link"
-        routerLink="/profile"
-        routerLinkActive="sb-user-link--active"
-        aria-label="Mon profil"
-      >
-        <div class="sb-avatar" aria-hidden="true">{{ auth.currentUser().avatar }}</div>
-        <div style="flex:1;min-width:0">
-          <div class="sb-user-name">{{ auth.currentUser().fullName || auth.currentUser().email }}</div>
-          <div class="sb-user-role">{{ auth.currentUser().role }}</div>
-        </div>
-      </a>
-      <button
-        type="button"
-        class="sb-logout"
-        (click)="logout()"
-        title="Déconnexion"
-        aria-label="Se déconnecter"
-      >
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </button>
-    </div>
-  </div>
 
 </aside>

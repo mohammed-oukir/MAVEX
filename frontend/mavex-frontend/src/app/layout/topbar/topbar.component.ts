@@ -25,10 +25,11 @@ export class TopbarComponent implements OnInit {
   private   readonly notifSvc   = inject(NotificationService);
   private   readonly destroyRef = inject(DestroyRef);
 
-  protected readonly isOpen  = signal(false);
-  protected readonly count   = signal(0);
-  protected readonly notifs  = signal<NotificationItem[]>([]);
-  protected readonly marking = signal(false);
+  protected readonly isOpen     = signal(false);
+  protected readonly count      = signal(0);
+  protected readonly notifs     = signal<NotificationItem[]>([]);
+  protected readonly marking    = signal(false);
+  protected readonly isUserOpen = signal(false);
 
   ngOnInit(): void {
     interval(30_000).pipe(
@@ -49,6 +50,13 @@ export class TopbarComponent implements OnInit {
   }
 
   closeDropdown(): void { this.isOpen.set(false); }
+
+  toggleUser(): void {
+    this.isOpen.set(false);
+    this.isUserOpen.update(v => !v);
+  }
+
+  closeUser(): void { this.isUserOpen.set(false); }
 
   markAllRead(): void {
     if (this.marking()) return;
