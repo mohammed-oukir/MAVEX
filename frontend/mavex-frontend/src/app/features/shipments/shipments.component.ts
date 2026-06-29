@@ -62,6 +62,7 @@ export class ShipmentsComponent implements OnInit {
   deleting         = signal(false);
   creatingShipment = signal(false);
   creating         = signal(false);
+  previewShipment  = signal<ShipmentResponse | null>(null);
 
   /* ── Shipper autocomplete (create) ───────────────────── */
   shipperSearch       = signal('');
@@ -454,6 +455,9 @@ export class ShipmentsComponent implements OnInit {
     const c = this.editForm.get(name);
     return !!(c?.invalid && c?.touched);
   }
+
+  openPreview(s: ShipmentResponse): void { this.previewShipment.set(s); }
+  closePreview(): void { this.previewShipment.set(null); }
 
   fmtDuty(rate: number | null | undefined): string {
     if (rate == null) return '—';

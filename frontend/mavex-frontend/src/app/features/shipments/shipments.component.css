@@ -303,3 +303,32 @@
 .sp-page-btn:hover:not(:disabled) { border-color: #F97316; color: #F97316; }
 .sp-page-btn.active   { background: #F97316; border-color: #F97316; color: #fff; }
 .sp-page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* =====================================================
+   MODAL APERÇU RAPIDE
+   ===================================================== */
+.pv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pv-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.pv-val {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}

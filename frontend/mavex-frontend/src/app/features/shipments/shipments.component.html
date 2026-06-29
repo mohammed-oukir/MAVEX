@@ -179,18 +179,19 @@
               <!-- Action icons -->
               <td (click)="$event.stopPropagation()">
                 <div class="sp-actions">
-                  <!-- Voir détail -->
-                  <a
+                  <!-- Aperçu rapide -->
+                  <button
+                    type="button"
                     class="sp-act view"
-                    [routerLink]="['/shipments', s.id]"
-                    [attr.aria-label]="'Voir le détail de ' + s.mawb"
-                    title="Voir le détail"
+                    (click)="openPreview(s)"
+                    [attr.aria-label]="'Aperçu de ' + s.mawb"
+                    title="Aperçu rapide"
                   >
                     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                       <circle cx="12" cy="12" r="3"/>
                     </svg>
-                  </a>
+                  </button>
 
                   <!-- Modifier -->
                   <button
@@ -651,13 +652,22 @@
                     </div>
                   } @else {
                     <div class="sp-combo-search-wrap">
-                      <svg class="sp-combo-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                      <input id="eShipper" type="text" class="sp-combo-input"
+<input id="eShipper" type="text" class="sp-combo-input"
                         [value]="editShipperSearch()"
                         (input)="onEditShipperSearchInput($any($event.target).value)"
                         (focus)="showEditShipperDropdown.set(true)"
                         placeholder="Rechercher un shipper…"
                         autocomplete="off" />
+                      <button type="button" class="sp-combo-chevron-btn"
+                        [class.open]="showEditShipperDropdown()"
+                        (click)="showEditShipperDropdown.set(!showEditShipperDropdown())"
+                        tabindex="-1"
+                        aria-label="Afficher les shippers">
+                        <svg width="13" height="13" fill="none" stroke="currentColor"
+                             stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                          <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                      </button>
                     </div>
                   }
                   @if (showEditShipperDropdown() && !selectedEditShipperName()) {
@@ -763,6 +773,95 @@
 <!-- ═══════════════════════════════════════════════════════════
      MODAL — Confirmer suppression
      ═══════════════════════════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL — Aperçu rapide
+     ═══════════════════════════════════════════════════════════ -->
+@if (previewShipment(); as pv) {
+  <div class="modal-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="previewShipTitle" (click)="closePreview()">
+    <div class="modal" style="max-width:500px" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="nm-header">
+        <div class="nm-icon orange" aria-hidden="true">
+          <svg width="20" height="20" fill="none" stroke="currentColor"
+               stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h2 id="previewShipTitle" class="nm-title">Aperçu Shipment</h2>
+          <p class="nm-sub">{{ pv.mawb }}</p>
+        </div>
+        <button type="button" class="nm-close" (click)="closePreview()" aria-label="Fermer">
+          <svg width="16" height="16" fill="none" stroke="currentColor"
+               stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="nm-body">
+        <div class="pv-grid">
+          <div class="pv-field">
+            <span class="pv-label">Statut</span>
+            <span class="pv-val"><app-badge [status]="pv.status" /></span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Carrier</span>
+            <span class="pv-val">{{ pv.importingCarrier || '—' }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Mode</span>
+            <span class="pv-val">{{ pv.modeOfTransport || '—' }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Port</span>
+            <span class="pv-val">{{ pv.portCode || '—' }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Date départ</span>
+            <span class="pv-val">{{ fmtDate(pv.exportDate) }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Date arrivée</span>
+            <span class="pv-val">{{ fmtDate(pv.importDate) }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Duty Rate</span>
+            <span class="pv-val">{{ fmtDuty(pv.dutyRate) }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Shipper</span>
+            <span class="pv-val">{{ pv.shipper?.companyName || '—' }}</span>
+          </div>
+          <div class="pv-field">
+            <span class="pv-label">Orders</span>
+            <span class="pv-val">{{ pv.totalOrders ?? 0 }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="nm-footer">
+        <button type="button" class="nm-btn-cancel" (click)="closePreview()">Fermer</button>
+        <a class="nm-btn-primary" [routerLink]="['/shipments', pv.id]" (click)="closePreview()">
+          <svg width="14" height="14" fill="none" stroke="currentColor"
+               stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Voir le détail complet
+        </a>
+      </div>
+
+    </div>
+  </div>
+}
+
+
 @if (deleteId() !== null) {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delShipTitle" (click)="cancelDelete()">
     <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
