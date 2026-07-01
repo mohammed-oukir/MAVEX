@@ -273,14 +273,16 @@
 /* 3 action icons */
 .sp-actions { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
 .sp-act {
-  width: 28px; height: 28px; border: 0.5px solid #E5E7EB; border-radius: 6px;
+  width: 32px; height: 32px; border: 1px solid #E5E7EB; border-radius: 6px;
   background: transparent; color: #6B7280; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   text-decoration: none; flex-shrink: 0;
   transition: background .15s, color .15s, border-color .15s;
 }
-.sp-act:hover     { background: #F3F4F6; text-decoration: none; }
-.sp-act.del:hover { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+.sp-act:hover       { background: #F3F4F6; color: #111827; text-decoration: none; }
+.sp-act.view:hover  { background: #EFF6FF; color: #2563EB; border-color: #BFDBFE; }
+.sp-act.edit:hover  { background: #FFF7ED; color: #F97316; border-color: #FED7AA; }
+.sp-act.del:hover   { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
 
 /* Expand panel */
 .sp-expand-row > td  { padding: 0 !important; border-bottom: 1px solid #E5E7EB !important; }
@@ -288,9 +290,29 @@
 .sp-expand-table > thead > tr > th { font-size: 10px; font-weight: 600; color: #fff; letter-spacing: .07em; text-transform: uppercase; background: #2D3748; padding: 8px 16px; border-bottom: none; white-space: nowrap; }
 .sp-expand-table > tbody > tr > td { padding: 9px 16px; font-size: 12px; color: #374151; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
 .sp-expand-table > tbody > tr:last-child > td { border-bottom: none; }
-.sp-expand-footer { padding: 8px 16px 12px; }
-.sp-expand-link   { font-size: 12px; color: #F97316; text-decoration: none; font-weight: 500; }
-.sp-expand-link:hover { text-decoration: underline; }
+.sp-expand-footer {
+  padding: 10px 16px 14px;
+  display: flex;
+  justify-content: flex-start;
+  border-top: 1px solid #F3F4F6;
+}
+.sp-expand-link {
+  font-size: 12px;
+  color: #fff;
+  background: #F97316;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s;
+}
+.sp-expand-link:hover {
+  background: #EA580C;
+  text-decoration: none;
+}
 
 /* Empty state */
 .sp-empty     { display: flex; flex-direction: column; align-items: center; padding: 60px 24px; gap: 10px; text-align: center; }

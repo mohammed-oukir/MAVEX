@@ -73,7 +73,7 @@ html.im-modal-open body { overflow: hidden; }
 }
 
 .bs-created         { background: #F3F4F6; color: #6B7280; }
-.bs-draft           { background: #F3F4F6; color: #6B7280; }
+.bs-draft           { background: #E5E7EB; color: #374151; }
 .bs-imported        { background: #DBEAFE; color: #1D4ED8; }
 .bs-email_sent      { background: #EFF6FF; color: #3B82F6; }
 .bs-email_outdated  { background: #FEF9C3; color: #92400E; }

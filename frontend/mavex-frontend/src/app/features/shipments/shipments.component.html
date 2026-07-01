@@ -254,7 +254,7 @@
                                 <td><strong>{{ o.hawb }}</strong></td>
                                 <td>{{ o.clientFullName || '—' }}</td>
                                 <td>{{ o.companyName || '—' }}</td>
-                                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.goodsDescription || '—' }}</td>
+                                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" [title]="o.goodsDescription || ''">{{ o.goodsDescription || '—' }}</td>
                                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
                                 <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
 
