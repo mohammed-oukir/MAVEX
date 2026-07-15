@@ -1,0 +1,56 @@
+<div class="nt-header">
+  <h2>Types de notification</h2>
+  <button type="button" class="nt-btn-add" (click)="openCreate()">Add New</button>
+</div>
+
+@if (loading()) {
+  <p>Chargement...</p>
+} @else {
+  <table class="nt-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Created date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (t of types(); track t.id) {
+        <tr>
+          <td>{{ t.name }}</td>
+          <td>{{ t.createdAt | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            <button type="button" class="nt-btn-edit" (click)="openEdit(t)" title="Éditer" aria-label="Éditer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </button>
+            <button type="button" class="nt-btn-delete" (click)="delete(t.id)" title="Supprimer" aria-label="Supprimer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2H8l1-2z" opacity="0"/>
+                <path d="M9 3.5h6a1 1 0 0 1 1 1V6h4a1 1 0 1 1 0 2h-.5l-1.2 12.1a2 2 0 0 1-2 1.9H8.7a2 2 0 0 1-2-1.9L5.5 8H5a1 1 0 1 1 0-2h4V4.5a1 1 0 0 1 1-1zM10 6h4V5h-4v1zM8.51 8l1.15 11.5h4.68L15.49 8H8.51z"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (showForm()) {
+  <div class="nt-modal-overlay">
+    <div class="nt-modal">
+      <h3>{{ editingId() ? 'Modifier' : 'Nouveau' }} type de notification</h3>
+      <input
+        type="text"
+        [value]="formName()"
+        (input)="formName.set($any($event.target).value)"
+        placeholder="Nom" />
+      <div class="nt-modal-actions">
+        <button type="button" class="nt-btn-save" (click)="save()">Save</button>
+        <button type="button" class="nt-btn-cancel" (click)="cancel()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

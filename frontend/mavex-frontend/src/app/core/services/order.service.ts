@@ -16,7 +16,15 @@ export class OrderService {
       .set('page', page)
       .set('size', size)
       .set('sort', 'createdAt,desc');
-    if (params.q)          p = p.set('q', params.q);
+    if (params.hawb)            p = p.set('hawb', params.hawb);
+    if (params.client)          p = p.set('client', params.client);
+    if (params.clientEmail)     p = p.set('clientEmail', params.clientEmail);
+    if (params.shipmentSearch)  p = p.set('shipmentSearch', params.shipmentSearch);
+    if (params.customsCurrency) p = p.set('customsCurrency', params.customsCurrency);
+    if (params.shipmentWeight != null) p = p.set('shipmentWeight', params.shipmentWeight);
+    if (params.customsValue   != null) p = p.set('customsValue', params.customsValue);
+    if (params.totalAmount    != null) p = p.set('totalAmount', params.totalAmount);
+    if (params.dutyRate       != null) p = p.set('dutyRate', params.dutyRate);
     if (params.status)     p = p.set('status', params.status);
     if (params.shipmentId) p = p.set('shipmentId', params.shipmentId);
     if (params.from)       p = p.set('from', params.from);

@@ -1,0 +1,202 @@
+:host {
+  display: block;
+  background: #ffffff;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ══════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════ */
+.nt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.nt-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0;
+}
+
+.nt-btn-add {
+  border: 1px solid var(--mavex-accent);
+  color: var(--mavex-accent);
+  background: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.nt-btn-add::before {
+  content: '+ ';
+}
+
+.nt-btn-add:hover {
+  background: var(--mavex-accent-soft);
+}
+
+/* ══════════════════════════════════════════════════
+   TABLEAU
+   ══════════════════════════════════════════════════ */
+.nt-table {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.nt-table thead {
+  background: #F9FAFB;
+}
+
+.nt-table thead th {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--mavex-muted);
+  font-weight: 600;
+}
+
+.nt-table thead th:first-child {
+  border-left: 3px solid var(--mavex-accent);
+}
+
+.nt-table tbody tr {
+  background: #FFFFFF;
+}
+
+.nt-table tbody tr:hover {
+  background: var(--mavex-accent-soft);
+}
+
+.nt-table th,
+.nt-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.nt-table td {
+  color: #111827;
+  font-weight: 500;
+}
+
+.nt-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ══════════════════════════════════════════════════
+   BOUTONS ACTION
+   ══════════════════════════════════════════════════ */
+.nt-btn-edit,
+.nt-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.nt-btn-edit {
+  background: transparent;
+  color: #111827;
+}
+
+.nt-btn-edit:hover {
+  background: #F3F4F6;
+}
+
+.nt-btn-delete {
+  background: transparent;
+  color: #EF4444;
+}
+
+.nt-btn-delete:hover {
+  background: #FEF2F2;
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════════════════ */
+.nt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.nt-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.12);
+}
+
+.nt-modal h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.nt-modal input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s;
+}
+
+.nt-modal input:focus {
+  border-color: var(--mavex-accent);
+}
+
+.nt-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.nt-btn-save {
+  background: var(--mavex-accent);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.nt-btn-save:hover {
+  background: var(--mavex-accent-dark);
+}
+
+.nt-btn-cancel {
+  background: #F3F4F6;
+  color: #374151;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.nt-btn-cancel:hover {
+  background: #E5E7EB;
+}

@@ -1,6 +1,5 @@
 package com.medafrica.mavex.model.email;
 
-import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.model.security.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +20,7 @@ import java.util.Map;
  *   {{paymentLink}}     /pay/{token}
  *   {{shipperName}}     Shipper.companyName
  *
- * NotificationType :
+ * type (NotificationTypeEntity) :
  *   PAYMENT_INVOICE_NO_AMOUNT   = Version 1 (sans montant - mail standard Med Africa)
  *   PAYMENT_INVOICE_WITH_AMOUNT = Version 2 (avec montant USD xxx)
  *
@@ -36,9 +35,9 @@ public class EmailTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private NotificationType type;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id", nullable = false)
+    private NotificationTypeEntity type;
 
     /** Label affiche a l'agent dans la liste */
     @Column(nullable = false)

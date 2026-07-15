@@ -1,24 +1,27 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { EmailTemplate } from '../models/email-template.model';
 
-export interface EmailTemplateDTO {
-  id: number;
-  subject: string;
-  bodyContent: string;
-  bodyAfterContent?: string;
-  htmlContent?: string;
-}
+const BASE = '/api/email-templates';
 
 @Injectable({ providedIn: 'root' })
 export class EmailTemplateService {
   private readonly http = inject(HttpClient);
 
-  getByType(type: string): Observable<EmailTemplateDTO> {
-    return this.http.get<EmailTemplateDTO>(`/api/email-templates/${type}`);
+  getAll(): Observable<EmailTemplate[]> {
+    return this.http.get<EmailTemplate[]>(BASE);
   }
 
-  update(id: number, dto: Omit<EmailTemplateDTO, 'htmlContent'>): Observable<EmailTemplateDTO> {
-    return this.http.put<EmailTemplateDTO>(`/api/email-templates/${id}`, dto);
+  getByType(type: string): Observable<EmailTemplate> {
+    return this.http.get<EmailTemplate>(`${BASE}/${type}`);
+  }
+
+  create(dto: EmailTemplate): Observable<EmailTemplate> {
+    return this.http.post<EmailTemplate>(BASE, dto);
+  }
+
+  update(id: number, dto: EmailTemplate): Observable<EmailTemplate> {
+    return this.http.put<EmailTemplate>(`${BASE}/${id}`, dto);
   }
 }

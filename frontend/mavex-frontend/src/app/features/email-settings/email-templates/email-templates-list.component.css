@@ -1,0 +1,221 @@
+:host {
+  display: block;
+  background: #ffffff;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* HEADER */
+.etl-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.etl-header-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--mavex-accent-soft);
+  color: var(--mavex-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.etl-header-text h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 2px 0;
+}
+
+.etl-header-text p {
+  font-size: 13px;
+  color: var(--mavex-muted);
+  margin: 0;
+}
+
+/* CARD */
+.etl-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 100%;
+}
+
+/* CHAMPS */
+.etl-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.etl-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mavex-accent);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.etl-select,
+.etl-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: #111827;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  background: #fff;
+  appearance: none;
+}
+
+.etl-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.etl-select:focus,
+.etl-input:focus {
+  border-color: var(--mavex-accent);
+  box-shadow: 0 0 0 3px rgba(249,115,22,.10);
+}
+
+.etl-disabled {
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* ZONE MESSAGE */
+.etl-message-zone {
+  min-height: 260px;
+  border: 1.5px dashed #E5E7EB;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #FAFAFA;
+  transition: border-color .2s, background .2s;
+}
+
+.etl-message-zone.active {
+  border-color: var(--mavex-accent);
+  background: var(--mavex-accent-soft);
+}
+
+.etl-envelope-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--mavex-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(249,115,22,.15);
+}
+
+.etl-message-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 4px 0 0 0;
+}
+
+.etl-message-sub {
+  font-size: 13px;
+  color: var(--mavex-muted);
+  margin: 0;
+  text-align: center;
+  max-width: 320px;
+}
+
+.etl-btn-editor {
+  margin-top: 4px;
+  border: 1.5px solid #E5E7EB;
+  background: #fff;
+  padding: 10px 22px;
+  border-radius: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.etl-btn-editor:hover {
+  border-color: var(--mavex-accent);
+  color: var(--mavex-accent);
+  background: var(--mavex-accent-soft);
+}
+
+/* FOOTER */
+.etl-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.etl-btn-save {
+  background: var(--mavex-accent);
+  color: #fff;
+  padding: 10px 28px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .15s, box-shadow .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.etl-btn-save:hover:not(:disabled) {
+  background: var(--mavex-accent-dark);
+  box-shadow: 0 4px 12px rgba(249,115,22,.25);
+}
+
+.etl-btn-save:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.etl-btn-cancel {
+  background: #F3F4F6;
+  color: #374151;
+  padding: 10px 24px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .15s;
+}
+
+.etl-btn-cancel:hover {
+  background: #E5E7EB;
+}

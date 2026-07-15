@@ -2,9 +2,7 @@
 
 /* ── Bootstrap ───────────────────────────────────────────── */
 @import 'bootstrap/dist/css/bootstrap.min.css';
-
-/* ── Quill WYSIWYG editor ────────────────────────────────── */
-@import 'quill/dist/quill.snow.css';
+@import 'grapesjs/dist/css/grapes.min.css';
 
 /* ── Design tokens ───────────────────────────────────────── */
 :root {

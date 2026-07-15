@@ -3,7 +3,6 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.dto.email.SendEmailResponse;
 import com.medafrica.mavex.dto.order.BulkEmailResult;
 import com.medafrica.mavex.model.email.EmailTemplate;
-import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
@@ -50,7 +49,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             .findByIsActiveTrueAndFromCurrencyAndToCurrency("USD", "MAD");
         if (activeRate.isEmpty()) {
             log.warn("Aucun taux actif USD→MAD trouvé — lockedExchangeRate ne sera pas figé pour Order id={}", orderId);
-        }
+        }   
         return doSendPaymentEmail(orderId, attachments, activeRate);
     }
 
@@ -61,7 +60,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         Order order = persistence.loadAndPrepareOrder(orderId);
             
         EmailTemplate template = templateRepository
-                .findByTypeAndActiveTrue(NotificationType.PAYMENT_INVOICE_WITH_AMOUNT)
+                .findByType_NameAndActiveTrue("PAYMENT_INVOICE_WITH_AMOUNT")
                 .orElseThrow(() -> new IllegalStateException(
                         "Aucun template email actif trouvé pour PAYMENT_INVOICE_WITH_AMOUNT. " +
                         "Veuillez exécuter le script SQL d'initialisation."));

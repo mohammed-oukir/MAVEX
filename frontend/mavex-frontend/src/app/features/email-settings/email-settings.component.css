@@ -1,0 +1,26 @@
+/* ══════════════════════════════════════════════════
+   ONGLETS
+   ══════════════════════════════════════════════════ */
+.es-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.es-tabs button {
+  background: #F3F4F6;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.es-tabs button.active {
+  background: var(--mavex-accent-soft);
+  color: var(--mavex-accent);
+  font-weight: 600;
+}

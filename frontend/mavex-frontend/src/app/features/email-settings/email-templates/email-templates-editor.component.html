@@ -1,0 +1,30 @@
+<div class="ete-page">
+  <div class="ete-topbar">
+    <button class="ete-btn-back" (click)="goBack()">← Retour</button>
+    <span class="ete-type-name">{{ typeName() }}</span>
+    <button class="ete-btn-save" (click)="save()" [disabled]="saving()">
+      {{ saving() ? 'Sauvegarde...' : '💾 Sauvegarder' }}
+    </button>
+  </div>
+  <div class="ete-toolbar" id="toolbar-container"></div>
+  <div class="ete-body">
+    <div class="ete-panel-left">
+      <div class="ete-panel-title">Blocs</div>
+      <div id="blocks-container"></div>
+    </div>
+    <div id="gjs" class="ete-editor"></div>
+    <div class="ete-panel-right">
+      <div class="ete-panel-section">
+        <div id="selector-container"></div>
+      </div>
+      <div class="ete-panel-section">
+        <div class="ete-panel-title">Style</div>
+        <div id="style-container"></div>
+      </div>
+      <div class="ete-panel-section">
+        <div class="ete-panel-title">Layers</div>
+        <div id="layers-container"></div>
+      </div>
+    </div>
+  </div>
+</div>

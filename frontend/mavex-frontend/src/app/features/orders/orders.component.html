@@ -3,7 +3,7 @@
      ══════════════════════════════════════════════════════════ -->
 <div class="or-kpi-grid mb-4">
 
-  <button type="button" class="or-kpi-card" [class.or-kpi-active]="statusTab() === ''" (click)="setTab('')" aria-label="Tous les orders">
+  <button type="button" class="or-kpi-card" [class.or-kpi-active]="flStatus() === ''" (click)="setTab('')" aria-label="Tous les orders">
     <div class="or-kpi-icon or-kpi-dark">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
     </div>
@@ -14,7 +14,7 @@
     <div class="or-kpi-chevron" aria-hidden="true">›</div>
   </button>
 
-  <button type="button" class="or-kpi-card or-kpi-amber" [class.or-kpi-active]="statusTab() === 'CREATED'" (click)="setTab('CREATED')" aria-label="Email non envoyé">
+  <button type="button" class="or-kpi-card or-kpi-amber" [class.or-kpi-active]="flStatus() === 'CREATED'" (click)="setTab('CREATED')" aria-label="Email non envoyé">
     <div class="or-kpi-icon or-kpi-amber-icon">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     </div>
@@ -25,7 +25,7 @@
     @if (kpiNoEmail() > 0) { <div class="or-kpi-alert" aria-hidden="true">!</div> }
   </button>
 
-  <button type="button" class="or-kpi-card or-kpi-blue" [class.or-kpi-active]="statusTab() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" aria-label="En attente de paiement">
+  <button type="button" class="or-kpi-card or-kpi-blue" [class.or-kpi-active]="flStatus() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" aria-label="En attente de paiement">
     <div class="or-kpi-icon or-kpi-blue-icon">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     </div>
@@ -36,7 +36,7 @@
     <div class="or-kpi-chevron" aria-hidden="true">›</div>
   </button>
 
-  <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="statusTab() === 'PAID'" (click)="setTab('PAID')" aria-label="Payés">
+  <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="flStatus() === 'PAID'" (click)="setTab('PAID')" aria-label="Payés">
     <div class="or-kpi-icon or-kpi-green-icon">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
@@ -53,46 +53,173 @@
 <!-- ══════════════════════════════════════════════════════════
      FILTRES + TABS
      ══════════════════════════════════════════════════════════ -->
+<!-- ── Panneau de filtres ──────────────────────────────────── -->
+<div class="sp-filters">
+
+  <div class="sp-filters-head">
+    <div class="sp-filters-title">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      <span>Filters</span>
+    </div>
+    <button type="button" class="sp-filters-toggle"
+      (click)="filtersCollapsed.set(!filtersCollapsed())"
+      [attr.aria-expanded]="!filtersCollapsed()"
+      aria-controls="or-filters-body"
+      [attr.aria-label]="filtersCollapsed() ? 'Agrandir les filtres' : 'Réduire les filtres'">
+      @if (filtersCollapsed()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      } @else {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      }
+    </button>
+  </div>
+
+  @if (!filtersCollapsed()) {
+    <div class="sp-filters-body" id="or-filters-body">
+
+      <div class="sp-filters-grid">
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-hawb">HAWB</label>
+          <input id="fo-hawb" type="text" class="sp-field-input"
+            [value]="flHawb()" (input)="flHawb.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-client">Client</label>
+          <input id="fo-client" type="text" class="sp-field-input"
+            [value]="flClient()" (input)="flClient.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-client-email">Email</label>
+          <input id="fo-client-email" type="text" class="sp-field-input"
+            [value]="flClientEmail()" (input)="flClientEmail.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-shipment">Shipment</label>
+          <input id="fo-shipment" type="text" class="sp-field-input"
+            [value]="flShipment()" (input)="flShipment.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-status">Statut</label>
+          <select id="fo-status" class="sp-field-input"
+            [value]="flStatus()" (change)="flStatus.set($any($event.target).value)">
+            <option value="">Tous</option>
+            <option value="CREATED">Créé</option>
+            <option value="EMAIL_SENT">Email envoyé</option>
+            <option value="EMAIL_OUTDATED">Email obsolète</option>
+            <option value="PENDING_PAYMENT">En attente</option>
+            <option value="PAID">Payé</option>
+            <option value="IN_DELIVERY">En livraison</option>
+            <option value="DELIVERED">Livré</option>
+            <option value="CANCELLED">Annulé</option>
+          </select>
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fo-currency">Devise</label>
+          <select id="fo-currency" class="sp-field-input"
+            [value]="flCurrency()" (change)="flCurrency.set($any($event.target).value)">
+            <option value="">Toutes</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="MAD">MAD</option>
+            <option value="GBP">GBP</option>
+            <option value="CAD">CAD</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="sp-filters-advanced">
+        <button type="button" class="sp-advanced-link"
+          (click)="advancedFiltersOpen.set(!advancedFiltersOpen())"
+          [attr.aria-expanded]="advancedFiltersOpen()"
+          aria-controls="or-advanced-grid">
+          Advanced filters
+          <svg class="sp-advanced-chevron" [class.open]="advancedFiltersOpen()"
+            width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (advancedFiltersOpen()) {
+        <div class="sp-filters-grid sp-filters-grid-advanced" id="or-advanced-grid">
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-weight">Poids (kg)</label>
+            <input id="fo-weight" type="number" min="0" step="0.001" class="sp-field-input"
+              [value]="flWeight()" (input)="flWeight.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-customs">Valeur</label>
+            <input id="fo-customs" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flCustomsValue()" (input)="flCustomsValue.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-total">Total dû</label>
+            <input id="fo-total" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flTotalAmount()" (input)="flTotalAmount.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-duty">Duty (%)</label>
+            <input id="fo-duty" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flDutyRate()" (input)="flDutyRate.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-from">Date — du</label>
+            <input id="fo-from" type="date" class="sp-field-input"
+              [value]="flFrom()" (input)="flFrom.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fo-to">Date — au</label>
+            <input id="fo-to" type="date" class="sp-field-input"
+              [value]="flTo()" (input)="flTo.set($any($event.target).value)" />
+          </div>
+
+        </div>
+      }
+
+      <div class="sp-filters-actions">
+        <button type="button" class="sp-btn sp-btn-reset" (click)="clearFilters()">Reset</button>
+        <button type="button" class="sp-btn sp-btn-search" (click)="onSearchClick()">Search</button>
+      </div>
+
+    </div>
+  }
+
+</div>
+
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-body p-0">
     <div class="or-filter-bar">
-      <div class="or-search-wrap">
-        <svg class="or-search-ico" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" class="or-search-input" placeholder="HAWB, nom client, email…"
-          [value]="searchQ()" (input)="onSearchInput($event)" aria-label="Rechercher" />
-      </div>
-      <div class="or-date-wrap">
-        <label class="or-date-lbl" for="or-from">Du</label>
-        <input id="or-from" type="date" class="or-date-input" [value]="fromDate()"
-          (change)="fromDate.set($any($event.target).value); applyDates()" />
-      </div>
-      <div class="or-date-wrap">
-        <label class="or-date-lbl" for="or-to">Au</label>
-        <input id="or-to" type="date" class="or-date-input" [value]="toDate()"
-          (change)="toDate.set($any($event.target).value); applyDates()" />
-      </div>
-      @if (hasFilters()) {
-        <button type="button" class="or-clear-btn" (click)="clearFilters()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Effacer
-        </button>
-      }
       <span class="or-total-badge ms-auto">{{ total() }} résultat(s)</span>
     </div>
 
     <div class="or-tab-bar" role="tablist">
-      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === ''" (click)="setTab('')" role="tab">Tous</button>
-      <button type="button" class="or-tab or-tab-amber" [class.or-tab-active]="statusTab() === 'CREATED'" (click)="setTab('CREATED')" role="tab">
+      <button type="button" class="or-tab" [class.or-tab-active]="flStatus() === ''" (click)="setTab('')" role="tab">Tous</button>
+      <button type="button" class="or-tab or-tab-amber" [class.or-tab-active]="flStatus() === 'CREATED'" (click)="setTab('CREATED')" role="tab">
         Non envoyés @if (kpiNoEmail() > 0) { <span class="or-tab-pill">{{ kpiNoEmail() }}</span> }
       </button>
-      <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="statusTab() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" role="tab">Email envoyé</button>
-      <button type="button" class="or-tab or-tab-orange" [class.or-tab-active]="statusTab() === 'EMAIL_OUTDATED'" (click)="setTab('EMAIL_OUTDATED')" role="tab">Email obsolète</button>
-      <button type="button" class="or-tab or-tab-pending" [class.or-tab-active]="statusTab() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" role="tab">
+      <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="flStatus() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" role="tab">Email envoyé</button>
+      <button type="button" class="or-tab or-tab-orange" [class.or-tab-active]="flStatus() === 'EMAIL_OUTDATED'" (click)="setTab('EMAIL_OUTDATED')" role="tab">Email obsolète</button>
+      <button type="button" class="or-tab or-tab-pending" [class.or-tab-active]="flStatus() === 'PENDING_PAYMENT'" (click)="setTab('PENDING_PAYMENT')" role="tab">
         En attente @if (kpiPending() > 0) { <span class="or-tab-pill or-tab-pill-amber">{{ kpiPending() }}</span> }
       </button>
-      <button type="button" class="or-tab or-tab-green" [class.or-tab-active]="statusTab() === 'PAID'" (click)="setTab('PAID')" role="tab">Payés</button>
-      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === 'IN_DELIVERY'" (click)="setTab('IN_DELIVERY')" role="tab">En livraison</button>
-      <button type="button" class="or-tab" [class.or-tab-active]="statusTab() === 'DELIVERED'" (click)="setTab('DELIVERED')" role="tab">Livrés</button>
+      <button type="button" class="or-tab or-tab-green" [class.or-tab-active]="flStatus() === 'PAID'" (click)="setTab('PAID')" role="tab">Payés</button>
+      <button type="button" class="or-tab" [class.or-tab-active]="flStatus() === 'IN_DELIVERY'" (click)="setTab('IN_DELIVERY')" role="tab">En livraison</button>
+      <button type="button" class="or-tab" [class.or-tab-active]="flStatus() === 'DELIVERED'" (click)="setTab('DELIVERED')" role="tab">Livrés</button>
     </div>
   </div>
 </div>

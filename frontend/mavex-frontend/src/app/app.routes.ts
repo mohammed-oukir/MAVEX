@@ -13,6 +13,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'settings/email-templates/:type',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./features/email-settings/email-templates/email-templates-editor.component').then(m => m.EmailTemplatesEditorComponent),
+  },
+
+  {
     path: '403',
     loadComponent: () =>
       import('./features/forbidden/forbidden.component').then(m => m.ForbiddenComponent),
@@ -102,10 +109,10 @@ export const routes: Routes = [
           import('./features/exchange-rates/exchange-rates.component').then(m => m.ExchangeRatesComponent),
       },
       {
-        path: 'settings/email-template',
+        path: 'settings/email-settings',
         canActivate: [adminGuard],
         loadComponent: () =>
-          import('./features/email-template/email-template.component').then(m => m.EmailTemplateComponent),
+          import('./features/email-settings/email-settings.component').then(m => m.EmailSettingsComponent),
       },
       {
         path: 'settings/email-provider',

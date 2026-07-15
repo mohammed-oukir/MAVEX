@@ -9,17 +9,20 @@ import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.*;
+import com.medafrica.mavex.repository.specification.ShipmentSpecification;
 import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -76,6 +79,19 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> listByStatus(ShipmentStatus status, Pageable pageable) {
         return shipmentRepository.findByStatus(status, pageable).map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ShipmentResponseDTO> search(String mawb, String shipperCompanyName,
+                                            LocalDate importFrom, LocalDate importTo,
+                                            String carrier, String mode, Integer totalOrders,
+                                            Double dutyRateMin, Double dutyRateMax,
+                                            ShipmentStatus status, Pageable pageable) {
+        Specification<Shipment> spec = ShipmentSpecification.build(
+                mawb, shipperCompanyName, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status);
+        return shipmentRepository.findAll(spec, pageable).map(this::toResponse);
     }
 
     @Override

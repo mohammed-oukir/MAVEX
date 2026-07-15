@@ -2,11 +2,42 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
-import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatusUpdate, DutyRateUpdate } from '../models/shipment.model';
+import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus, ShipmentStatusUpdate, DutyRateUpdate } from '../models/shipment.model';
+
+export interface ShipmentSearchParams {
+  mawb?:         string;
+  shipper?:      string;
+  importFrom?:   string;
+  importTo?:     string;
+  carrier?:      string;
+  mode?:         string;
+  totalOrders?:  number;
+  dutyRateMin?:  number;
+  dutyRateMax?:  number;
+  status?:       ShipmentStatus | '';
+}
 
 @Injectable({ providedIn: 'root' })
 export class ShipmentService {
   private readonly http = inject(HttpClient);
+
+  search(params: ShipmentSearchParams = {}, page = 0, size = 15): Observable<Page<ShipmentResponse>> {
+    let p = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    if (params.mawb)       p = p.set('mawb', params.mawb);
+    if (params.shipper)    p = p.set('shipper', params.shipper);
+    if (params.importFrom) p = p.set('importFrom', params.importFrom);
+    if (params.importTo)   p = p.set('importTo', params.importTo);
+    if (params.carrier)    p = p.set('carrier', params.carrier);
+    if (params.mode)       p = p.set('mode', params.mode);
+    if (params.totalOrders != null) p = p.set('totalOrders', params.totalOrders);
+    if (params.dutyRateMin != null) p = p.set('dutyRateMin', params.dutyRateMin);
+    if (params.dutyRateMax != null) p = p.set('dutyRateMax', params.dutyRateMax);
+    if (params.status)     p = p.set('status', params.status);
+    return this.http.get<Page<ShipmentResponse>>('/api/shipments', { params: p });
+  }
 
   getAll(page = 0, size = 15, sort = 'createdAt,desc'): Observable<Page<ShipmentResponse>> {
     const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);

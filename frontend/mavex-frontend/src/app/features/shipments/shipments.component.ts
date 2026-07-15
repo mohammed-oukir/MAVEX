@@ -4,9 +4,10 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService }   from '../../core/services/layout.service';
-import { ShipmentService } from '../../core/services/shipment.service';
+import { ShipmentService, ShipmentSearchParams } from '../../core/services/shipment.service';
 import { ShipperService }  from '../../core/services/shipper.service';
 import { OrderService }    from '../../core/services/order.service';
 import { ToastService }    from '../../core/services/toast.service';
@@ -24,6 +25,9 @@ import { RequiresPermissionDirective } from '../../core/directives/requires-perm
   templateUrl: './shipments.component.html',
   styleUrl:    './shipments.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'onDocumentClick($event)',
+  },
 })
 export class ShipmentsComponent implements OnInit {
   private readonly router      = inject(Router);
@@ -41,13 +45,36 @@ export class ShipmentsComponent implements OnInit {
   detectingAirline = signal(false);
 
   /* ── Data ─────────────────────────────────────────────── */
-  allShipments = signal<ShipmentResponse[]>([]);
+  shipments    = signal<ShipmentResponse[]>([]);
+  total        = signal(0);
   shippers     = signal<ShipperResponse[]>([]);
   loading      = signal(true);
 
-  /* ── Filters ──────────────────────────────────────────── */
-  search       = signal('');
-  statusFilter = signal('');
+  /* ── Panneau de filtres ───────────────────────────────── */
+  filtersCollapsed = signal(false);
+  flMawb        = signal('');
+  flShipper     = signal('');
+  flImportFrom  = signal('');
+  flImportTo    = signal('');
+  flCarrier     = signal('');
+  flMode        = signal('');
+  flTotalOrders = signal('');
+  flDutyMin     = signal('');
+  flDutyMax     = signal('');
+  flStatus      = signal('');
+
+  /* ── Combobox Shipper du panneau de filtres ──────────── */
+  shipperDropdownOpen = signal(false);
+
+  /* ── Filtres avancés (repliés par défaut) ────────────── */
+  advancedFiltersOpen = signal(false);
+
+  /** Tous les shippers, triés alphabétiquement */
+  sortedShippers = computed(() =>
+    [...this.shippers()].sort((a, b) =>
+      (a.companyName ?? '').localeCompare(b.companyName ?? '', 'fr', { sensitivity: 'base' })
+    )
+  );
 
   /* ── Pagination ───────────────────────────────────────── */
   readonly PAGE_SIZE = 15;
@@ -94,48 +121,22 @@ export class ShipmentsComponent implements OnInit {
     ).slice(0, 50);
   });
 
-  /* ── Status chips config ──────────────────────────────── */
-  protected readonly statusOptions = [
-    { value: '',           label: 'Tous' },
-    { value: 'DRAFT',      label: 'Draft' },
-    { value: 'IMPORTED',   label: 'Imported' },
-    { value: 'PROCESSING', label: 'Processing' },
-    { value: 'CLOSED',     label: 'Closed' },
-  ] as const;
-
-  /* ── Computed ─────────────────────────────────────────── */
-  filtered = computed(() => {
-    const q = this.search().toLowerCase();
-    const s = this.statusFilter();
-    return this.allShipments().filter(sh => {
-      const matchQ = !q
-        || sh.mawb.toLowerCase().includes(q)
-        || (sh.shipper?.companyName ?? '').toLowerCase().includes(q);
-      const matchS = !s || sh.status === s;
-      return matchQ && matchS;
-    });
-  });
-
-  totalItems = computed(() => this.filtered().length);
-  totalPages = computed(() => Math.ceil(this.totalItems() / this.PAGE_SIZE));
+  /* ── Computed (pagination serveur) ────────────────────── */
+  totalPages = computed(() => Math.ceil(this.total() / this.PAGE_SIZE));
   pages      = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i));
-  pageItems  = computed(() =>
-    this.filtered().slice(
-      this.currentPage() * this.PAGE_SIZE,
-      (this.currentPage() + 1) * this.PAGE_SIZE,
-    )
+
+  hasFilters = computed(() =>
+    !!this.flMawb()    || !!this.flShipper() || !!this.flImportFrom() || !!this.flImportTo() ||
+    !!this.flCarrier() || !!this.flMode()    || !!this.flTotalOrders() ||
+    !!this.flDutyMin() || !!this.flDutyMax() || !!this.flStatus()
   );
 
-  statusCounts = computed(() => {
-    const all = this.allShipments();
-    return {
-      '':           all.length,
-      'DRAFT':      all.filter(s => s.status === 'DRAFT').length,
-      'IMPORTED':   all.filter(s => s.status === 'IMPORTED').length,
-      'PROCESSING': all.filter(s => s.status === 'PROCESSING').length,
-      'CLOSED':     all.filter(s => s.status === 'CLOSED').length,
-    } as Record<string, number>;
-  });
+  /* ── KPIs (compteurs des stat-cards) ─────────────────── */
+  kpiAll        = signal(0);
+  kpiDraft      = signal(0);
+  kpiImported   = signal(0);
+  kpiProcessing = signal(0);
+  kpiClosed     = signal(0);
 
   /* ── Forms ────────────────────────────────────────────── */
   createForm = this.fb.group({
@@ -165,16 +166,60 @@ export class ShipmentsComponent implements OnInit {
       label:   'Nouveau Shipment',
       onClick: () => this.openCreate(),
     });
-    this.loadAll();
+    this.loadShipments();
+    this.loadKpis();
     this.loadShippers();
   }
 
   /* ── Load ─────────────────────────────────────────────── */
-  private loadAll(): void {
+  private loadShipments(): void {
     this.loading.set(true);
-    this.shipSvc.getAllUnpaged().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next:  p  => { this.allShipments.set(p.content); this.loading.set(false); },
-      error: () => this.loading.set(false),
+    this.shipSvc.search(this.buildParams(), this.currentPage(), this.PAGE_SIZE)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next:  p  => {
+          this.shipments.set(p.content);
+          this.total.set(p.totalElements);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+  }
+
+  /** Lit les 10 signals de filtre. Duty : le backend stocke une fraction → on divise par 100. */
+  private buildParams(): ShipmentSearchParams {
+    const orders = this.flTotalOrders().trim();
+    const dMin   = this.flDutyMin().trim();
+    const dMax   = this.flDutyMax().trim();
+    return {
+      mawb:        this.flMawb().trim()    || undefined,
+      shipper:     this.flShipper().trim() || undefined,
+      importFrom:  this.flImportFrom()     || undefined,
+      importTo:    this.flImportTo()       || undefined,
+      carrier:     this.flCarrier().trim() || undefined,
+      mode:        this.flMode().trim()    || undefined,
+      totalOrders: orders !== '' ? Number(orders)     : undefined,
+      dutyRateMin: dMin   !== '' ? Number(dMin) / 100 : undefined,
+      dutyRateMax: dMax   !== '' ? Number(dMax) / 100 : undefined,
+      status:      (this.flStatus() as ShipmentStatus) || undefined,
+    };
+  }
+
+  private loadKpis(): void {
+    forkJoin({
+      all:        this.shipSvc.search({},                       0, 1),
+      draft:      this.shipSvc.search({ status: 'DRAFT' },      0, 1),
+      imported:   this.shipSvc.search({ status: 'IMPORTED' },   0, 1),
+      processing: this.shipSvc.search({ status: 'PROCESSING' }, 0, 1),
+      closed:     this.shipSvc.search({ status: 'CLOSED' },     0, 1),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ all, draft, imported, processing, closed }) => {
+        this.kpiAll.set(all.totalElements);
+        this.kpiDraft.set(draft.totalElements);
+        this.kpiImported.set(imported.totalElements);
+        this.kpiProcessing.set(processing.totalElements);
+        this.kpiClosed.set(closed.totalElements);
+      },
     });
   }
 
@@ -185,15 +230,51 @@ export class ShipmentsComponent implements OnInit {
     });
   }
 
-  /* ── Filters ──────────────────────────────────────────── */
-  onSearch(e: Event): void {
-    this.search.set((e.target as HTMLInputElement).value);
+  /* ── Filtres ──────────────────────────────────────────── */
+  onSearchClick(): void {
     this.currentPage.set(0);
+    this.loadShipments();
   }
 
-  setStatus(value: string): void {
-    this.statusFilter.set(value);
+  onResetClick(): void {
+    this.flMawb.set('');
+    this.flShipper.set('');
+    this.flImportFrom.set('');
+    this.flImportTo.set('');
+    this.flCarrier.set('');
+    this.flMode.set('');
+    this.flTotalOrders.set('');
+    this.flDutyMin.set('');
+    this.flDutyMax.set('');
+    this.flStatus.set('');
     this.currentPage.set(0);
+    this.loadShipments();
+  }
+
+  /** Stat-cards : flStatus est la seule source de vérité du filtre statut. */
+  setStatus(value: string): void {
+    this.flStatus.set(value);
+    this.onSearchClick();
+  }
+
+  selectFilterShipper(companyName: string): void {
+    this.flShipper.set(companyName);
+    this.shipperDropdownOpen.set(false);
+  }
+
+  /** Ferme le dropdown du filtre Shipper au clic extérieur. */
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.shipperDropdownOpen()) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest('.sp-field-combo')) {
+      this.shipperDropdownOpen.set(false);
+    }
+  }
+
+  /* ── Pagination serveur ───────────────────────────────── */
+  goToPage(p: number): void {
+    this.currentPage.set(p);
+    this.loadShipments();
   }
 
   /* ── Navigation ───────────────────────────────────────── */
@@ -442,7 +523,8 @@ export class ShipmentsComponent implements OnInit {
         this.saving.set(false);
         this.editingShipment.set(null);
         this.toast.success('Shipment mis à jour.');
-        this.loadAll();
+        this.loadShipments();
+        this.loadKpis();
       },
       error: err => {
         this.saving.set(false);
@@ -484,7 +566,8 @@ export class ShipmentsComponent implements OnInit {
         this.deleting.set(false);
         this.deleteId.set(null);
         this.toast.success('Shipment supprimé.');
-        this.loadAll();
+        this.loadShipments();
+        this.loadKpis();
       },
       error: err => {
         this.deleting.set(false);

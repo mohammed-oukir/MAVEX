@@ -15,10 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/shipments")
@@ -41,12 +44,34 @@ public class ShipmentController {
         return ResponseEntity.ok(shipmentService.getById(id));
     }
 
+    // ─────────── GET /api/shipments — liste paginée, avec filtres par colonne ───────────
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.VIEW)
     public ResponseEntity<Page<ShipmentResponseDTO>> list(
+            @RequestParam(required = false) String mawb,
+            @RequestParam(required = false) String shipper,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importTo,
+            @RequestParam(required = false) String carrier,
+            @RequestParam(required = false) String mode,
+            @RequestParam(required = false) Integer totalOrders,
+            @RequestParam(required = false) Double dutyRateMin,
+            @RequestParam(required = false) Double dutyRateMax,
+            @RequestParam(required = false) ShipmentStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(shipmentService.list(pageable));
+
+        boolean hasFilter = mawb != null || shipper != null || importFrom != null || importTo != null
+                || carrier != null || mode != null || totalOrders != null
+                || dutyRateMin != null || dutyRateMax != null || status != null;
+
+        if (!hasFilter) {
+            return ResponseEntity.ok(shipmentService.list(pageable));
+        }
+
+        return ResponseEntity.ok(shipmentService.search(
+                mawb, shipper, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status, pageable));
     }
 
     @GetMapping("/status/{status}")

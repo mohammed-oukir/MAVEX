@@ -19,6 +19,19 @@ import { ShipperResponse } from '../../core/models/shipper.model';
 import { OrderResponse, OrderRequest, OrderPatch, OrderStatus, OrderStatusUpdate } from '../../core/models/order.model';
 import { ClientResponse }  from '../../core/models/client.model';
 
+interface OrderColumnFilters {
+  hawb?:       string;
+  client?:     string;
+  desc?:       string;
+  weight?:     number;
+  items?:      number;
+  customsMin?: number;
+  customsMax?: number;
+  currency?:   string;
+  totalMin?:   number;
+  totalMax?:   number;
+}
+
 @Component({
   selector: 'app-shipment-detail',
   imports: [RouterLink, ReactiveFormsModule, BadgeComponent, RequiresPermissionDirective],
@@ -47,6 +60,23 @@ export class ShipmentDetailComponent implements OnInit {
   loading   = signal(true);
   search    = signal('');
   statusFilter = signal('');
+
+  /* ── Panneau de filtres par colonne (100% local, aucun HTTP) ─── */
+  filtersCollapsed = signal(false);
+  advancedFiltersOpen = signal(false);
+  flHawb        = signal('');
+  flClient      = signal('');
+  flDesc        = signal('');
+  flWeight      = signal('');
+  flItems       = signal('');
+  flCustomsMin  = signal('');
+  flCustomsMax  = signal('');
+  flCurrency    = signal('');
+  flTotalMin    = signal('');
+  flTotalMax    = signal('');
+
+  /** Filtres réellement appliqués — mis à jour uniquement au clic sur Search. */
+  appliedFilters = signal<OrderColumnFilters>({});
 
   /* ── Duty edit ────────────────────────────────────────── */
   editingDuty   = signal(false);
@@ -205,19 +235,77 @@ export class ShipmentDetailComponent implements OnInit {
   filteredOrders = computed(() => {
     const q  = this.search().toLowerCase().trim();
     const st = this.statusFilter();
+    const f  = this.appliedFilters();
+
     return this.orders().filter(o => {
+      // 1. Statut (onglets)
       if (st && o.status !== st) return false;
-      if (!q) return true;
-      return (
-        o.hawb?.toLowerCase().includes(q) ||
-        o.clientFullName?.toLowerCase().includes(q) ||
-        o.goodsDescription?.toLowerCase().includes(q) ||
-        o.clientEmail?.toLowerCase().includes(q) ||
-        o.clientCity?.toLowerCase().includes(q) ||
-        o.htsusCode?.toLowerCase().includes(q)
-      );
+
+      // 2. Recherche globale
+      if (q) {
+        const matchQ =
+          o.hawb?.toLowerCase().includes(q) ||
+          o.clientFullName?.toLowerCase().includes(q) ||
+          o.goodsDescription?.toLowerCase().includes(q) ||
+          o.clientEmail?.toLowerCase().includes(q) ||
+          o.clientCity?.toLowerCase().includes(q) ||
+          o.htsusCode?.toLowerCase().includes(q);
+        if (!matchQ) return false;
+      }
+
+      // 3. Filtres par colonne
+      if (f.hawb   && !o.hawb?.toLowerCase().includes(f.hawb))             return false;
+      if (f.client && !o.clientFullName?.toLowerCase().includes(f.client)) return false;
+      if (f.desc   && !o.goodsDescription?.toLowerCase().includes(f.desc)) return false;
+
+      if (f.weight   != null && o.shipmentWeight !== f.weight) return false;
+      if (f.items    != null && o.numberOfItems  !== f.items)  return false;
+      if (f.currency && o.customsCurrency !== f.currency)      return false;
+
+      if (f.customsMin != null && (o.customsValue ?? 0) < f.customsMin) return false;
+      if (f.customsMax != null && (o.customsValue ?? 0) > f.customsMax) return false;
+      if (f.totalMin   != null && (o.totalAmount  ?? 0) < f.totalMin)   return false;
+      if (f.totalMax   != null && (o.totalAmount  ?? 0) > f.totalMax)   return false;
+
+      return true;
     });
   });
+
+  /** Un filtre de colonne est-il réellement appliqué ? (source de vérité : appliedFilters) */
+  hasColumnFilters = computed(() =>
+    Object.values(this.appliedFilters()).some(v => v !== undefined)
+  );
+
+  /* ── Panneau de filtres ───────────────────────────────── */
+  onFiltersSearch(): void {
+    const num = (s: string) => (s.trim() !== '' ? Number(s) : undefined);
+    this.appliedFilters.set({
+      hawb:       this.flHawb().trim().toLowerCase()   || undefined,
+      client:     this.flClient().trim().toLowerCase() || undefined,
+      desc:       this.flDesc().trim().toLowerCase()   || undefined,
+      weight:     num(this.flWeight()),
+      items:      num(this.flItems()),
+      customsMin: num(this.flCustomsMin()),
+      customsMax: num(this.flCustomsMax()),
+      currency:   this.flCurrency() || undefined,
+      totalMin:   num(this.flTotalMin()),
+      totalMax:   num(this.flTotalMax()),
+    });
+  }
+
+  onFiltersReset(): void {
+    this.flHawb.set('');
+    this.flClient.set('');
+    this.flDesc.set('');
+    this.flWeight.set('');
+    this.flItems.set('');
+    this.flCurrency.set('');
+    this.flCustomsMin.set('');
+    this.flCustomsMax.set('');
+    this.flTotalMin.set('');
+    this.flTotalMax.set('');
+    this.appliedFilters.set({});
+  }
 
   totalOrders     = computed(() => this.orders().length);
   createdCount    = computed(() => this.orders().filter(o => o.status === 'CREATED').length);

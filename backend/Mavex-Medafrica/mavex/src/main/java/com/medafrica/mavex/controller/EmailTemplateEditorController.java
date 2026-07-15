@@ -1,12 +1,13 @@
 package com.medafrica.mavex.controller;
 
 import com.medafrica.mavex.dto.email.EmailTemplateDTO;
-import com.medafrica.mavex.model.enums.NotificationType;
 import com.medafrica.mavex.service.interfaces.EmailTemplateEditorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/email-templates")
@@ -16,6 +17,16 @@ public class EmailTemplateEditorController {
     private final EmailTemplateEditorService editorService;
 
     // ─────────────────────────────────────────────────────────────────
+    // GET /api/email-templates
+    // Liste tous les NotificationTypeEntity — ceux sans ligne en base ont id=null
+    // ─────────────────────────────────────────────────────────────────
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<EmailTemplateDTO>> getAll() {
+        return ResponseEntity.ok(editorService.listAll());
+    }
+
+    // ─────────────────────────────────────────────────────────────────
     // GET /api/email-templates/{type}
     // Charge le template actif par type
     // Retourne : id + subject + bodyContent → Quill l'affiche
@@ -23,7 +34,7 @@ public class EmailTemplateEditorController {
     // ─────────────────────────────────────────────────────────────────
     @GetMapping("/{type}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EmailTemplateDTO> getByType(@PathVariable NotificationType type) {
+    public ResponseEntity<EmailTemplateDTO> getByType(@PathVariable String type) {
         return ResponseEntity.ok(editorService.getByType(type));
     }
 
@@ -38,5 +49,15 @@ public class EmailTemplateEditorController {
             @PathVariable Long id,
             @RequestBody EmailTemplateDTO dto) {
         return ResponseEntity.ok(editorService.update(id, dto));
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // POST /api/email-templates
+    // Crée un nouveau template pour un type sans ligne en base
+    // ─────────────────────────────────────────────────────────────────
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmailTemplateDTO> create(@RequestBody EmailTemplateDTO dto) {
+        return ResponseEntity.ok(editorService.create(dto));
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface ShipmentService {
 
@@ -18,6 +19,20 @@ public interface ShipmentService {
     Page<ShipmentResponseDTO> list(Pageable pageable);
 
     Page<ShipmentResponseDTO> listByStatus(ShipmentStatus status, Pageable pageable);
+
+    Page<ShipmentResponseDTO> search(
+            String mawb,
+            String shipperCompanyName,
+            LocalDate importFrom,
+            LocalDate importTo,
+            String carrier,
+            String mode,
+            Integer totalOrders,
+            Double dutyRateMin,
+            Double dutyRateMax,
+            ShipmentStatus status,
+            Pageable pageable
+    );
 
     ShipmentResponseDTO update(Long id, ShipmentRequestDTO req);
 

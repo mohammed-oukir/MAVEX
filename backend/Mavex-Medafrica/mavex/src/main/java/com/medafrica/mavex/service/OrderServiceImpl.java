@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -106,9 +106,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> search(String q, OrderStatus status, Long shipmentId,
-                                       LocalDateTime from, LocalDateTime to, Pageable pageable) {
-        Specification<Order> spec = OrderSpecification.build(q, status, shipmentId, from, to);
+    public Page<OrderResponse> search(String hawb, String client, String clientEmail,
+                                       String shipmentSearch,
+                                       Double shipmentWeight, Double customsValue,
+                                       Double totalAmount, Double dutyRate,
+                                       String customsCurrency, OrderStatus status,
+                                       Long shipmentId, LocalDate from, LocalDate to,
+                                       Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.build(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
         return orderRepository.findAll(spec, pageable).map(this::toResponse);
     }
 

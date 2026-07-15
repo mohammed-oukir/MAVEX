@@ -1,0 +1,98 @@
+<div class="etl-header">
+  <div class="etl-header-icon">
+    <svg width="20" height="20" fill="none" stroke="currentColor"
+         stroke-width="1.75" viewBox="0 0 24 24">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  </div>
+  <div class="etl-header-text">
+    <h2>Email Template Configuration</h2>
+    <p style="color: var(--mavex-muted)">Personnalisez les templates d'emails envoyés aux clients</p>
+  </div>
+</div>
+
+<div class="etl-card">
+  <div class="etl-field">
+    <label class="etl-label">Type Notification *</label>
+    <select
+      class="etl-select"
+      [value]="selectedType()"
+      (change)="onTypeChange($any($event.target).value)">
+      <option value="" disabled>Sélectionner un type de notification</option>
+      @for (t of templates(); track t.type) {
+        <option [value]="t.type">
+          {{ t.type }} {{ t.id ? '✓ Configuré' : '○ Non configuré' }}
+        </option>
+      }
+    </select>
+  </div>
+
+  <div class="etl-field">
+    <label class="etl-label">Subject *</label>
+    <input
+      type="text"
+      class="etl-input"
+      [class.etl-disabled]="!selectedType()"
+      [disabled]="!selectedType()"
+      [value]="subject()"
+      (input)="subject.set($any($event.target).value)"
+      placeholder="Ex: Votre colis {{ '{{hawb}}' }} est prêt" />
+  </div>
+
+  <div class="etl-field">
+    <label class="etl-label">Message *</label>
+    <div class="etl-message-zone" [class.active]="selectedType()">
+      @if (selectedType()) {
+        <div class="etl-envelope-icon">
+          <svg width="28" height="28" fill="none" stroke="currentColor"
+               stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <h3 class="etl-message-title">Design Your Email</h3>
+        <p class="etl-message-sub">
+          Utilisez l'éditeur drag-and-drop pour personnaliser
+          votre template d'email professionnel
+        </p>
+        <button type="button" class="etl-btn-editor" (click)="openEditor()">
+          <svg width="15" height="15" fill="none" stroke="currentColor"
+               stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Open Email Editor
+        </button>
+      } @else {
+        <svg width="32" height="32" fill="none" stroke="#D1D5DB"
+             stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <p style="color:#D1D5DB; font-size:13px; margin:0;">
+          Sélectionnez un type pour accéder à l'éditeur
+        </p>
+      }
+    </div>
+  </div>
+
+  <div class="etl-footer">
+    <button type="button" class="etl-btn-cancel" (click)="cancel()">
+      Annuler
+    </button>
+    <button
+      type="button"
+      class="etl-btn-save"
+      [disabled]="!selectedType() || !subject()"
+      (click)="save()">
+      <svg width="14" height="14" fill="none" stroke="currentColor"
+           stroke-width="2" viewBox="0 0 24 24">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Sauvegarder
+    </button>
+  </div>
+</div>

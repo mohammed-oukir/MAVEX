@@ -8,7 +8,7 @@ import com.medafrica.mavex.model.enums.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface OrderService {
@@ -19,9 +19,23 @@ public interface OrderService {
 
     OrderResponse getByHawb(String hawb);
 
-    /** Recherche paginée avec filtres combinés — remplace getAll() */
-    Page<OrderResponse> search(String q, OrderStatus status, Long shipmentId,
-                                LocalDateTime from, LocalDateTime to, Pageable pageable);
+    /** Recherche paginée avec filtres par colonne */
+    Page<OrderResponse> search(
+            String hawb,
+            String client,
+            String clientEmail,
+            String shipmentSearch,
+            Double shipmentWeight,
+            Double customsValue,
+            Double totalAmount,
+            Double dutyRate,
+            String customsCurrency,
+            OrderStatus status,
+            Long shipmentId,
+            LocalDate from,
+            LocalDate to,
+            Pageable pageable
+    );
 
     List<OrderResponse> getByShipment(Long shipmentId);
 

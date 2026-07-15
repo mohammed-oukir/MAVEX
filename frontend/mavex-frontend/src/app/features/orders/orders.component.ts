@@ -5,8 +5,6 @@ import {
 import { RouterLink } from '@angular/router';
 import { DatePipe }   from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject }    from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { forkJoin }   from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService }       from '../../core/services/layout.service';
@@ -16,7 +14,7 @@ import { EmailService }        from '../../core/services/email.service';
 import { ToastService }        from '../../core/services/toast.service';
 import { ExchangeRateService } from '../../core/services/exchange-rate.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
-import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderStatus } from '../../core/models/order.model';
+import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderSearchParams, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
 import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
@@ -36,8 +34,6 @@ export class OrdersComponent implements OnInit {
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly erSvc      = inject(ExchangeRateService);
-
-  private readonly searchSubject = new Subject<string>();
 
   /* ── Data ─────────────────────────────────────────────── */
   orders  = signal<OrderResponse[]>([]);
@@ -59,11 +55,21 @@ export class OrdersComponent implements OnInit {
   kpiPending = signal(0);
   kpiPaid    = signal(0);
 
-  /* ── Filtres ──────────────────────────────────────────── */
-  searchQ   = signal('');
-  statusTab = signal<OrderStatus | ''>('');
-  fromDate  = signal('');
-  toDate    = signal('');
+  /* ── Panneau de filtres ───────────────────────────────── */
+  filtersCollapsed    = signal(false);
+  advancedFiltersOpen = signal(false);
+  flHawb         = signal('');
+  flClient       = signal('');
+  flClientEmail  = signal('');
+  flShipment     = signal('');
+  flStatus       = signal<OrderStatus | ''>('');
+  flCurrency     = signal('');
+  flWeight       = signal('');
+  flCustomsValue = signal('');
+  flTotalAmount  = signal('');
+  flDutyRate     = signal('');
+  flFrom         = signal('');
+  flTo           = signal('');
 
   /* ── Sélection bulk ───────────────────────────────────── */
   selectedIds  = signal<Set<number>>(new Set());
@@ -140,21 +146,17 @@ export class OrdersComponent implements OnInit {
 
   /* ── Computed ─────────────────────────────────────────── */
   totalPages  = computed(() => Math.ceil(this.total() / this.pageSize()));
-  hasFilters  = computed(() => !!this.searchQ() || !!this.statusTab() || !!this.fromDate() || !!this.toDate());
+  hasFilters = computed(() =>
+    !!this.flHawb()         || !!this.flClient()      || !!this.flClientEmail() ||
+    !!this.flShipment()     ||
+    !!this.flStatus()       || !!this.flCurrency()    || !!this.flWeight()   ||
+    !!this.flCustomsValue() || !!this.flTotalAmount() || !!this.flDutyRate() ||
+    !!this.flFrom()         || !!this.flTo()
+  );
 
   /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
     this.layout.setPage('Orders');
-
-    this.searchSubject.pipe(
-      debounceTime(350),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(q => {
-      this.searchQ.set(q);
-      this.page.set(0);
-      this.loadOrders();
-    });
 
     this.loadKpis();
     this.loadOrders();
@@ -168,17 +170,32 @@ export class OrdersComponent implements OnInit {
   private loadOrders(): void {
     this.loading.set(true);
     this.selectedIds.set(new Set());
-    this.orderSvc.search({
-      q:          this.searchQ()   || undefined,
-      status:     this.statusTab() || undefined,
-      from:       this.fromDate()  || undefined,
-      to:         this.toDate()    || undefined,
-    }, this.page(), this.pageSize())
+    this.orderSvc.search(this.buildParams(), this.page(), this.pageSize())
     .pipe(takeUntilDestroyed(this.destroyRef))
     .subscribe({
       next: p => { this.orders.set(p.content); this.total.set(p.totalElements); this.loading.set(false); },
       error: ()  => this.loading.set(false),
     });
+  }
+
+  /** Duty : le backend stocke une fraction (0.10 = 10 %) → on divise par 100. */
+  private buildParams(): OrderSearchParams {
+    const num = (s: string) => (s.trim() !== '' ? Number(s) : undefined);
+    const duty = this.flDutyRate().trim();
+    return {
+      hawb:            this.flHawb().trim()        || undefined,
+      client:          this.flClient().trim()      || undefined,
+      clientEmail:     this.flClientEmail().trim() || undefined,
+      shipmentSearch:  this.flShipment().trim()    || undefined,
+      customsCurrency: this.flCurrency()        || undefined,
+      status:          this.flStatus()          || undefined,
+      shipmentWeight:  num(this.flWeight()),
+      customsValue:    num(this.flCustomsValue()),
+      totalAmount:     num(this.flTotalAmount()),
+      dutyRate:        duty !== '' ? Number(duty) / 100 : undefined,
+      from:            this.flFrom() || undefined,
+      to:              this.flTo()   || undefined,
+    };
   }
 
   private loadKpis(): void {
@@ -198,23 +215,30 @@ export class OrdersComponent implements OnInit {
   }
 
   /* ── Filtres ──────────────────────────────────────────── */
-  onSearchInput(e: Event): void {
-    this.searchSubject.next((e.target as HTMLInputElement).value);
-  }
-
   setTab(tab: OrderStatus | ''): void {
-    this.statusTab.set(tab);
+    this.flStatus.set(tab);
     this.page.set(0);
     this.loadOrders();
   }
 
-  applyDates(): void { this.page.set(0); this.loadOrders(); }
+  onSearchClick(): void {
+    this.page.set(0);
+    this.loadOrders();
+  }
 
   clearFilters(): void {
-    this.searchQ.set('');
-    this.statusTab.set('');
-    this.fromDate.set('');
-    this.toDate.set('');
+    this.flHawb.set('');
+    this.flClient.set('');
+    this.flClientEmail.set('');
+    this.flShipment.set('');
+    this.flStatus.set('');
+    this.flCurrency.set('');
+    this.flWeight.set('');
+    this.flCustomsValue.set('');
+    this.flTotalAmount.set('');
+    this.flDutyRate.set('');
+    this.flFrom.set('');
+    this.flTo.set('');
     this.page.set(0);
     this.loadOrders();
   }

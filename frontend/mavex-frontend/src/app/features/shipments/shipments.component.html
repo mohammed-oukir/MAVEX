@@ -1,74 +1,211 @@
 <!-- ── Stat cards ─────────────────────────────────────────── -->
 <div class="sp-stat-cards" role="group" aria-label="Filtrer par statut">
 
-  <button type="button" class="sp-stat-card card-all" [class.active]="statusFilter() === ''" (click)="setStatus('')" [attr.aria-pressed]="statusFilter() === ''">
+  <button type="button" class="sp-stat-card card-all" [class.active]="flStatus() === ''" (click)="setStatus('')" [attr.aria-pressed]="flStatus() === ''">
     <div class="sp-stat-icon sp-si-all">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     </div>
     <div>
-      <div class="sp-stat-num">{{ statusCounts()[''] }}</div>
+      <div class="sp-stat-num">{{ kpiAll() }}</div>
       <div class="sp-stat-lbl">Tous</div>
     </div>
   </button>
 
-  <button type="button" class="sp-stat-card card-draft" [class.active]="statusFilter() === 'DRAFT'" (click)="setStatus('DRAFT')" [attr.aria-pressed]="statusFilter() === 'DRAFT'">
+  <button type="button" class="sp-stat-card card-draft" [class.active]="flStatus() === 'DRAFT'" (click)="setStatus('DRAFT')" [attr.aria-pressed]="flStatus() === 'DRAFT'">
     <div class="sp-stat-icon sp-si-draft">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     </div>
     <div>
-      <div class="sp-stat-num">{{ statusCounts()['DRAFT'] }}</div>
+      <div class="sp-stat-num">{{ kpiDraft() }}</div>
       <div class="sp-stat-lbl">Draft</div>
     </div>
   </button>
 
-  <button type="button" class="sp-stat-card card-imported" [class.active]="statusFilter() === 'IMPORTED'" (click)="setStatus('IMPORTED')" [attr.aria-pressed]="statusFilter() === 'IMPORTED'">
+  <button type="button" class="sp-stat-card card-imported" [class.active]="flStatus() === 'IMPORTED'" (click)="setStatus('IMPORTED')" [attr.aria-pressed]="flStatus() === 'IMPORTED'">
     <div class="sp-stat-icon sp-si-imported">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
     </div>
     <div>
-      <div class="sp-stat-num">{{ statusCounts()['IMPORTED'] }}</div>
+      <div class="sp-stat-num">{{ kpiImported() }}</div>
       <div class="sp-stat-lbl">Imported</div>
     </div>
   </button>
 
-  <button type="button" class="sp-stat-card card-processing" [class.active]="statusFilter() === 'PROCESSING'" (click)="setStatus('PROCESSING')" [attr.aria-pressed]="statusFilter() === 'PROCESSING'">
+  <button type="button" class="sp-stat-card card-processing" [class.active]="flStatus() === 'PROCESSING'" (click)="setStatus('PROCESSING')" [attr.aria-pressed]="flStatus() === 'PROCESSING'">
     <div class="sp-stat-icon sp-si-processing">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
     </div>
     <div>
-      <div class="sp-stat-num">{{ statusCounts()['PROCESSING'] }}</div>
+      <div class="sp-stat-num">{{ kpiProcessing() }}</div>
       <div class="sp-stat-lbl">Processing</div>
     </div>
   </button>
 
-  <button type="button" class="sp-stat-card card-closed" [class.active]="statusFilter() === 'CLOSED'" (click)="setStatus('CLOSED')" [attr.aria-pressed]="statusFilter() === 'CLOSED'">
+  <button type="button" class="sp-stat-card card-closed" [class.active]="flStatus() === 'CLOSED'" (click)="setStatus('CLOSED')" [attr.aria-pressed]="flStatus() === 'CLOSED'">
     <div class="sp-stat-icon sp-si-closed">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
     </div>
     <div>
-      <div class="sp-stat-num">{{ statusCounts()['CLOSED'] }}</div>
+      <div class="sp-stat-num">{{ kpiClosed() }}</div>
       <div class="sp-stat-lbl">Closed</div>
     </div>
   </button>
 
 </div>
 
-<!-- ── Toolbar ─────────────────────────────────────────────── -->
-<div class="sp-toolbar">
-  <div class="sp-search-wrap">
-    <svg class="sp-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-    <input
-      type="search"
-      class="sp-search"
-      placeholder="Rechercher MAWB, shipper…"
-      [value]="search()"
-      (input)="onSearch($event)"
-      aria-label="Rechercher un shipment"
-    />
+<!-- ── Panneau de filtres ──────────────────────────────────── -->
+<div class="sp-filters">
+
+  <div class="sp-filters-head">
+    <div class="sp-filters-title">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      <span>Filters</span>
+    </div>
+    <button
+      type="button"
+      class="sp-filters-toggle"
+      (click)="filtersCollapsed.set(!filtersCollapsed())"
+      [attr.aria-expanded]="!filtersCollapsed()"
+      aria-controls="sp-filters-body"
+      [attr.aria-label]="filtersCollapsed() ? 'Agrandir les filtres' : 'Réduire les filtres'"
+    >
+      @if (filtersCollapsed()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      } @else {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      }
+    </button>
   </div>
-  <span class="sp-total">{{ totalItems() }} shipment(s)</span>
+
+  @if (!filtersCollapsed()) {
+    <div class="sp-filters-body" id="sp-filters-body">
+
+      <div class="sp-filters-grid">
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fl-mawb">MAWB</label>
+          <input id="fl-mawb" type="text" class="sp-field-input"
+            [value]="flMawb()" (input)="flMawb.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fl-shipper">Shipper</label>
+          <div class="sp-field-combo">
+            <input id="fl-shipper" type="text" class="sp-field-input sp-field-input-combo"
+              [value]="flShipper()"
+              (input)="flShipper.set($any($event.target).value)"
+              autocomplete="off" />
+            <button type="button" class="sp-field-chevron"
+              [class.open]="shipperDropdownOpen()"
+              (click)="shipperDropdownOpen.set(!shipperDropdownOpen())"
+              tabindex="-1"
+              [attr.aria-expanded]="shipperDropdownOpen()"
+              aria-label="Afficher la liste des shippers">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            @if (shipperDropdownOpen()) {
+              <div class="sp-combo-list" role="listbox">
+                @if (sortedShippers().length === 0) {
+                  <div class="sp-combo-empty">Aucun shipper</div>
+                } @else {
+                  @for (sh of sortedShippers(); track sh.id) {
+                    <button type="button" class="sp-combo-item" (click)="selectFilterShipper(sh.companyName)">
+                      <span class="sp-combo-item-name">{{ sh.companyName }}</span>
+                    </button>
+                  }
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fl-date-from">Date arrivée — du</label>
+          <input id="fl-date-from" type="date" class="sp-field-input"
+            [value]="flImportFrom()" (input)="flImportFrom.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fl-date-to">Date arrivée — au</label>
+          <input id="fl-date-to" type="date" class="sp-field-input"
+            [value]="flImportTo()" (input)="flImportTo.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fl-status">Statut</label>
+          <select id="fl-status" class="sp-field-input"
+            [value]="flStatus()" (change)="flStatus.set($any($event.target).value)">
+            <option value="">Tous</option>
+            <option value="DRAFT">Draft</option>
+            <option value="IMPORTED">Imported</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+        </div>
+         <div class="sp-field">
+            <label class="sp-field-label" for="fl-orders">Orders</label>
+            <input id="fl-orders" type="number" min="0" step="1" class="sp-field-input"
+              [value]="flTotalOrders()" (input)="flTotalOrders.set($any($event.target).value)" />
+          </div>
+
+
+      </div>
+
+      <div class="sp-filters-advanced">
+        <button type="button" class="sp-advanced-link"
+          (click)="advancedFiltersOpen.set(!advancedFiltersOpen())"
+          [attr.aria-expanded]="advancedFiltersOpen()"
+          aria-controls="sp-advanced-grid">
+          Advanced filters
+          <svg class="sp-advanced-chevron" [class.open]="advancedFiltersOpen()"
+            width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (advancedFiltersOpen()) {
+        <div class="sp-filters-grid sp-filters-grid-advanced" id="sp-advanced-grid">
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fl-carrier">Carrier</label>
+            <input id="fl-carrier" type="text" class="sp-field-input"
+              [value]="flCarrier()" (input)="flCarrier.set($any($event.target).value)" />
+          </div>
+
+         
+          <div class="sp-field">
+            <label class="sp-field-label" for="fl-duty-min">Duty min (%)</label>
+            <input id="fl-duty-min" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flDutyMin()" (input)="flDutyMin.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fl-duty-max">Duty max (%)</label>
+            <input id="fl-duty-max" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flDutyMax()" (input)="flDutyMax.set($any($event.target).value)" />
+          </div>
+
+        </div>
+      }
+
+      <div class="sp-filters-actions">
+        <button type="button" class="sp-btn sp-btn-reset" (click)="onResetClick()">Reset</button>
+        <button type="button" class="sp-btn sp-btn-search" (click)="onSearchClick()">Search</button>
+      </div>
+
+    </div>
+  }
+
+</div>
+
+<!-- ── Total ───────────────────────────────────────────────── -->
+<div class="sp-toolbar">
+  <span class="sp-total">{{ total() }} shipment(s)</span>
 </div>
 
 <!-- ── Table ───────────────────────────────────────────────── -->
@@ -105,7 +242,7 @@
             </tr>
           }
 
-        } @else if (pageItems().length === 0) {
+        } @else if (shipments().length === 0) {
           <tr>
             <td colspan="9" style="padding:0;border:none">
               <div class="sp-empty">
@@ -115,16 +252,16 @@
                   <line x1="12" y1="22.08" x2="12" y2="12"/>
                 </svg>
                 <p>Aucun shipment trouvé</p>
-                @if (search() || statusFilter()) {
+                @if (hasFilters()) {
                   <button type="button" class="btn btn-sm btn-outline-secondary mt-1"
-                    (click)="search.set(''); setStatus('')">Réinitialiser les filtres</button>
+                    (click)="onResetClick()">Réinitialiser les filtres</button>
                 }
               </div>
             </td>
           </tr>
 
         } @else {
-          @for (s of pageItems(); track s.id) {
+          @for (s of shipments(); track s.id) {
 
             <!-- Main row -->
             <tr
@@ -284,18 +421,18 @@
     <nav class="sp-pagination" aria-label="Pagination">
       <button type="button" class="sp-page-btn"
         [disabled]="currentPage() === 0"
-        (click)="currentPage.set(currentPage() - 1)" aria-label="Page précédente">
+        (click)="goToPage(currentPage() - 1)" aria-label="Page précédente">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       @for (p of pages(); track p) {
         <button type="button" class="sp-page-btn" [class.active]="p === currentPage()"
-          (click)="currentPage.set(p)"
+          (click)="goToPage(p)"
           [attr.aria-label]="'Page ' + (p + 1)"
           [attr.aria-current]="p === currentPage() ? 'page' : null">{{ p + 1 }}</button>
       }
       <button type="button" class="sp-page-btn"
         [disabled]="currentPage() === totalPages() - 1"
-        (click)="currentPage.set(currentPage() + 1)" aria-label="Page suivante">
+        (click)="goToPage(currentPage() + 1)" aria-label="Page suivante">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </nav>

@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -49,16 +48,25 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @RequiresPermission(module = PermissionModule.ORDERS, action = PermissionAction.VIEW)
     public ResponseEntity<Page<OrderResponse>> search(
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String hawb,
+            @RequestParam(required = false) String client,
+            @RequestParam(required = false) String clientEmail,
+            @RequestParam(required = false) String shipmentSearch,
+            @RequestParam(required = false) Double shipmentWeight,
+            @RequestParam(required = false) Double customsValue,
+            @RequestParam(required = false) Double totalAmount,
+            @RequestParam(required = false) Double dutyRate,
+            @RequestParam(required = false) String customsCurrency,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) Long shipmentId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        LocalDateTime fromDt = from != null ? from.atStartOfDay()          : null;
-        LocalDateTime toDt   = to   != null ? to.atTime(23, 59, 59) : null;
-        return ResponseEntity.ok(orderService.search(q, status, shipmentId, fromDt, toDt, pageable));
+        return ResponseEntity.ok(orderService.search(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId,
+                from, to, pageable));
     }
 
     // ─────────── GET /api/orders/{id} ───────────

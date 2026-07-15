@@ -89,11 +89,19 @@ export interface OrderStatusUpdate {
 }
 
 export interface OrderSearchParams {
-  q?:          string;
-  status?:     OrderStatus | '';
-  shipmentId?: number;
-  from?:       string;
-  to?:         string;
+  hawb?:            string;
+  client?:          string;
+  clientEmail?:     string;
+  shipmentSearch?:  string;
+  shipmentWeight?:  number;
+  customsValue?:    number;
+  totalAmount?:     number;
+  dutyRate?:        number;
+  customsCurrency?: string;
+  status?:          OrderStatus | '';
+  shipmentId?:      number;
+  from?:            string;
+  to?:              string;
 }
 
 export interface BulkEmailResult {

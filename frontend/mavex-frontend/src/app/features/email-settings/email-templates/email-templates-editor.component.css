@@ -1,0 +1,409 @@
+.ete-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ete-topbar {
+  height: 56px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.ete-btn-back {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+
+.ete-btn-back:hover {
+  color: #fff;
+  border-color: #64748b;
+}
+
+.ete-type-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+
+.ete-btn-save {
+  background: #F97316;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.ete-btn-save:hover:not(:disabled) {
+  background: #EA580C;
+}
+
+.ete-btn-save:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.ete-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.ete-panel-left {
+  width: 260px;
+  background: #fff;
+  border-right: 1px solid #E5E7EB;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.ete-panel-title {
+  color: var(--mavex-accent);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--mavex-accent);
+  margin-bottom: 16px;
+}
+
+::ng-deep #blocks-container-header {
+  color: var(--mavex-accent);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--mavex-accent);
+  margin-bottom: 16px;
+}
+
+.ete-panel-right {
+  width: 280px;
+  background: #fff;
+  border-left: 1px solid #E5E7EB;
+  overflow-y: auto;
+}
+
+.ete-toolbar {
+  height: 44px;
+  background: #fff;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.ete-editor {
+  flex: 1;
+  overflow: auto;
+  background: #F3F4F6;
+}
+
+::ng-deep #blocks-container .gjs-blocks-no-cat .gjs-blocks-c,
+::ng-deep #blocks-container .gjs-block-category.gjs-open .gjs-blocks-c {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+::ng-deep #blocks-container .gjs-block-category:not(.gjs-open) .gjs-blocks-c {
+  display: none !important;
+}
+
+::ng-deep #blocks-container .gjs-blocks-no-cat {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+}
+
+::ng-deep #blocks-container .gjs-block {
+  width: auto !important;
+  min-height: 70px;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  padding: 10px 6px;
+}
+
+::ng-deep #blocks-container .gjs-block-label {
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+::ng-deep #blocks-container .gjs-block__media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  color: #6B7280;
+}
+
+::ng-deep #blocks-container .gjs-block__media svg {
+  width: 100%;
+  height: 100%;
+}
+
+::ng-deep #blocks-container .gjs-block:hover .gjs-block__media {
+  color: #F97316;
+}
+
+::ng-deep #blocks-container .gjs-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1F2937;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background .15s;
+}
+
+::ng-deep #blocks-container .gjs-title:hover {
+  background: #F3F4F6;
+}
+
+::ng-deep #blocks-container .gjs-caret-icon {
+  display: inline-block !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 8px 0 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  border-style: solid !important;
+  border-width: 5px 0 5px 7px !important;
+  border-color: transparent transparent transparent var(--mavex-accent) !important;
+  transition: transform .15s;
+  vertical-align: middle;
+}
+
+::ng-deep #blocks-container .gjs-caret-icon.fa-caret-down {
+  transform: rotate(90deg);
+}
+
+::ng-deep #blocks-container .gjs-caret-icon.fa-caret-right {
+  transform: rotate(0deg);
+}
+
+/* Cache le second bloc Classes/State dupliqué par le plugin newsletter,
+   garde uniquement le premier (fonctionnel) */
+::ng-deep #selector-container .gjs-clm-tags:nth-of-type(2) {
+  display: none !important;
+}
+
+/* Corrige la lisibilité du texte du premier bloc restant */
+::ng-deep #selector-container .gjs-clm-header-label {
+  color: #1F2937 !important;
+  font-weight: 600 !important;
+}
+
+::ng-deep #selector-container .gjs-clm-label-sel {
+  color: #6B7280 !important;
+}
+
+::ng-deep #selector-container select {
+  color: #1F2937 !important;
+  background: #fff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+}
+
+::ng-deep #selector-container .gjs-clm-tags {
+  background: #fff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+::ng-deep #selector-container .gjs-clm-tags-field {
+  min-height: auto !important;
+  padding: 0 !important;
+}
+
+::ng-deep #selector-container .gjs-clm-sels-info {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+::ng-deep #selector-container #gjs-clm-add-tag {
+  margin-top: 0 !important;
+}
+
+::ng-deep #selector-container input,
+::ng-deep #selector-container #gjs-clm-new {
+  color: #1F2937 !important;
+  font-size: 13px !important;
+  background: #fff !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+}
+
+::ng-deep #selector-container input::placeholder {
+  color: #9CA3AF !important;
+}
+
+.ete-panel-section {
+  border-bottom: 1px solid #F3F4F6;
+  padding: 12px;
+}
+
+::ng-deep .gjs-sm-sector.gjs-sm-open .gjs-sm-properties {
+  display: block !important;
+}
+
+::ng-deep .gjs-sm-sector-title {
+  cursor: pointer;
+  padding: 8px 0 !important;
+  font-size: 12px !important;
+}
+
+/* ══════════════════════════════════════════════════
+   OVERRIDE THEME CLAIR GRAPESJS
+   ══════════════════════════════════════════════════ */
+
+/* Panels généraux (blocs à gauche, style à droite) */
+::ng-deep .gjs-pn-panel {
+  background: #ffffff !important;
+  border-color: #E5E7EB !important;
+}
+
+::ng-deep .gjs-pn-views-container,
+::ng-deep .gjs-pn-options {
+  background: #ffffff !important;
+}
+
+/* Texte des labels */
+::ng-deep .gjs-sm-label,
+::ng-deep .gjs-label,
+::ng-deep .gjs-sm-title,
+::ng-deep .gjs-title {
+  color: #374151 !important;
+}
+
+/* Catégories de blocs */
+::ng-deep .gjs-block-category {
+  background: #F9FAFB !important;
+  border-color: #E5E7EB !important;
+}
+
+::ng-deep .gjs-block-category .gjs-title {
+  color: #1F2937 !important;
+  font-weight: 600 !important;
+}
+
+/* Blocs individuels */
+::ng-deep .gjs-block {
+  background: #ffffff !important;
+  border: 1px solid #E5E7EB !important;
+  color: #374151 !important;
+  border-radius: 8px !important;
+}
+
+::ng-deep .gjs-block:hover {
+  border-color: #F97316 !important;
+  background: #FFF7ED !important;
+}
+
+/* Inputs et selects du Style Manager */
+::ng-deep .gjs-field {
+  background: #ffffff !important;
+  border-color: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+::ng-deep .gjs-sm-composite,
+::ng-deep .gjs-sm-sector {
+  background: #ffffff !important;
+  border-color: #F3F4F6 !important;
+}
+
+::ng-deep .gjs-sm-sector-title {
+  background: #F9FAFB !important;
+  color: #1F2937 !important;
+}
+
+/* Boutons génériques toolbar interne GrapesJS */
+::ng-deep .gjs-pn-btn {
+  color: #6B7280 !important;
+}
+
+::ng-deep .gjs-pn-btn.gjs-pn-active,
+::ng-deep .gjs-pn-btn:hover {
+  color: #F97316 !important;
+  background: #FFF7ED !important;
+}
+
+/* Canvas wrapper */
+::ng-deep .gjs-cv-canvas {
+  background: #F3F4F6 !important;
+}
+
+/* Selector Manager (Normal/Hover/Focus states) */
+::ng-deep .gjs-clm-tags,
+::ng-deep .gjs-states {
+  background: #ffffff !important;
+  border-color: #E5E7EB !important;
+}
+
+/* Layer manager */
+::ng-deep .gjs-layer {
+  background: #ffffff !important;
+  color: #374151 !important;
+  border-color: #F3F4F6 !important;
+}
+
+::ng-deep .gjs-layer-item {
+  background: #ffffff !important;
+  color: #374151 !important;
+  border-color: #F3F4F6 !important;
+}
+
+::ng-deep .gjs-layer-item:hover {
+  background: #F9FAFB !important;
+}
+
+::ng-deep .gjs-layer-title-c {
+  background: transparent !important;
+}
+
+::ng-deep .gjs-layer-name {
+  color: #374151 !important;
+}

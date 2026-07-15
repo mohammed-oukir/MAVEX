@@ -404,3 +404,153 @@
   .sd-page-hd { flex-direction: column; align-items: flex-start; }
   .sd-search  { width: 140px; }
 }
+
+/* ── Panneau de filtres (dupliqué depuis shipments.component.css :
+   les styles Angular sont scopés par composant) ────────────── */
+.sp-filters {
+  background: #FFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.sp-filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #F3F4F6;
+  background: #FCFCFD;
+}
+
+.sp-filters-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.sp-filters-title svg { color: var(--mavex-accent); }
+
+.sp-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  background: #FFF;
+  color: var(--mavex-muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.sp-filters-toggle:hover { border-color: var(--mavex-accent); color: var(--mavex-accent); }
+.sp-filters-toggle:focus-visible { outline: 2px solid var(--mavex-accent); outline-offset: 1px; }
+
+.sp-filters-body { padding: 14px; }
+
+.sp-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+@media (max-width: 1200px) { .sp-filters-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px)  { .sp-filters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px)  { .sp-filters-grid { grid-template-columns: 1fr; } }
+
+.sp-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.sp-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.sp-field-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: #111827;
+  background: #FFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.sp-field-input:focus {
+  outline: none;
+  border-color: var(--mavex-accent);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, .12);
+}
+select.sp-field-input { cursor: pointer; }
+
+.sp-filters-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.sp-btn {
+  min-width: 96px;
+  height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.sp-btn:focus-visible { outline: 2px solid var(--mavex-accent); outline-offset: 2px; }
+
+.sp-btn-reset {
+  background: #FFF;
+  border: 1px solid #E5E7EB;
+  color: #374151;
+}
+.sp-btn-reset:hover { background: #F9FAFB; border-color: #D1D5DB; }
+
+.sp-btn-search {
+  background: var(--mavex-accent);
+  border: 1px solid var(--mavex-accent);
+  color: #FFF;
+}
+.sp-btn-search:hover { background: var(--mavex-accent-dark); border-color: var(--mavex-accent-dark); }
+
+/* ── Advanced filters (dupliqué depuis shipments.component.css) ── */
+.sp-filters-advanced { margin-top: 12px; }
+
+.sp-advanced-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mavex-accent);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.sp-advanced-link:hover { color: var(--mavex-accent-dark); }
+.sp-advanced-link:focus-visible {
+  outline: 2px solid var(--mavex-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sp-advanced-chevron { transition: transform .15s; }
+.sp-advanced-chevron.open { transform: rotate(180deg); }
+
+.sp-filters-grid-advanced {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #E5E7EB;
+}
