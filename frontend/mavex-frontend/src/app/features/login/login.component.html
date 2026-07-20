@@ -1,58 +1,52 @@
 <div class="lp-wrap">
 
   <!-- ══════════════════════════════════════════════════════
-       LEFT PANEL — Branding
+       BACKGROUND DECOR — Route Maroc → USA (statique)
   ══════════════════════════════════════════════════════════ -->
-  <aside class="lp-left d-none d-lg-flex flex-column" aria-hidden="true">
+  <svg class="lp-decor" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="#E8862C" stroke-width="2" opacity="0.4">
+      <!-- Tracé pointillé Maroc -> USA -->
+      <path class="lp-decor-path" d="M 180 620 Q 580 260 980 160" stroke-dasharray="6 8" />
 
-    <div class="lp-brand">
-      <div class="lp-logo-mark">M</div>
-      <div>
-        <div class="lp-logo-name">MAVEX</div>
-        <div class="lp-logo-sub">Med Africa</div>
-      </div>
-    </div>
+      <!-- Point Maroc -->
+      <circle cx="180" cy="620" r="6" fill="#E8862C" stroke="none" />
+      <circle cx="180" cy="620" r="12" />
 
-    <div class="lp-hero">
-      <h2 class="lp-headline">
-        Gérez vos<br>
-        <span class="lp-accent">expéditions</span><br>
-        avec précision.
-      </h2>
-      <p class="lp-sub">
-        Plateforme de gestion fret centralisée —<br>
-        imports, shipments et paiements en un seul endroit.
-      </p>
-      <div class="lp-features">
-        <div class="lp-feature">
-          <div class="lp-feature-dot"></div>
-          Imports de manifestes Excel automatisés
-        </div>
-        <div class="lp-feature">
-          <div class="lp-feature-dot"></div>
-          Suivi des shipments en temps réel
-        </div>
-        <div class="lp-feature">
-          <div class="lp-feature-dot"></div>
-          Notifications de paiement par email
-        </div>
-      </div>
-    </div>
+      <!-- Point ville US -->
+      <circle cx="980" cy="160" r="6" fill="#E8862C" stroke="none" />
+      <circle cx="980" cy="160" r="12" />
 
-    <div class="lp-foot">Med Africa &copy; 2025 &nbsp;·&nbsp; MAVEX</div>
-
-  </aside>
+      <!-- Icône avion (Lucide "plane"), suit le tracé avec orientation automatique -->
+      <g class="lp-decor-dot">
+        <path
+          d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+          transform="translate(-12 -12) scale(1.15) rotate(5 12 12)"
+          fill="none"
+          stroke="#E8862C"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+    </g>
+  </svg>
 
   <!-- ══════════════════════════════════════════════════════
-       RIGHT PANEL — Form
+       FORM CARD — Glassmorphism
   ══════════════════════════════════════════════════════════ -->
   <main class="lp-right">
     <div class="lp-form-wrap">
 
-      <!-- Mobile brand (visible below lg) -->
+      <!-- Brand -->
       <div class="lp-mobile-brand">
-        <div class="lp-mobile-mark">M</div>
-        <span class="lp-mobile-name">MAVEX</span>
+        <img
+          ngSrc="medafrica-logistics.png"
+          width="939"
+          height="266"
+          class="lp-brand-logo"
+          alt="MAVEX Med Africa"
+          priority
+        />
       </div>
 
       <!-- ────────────────────────────────────────────
@@ -94,6 +88,7 @@
               formControlName="email"
               placeholder="you@company.com"
               autocomplete="email"
+              autofocus
             />
             @if (fieldInvalid(loginForm, 'email')) {
               <div class="lp-field-error" role="alert">
@@ -347,3 +342,4 @@
   </main>
 
 </div>
+

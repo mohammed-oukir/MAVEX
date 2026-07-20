@@ -21,7 +21,20 @@ export class AuthService {
     localStorage.getItem('userId') ? Number(localStorage.getItem('userId')) : null
   );
 
-  readonly isAuthenticated = computed(() => !!this._token());
+  readonly isAuthenticated = computed(() => {
+    const token = this._token();
+    return !!token && !this.isTokenExpired(token);
+  });
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (typeof payload.exp !== 'number') return true;
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  }
 
   readonly currentUser = computed(() => {
     const name = this._fullName() || this._email() || '?';
