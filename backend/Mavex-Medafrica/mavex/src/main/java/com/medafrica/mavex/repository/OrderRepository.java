@@ -26,6 +26,14 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findByShipmentId(Long shipmentId);
 
+    /** Variante fetch-join pour l'affichage (client, shipment, shipment.shipper) — utilisée par getByShipment(). */
+    @Query("SELECT o FROM Order o " +
+           "LEFT JOIN FETCH o.client " +
+           "LEFT JOIN FETCH o.shipment s " +
+           "LEFT JOIN FETCH s.shipper " +
+           "WHERE o.shipment.id = :shipmentId")
+    List<Order> findByShipmentIdWithRelations(@Param("shipmentId") Long shipmentId);
+
     List<Order> findByClientId(Long clientId);
 
     List<Order> findByStatus(OrderStatus status);
@@ -48,6 +56,9 @@ List<Order> findAllByHawbIn(List<String> hawbs);
 
     @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
     List<Object[]> countGroupByStatus();
+
+    @Query("SELECT o.shipment.id, COUNT(o) FROM Order o WHERE o.shipment.id IN :shipmentIds GROUP BY o.shipment.id")
+    List<Object[]> countByShipmentIds(@Param("shipmentIds") List<Long> shipmentIds);
 
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'PAID'")
     BigDecimal sumPaidAmount();

@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -72,13 +74,17 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> list(Pageable pageable) {
-        return shipmentRepository.findAll(pageable).map(this::toResponse);
+        Page<Shipment> page = shipmentRepository.findAll(pageable);
+        Map<Long, Long> orderCounts = countOrdersByShipmentIds(page);
+        return page.map(s -> toResponse(s, orderCounts.getOrDefault(s.getId(), 0L)));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ShipmentResponseDTO> listByStatus(ShipmentStatus status, Pageable pageable) {
-        return shipmentRepository.findByStatus(status, pageable).map(this::toResponse);
+        Page<Shipment> page = shipmentRepository.findByStatus(status, pageable);
+        Map<Long, Long> orderCounts = countOrdersByShipmentIds(page);
+        return page.map(s -> toResponse(s, orderCounts.getOrDefault(s.getId(), 0L)));
     }
 
     @Override
@@ -91,7 +97,9 @@ public class ShipmentServiceImpl implements ShipmentService {
         Specification<Shipment> spec = ShipmentSpecification.build(
                 mawb, shipperCompanyName, importFrom, importTo, carrier, mode,
                 totalOrders, dutyRateMin, dutyRateMax, status);
-        return shipmentRepository.findAll(spec, pageable).map(this::toResponse);
+        Page<Shipment> page = shipmentRepository.findAll(spec, pageable);
+        Map<Long, Long> orderCounts = countOrdersByShipmentIds(page);
+        return page.map(s -> toResponse(s, orderCounts.getOrDefault(s.getId(), 0L)));
     }
 
     @Override
@@ -193,7 +201,25 @@ public class ShipmentServiceImpl implements ShipmentService {
         return null;
     }
 
+    private Map<Long, Long> countOrdersByShipmentIds(Page<Shipment> page) {
+        List<Long> shipmentIds = page.getContent().stream()
+                .map(Shipment::getId)
+                .toList();
+        if (shipmentIds.isEmpty()) {
+            return Map.of();
+        }
+        return orderRepository.countByShipmentIds(shipmentIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+    }
+
     private ShipmentResponseDTO toResponse(Shipment s) {
+        return toResponse(s, s.getOrders().size());
+    }
+
+    private ShipmentResponseDTO toResponse(Shipment s, long totalOrders) {
         ShipmentResponseDTO.ShipperSummary shipperSummary = null;
         if (s.getShipper() != null) {
             shipperSummary = ShipmentResponseDTO.ShipperSummary.builder()
@@ -212,7 +238,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 .portCode(s.getPortCode())
                 .status(s.getStatus())
                 .dutyRate(s.getDutyRate())
-                .totalOrders(s.getOrders().size())
+                .totalOrders((int) totalOrders)
                 .shipper(shipperSummary)
                 .createdBy(s.getCreatedBy() != null ? s.getCreatedBy().getFullName() : "system")
                 .createdAt(s.getCreatedAt())

@@ -103,6 +103,17 @@ public class ShipmentSpecification {
                 predicates.add(cb.equal(root.get("status"), status));
             }
 
+            // Fetch join sur shipper — utilisé systématiquement par ShipmentResponseDTO
+            // (shipper.companyName, shipper.email). Exclu de la requête COUNT auto-générée
+            // par Spring Data (getResultType() == Long/long), sinon Hibernate lève une
+            // IllegalArgumentException (fetch interdit sur un COUNT).
+            // Hibernate fusionne automatiquement avec le join() conditionnel ci-dessus
+            // s'il porte sur le même attribut en LEFT — pas de double jointure SQL
+            // (comportement déjà vérifié sur OrderSpecification).
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                root.fetch("shipper", JoinType.LEFT);
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

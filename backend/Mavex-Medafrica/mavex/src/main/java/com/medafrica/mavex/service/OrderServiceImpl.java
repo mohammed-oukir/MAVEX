@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -116,14 +117,20 @@ public class OrderServiceImpl implements OrderService {
         Specification<Order> spec = OrderSpecification.build(
                 hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
                 totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
-        return orderRepository.findAll(spec, pageable).map(this::toResponse);
+        Page<Order> page = orderRepository.findAll(spec, pageable);
+
+        Map<Long, EmailLog> lastSentByOrderId = lastSentEmailLogsByOrders(page.getContent());
+
+        return page.map(order -> toResponse(order, lastSentByOrderId.get(order.getId())));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> getByShipment(Long shipmentId) {
-        return orderRepository.findByShipmentId(shipmentId).stream()
-                .map(this::toResponse)
+        List<Order> orders = orderRepository.findByShipmentIdWithRelations(shipmentId);
+        Map<Long, EmailLog> lastSentByOrderId = lastSentEmailLogsByOrders(orders);
+        return orders.stream()
+                .map(o -> toResponse(o, lastSentByOrderId.get(o.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -301,6 +308,21 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order introuvable id=" + id));
     }
 
+    private Map<Long, EmailLog> lastSentEmailLogsByOrders(List<Order> orders) {
+        List<Long> orderIds = orders.stream()
+                .map(Order::getId)
+                .toList();
+        if (orderIds.isEmpty()) {
+            return Map.of();
+        }
+        return emailLogRepository.findLastSentByOrderIds(orderIds, EmailStatus.SENT).stream()
+                .collect(Collectors.toMap(
+                        e -> e.getOrder().getId(),
+                        e -> e,
+                        (a, b) -> a.getId() > b.getId() ? a : b
+                ));
+    }
+
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return (principal instanceof User u) ? u : null;
@@ -320,12 +342,14 @@ public class OrderServiceImpl implements OrderService {
     // ─────────────────────────── MAPPING ──────────────────────────────
 
     private OrderResponse toResponse(Order o) {
-
         EmailLog lastLog = o.getId() != null
                 ? emailLogRepository.findTopByOrderIdAndStatusOrderBySentAtDesc(
                         o.getId(), EmailStatus.SENT).orElse(null)
                 : null;
+        return toResponse(o, lastLog);
+    }
 
+    private OrderResponse toResponse(Order o, EmailLog lastLog) {
         String clientFullName = null;
         String clientEmail    = null;
         String clientPhone    = null;

@@ -4,6 +4,7 @@ import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +19,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Long>, JpaSp
     Optional<Shipment> findByMawb(String mawb);
 
     boolean existsByMawb(String mawb);
+
+    @Override
+    @EntityGraph(attributePaths = {"shipper"})
+    Page<Shipment> findAll(Pageable pageable);
 
     Page<Shipment> findByStatus(ShipmentStatus status, Pageable pageable);
 

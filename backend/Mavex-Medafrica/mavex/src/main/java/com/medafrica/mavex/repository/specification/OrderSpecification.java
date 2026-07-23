@@ -41,7 +41,7 @@ public class OrderSpecification {
             }
 
             // Colonnes Client et Email — un seul LEFT JOIN partagé (relation nullable)
-            boolean needsClient = (client != null && !client.isBlank())
+            boolean needsClient = (client != null && !client.isBlank()) 
                     || (clientEmail != null && !clientEmail.isBlank());
 
             if (needsClient) {
@@ -126,6 +126,17 @@ public class OrderSpecification {
             // Évite les doublons causés par les LEFT JOIN
             if (joined) {
                 query.distinct(true);
+            }
+
+            // Fetch join des relations utilisées systématiquement par OrderResponse
+            // (client.fullName, shipment.mawb, shipment.shipper.companyName).
+            // Exclu de la requête COUNT auto-générée par Spring Data (getResultType() == Long/long),
+            // sinon Hibernate lève une IllegalArgumentException (fetch interdit sur un COUNT).
+            // Hibernate fusionne automatiquement avec les join() conditionnels ci-dessus
+            // s'ils portent sur le même attribut en LEFT — pas de double jointure SQL.
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                root.fetch("client", JoinType.LEFT);
+                root.fetch("shipment", JoinType.LEFT).fetch("shipper", JoinType.LEFT);
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
