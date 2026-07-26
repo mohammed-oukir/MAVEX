@@ -11,6 +11,8 @@ public interface ExcelImportService {
 
     ImportPreviewResponse previewManifest(MultipartFile file) throws Exception;
 
+    ImportPreviewResponse revalidate(java.util.List<ImportPreviewResponse.PreviewRow> rows);
+
     ImportLogResponse confirmImport(ImportConfirmRequest request) throws Exception;
 
     byte[] generateTemplate() throws Exception;

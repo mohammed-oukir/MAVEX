@@ -2,6 +2,7 @@ package com.medafrica.mavex.service.interfaces;
 
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
+import com.medafrica.mavex.dto.shipper.ShipperSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,6 +15,8 @@ public interface ShipperService {
     ShipperResponseDTO getById(Long id);
 
     Page<ShipperResponseDTO> list(Pageable pageable);
+
+    Page<ShipperResponseDTO> search(ShipperSearchCriteria criteria, Pageable pageable);
 
     ShipperResponseDTO update(Long id, ShipperRequestDTO req);
 

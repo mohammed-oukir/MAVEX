@@ -4,11 +4,12 @@ import com.medafrica.mavex.model.actor.Shipper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ShipperRepository extends JpaRepository<Shipper, Long> {
+public interface ShipperRepository extends JpaRepository<Shipper, Long>, JpaSpecificationExecutor<Shipper> {
 
     Page<Shipper> findByActiveTrue(Pageable pageable);
 

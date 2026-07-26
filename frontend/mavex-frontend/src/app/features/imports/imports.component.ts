@@ -11,7 +11,7 @@ import { ImportService }   from '../../core/services/import.service';
 import { ToastService }    from '../../core/services/toast.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
 import {
-  ImportLogResponse, ImportPreviewResponse, ImportPreviewRow,
+  ImportLogResponse, ImportPreviewResponse, ImportPreviewRow, ImportStatsResponse,
 } from '../../core/models/import.model';
 import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
@@ -42,8 +42,12 @@ export class ImportsComponent implements OnInit {
   result     = signal<ImportLogResponse | null>(null);
   showRows   = signal(false);
 
+  /* ── Stats (KPI) ──────────────────────────────────────────── */
+  stats = signal<ImportStatsResponse | null>(null);
+
   /* ── Édition d'une ligne invalide ─────────────────────────── */
   editingRow = signal<ImportPreviewRow | null>(null);
+  revalidating = signal(false);
 
   editForm = new FormGroup({
     mawb:               new FormControl('',   [Validators.required]),
@@ -96,6 +100,12 @@ export class ImportsComponent implements OnInit {
   skippedRows = computed(() => this.previewRows().filter(r => r.previewStatus === 'SKIPPED'));
   canConfirm  = computed(() => this.validRows().length > 0);
 
+  currentStep = computed<1 | 2 | 3>(() => {
+    if (this.result())                       return 3;
+    if (this.preview() || this.confirming())  return 2;
+    return 1;
+  });
+
   filteredHistory = computed(() => {
     const q = this.historyFilter().toLowerCase().trim();
     if (!q) return this.history();
@@ -118,6 +128,7 @@ export class ImportsComponent implements OnInit {
   ngOnInit(): void {
     this.layout.setPage('Imports');
     this.loadHistory();
+    this.loadStats();
   }
 
   /* ── Drag & Drop ──────────────────────────────────────────── */
@@ -217,11 +228,9 @@ export class ImportsComponent implements OnInit {
 
     // Force tous les champs à "touched" → les bordures rouges apparaissent immédiatement
     this.editForm.markAllAsTouched();
+    if (this.editForm.invalid) return;
 
     const v = this.editForm.getRawValue();
-
-    // Valider les champs avant de marquer la ligne comme valide
-    const validationErrors = this.validateRowFields(v);
 
     const corrected: ImportPreviewRow = {
       ...original,
@@ -251,36 +260,34 @@ export class ImportsComponent implements OnInit {
       shipmentWeight:     v.shipmentWeight      ?? undefined,
       customsValue:       v.customsValue        ?? undefined,
       customsCurrency:    v.customsCurrency     ?? undefined,
-      previewStatus: validationErrors.length === 0 ? 'VALID' : 'INVALID',
-      errors:        validationErrors,
     };
 
-    this.previewRows.update(rows =>
-      rows.map(r => r.rowNumber === original.rowNumber ? corrected : r)
+    const candidateRows = this.previewRows().map(r =>
+      r.rowNumber === original.rowNumber ? corrected : r
     );
-    this.unlockScroll();
-    this.editingRow.set(null);
 
-    if (validationErrors.length > 0) {
-      this.toast.error(`${validationErrors.length} erreur(s) : ${validationErrors[0]}`);
-    } else {
-      this.toast.success('Ligne corrigée — prête à être importée.');
-    }
-  }
+    this.revalidating.set(true);
+    this.importSvc.revalidate({ rows: candidateRows })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.previewRows.set(res.rows);
+          this.revalidating.set(false);
+          this.unlockScroll();
+          this.editingRow.set(null);
 
-  private validateRowFields(v: ReturnType<typeof this.editForm.getRawValue>): string[] {
-    const errors: string[] = [];
-    if (!v.mawb?.trim())          errors.push('MAWB manquant');
-    if (!v.hawb?.trim())          errors.push('HAWB manquant');
-    if (!v.receiverName?.trim())  errors.push('Nom destinataire manquant');
-    if (!v.receiverEmail?.trim()) {
-      errors.push('Email destinataire manquant');
-    } else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.receiverEmail)) {
-      errors.push(`Format email invalide : ${v.receiverEmail}`);
-    }
-    if (!v.customsValue   || v.customsValue   <= 0) errors.push('Valeur douanière doit être > 0');
-    if (!v.shipmentWeight || v.shipmentWeight <= 0) errors.push('Poids doit être > 0');
-    return errors;
+          const updatedRow = res.rows.find(r => r.rowNumber === original.rowNumber);
+          if (updatedRow?.previewStatus === 'INVALID') {
+            this.toast.error(`${updatedRow.errors.length} erreur(s) : ${updatedRow.errors[0]}`);
+          } else {
+            this.toast.success('Ligne corrigée — prête à être importée.');
+          }
+        },
+        error: () => {
+          this.revalidating.set(false);
+          this.toast.error('Impossible de revalider la ligne — vérifiez votre connexion et réessayez.');
+        },
+      });
   }
 
   /* ── Confirm ──────────────────────────────────────────────── */
@@ -304,6 +311,7 @@ export class ImportsComponent implements OnInit {
         this.previewRows.set([]);
         this.selectedFile.set(null);
         this.loadHistory();
+        this.loadStats();
         this.toast.success('Import confirmé avec succès.');
       },
       error: err => {
@@ -378,6 +386,13 @@ export class ImportsComponent implements OnInit {
         },
         error: () => this.historyLoading.set(false),
       });
+  }
+
+  private loadStats(): void {
+    this.importSvc.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next:  s => this.stats.set(s),
+      error: () => this.stats.set(null),
+    });
   }
 
   goToPage(page: number): void {

@@ -4,17 +4,23 @@ import com.medafrica.mavex.dto.client.BulkActionRequest;
 import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
+import com.medafrica.mavex.dto.client.ClientSearchCriteria;
 import com.medafrica.mavex.model.enums.PermissionAction;
 import com.medafrica.mavex.model.enums.PermissionModule;
 import com.medafrica.mavex.security.annotation.RequiresPermission;
 import com.medafrica.mavex.service.interfaces.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +42,33 @@ public class ClientController {
     @RequiresPermission(module = PermissionModule.CLIENTS, action = PermissionAction.VIEW)
     public ResponseEntity<List<ClientResponseDTO>> getAllActive() {
         return ResponseEntity.ok(clientService.findAllActive());
+    }
+
+    @GetMapping("/search")
+    @RequiresPermission(module = PermissionModule.CLIENTS, action = PermissionAction.VIEW)
+    public ResponseEntity<Page<ClientResponseDTO>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) LocalDate dateFrom,
+            @RequestParam(required = false) LocalDate dateTo,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        ClientSearchCriteria criteria = ClientSearchCriteria.builder()
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .city(city)
+                .state(state)
+                .country(country)
+                .status(status)
+                .dateFrom(dateFrom)
+                .dateTo(dateTo)
+                .build();
+        return ResponseEntity.ok(clientService.search(criteria, pageable));
     }
 
     @GetMapping("/{id}")

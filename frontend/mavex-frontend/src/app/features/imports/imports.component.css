@@ -2,7 +2,161 @@
    IMPORTS — Professional design
    ════════════════════════════════════════════════════════════ */
 
+/* ── KPI Cards ──────────────────────────────────────────────── */
+.im-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 992px) { .im-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 576px) { .im-kpi-grid { grid-template-columns: 1fr; } }
+
+.im-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px 20px;
+  border: 1.5px solid #F3F4F6;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.im-kpi-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+}
+.im-accent-orange { background: #E5E7EB; } /* gris neutre — nom de classe conservé pour éviter de toucher le HTML */
+.im-accent-green  { background: #F97316; } /* orange marque — nom de classe conservé pour éviter de toucher le HTML */
+.im-accent-red    { background: rgba(239,68,68,.4); } /* rouge alerte atténué — seule carte gardant une teinte d'alerte */
+.im-accent-blue   { background: #E5E7EB; } /* gris neutre — nom de classe conservé pour éviter de toucher le HTML */
+
+.im-kpi-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.im-icon-orange { background: #F3F4F6; color: #6B7280; } /* gris neutre — nom de classe conservé pour éviter de toucher le HTML */
+.im-icon-green  { background: #FFF7ED; color: #F97316; } /* orange marque — nom de classe conservé pour éviter de toucher le HTML */
+.im-icon-red    { background: #FEF2F2; color: #F87171; } /* rouge alerte atténué — seule carte gardant une teinte d'alerte */
+.im-icon-blue   { background: #F3F4F6; color: #6B7280; } /* gris neutre — nom de classe conservé pour éviter de toucher le HTML */
+
+.im-kpi-body { flex: 1; min-width: 0; }
+
+.im-kpi-num {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+  color: #0C0C0E;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.im-kpi-lbl {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* ── Stepper ────────────────────────────────────────────────── */
+.im-stepper {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #F3F4F6;
+  border-radius: 12px;
+  padding: 18px 28px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+.im-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.im-step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9CA3AF;
+  background: #F3F4F6;
+  border: 1.5px solid #E5E7EB;
+  flex-shrink: 0;
+  transition: background .18s, border-color .18s, color .18s;
+}
+
+.im-step-active .im-step-circle {
+  background: #F97316;
+  border-color: #F97316;
+  color: #fff;
+}
+
+.im-step-done .im-step-circle {
+  background: #F97316;
+  border-color: #F97316;
+  color: #fff;
+}
+
+.im-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9CA3AF;
+  white-space: nowrap;
+  transition: color .18s;
+}
+
+.im-step-active .im-step-label,
+.im-step-done .im-step-label {
+  color: #111827;
+}
+
+.im-step-line {
+  flex: 1;
+  height: 2px;
+  background: #E5E7EB;
+  margin: 0 14px;
+  border-radius: 100px;
+  transition: background .18s;
+}
+
+.im-step-line-done { background: #F97316; }
+
+@media (max-width: 576px) {
+  .im-stepper { padding: 16px; }
+  .im-step-label { display: none; }
+  .im-step-line { margin: 0 8px; }
+}
+
 /* ── Upload Card ────────────────────────────────────────────── */
+.im-upload-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 992px) {
+  .im-upload-grid { grid-template-columns: 1fr; }
+}
+
 .im-upload-card {
   background: #fff;
   border: 1px solid #E5E7EB;
@@ -94,6 +248,10 @@
   text-align: center;
 }
 
+.im-dropzone-compact {
+  padding: 22px 20px;
+}
+
 .im-dropzone:hover,
 .im-drag-over {
   border-color: #F97316;
@@ -123,6 +281,12 @@
   justify-content: center;
   color: #F97316;
   transition: background .18s;
+}
+
+.im-dropzone-compact .im-dz-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
 }
 
 .im-dropzone:hover .im-dz-icon-wrap,
@@ -173,6 +337,83 @@
   color: #9CA3AF;
   font-weight: 500;
   font-family: inherit;
+}
+
+/* ── Help card ──────────────────────────────────────────────── */
+.im-help-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.im-help-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #F97316;
+}
+
+.im-help-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.im-help-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #9CA3AF;
+}
+
+.im-help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.im-help-list li {
+  font-size: 12.5px;
+  color: #374151;
+  padding-left: 16px;
+  position: relative;
+}
+
+.im-help-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #F97316;
+}
+
+.im-help-note {
+  font-size: 11.5px;
+  color: #9CA3AF;
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.im-help-tpl-btn {
+  justify-content: center;
+  width: 100%;
 }
 
 /* ── File-ready state ───────────────────────────────────────── */
@@ -378,14 +619,14 @@
 
 /* ── Table shared ───────────────────────────────────────────── */
 .im-table-head th {
-  background: #F9FAFB;
+  background: #2D3748;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: #6B7280;
+  color: #fff;
   padding: 10px 16px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: none;
   white-space: nowrap;
 }
 

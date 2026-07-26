@@ -3,6 +3,8 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.imports.ImportConfirmRequest;
 import com.medafrica.mavex.dto.imports.ImportLogResponse;
 import com.medafrica.mavex.dto.imports.ImportPreviewResponse;
+import com.medafrica.mavex.dto.imports.ImportRevalidateRequest;
+import com.medafrica.mavex.dto.imports.ImportStatsResponse;
 import com.medafrica.mavex.model.enums.PermissionAction;
 import com.medafrica.mavex.model.enums.PermissionModule;
 import com.medafrica.mavex.security.annotation.RequiresPermission;
@@ -50,6 +52,12 @@ public class ImportController {
         return ResponseEntity.ok(importLogService.list(pageable));
     }
 
+    @GetMapping("/stats")
+    @RequiresPermission(module = PermissionModule.IMPORTS, action = PermissionAction.VIEW)
+    public ResponseEntity<ImportStatsResponse> getStats() {
+        return ResponseEntity.ok(importLogService.getStats());
+    }
+
     @GetMapping("/{id}")
     @RequiresPermission(module = PermissionModule.IMPORTS, action = PermissionAction.VIEW)
     public ResponseEntity<ImportLogResponse> getById(@PathVariable Long id) {
@@ -62,6 +70,13 @@ public class ImportController {
             @RequestParam("file") MultipartFile file) throws Exception {
         if (file.isEmpty()) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(excelImportService.previewManifest(file));
+    }
+
+    @PostMapping("/revalidate")
+    @RequiresPermission(module = PermissionModule.IMPORTS, action = PermissionAction.CREATE)
+    public ResponseEntity<ImportPreviewResponse> revalidate(
+            @RequestBody ImportRevalidateRequest request) {
+        return ResponseEntity.ok(excelImportService.revalidate(request.getRows()));
     }
 
     @PostMapping("/confirm")

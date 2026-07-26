@@ -4,12 +4,13 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { LayoutService }  from '../../core/services/layout.service';
 import { ClientService }  from '../../core/services/client.service';
 import { OrderService }   from '../../core/services/order.service';
 import { ToastService }   from '../../core/services/toast.service';
-import { ClientResponse } from '../../core/models/client.model';
+import { ClientResponse, ClientSearchCriteria } from '../../core/models/client.model';
 import { OrderResponse }  from '../../core/models/order.model';
 import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 import { BadgeComponent } from '../../shared/badge/badge.component';
@@ -29,11 +30,16 @@ export class ClientsComponent implements OnInit {
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  /* ── Data ─────────────────────────────────────────── */
-  allClients = signal<ClientResponse[]>([]);
-  loading    = signal(true);
-  page       = signal(0);
+  /* ── Data (recherche paginée côté serveur) ─────────── */
+  pageItems      = signal<ClientResponse[]>([]);
+  totalElements  = signal(0);
+  totalPages     = signal(0);
+  loading        = signal(true);
+  page           = signal(0);
   readonly pageSize = 15;
+
+  /* ── Data KPIs (liste complète, indépendante de la pagination) ── */
+  allClients = signal<ClientResponse[]>([]);
 
   /* ── Column filters ───────────────────────────────── */
   fName      = signal('');
@@ -59,48 +65,27 @@ export class ClientsComponent implements OnInit {
     }).length;
   });
 
-  /* ── Filtered + paginated ─────────────────────────── */
-  filtered = computed(() => {
-    const n    = this.fName().toLowerCase();
-    const e    = this.fEmail().toLowerCase();
-    const p    = this.fPhone().toLowerCase();
-    const ci   = this.fCity().toLowerCase();
-    const st   = this.fState().toLowerCase();
-    const co   = this.fCountry().toLowerCase();
-    const s    = this.fStatus();
-    const from = this.fDateFrom() ? new Date(this.fDateFrom()) : null;
-    const to   = this.fDateTo()   ? new Date(this.fDateTo())   : null;
-    if (to) to.setHours(23, 59, 59, 999);
+  /* ── Critères combinés → déclenchent la recherche serveur ── */
+  private readonly searchParams = computed(() => ({
+    criteria: {
+      name:    this.fName(),
+      email:   this.fEmail(),
+      phone:   this.fPhone(),
+      city:    this.fCity(),
+      state:   this.fState(),
+      country: this.fCountry(),
+      status:  this.fStatus(),
+      dateFrom: this.fDateFrom(),
+      dateTo:   this.fDateTo(),
+    } satisfies ClientSearchCriteria,
+    page: this.page(),
+  }));
 
-    return this.allClients().filter(c => {
-      if (n  && !c.fullName?.toLowerCase().includes(n))  return false;
-      if (e  && !c.email?.toLowerCase().includes(e))    return false;
-      if (p  && !c.phone?.toLowerCase().includes(p))    return false;
-      if (ci && !c.city?.toLowerCase().includes(ci))    return false;
-      if (st && !c.state?.toLowerCase().includes(st))   return false;
-      if (co) {
-        const cc = c.country?.code?.toLowerCase() ?? '';
-        const cn = c.country?.name?.toLowerCase() ?? '';
-        if (!cc.includes(co) && !cn.includes(co)) return false;
-      }
-      if (s === 'active'   && !c.active)  return false;
-      if (s === 'inactive' && c.active)   return false;
-      if (from || to) {
-        const created = c.createdAt ? new Date(c.createdAt) : null;
-        if (!created) return false;
-        if (from && created < from) return false;
-        if (to   && created > to)   return false;
-      }
-      return true;
-    });
-  });
+  /* ── Observable des critères — créé en champ de classe (contexte d'injection
+     valide via le constructeur), consommé dans ngOnInit() ── */
+  private readonly searchParams$ = toObservable(this.searchParams);
 
-  total      = computed(() => this.filtered().length);
-  totalPages = computed(() => Math.ceil(this.total() / this.pageSize));
-  pageItems  = computed(() => {
-    const start = this.page() * this.pageSize;
-    return this.filtered().slice(start, start + this.pageSize);
-  });
+  total      = computed(() => this.totalElements());
   hasFilters = computed(() =>
     !!this.fName() || !!this.fEmail() || !!this.fPhone() ||
     !!this.fCity() || !!this.fState() || !!this.fCountry() ||
@@ -145,18 +130,55 @@ export class ClientsComponent implements OnInit {
   /* ── Lifecycle ────────────────────────────────────── */
   ngOnInit(): void {
     this.layout.setPage('Clients');
-    this.loadClients();
+    this.loadKpiData();
+
+    this.searchParams$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        switchMap(({ criteria, page }) => {
+          this.loading.set(true);
+          return this.clientSvc.search(criteria, page, this.pageSize);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: result => {
+          this.pageItems.set(result.content);
+          this.totalElements.set(result.totalElements);
+          this.totalPages.set(result.totalPages);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
-  /* ── Load ─────────────────────────────────────────── */
-  loadClients(): void {
-    this.loading.set(true);
+  /* ── Load KPIs (liste complète, indépendante des filtres/pagination) ── */
+  private loadKpiData(): void {
     this.clientSvc.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: clients => { this.allClients.set(clients); this.loading.set(false); },
-        error: ()      => this.loading.set(false),
+        next: clients => this.allClients.set(clients),
+        error: () => {},
       });
+  }
+
+  /* ── Rafraîchit la page courante après une mutation (create/edit/delete/…) ── */
+  private reloadCurrentPage(): void {
+    const { criteria, page } = this.searchParams();
+    this.loading.set(true);
+    this.clientSvc.search(criteria, page, this.pageSize)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          this.pageItems.set(result.content);
+          this.totalElements.set(result.totalElements);
+          this.totalPages.set(result.totalPages);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+    this.loadKpiData();
   }
 
   /* ── Filters ──────────────────────────────────────── */
@@ -227,12 +249,8 @@ export class ClientsComponent implements OnInit {
         this.formMode.set(null);
         const isEdit = !!this.editingId();
         this.toast.success(isEdit ? 'Client modifié avec succès.' : 'Client créé avec succès.');
-        if (isEdit) {
-          this.allClients.update(list => list.map(c => c.id === saved.id ? saved : c));
-        } else {
-          this.allClients.update(list => [saved, ...list]);
-          this.page.set(0);
-        }
+        if (!isEdit) this.page.set(0);
+        this.reloadCurrentPage();
         this.lastSavedId.set(saved.id);
         setTimeout(() => this.lastSavedId.set(null), 1800);
       },
@@ -271,7 +289,7 @@ export class ClientsComponent implements OnInit {
       .subscribe({
         next: updated => {
           this.toggling.set(null);
-          this.allClients.update(list => list.map(x => x.id === updated.id ? updated : x));
+          this.reloadCurrentPage();
           this.toast.success(updated.active ? 'Client activé.' : 'Client désactivé.');
         },
         error: () => { this.toggling.set(null); this.toast.error('Erreur.'); },
@@ -292,7 +310,7 @@ export class ClientsComponent implements OnInit {
         next: () => {
           this.deleting.set(false);
           this.deleteId.set(null);
-          this.allClients.update(list => list.filter(c => c.id !== id));
+          this.reloadCurrentPage();
           this.toast.success('Client supprimé.');
         },
         error: (err: any) => { this.deleting.set(false); this.toast.error(err?.error?.message || 'Erreur lors de la suppression.'); },
@@ -339,7 +357,7 @@ export class ClientsComponent implements OnInit {
           this.bulkActing.set(false);
           this.bulkDeleteConfirm.set(false);
           this.selectedIds.set(new Set());
-          this.allClients.update(list => list.filter(c => !ids.includes(c.id)));
+          this.reloadCurrentPage();
           this.toast.success(`${res.deleted} client(s) supprimé(s).`);
         },
         error: (err: any) => { this.bulkActing.set(false); this.toast.error(err?.error?.message || 'Erreur lors de la suppression en masse.'); },
@@ -354,8 +372,8 @@ export class ClientsComponent implements OnInit {
       .subscribe({
         next: res => {
           this.bulkActing.set(false);
-          this.allClients.update(list => list.map(c => ids.includes(c.id) ? { ...c, active: true } : c));
           this.selectedIds.set(new Set());
+          this.reloadCurrentPage();
           this.toast.success(`${res.activated} client(s) activé(s).`);
         },
         error: () => { this.bulkActing.set(false); this.toast.error('Erreur activation en masse.'); },
@@ -370,8 +388,8 @@ export class ClientsComponent implements OnInit {
       .subscribe({
         next: res => {
           this.bulkActing.set(false);
-          this.allClients.update(list => list.map(c => ids.includes(c.id) ? { ...c, active: false } : c));
           this.selectedIds.set(new Set());
+          this.reloadCurrentPage();
           this.toast.success(`${res.deactivated} client(s) désactivé(s).`);
         },
         error: () => { this.bulkActing.set(false); this.toast.error('Erreur désactivation en masse.'); },

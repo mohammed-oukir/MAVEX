@@ -4,6 +4,7 @@ import com.medafrica.mavex.dto.client.BulkActionRequest;
 import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
+import com.medafrica.mavex.dto.client.ClientSearchCriteria;
 import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.country.Country;
 import com.medafrica.mavex.model.enums.OrderStatus;
@@ -11,10 +12,13 @@ import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.repository.CountryRepository;
 import com.medafrica.mavex.repository.OrderRepository;
+import com.medafrica.mavex.repository.specification.ClientSpecification;
 import com.medafrica.mavex.service.interfaces.ClientService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +48,12 @@ public class ClientServiceImpl implements ClientService {
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ClientResponseDTO> search(ClientSearchCriteria criteria, Pageable pageable) {
+        return clientRepository.findAll(ClientSpecification.build(criteria), pageable)
+                .map(this::toResponseDTO);
     }
 
     @Override

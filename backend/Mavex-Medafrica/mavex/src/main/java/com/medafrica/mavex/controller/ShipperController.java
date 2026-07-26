@@ -3,6 +3,7 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.ApiResponse;
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
+import com.medafrica.mavex.dto.shipper.ShipperSearchCriteria;
 import com.medafrica.mavex.model.enums.PermissionAction;
 import com.medafrica.mavex.model.enums.PermissionModule;
 import com.medafrica.mavex.security.annotation.RequiresPermission;
@@ -34,6 +35,29 @@ public class ShipperController {
     public ResponseEntity<Page<ShipperResponseDTO>> list(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(shipperService.list(pageable));
+    }
+
+    @GetMapping("/search")
+    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.VIEW)
+    public ResponseEntity<Page<ShipperResponseDTO>> search(
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String contact,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String status,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        ShipperSearchCriteria criteria = ShipperSearchCriteria.builder()
+                .company(company)
+                .contact(contact)
+                .email(email)
+                .phone(phone)
+                .city(city)
+                .country(country)
+                .status(status)
+                .build();
+        return ResponseEntity.ok(shipperService.search(criteria, pageable));
     }
 
     @GetMapping("/{id}")

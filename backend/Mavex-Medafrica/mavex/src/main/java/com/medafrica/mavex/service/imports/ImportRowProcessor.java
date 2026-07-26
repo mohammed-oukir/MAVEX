@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.medafrica.mavex.service.imports.ImportColumns.*;
 
@@ -83,11 +84,12 @@ public class ImportRowProcessor {
     // ===============================================================
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public RowOutcome processConfirmRow(ImportConfirmRequest.RowData d, User currentUser) {
+    public RowOutcome processConfirmRow(ImportConfirmRequest.RowData d, User currentUser, List<String> knownErrors) {
 
         String hawb = d.getHawb();
         String mawb = d.getMawb();
 
+        // Phase CHECK — lecture seule, aucune écriture
         if (orderRepository.existsByHawbAndShipmentMawb(hawb, mawb)) {
             return RowOutcome.skipped("Doublon MAWB+HAWB");
         }
@@ -95,18 +97,37 @@ public class ImportRowProcessor {
             return RowOutcome.skipped("HAWB existant sous autre MAWB");
         }
 
-        List<String> warnings = new ArrayList<>();
-        Shipment shipment = findOrCreateShipment(mawb, currentUser);
-        Shipper  shipper  = findOrCreateShipperFromRequest(d, warnings);
-        if (shipment.getShipper() == null) {
-            shipment.setShipper(shipper);
-            shipmentRepository.save(shipment);
-        }
-        Client client = findOrCreateClientFromRequest(d, warnings);
-        createOrderFromRequest(d, shipment, client, warnings);
+        List<String> errors = new ArrayList<>(knownErrors);
 
-        String warningText = warnings.isEmpty() ? null : String.join(" | ", warnings);
-        return RowOutcome.imported(warningText, mawb);
+        Optional<Shipper> existingShipper = shipperRepository.findByCompanyNameIgnoreCase(resolveShipperName(d));
+        existingShipper.ifPresent(s -> checkShipperActive(s).ifPresent(errors::add));
+
+        Optional<Client> existingClient = clientRepository.findByEmail(d.getReceiverEmail());
+        existingClient.ifPresent(c -> checkClientUsable(c, d.getReceiverName(), d.getReceiverEmail()).ifPresent(errors::add));
+
+        // Phase DÉCISION
+        if (!errors.isEmpty()) {
+            return RowOutcome.failed(String.join(" | ", errors));
+        }
+
+        // Phase WRITE — uniquement si aucune erreur connue
+        try {
+            List<String> warnings = new ArrayList<>();
+            Shipment shipment = findOrCreateShipment(mawb, currentUser);
+            Shipper  shipper  = writeShipperFromRequest(existingShipper, d, warnings);
+            if (shipment.getShipper() == null) {
+                shipment.setShipper(shipper);
+                shipmentRepository.save(shipment);
+            }
+            Client client = writeClientFromRequest(existingClient, d, warnings);
+            createOrderFromRequest(d, shipment, client, warnings);
+
+            String warningText = warnings.isEmpty() ? null : String.join(" | ", warnings);
+            return RowOutcome.imported(warningText, mawb);
+        } catch (Exception e) {
+            log.error("Erreur écriture ligne HAWB={} : {}", hawb, e.getMessage());
+            return RowOutcome.failed("Erreur traitement : " + e.getMessage());
+        }
     }
 
     // ===============================================================
@@ -190,13 +211,18 @@ public class ImportRowProcessor {
         });
     }
 
-    private Shipper findOrCreateShipperFromRequest(ImportConfirmRequest.RowData d, List<String> warnings) {
+    /** Nom effectif du shipper pour cette ligne (résolution seule, pas d'écriture — utilisable en phase check). */
+    private String resolveShipperName(ImportConfirmRequest.RowData d) {
         String name = d.getSenderName();
-        if (name == null || name.isBlank()) {
-            name = "Unknown Shipper";
+        return (name == null || name.isBlank()) ? "Unknown Shipper" : name;
+    }
+
+    /** Écrit (update ou create) le shipper à partir de l'Optional déjà chargé en phase check. */
+    private Shipper writeShipperFromRequest(Optional<Shipper> existingShipper, ImportConfirmRequest.RowData d, List<String> warnings) {
+        String finalName = resolveShipperName(d);
+        if (d.getSenderName() == null || d.getSenderName().isBlank()) {
             warnings.add("Sender name manquant → 'Unknown Shipper'");
         }
-        final String finalName = name;
 
         Country country = resolveCountry(d.getSenderCountry());
 
@@ -207,8 +233,7 @@ public class ImportRowProcessor {
         }
         final String finalState = state;
 
-        return shipperRepository.findByCompanyNameIgnoreCase(finalName).map(existing -> {
-            assertShipperActive(existing);
+        return existingShipper.map(existing -> {
             existing.setContactName(d.getSenderContact());
             existing.setPhone(d.getSenderPhone());
             existing.setAddress(d.getSenderAddress());
@@ -236,10 +261,17 @@ public class ImportRowProcessor {
     }
 
     private void assertShipperActive(Shipper existing) {
+        checkShipperActive(existing).ifPresent(msg -> {
+            throw new IllegalArgumentException(msg);
+        });
+    }
+
+    private Optional<String> checkShipperActive(Shipper existing) {
         if (!existing.isActive()) {
-            throw new IllegalArgumentException("Le shipper '" + existing.getCompanyName()
+            return Optional.of("Le shipper '" + existing.getCompanyName()
                     + "' est désactivé. Veuillez le réactiver avant d'importer.");
         }
+        return Optional.empty();
     }
 
     // ===============================================================
@@ -284,7 +316,8 @@ public class ImportRowProcessor {
                 .country(country).build()));
     }
 
-    private Client findOrCreateClientFromRequest(ImportConfirmRequest.RowData d, List<String> warnings) {
+    /** Écrit (update ou create) le client à partir de l'Optional déjà chargé en phase check. */
+    private Client writeClientFromRequest(Optional<Client> existingClient, ImportConfirmRequest.RowData d, List<String> warnings) {
         String email    = d.getReceiverEmail();
         String fullName = d.getReceiverName();
         Country country = resolveCountry(d.getReceiverCountry());
@@ -296,8 +329,7 @@ public class ImportRowProcessor {
         }
         final String finalState = state;
 
-        return clientRepository.findByEmail(email).map(existing -> {
-            assertClientUsable(existing, fullName, email);
+        return existingClient.map(existing -> {
             existing.setPhone(d.getReceiverPhone());
             existing.setAddress(d.getReceiverAddress());
             existing.setCity(d.getReceiverCity());
@@ -313,18 +345,24 @@ public class ImportRowProcessor {
                 .contactName(d.getReceiverContact()).country(country).build()));
     }
 
-    /** Refuse un client désactivé ou dont l'email appartient à quelqu'un d'autre. */
     private void assertClientUsable(Client existing, String fullName, String email) {
+        checkClientUsable(existing, fullName, email).ifPresent(msg -> {
+            throw new IllegalArgumentException(msg);
+        });
+    }
+
+    /** Retourne une erreur si le client est désactivé, ou si l'email appartient à quelqu'un d'autre. */
+    private Optional<String> checkClientUsable(Client existing, String fullName, String email) {
         if (!existing.isActive()) {
-            throw new IllegalArgumentException("Le client '" + existing.getEmail()
+            return Optional.of("Le client '" + existing.getEmail()
                     + "' est désactivé. Veuillez le réactiver avant d'importer.");
         }
         if (existing.getFullName() != null && fullName != null
                 && !existing.getFullName().equalsIgnoreCase(fullName)) {
-            throw new IllegalArgumentException(
-                    "L'email '" + email + "' appartient déjà au client '" + existing.getFullName()
+            return Optional.of("L'email '" + email + "' appartient déjà au client '" + existing.getFullName()
                     + "'. Impossible de l'associer à '" + fullName + "'.");
         }
+        return Optional.empty();
     }
 
     // ===============================================================

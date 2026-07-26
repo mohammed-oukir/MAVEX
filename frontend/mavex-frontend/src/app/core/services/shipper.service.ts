@@ -3,11 +3,26 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Page } from '../models/api.model';
-import { ShipperResponse, ShipperRequest } from '../models/shipper.model';
+import { ShipperResponse, ShipperRequest, ShipperSearchCriteria } from '../models/shipper.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShipperService {
   private readonly http = inject(HttpClient);
+
+  search(criteria: ShipperSearchCriteria = {}, page = 0, size = 15): Observable<Page<ShipperResponse>> {
+    let p = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    if (criteria.company) p = p.set('company', criteria.company);
+    if (criteria.contact) p = p.set('contact', criteria.contact);
+    if (criteria.email)   p = p.set('email', criteria.email);
+    if (criteria.phone)   p = p.set('phone', criteria.phone);
+    if (criteria.city)    p = p.set('city', criteria.city);
+    if (criteria.country) p = p.set('country', criteria.country);
+    if (criteria.status && criteria.status !== 'all') p = p.set('status', criteria.status);
+    return this.http.get<Page<ShipperResponse>>('/api/shippers/search', { params: p });
+  }
 
   getAll(size = 200): Observable<ShipperResponse[]> {
     const params = new HttpParams().set('size', size);

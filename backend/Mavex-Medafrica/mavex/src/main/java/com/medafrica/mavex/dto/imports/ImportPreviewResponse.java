@@ -26,7 +26,7 @@ public class ImportPreviewResponse {
     private List<PreviewRow> rows;
 
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     public static class PreviewRow {
         private int    rowNumber;
         private String previewStatus;   // "VALID" | "INVALID" | "SKIPPED"

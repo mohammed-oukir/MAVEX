@@ -28,3 +28,13 @@ export interface ShipperRequest {
   city?: string;
   countryCode?: string;
 }
+
+export interface ShipperSearchCriteria {
+  company?: string;
+  contact?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  country?: string;
+  status?: 'all' | 'active' | 'inactive';
+}

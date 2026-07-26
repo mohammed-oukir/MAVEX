@@ -1,139 +1,280 @@
 <!-- ══════════════════════════════════════════════════════════
-     UPLOAD SECTION
+     KPI CARDS
      ══════════════════════════════════════════════════════════ -->
-<div class="im-upload-card mb-4">
+<div class="im-kpi-grid mb-4">
 
-  <!-- Header -->
-  <div class="im-upload-header">
-    <div class="im-upload-header-left">
-      <div class="im-header-icon" aria-hidden="true">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-        </svg>
-      </div>
-      <div>
-        <div class="im-header-title">Importer un manifeste Excel</div>
-        <div class="im-header-sub">Glissez votre fichier ou parcourez — analyse automatique avant import</div>
+  <div class="im-kpi-card">
+    <div class="im-kpi-accent im-accent-orange"></div>
+    <div class="im-kpi-icon im-icon-orange">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
+    <div class="im-kpi-body">
+      @if (stats(); as s) {
+        <div class="im-kpi-num im-num-orange">{{ s.importsThisMonth }}</div>
+      } @else {
+        <div class="im-kpi-num im-num-orange">—</div>
+      }
+      <div class="im-kpi-lbl">Imports ce mois</div>
+    </div>
+  </div>
+
+  <div class="im-kpi-card">
+    <div class="im-kpi-accent im-accent-green"></div>
+    <div class="im-kpi-icon im-icon-green">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="im-kpi-body">
+      @if (stats(); as s) {
+        <div class="im-kpi-num im-num-green">{{ s.successRatePercent }}%</div>
+      } @else {
+        <div class="im-kpi-num im-num-green">—</div>
+      }
+      <div class="im-kpi-lbl">Taux de succès (30j)</div>
+    </div>
+  </div>
+
+  <div class="im-kpi-card">
+    <div class="im-kpi-accent im-accent-red"></div>
+    <div class="im-kpi-icon im-icon-red">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="im-kpi-body">
+      @if (stats(); as s) {
+        <div class="im-kpi-num im-num-red">{{ s.failedRowsRecent }}</div>
+      } @else {
+        <div class="im-kpi-num im-num-red">—</div>
+      }
+      <div class="im-kpi-lbl">Lignes en erreur (30j)</div>
+    </div>
+  </div>
+
+  <div class="im-kpi-card">
+    <div class="im-kpi-accent im-accent-blue"></div>
+    <div class="im-kpi-icon im-icon-blue">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+    </div>
+    <div class="im-kpi-body">
+      @if (stats(); as s) {
+        <div class="im-kpi-num im-num-blue">{{ s.totalImportsRecent }}</div>
+      } @else {
+        <div class="im-kpi-num im-num-blue">—</div>
+      }
+      <div class="im-kpi-lbl">Total imports (30j)</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     STEPPER
+     ══════════════════════════════════════════════════════════ -->
+<div class="im-stepper mb-4">
+  <div class="im-step" [class.im-step-active]="currentStep() === 1" [class.im-step-done]="currentStep() > 1">
+    <div class="im-step-circle">
+      @if (currentStep() > 1) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      } @else {
+        <span>1</span>
+      }
+    </div>
+    <span class="im-step-label">Upload</span>
+  </div>
+
+  <div class="im-step-line" [class.im-step-line-done]="currentStep() > 1"></div>
+
+  <div class="im-step" [class.im-step-active]="currentStep() === 2" [class.im-step-done]="currentStep() > 2">
+    <div class="im-step-circle">
+      @if (currentStep() > 2) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+      } @else {
+        <span>2</span>
+      }
+    </div>
+    <span class="im-step-label">Vérification</span>
+  </div>
+
+  <div class="im-step-line" [class.im-step-line-done]="currentStep() > 2"></div>
+
+  <div class="im-step" [class.im-step-active]="currentStep() === 3" [class.im-step-done]="false">
+    <div class="im-step-circle">
+      <span>3</span>
+    </div>
+    <span class="im-step-label">Confirmation</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     UPLOAD SECTION (60/40 : upload + aide contextuelle)
+     ══════════════════════════════════════════════════════════ -->
+<div class="im-upload-grid mb-4">
+
+  <!-- Colonne gauche (~60%) : upload -->
+  <div class="im-upload-card">
+
+    <!-- Header -->
+    <div class="im-upload-header">
+      <div class="im-upload-header-left">
+        <div class="im-header-icon" aria-hidden="true">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        </div>
+        <div>
+          <div class="im-header-title">Importer un manifeste Excel</div>
+          <div class="im-header-sub">Glissez votre fichier ou parcourez</div>
+        </div>
       </div>
     </div>
-    <button type="button" class="im-tpl-btn" (click)="downloadTemplate()" title="Télécharger le fichier modèle">
+
+    <!-- Body -->
+    <div class="im-upload-body">
+
+      @if (!previewing() && !preview() && !confirming() && !result()) {
+        <input #fileInput type="file" accept=".xlsx,.xls" class="d-none"
+          (change)="onFileChange($event)" aria-label="Sélectionner un fichier Excel" />
+
+        @if (!selectedFile()) {
+          <!-- Drop zone -->
+          <div
+            class="im-dropzone im-dropzone-compact"
+            [class.im-drag-over]="dragOver()"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="fileInput.click()"
+            aria-label="Cliquez ou glissez un fichier Excel">
+
+            <div class="im-dz-content">
+              <div class="im-dz-icon-wrap" aria-hidden="true">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                </svg>
+              </div>
+              <div class="im-dz-text">
+                <span class="im-dz-title">Glissez votre fichier ici</span>
+                <span class="im-dz-or">ou</span>
+                <span class="im-dz-link">cliquez pour parcourir</span>
+              </div>
+            </div>
+          </div>
+
+        } @else {
+          <!-- File selected state -->
+          <div class="im-file-ready">
+            <div class="im-file-ready-left">
+              <div class="im-file-ready-icon" aria-hidden="true">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <div>
+                <div class="im-file-ready-name">{{ selectedFile()!.name }}</div>
+                <div class="im-file-ready-meta">{{ fmtSize(selectedFile()!.size) }} · Excel</div>
+              </div>
+            </div>
+            <div class="im-file-ready-actions">
+              <button type="button" class="im-btn-ghost" (click)="selectedFile.set(null)" aria-label="Retirer le fichier">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Retirer
+              </button>
+              <button type="button" class="im-btn-analyse" appRequiresPermission module="IMPORTS" action="CREATE" (click)="analyseFile()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Analyser le fichier
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Analyse en cours -->
+      @if (previewing()) {
+        <div class="im-state-loader">
+          <div class="im-state-spinner im-spinner-orange" role="status" aria-label="Analyse en cours">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+              <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" stroke="#F97316" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
+            </svg>
+          </div>
+          <div class="im-state-text">
+            <div class="im-state-title">Analyse en cours…</div>
+            <div class="im-state-sub">Validation de chaque ligne — aucune donnée enregistrée pour l'instant</div>
+          </div>
+        </div>
+      }
+
+      <!-- Import en cours -->
+      @if (confirming()) {
+        <div class="im-state-loader">
+          <div class="im-state-spinner" role="status" aria-label="Import en cours">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+              <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15" stroke="#22C55E" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
+            </svg>
+          </div>
+          <div class="im-state-text">
+            <div class="im-state-title">Import en cours…</div>
+            <div class="im-state-sub">Création des orders et du shipment — veuillez patienter</div>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Colonne droite (~40%) : aide contextuelle -->
+  <div class="im-help-card">
+    <div class="im-help-header">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>Format attendu</span>
+    </div>
+
+    <div class="im-help-row">
+      <span class="im-help-label">Fichiers acceptés</span>
+      <div class="im-dz-badges">
+        <span class="im-fmt-badge">.xlsx</span>
+        <span class="im-fmt-badge">.xls</span>
+        <span class="im-fmt-badge im-fmt-limit">max 10 MB</span>
+      </div>
+    </div>
+
+    <div class="im-help-row">
+      <span class="im-help-label">Colonnes obligatoires</span>
+      <ul class="im-help-list">
+        <li>MAWB</li>
+        <li>HAWB (Connote #)</li>
+        <li>Nom du destinataire</li>
+        <li>Email du destinataire</li>
+        <li>Poids du colis (&gt; 0)</li>
+        <li>Valeur douanière (&gt; 0)</li>
+      </ul>
+    </div>
+
+    <p class="im-help-note">
+      Les informations expéditeur, la description et la devise sont facultatives — des valeurs par défaut sont appliquées automatiquement si elles sont absentes.
+    </p>
+
+    <button type="button" class="im-tpl-btn im-help-tpl-btn" (click)="downloadTemplate()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
         <polyline points="7 10 12 15 17 10"/>
         <line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
-      Template Excel
+      Télécharger le template
     </button>
   </div>
 
-  <!-- Body -->
-  <div class="im-upload-body">
-
-    @if (!previewing() && !preview() && !confirming() && !result()) {
-      <input #fileInput type="file" accept=".xlsx,.xls" class="d-none"
-        (change)="onFileChange($event)" aria-label="Sélectionner un fichier Excel" />
-
-      @if (!selectedFile()) {
-        <!-- Drop zone -->
-        <div
-          class="im-dropzone"
-          [class.im-drag-over]="dragOver()"
-          (dragover)="onDragOver($event)"
-          (dragleave)="onDragLeave()"
-          (drop)="onDrop($event)"
-          (click)="fileInput.click()"
-          role="button"
-          tabindex="0"
-          (keydown.enter)="fileInput.click()"
-          aria-label="Cliquez ou glissez un fichier Excel">
-
-          <div class="im-dz-content">
-            <div class="im-dz-icon-wrap" aria-hidden="true">
-              <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-              </svg>
-            </div>
-            <div class="im-dz-text">
-              <span class="im-dz-title">Glissez votre fichier ici</span>
-              <span class="im-dz-or">ou</span>
-              <span class="im-dz-link">cliquez pour parcourir</span>
-            </div>
-            <div class="im-dz-badges">
-              <span class="im-fmt-badge">.xlsx</span>
-              <span class="im-fmt-badge">.xls</span>
-              <span class="im-fmt-badge im-fmt-limit">max 10 MB</span>
-            </div>
-          </div>
-        </div>
-
-      } @else {
-        <!-- File selected state -->
-        <div class="im-file-ready">
-          <div class="im-file-ready-left">
-            <div class="im-file-ready-icon" aria-hidden="true">
-              <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-            </div>
-            <div>
-              <div class="im-file-ready-name">{{ selectedFile()!.name }}</div>
-              <div class="im-file-ready-meta">{{ fmtSize(selectedFile()!.size) }} · Excel</div>
-            </div>
-          </div>
-          <div class="im-file-ready-actions">
-            <button type="button" class="im-btn-ghost" (click)="selectedFile.set(null)" aria-label="Retirer le fichier">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-              Retirer
-            </button>
-            <button type="button" class="im-btn-analyse" appRequiresPermission module="IMPORTS" action="CREATE" (click)="analyseFile()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              Analyser le fichier
-            </button>
-          </div>
-        </div>
-      }
-    }
-
-    <!-- Analyse en cours -->
-    @if (previewing()) {
-      <div class="im-state-loader">
-        <div class="im-state-spinner im-spinner-orange" role="status" aria-label="Analyse en cours">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-            <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
-            <circle cx="18" cy="18" r="15" stroke="#F97316" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
-          </svg>
-        </div>
-        <div class="im-state-text">
-          <div class="im-state-title">Analyse en cours…</div>
-          <div class="im-state-sub">Validation de chaque ligne — aucune donnée enregistrée pour l'instant</div>
-        </div>
-      </div>
-    }
-
-    <!-- Import en cours -->
-    @if (confirming()) {
-      <div class="im-state-loader">
-        <div class="im-state-spinner" role="status" aria-label="Import en cours">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-            <circle cx="18" cy="18" r="15" stroke="#F3F4F6" stroke-width="3"/>
-            <circle cx="18" cy="18" r="15" stroke="#22C55E" stroke-width="3" stroke-dasharray="60 35" stroke-linecap="round" class="im-spin"/>
-          </svg>
-        </div>
-        <div class="im-state-text">
-          <div class="im-state-title">Import en cours…</div>
-          <div class="im-state-sub">Création des orders et du shipment — veuillez patienter</div>
-        </div>
-      </div>
-    }
-
-  </div>
 </div>
 
 
@@ -237,13 +378,11 @@
                 }
               </td>
               <td class="text-end">
-                @if (row.previewStatus === 'INVALID') {
-                  <button type="button" class="btn btn-sm im-act-btn im-act-edit"
-                    appRequiresPermission module="IMPORTS" action="EDIT"
-                    (click)="openEdit(row)" aria-label="Corriger cette ligne">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                }
+                <button type="button" class="btn btn-sm im-act-btn im-act-edit"
+                  appRequiresPermission module="IMPORTS" action="EDIT"
+                  (click)="openEdit(row)" aria-label="Corriger cette ligne">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
               </td>
             </tr>
           }
@@ -686,9 +825,14 @@
       </div>
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeEdit()">Annuler</button>
-        <button type="button" class="nm-btn-primary" (click)="saveEdit()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
-          Enregistrer la correction
+        <button type="button" class="nm-btn-primary" [disabled]="revalidating()" (click)="saveEdit()">
+          @if (revalidating()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Vérification...
+          } @else {
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer la correction
+          }
         </button>
       </div>
     </div>

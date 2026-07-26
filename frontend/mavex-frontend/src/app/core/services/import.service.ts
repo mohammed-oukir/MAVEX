@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
-import { ImportConfirmRequest, ImportLogResponse, ImportPreviewResponse } from '../models/import.model';
+import { ImportConfirmRequest, ImportLogResponse, ImportPreviewResponse, ImportRevalidateRequest, ImportStatsResponse } from '../models/import.model';
 
 @Injectable({ providedIn: 'root' })
 export class ImportService {
@@ -20,8 +20,16 @@ export class ImportService {
     return this.http.post<ImportPreviewResponse>('/api/v1/imports/preview', form);
   }
 
+  revalidate(request: ImportRevalidateRequest): Observable<ImportPreviewResponse> {
+    return this.http.post<ImportPreviewResponse>('/api/v1/imports/revalidate', request);
+  }
+
   confirm(request: ImportConfirmRequest): Observable<ImportLogResponse> {
     return this.http.post<ImportLogResponse>('/api/v1/imports/confirm', request);
+  }
+
+  getStats(): Observable<ImportStatsResponse> {
+    return this.http.get<ImportStatsResponse>('/api/v1/imports/stats');
   }
 
   downloadTemplate(): Observable<Blob> {

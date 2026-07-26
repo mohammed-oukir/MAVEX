@@ -82,3 +82,18 @@ export interface ImportConfirmRequest {
   fileHash: string;
   rows:     ImportPreviewRow[];
 }
+
+/* ── Revalidate (relecture complète après correction) ──────── */
+
+export interface ImportRevalidateRequest {
+  rows: ImportPreviewRow[];
+}
+
+/* ── Stats (KPI) ─────────────────────────────────────────────── */
+
+export interface ImportStatsResponse {
+  importsThisMonth:    number;
+  successRatePercent:  number;
+  failedRowsRecent:    number;
+  totalImportsRecent:  number;
+}

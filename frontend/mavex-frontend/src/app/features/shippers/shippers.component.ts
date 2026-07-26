@@ -4,11 +4,12 @@ import {
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { LayoutService }   from '../../core/services/layout.service';
 import { ShipperService }  from '../../core/services/shipper.service';
 import { ToastService }    from '../../core/services/toast.service';
-import { ShipperResponse } from '../../core/models/shipper.model';
+import { ShipperResponse, ShipperSearchCriteria } from '../../core/models/shipper.model';
 import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
@@ -25,11 +26,16 @@ export class ShippersComponent implements OnInit {
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
-  /* ── Data ─────────────────────────────────────────── */
-  allShippers = signal<ShipperResponse[]>([]);
-  loading     = signal(true);
-  page        = signal(0);
+  /* ── Data (recherche paginée côté serveur) ─────────── */
+  pageItems      = signal<ShipperResponse[]>([]);
+  totalElements  = signal(0);
+  totalPages     = signal(0);
+  loading        = signal(true);
+  page           = signal(0);
   readonly pageSize = 15;
+
+  /* ── Data KPIs (liste complète, indépendante de la pagination) ── */
+  allShippers = signal<ShipperResponse[]>([]);
 
   /* ── Filtres par colonne ──────────────────────────── */
   fCompany = signal('');
@@ -53,38 +59,25 @@ export class ShippersComponent implements OnInit {
     }).length;
   });
 
-  /* ── Filtered + paginated ─────────────────────────── */
-  filtered = computed(() => {
-    const co = this.fCompany().toLowerCase();
-    const cn = this.fContact().toLowerCase();
-    const em = this.fEmail().toLowerCase();
-    const ph = this.fPhone().toLowerCase();
-    const ci = this.fCity().toLowerCase();
-    const ct = this.fCountry().toLowerCase();
-    const st = this.fStatus();
+  /* ── Critères combinés → déclenchent la recherche serveur ── */
+  private readonly searchParams = computed(() => ({
+    criteria: {
+      company: this.fCompany(),
+      contact: this.fContact(),
+      email:   this.fEmail(),
+      phone:   this.fPhone(),
+      city:    this.fCity(),
+      country: this.fCountry(),
+      status:  this.fStatus(),
+    } satisfies ShipperSearchCriteria,
+    page: this.page(),
+  }));
 
-    return this.allShippers().filter(s => {
-      if (co && !s.companyName?.toLowerCase().includes(co))  return false;
-      if (cn && !s.contactName?.toLowerCase().includes(cn))  return false;
-      if (em && !s.email?.toLowerCase().includes(em))        return false;
-      if (ph && !s.phone?.toLowerCase().includes(ph))        return false;
-      if (ci && !s.city?.toLowerCase().includes(ci))         return false;
-      if (ct) {
-        const cc = s.countryCode?.code?.toLowerCase() ?? '';
-        if (!cc.includes(ct)) return false;
-      }
-      if (st === 'active'   && !s.active)  return false;
-      if (st === 'inactive' && s.active)   return false;
-      return true;
-    });
-  });
+  /* ── Observable des critères — créé en champ de classe (contexte d'injection
+     valide via le constructeur), consommé dans ngOnInit() ── */
+  private readonly searchParams$ = toObservable(this.searchParams);
 
-  total      = computed(() => this.filtered().length);
-  totalPages = computed(() => Math.ceil(this.total() / this.pageSize));
-  pageItems  = computed(() => {
-    const start = this.page() * this.pageSize;
-    return this.filtered().slice(start, start + this.pageSize);
-  });
+  total = computed(() => this.totalElements());
   hasFilters = computed(() =>
     !!this.fCompany() || !!this.fContact() || !!this.fEmail() ||
     !!this.fPhone()   || !!this.fCity()    || !!this.fCountry() ||
@@ -124,18 +117,55 @@ export class ShippersComponent implements OnInit {
   /* ── Lifecycle ────────────────────────────────────── */
   ngOnInit(): void {
     this.layout.setPage('Shippers');
-    this.loadShippers();
+    this.loadKpiData();
+
+    this.searchParams$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        switchMap(({ criteria, page }) => {
+          this.loading.set(true);
+          return this.shipperSvc.search(criteria, page, this.pageSize);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: result => {
+          this.pageItems.set(result.content);
+          this.totalElements.set(result.totalElements);
+          this.totalPages.set(result.totalPages);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
-  /* ── Load ─────────────────────────────────────────── */
-  loadShippers(): void {
-    this.loading.set(true);
+  /* ── Load KPIs (liste complète, indépendante des filtres/pagination) ── */
+  private loadKpiData(): void {
     this.shipperSvc.getAll(500)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: shippers => { this.allShippers.set(shippers); this.loading.set(false); },
-        error: ()       => this.loading.set(false),
+        next: shippers => this.allShippers.set(shippers),
+        error: () => {},
       });
+  }
+
+  /* ── Rafraîchit la page courante après une mutation (create/edit/delete/…) ── */
+  private reloadCurrentPage(): void {
+    const { criteria, page } = this.searchParams();
+    this.loading.set(true);
+    this.shipperSvc.search(criteria, page, this.pageSize)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: result => {
+          this.pageItems.set(result.content);
+          this.totalElements.set(result.totalElements);
+          this.totalPages.set(result.totalPages);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
+    this.loadKpiData();
   }
 
   /* ── Filtres ──────────────────────────────────────── */
@@ -204,12 +234,8 @@ export class ShippersComponent implements OnInit {
         this.formMode.set(null);
         const isEdit = !!this.editingId();
         this.toast.success(isEdit ? 'Shipper modifié.' : 'Shipper créé.');
-        if (isEdit) {
-          this.allShippers.update(list => list.map(s => s.id === data.id ? data : s));
-        } else {
-          this.allShippers.update(list => [data, ...list]);
-          this.page.set(0);
-        }
+        if (!isEdit) this.page.set(0);
+        this.reloadCurrentPage();
       },
       error: err => {
         this.saving.set(false);
@@ -230,9 +256,7 @@ export class ShippersComponent implements OnInit {
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.toggling.set(null);
-        this.allShippers.update(list =>
-          list.map(x => x.id === s.id ? { ...x, active: !s.active } : x)
-        );
+        this.reloadCurrentPage();
         this.toast.success(s.active ? 'Shipper désactivé.' : 'Shipper activé.');
       },
       error: () => { this.toggling.set(null); this.toast.error('Erreur.'); },
@@ -253,7 +277,7 @@ export class ShippersComponent implements OnInit {
         next: () => {
           this.deleting.set(false);
           this.deleteId.set(null);
-          this.allShippers.update(list => list.filter(s => s.id !== id));
+          this.reloadCurrentPage();
           this.toast.success('Shipper supprimé.');
         },
         error: () => { this.deleting.set(false); this.toast.error('Erreur suppression.'); },
@@ -298,7 +322,7 @@ export class ShippersComponent implements OnInit {
         this.bulkActing.set(false);
         this.bulkDeleteConfirm.set(false);
         this.selectedIds.set(new Set());
-        this.allShippers.update(list => list.filter(s => !ids.includes(s.id)));
+        this.reloadCurrentPage();
         this.toast.success(`${res.deleted} shipper(s) supprimé(s).`);
       },
       error: () => { this.bulkActing.set(false); this.toast.error('Erreur suppression en masse.'); },
@@ -311,8 +335,8 @@ export class ShippersComponent implements OnInit {
     this.shipperSvc.bulkActivate(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.bulkActing.set(false);
-        this.allShippers.update(list => list.map(s => ids.includes(s.id) ? { ...s, active: true } : s));
         this.selectedIds.set(new Set());
+        this.reloadCurrentPage();
         this.toast.success(`${res.activated} shipper(s) activé(s).`);
       },
       error: () => { this.bulkActing.set(false); this.toast.error('Erreur activation en masse.'); },
@@ -325,8 +349,8 @@ export class ShippersComponent implements OnInit {
     this.shipperSvc.bulkDeactivate(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.bulkActing.set(false);
-        this.allShippers.update(list => list.map(s => ids.includes(s.id) ? { ...s, active: false } : s));
         this.selectedIds.set(new Set());
+        this.reloadCurrentPage();
         this.toast.success(`${res.deactivated} shipper(s) désactivé(s).`);
       },
       error: () => { this.bulkActing.set(false); this.toast.error('Erreur désactivation en masse.'); },

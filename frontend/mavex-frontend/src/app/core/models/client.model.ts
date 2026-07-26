@@ -39,3 +39,15 @@ export interface ClientPatch {
   countryCode?: string;
   active?: boolean;
 }
+
+export interface ClientSearchCriteria {
+  name?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  status?: 'all' | 'active' | 'inactive';
+  dateFrom?: string; // YYYY-MM-DD
+  dateTo?: string;   // YYYY-MM-DD
+}

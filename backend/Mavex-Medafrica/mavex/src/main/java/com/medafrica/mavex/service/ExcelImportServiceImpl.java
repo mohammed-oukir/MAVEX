@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.medafrica.mavex.service.imports.ImportColumns.*;
 
@@ -222,11 +223,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         int totalRows = 0, validRows = 0, invalidRows = 0, skippedRows = 0;
         String mawbFound = null;
 
-        // Détection des doublons internes au fichier (même HAWB sur 2 lignes)
-        Set<String> seenHawb = new HashSet<>();
-        // Détection des conflits email↔nom internes au fichier
-        Map<String, String> emailToName = new HashMap<>();
-
         try (InputStream is = file.getInputStream();
              Workbook workbook = new XSSFWorkbook(is)) {
 
@@ -239,6 +235,12 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                 throw new IllegalArgumentException("La ligne d'en-tête est absente.");
 
             int[] cols = buildColMap(headerRow);
+
+            // Passe préalable : conflits email↔nom et doublons HAWB détectés sur tout le fichier
+            // AVANT le traitement ligne par ligne, pour que la toute première occurrence
+            // concernée soit aussi flaguée (pas seulement celles qui la suivent).
+            Map<String, Set<String>> namesPerEmail = collectNamesPerEmail(sheet, cols);
+            Set<String> duplicateHawbs = detectDuplicateHawbs(sheet, cols);
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -287,18 +289,18 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                 List<String> rowErrors = validateRow(row, mawb, hawb, receiverEmail, cols);
 
                 // Doublon HAWB interne au fichier
-                if (hawb != null && !seenHawb.add(hawb.trim().toLowerCase())) {
+                if (hawb != null && duplicateHawbs.contains(hawb.trim().toLowerCase())) {
                     rowErrors = new ArrayList<>(rowErrors);
                     rowErrors.add("HAWB=" + hawb + " en doublon dans le fichier");
                 }
                 // Conflit email↔nom interne au fichier
-                if (receiverEmail != null && receiverName != null && rowErrors.isEmpty()) {
+                if (receiverEmail != null && receiverName != null) {
                     String key = receiverEmail.trim().toLowerCase();
-                    String prevName = emailToName.putIfAbsent(key, receiverName);
-                    if (prevName != null && !prevName.equalsIgnoreCase(receiverName)) {
+                    Set<String> names = namesPerEmail.get(key);
+                    if (names != null && names.size() > 1) {
                         rowErrors = new ArrayList<>(rowErrors);
-                        rowErrors.add("Email '" + receiverEmail + "' utilisé avec deux noms différents dans le fichier ('"
-                                + prevName + "' et '" + receiverName + "')");
+                        rowErrors.add("Email '" + receiverEmail + "' utilisé avec plusieurs noms différents dans le fichier : "
+                                + String.join(", ", names));
                     }
                 }
 
@@ -334,6 +336,73 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     }
 
     // ---------------------------------------------------------------
+    // REVALIDATION — état courant de la preview (aucune écriture)
+    // ---------------------------------------------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public ImportPreviewResponse revalidate(List<ImportPreviewResponse.PreviewRow> rows) {
+
+        Set<String> duplicateHawbs = detectDuplicateHawbs(rows, ImportPreviewResponse.PreviewRow::getHawb);
+        Map<String, Set<String>> namesPerEmail = collectNamesPerEmail(
+                rows,
+                ImportPreviewResponse.PreviewRow::getReceiverEmail,
+                ImportPreviewResponse.PreviewRow::getReceiverName
+        );
+
+        List<ImportPreviewResponse.PreviewRow> revalidatedRows = new ArrayList<>();
+        int validRows = 0, invalidRows = 0, skippedRows = 0;
+
+        for (ImportPreviewResponse.PreviewRow row : rows) {
+            List<String> rowErrors = validateFields(
+                    row.getMawb(), row.getHawb(), row.getReceiverName(), row.getReceiverEmail(),
+                    row.getCustomsValue(), row.getShipmentWeight(), row.getNumberOfItems(), row.getGoodsDescription()
+            );
+
+            String hawb = row.getHawb();
+            if (hawb != null && duplicateHawbs.contains(hawb.trim().toLowerCase())) {
+                rowErrors = new ArrayList<>(rowErrors);
+                rowErrors.add("HAWB=" + hawb + " en doublon parmi les lignes");
+            }
+
+            String receiverEmail = row.getReceiverEmail();
+            if (receiverEmail != null && row.getReceiverName() != null) {
+                Set<String> names = namesPerEmail.get(receiverEmail.trim().toLowerCase());
+                if (names != null && names.size() > 1) {
+                    rowErrors = new ArrayList<>(rowErrors);
+                    rowErrors.add("Email '" + receiverEmail + "' utilisé avec plusieurs noms différents : "
+                            + String.join(", ", names));
+                }
+            }
+
+            String mawb = row.getMawb();
+            ImportPreviewResponse.PreviewRow.PreviewRowBuilder rb = row.toBuilder();
+
+            if (!rowErrors.isEmpty()) {
+                rb.previewStatus("INVALID").errors(rowErrors).warnings(List.of());
+                invalidRows++;
+            } else if (hawb != null && (orderRepository.existsByHawbAndShipmentMawb(hawb, mawb)
+                    || orderRepository.existsByHawb(hawb))) {
+                rb.previewStatus("SKIPPED").errors(List.of("Déjà importé dans la base")).warnings(List.of()).alreadyExists(true);
+                skippedRows++;
+            } else {
+                rb.previewStatus("VALID").errors(List.of());
+                validRows++;
+            }
+
+            revalidatedRows.add(rb.build());
+        }
+
+        return ImportPreviewResponse.builder()
+                .totalRows(rows.size())
+                .validRows(validRows)
+                .invalidRows(invalidRows)
+                .skippedRows(skippedRows)
+                .rows(revalidatedRows)
+                .build();
+    }
+
+    // ---------------------------------------------------------------
     // CONFIRM — crée les entités depuis les données corrigées du frontend
     // ---------------------------------------------------------------
     //
@@ -358,8 +427,15 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         int successRows = 0, skippedRows = 0, failedRows = 0;
         String mawbFound = null;
 
-        // Garde-fou : doublons HAWB internes à la requête
-        Set<String> seenHawb = new HashSet<>();
+        // Passe préalable : doublons HAWB et emails en conflit détectés sur TOUTE la requête,
+        // pour que toutes les lignes concernées soient rejetées, pas seulement celles qui
+        // suivent la première occurrence.
+        Set<String> duplicateHawbs = detectDuplicateHawbs(request.getRows(), ImportConfirmRequest.RowData::getHawb);
+        Map<String, Set<String>> namesPerEmail = collectNamesPerEmail(
+                request.getRows(),
+                ImportConfirmRequest.RowData::getReceiverEmail,
+                ImportConfirmRequest.RowData::getReceiverName
+        );
 
         for (ImportConfirmRequest.RowData d : request.getRows()) {
             String hawb  = d.getHawb();
@@ -367,23 +443,31 @@ public class ExcelImportServiceImpl implements ExcelImportService {
 
             // 1. Re-validation côté serveur
             List<String> rowErrors = validateRowData(d);
-            if (hawb != null && !seenHawb.add(hawb.trim().toLowerCase())) {
+            if (hawb != null && duplicateHawbs.contains(hawb.trim().toLowerCase())) {
                 rowErrors.add("HAWB=" + hawb + " en doublon dans la requête");
             }
-            if (!rowErrors.isEmpty()) {
-                rowLogs.add(buildRowLog(importLog, d.getRowNumber(), hawb, email,
-                        ImportRowStatus.FAILED, String.join(" | ", rowErrors), null));
-                failedRows++;
-                continue;
+            if (email != null) {
+                Set<String> names = namesPerEmail.get(email.trim().toLowerCase());
+                if (names != null && names.size() > 1) {
+                    rowErrors.add("Email '" + email + "' utilisé avec plusieurs noms différents dans la requête : "
+                            + String.join(", ", names));
+                }
             }
 
-            // 2. Traitement isolé
             RowOutcome outcome;
-            try {
-                outcome = rowProcessor.processConfirmRow(d, currentUser);
-            } catch (Exception e) {
-                log.error("Erreur confirm ligne {} HAWB={} : {}", d.getRowNumber(), hawb, e.getMessage());
-                outcome = RowOutcome.failed("Erreur traitement : " + rootMessage(e));
+            if (!rowErrors.isEmpty()) {
+                // 2a. Erreurs déjà connues avant tout appel — court-circuit, pas d'écriture,
+                //     pas d'aller-retour DB inutile dans processConfirmRow.
+                outcome = RowOutcome.failed(String.join(" | ", rowErrors));
+            } else {
+                // 2b. Traitement isolé — processConfirmRow ajoute ses propres contrôles
+                //     (shipper/client) avant de décider FAILED/SKIPPED/IMPORTED
+                try {
+                    outcome = rowProcessor.processConfirmRow(d, currentUser, rowErrors);
+                } catch (Exception e) {
+                    log.error("Erreur confirm ligne {} HAWB={} : {}", d.getRowNumber(), hawb, e.getMessage());
+                    outcome = RowOutcome.failed("Erreur traitement : " + rootMessage(e));
+                }
             }
 
             switch (outcome.status()) {
@@ -444,18 +528,10 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     // ---------------------------------------------------------------
 
     private List<String> validateRowData(ImportConfirmRequest.RowData d) {
-        List<String> errors = new ArrayList<>();
-        if (d.getMawb()         == null || d.getMawb().isBlank())         errors.add("MAWB manquant");
-        if (d.getHawb()         == null || d.getHawb().isBlank())         errors.add("HAWB manquant");
-        if (d.getReceiverName() == null || d.getReceiverName().isBlank()) errors.add("Nom destinataire manquant");
-        if (d.getReceiverEmail() == null || d.getReceiverEmail().isBlank()) {
-            errors.add("Email destinataire manquant");
-        } else if (!d.getReceiverEmail().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            errors.add("Format email invalide : " + d.getReceiverEmail());
-        }
-        if (d.getCustomsValue()   == null || d.getCustomsValue().compareTo(BigDecimal.ZERO)   <= 0) errors.add("Valeur douanière invalide");
-        if (d.getShipmentWeight() == null || d.getShipmentWeight().compareTo(BigDecimal.ZERO) <= 0) errors.add("Poids invalide");
-        return errors;
+        return validateFields(
+                d.getMawb(), d.getHawb(), d.getReceiverName(), d.getReceiverEmail(),
+                d.getCustomsValue(), d.getShipmentWeight(), d.getNumberOfItems(), d.getGoodsDescription()
+        );
     }
 
     // ---------------------------------------------------------------
@@ -579,6 +655,25 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     // ---------------------------------------------------------------
 
     private List<String> validateRow(Row row, String mawb, String hawb, String receiverEmail, int[] cols) {
+        String receiverName = getCellString(row, cols[COL_RECEIVER_NAME]);
+        BigDecimal customs = getCellDecimal(row, cols[COL_CUSTOMS_VALUE]);
+        BigDecimal weight = getCellDecimal(row, cols[COL_WEIGHT]);
+        Integer nbItems = getCellInteger(row, cols[COL_NB_ITEMS]);
+        String description = getCellString(row, cols[COL_GOODS_DESC]);
+
+        return validateFields(mawb, hawb, receiverName, receiverEmail, customs, weight, nbItems, description);
+    }
+
+    private List<String> validateFields(
+            String mawb,
+            String hawb,
+            String receiverName,
+            String receiverEmail,
+            BigDecimal customsValue,
+            BigDecimal weight,
+            Integer nbItems,
+            String description
+    ) {
         List<String> errors = new ArrayList<>();
 
         if (mawb == null || mawb.isBlank())       errors.add("MAWB manquant");
@@ -587,7 +682,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
         if (hawb == null || hawb.isBlank())       errors.add("Connote # (HAWB) manquant");
         else if (hawb.length() > MAX_HAWB_LENGTH) errors.add("HAWB trop long (" + hawb.length() + " chars, max " + MAX_HAWB_LENGTH + ")");
 
-        String receiverName = getCellString(row, cols[COL_RECEIVER_NAME]);
         if (receiverName == null || receiverName.isBlank())       errors.add("Nom du destinataire manquant");
         else if (receiverName.length() > MAX_NAME_LENGTH)         errors.add("Nom destinataire trop long (" + receiverName.length() + " chars, max " + MAX_NAME_LENGTH + ")");
 
@@ -598,21 +692,17 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             if (receiverEmail.length() > MAX_EMAIL_LENGTH)                 errors.add("Email trop long (" + receiverEmail.length() + " chars, max " + MAX_EMAIL_LENGTH + ")");
         }
 
-        BigDecimal customs = getCellDecimal(row, cols[COL_CUSTOMS_VALUE]);
-        if (customs == null)                                  errors.add("Valeur douanière manquante");
-        else if (customs.compareTo(BigDecimal.ZERO) <= 0)    errors.add("Valeur douanière doit être > 0 (valeur actuelle : " + customs + ")");
-        else if (customs.compareTo(MAX_CUSTOMS_VALUE) > 0)   errors.add("Valeur douanière anormalement élevée : " + customs + " (max " + MAX_CUSTOMS_VALUE + ")");
+        if (customsValue == null)                                  errors.add("Valeur douanière manquante");
+        else if (customsValue.compareTo(BigDecimal.ZERO) <= 0)    errors.add("Valeur douanière doit être > 0 (valeur actuelle : " + customsValue + ")");
+        else if (customsValue.compareTo(MAX_CUSTOMS_VALUE) > 0)   errors.add("Valeur douanière anormalement élevée : " + customsValue + " (max " + MAX_CUSTOMS_VALUE + ")");
 
-        BigDecimal weight = getCellDecimal(row, cols[COL_WEIGHT]);
         if (weight == null)                               errors.add("Poids du colis manquant");
         else if (weight.compareTo(BigDecimal.ZERO) <= 0)  errors.add("Poids doit être > 0 (valeur actuelle : " + weight + ")");
         else if (weight.compareTo(MAX_WEIGHT) > 0)        errors.add("Poids anormalement élevé : " + weight + " kg (max " + MAX_WEIGHT + ")");
 
-        Integer nbItems = getCellInteger(row, cols[COL_NB_ITEMS]);
         if (nbItems != null && nbItems <= 0)    errors.add("Nombre d'articles doit être > 0 (valeur actuelle : " + nbItems + ")");
         if (nbItems != null && nbItems > 10000) errors.add("Nombre d'articles anormalement élevé : " + nbItems);
 
-        String description = getCellString(row, cols[COL_GOODS_DESC]);
         if (description != null && description.length() > MAX_DESCRIPTION_LENGTH)
             errors.add("Description trop longue (" + description.length() + " chars, max " + MAX_DESCRIPTION_LENGTH + ")");
 
@@ -654,6 +744,79 @@ public class ExcelImportServiceImpl implements ExcelImportService {
     // ---------------------------------------------------------------
     // DÉTECTION LIGNE VIDE
     // ---------------------------------------------------------------
+
+    // ---------------------------------------------------------------
+    // DÉTECTION DES CONFLITS INTERNES AU FICHIER (passe préalable, preview)
+    // ---------------------------------------------------------------
+
+    /** Pour chaque email (normalisé), l'ensemble des noms destinataires distincts rencontrés dans le fichier. */
+    private Map<String, Set<String>> collectNamesPerEmail(Sheet sheet, int[] cols) {
+        Map<String, Set<String>> namesPerEmail = new HashMap<>();
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null || isRowEmpty(row, cols)) continue;
+
+            String receiverEmail = getCellString(row, cols[COL_EMAIL]);
+            String receiverName  = getCellString(row, cols[COL_RECEIVER_NAME]);
+            if (receiverEmail == null || receiverName == null) continue;
+
+            String key = receiverEmail.trim().toLowerCase();
+            namesPerEmail.computeIfAbsent(key, k -> new LinkedHashSet<>()).add(receiverName);
+        }
+        return namesPerEmail;
+    }
+
+    /** HAWB (normalisés) apparaissant sur au moins 2 lignes du fichier. */
+    private Set<String> detectDuplicateHawbs(Sheet sheet, int[] cols) {
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicates = new HashSet<>();
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+            Row row = sheet.getRow(i);
+            if (row == null || isRowEmpty(row, cols)) continue;
+
+            String hawb = getCellString(row, cols[COL_HAWB]);
+            if (hawb == null) continue;
+
+            String key = hawb.trim().toLowerCase();
+            if (!seen.add(key)) {
+                duplicates.add(key);
+            }
+        }
+        return duplicates;
+    }
+
+    /** Pour chaque email (normalisé), l'ensemble des noms distincts rencontrés parmi les lignes. */
+    private <T> Map<String, Set<String>> collectNamesPerEmail(
+            List<T> rows,
+            Function<T, String> emailExtractor,
+            Function<T, String> nameExtractor
+    ) {
+        Map<String, Set<String>> namesPerEmail = new HashMap<>();
+        for (T row : rows) {
+            String email = emailExtractor.apply(row);
+            String name  = nameExtractor.apply(row);
+            if (email == null || name == null) continue;
+
+            String key = email.trim().toLowerCase();
+            namesPerEmail.computeIfAbsent(key, k -> new LinkedHashSet<>()).add(name);
+        }
+        return namesPerEmail;
+    }
+
+    /** HAWB (normalisés) apparaissant sur au moins 2 lignes parmi les lignes. */
+    private <T> Set<String> detectDuplicateHawbs(List<T> rows, Function<T, String> hawbExtractor) {
+        Set<String> seen = new HashSet<>();
+        Set<String> duplicates = new HashSet<>();
+        for (T row : rows) {
+            String hawb = hawbExtractor.apply(row);
+            if (hawb == null) continue;
+            String key = hawb.trim().toLowerCase();
+            if (!seen.add(key)) {
+                duplicates.add(key);
+            }
+        }
+        return duplicates;
+    }
 
     private boolean isRowEmpty(Row row, int[] cols) {
         for (int logicalCol : new int[]{COL_MAWB, COL_HAWB, COL_EMAIL}) {

@@ -1,11 +1,29 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ClientResponse, ClientRequest, ClientPatch } from '../models/client.model';
+import { Page } from '../models/api.model';
+import { ClientResponse, ClientRequest, ClientPatch, ClientSearchCriteria } from '../models/client.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
   private readonly http = inject(HttpClient);
+
+  search(criteria: ClientSearchCriteria = {}, page = 0, size = 15): Observable<Page<ClientResponse>> {
+    let p = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    if (criteria.name)    p = p.set('name', criteria.name);
+    if (criteria.email)   p = p.set('email', criteria.email);
+    if (criteria.phone)   p = p.set('phone', criteria.phone);
+    if (criteria.city)    p = p.set('city', criteria.city);
+    if (criteria.state)   p = p.set('state', criteria.state);
+    if (criteria.country) p = p.set('country', criteria.country);
+    if (criteria.status && criteria.status !== 'all') p = p.set('status', criteria.status);
+    if (criteria.dateFrom) p = p.set('dateFrom', criteria.dateFrom);
+    if (criteria.dateTo)   p = p.set('dateTo', criteria.dateTo);
+    return this.http.get<Page<ClientResponse>>('/api/clients/search', { params: p });
+  }
 
   getAll(): Observable<ClientResponse[]> {
     return this.http.get<ClientResponse[]>('/api/clients');

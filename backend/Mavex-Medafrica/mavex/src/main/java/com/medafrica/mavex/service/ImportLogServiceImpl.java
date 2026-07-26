@@ -1,6 +1,7 @@
 package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.dto.imports.ImportLogResponse;
+import com.medafrica.mavex.dto.imports.ImportStatsResponse;
 import com.medafrica.mavex.model.imports.ImportLog;
 import com.medafrica.mavex.repository.ImportLogRepository;
 import com.medafrica.mavex.repository.ImportRowLogRepository;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,6 +25,8 @@ public class ImportLogServiceImpl implements ImportLogService {
     private final ImportLogRepository    importLogRepository;
     private final ImportRowLogRepository importRowLogRepository;
     private final ShipmentRepository     shipmentRepository;
+
+    private static final int RECENT_WINDOW_DAYS = 30;
 
     @Override
     @Transactional(readOnly = true)
@@ -35,6 +40,34 @@ public class ImportLogServiceImpl implements ImportLogService {
         ImportLog log = importLogRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Import introuvable id=" + id));
         return toResponseWithRows(log);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ImportStatsResponse getStats() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+        LocalDateTime since30Days = LocalDateTime.now().minusDays(RECENT_WINDOW_DAYS);
+
+        long importsThisMonth = importLogRepository.countByImportedAtBetween(startOfMonth, startOfNextMonth);
+        long totalImportsRecent = importLogRepository.countByImportedAtAfter(since30Days);
+
+        List<Object[]> sumsResult = importLogRepository.sumRowsSince(since30Days);
+        Object[] sums = sumsResult.isEmpty() ? new Object[]{0L, 0L, 0L} : sumsResult.get(0);
+        long totalRowsRecent   = ((Number) sums[0]).longValue();
+        long successRowsRecent = ((Number) sums[1]).longValue();
+        long failedRowsRecent  = ((Number) sums[2]).longValue();
+
+        double successRatePercent = totalRowsRecent == 0
+                ? 0.0
+                : Math.round((successRowsRecent * 10000.0) / totalRowsRecent) / 100.0;
+
+        return ImportStatsResponse.builder()
+                .importsThisMonth(importsThisMonth)
+                .successRatePercent(successRatePercent)
+                .failedRowsRecent(failedRowsRecent)
+                .totalImportsRecent(totalImportsRecent)
+                .build();
     }
 
     private Long resolveShipmentId(String mawb) {

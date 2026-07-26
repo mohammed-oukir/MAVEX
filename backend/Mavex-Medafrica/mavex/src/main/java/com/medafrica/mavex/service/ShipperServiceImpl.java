@@ -2,10 +2,12 @@ package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
+import com.medafrica.mavex.dto.shipper.ShipperSearchCriteria;
 import com.medafrica.mavex.model.actor.Shipper;
 import com.medafrica.mavex.model.country.Country;
 import com.medafrica.mavex.repository.CountryRepository;
 import com.medafrica.mavex.repository.ShipperRepository;
+import com.medafrica.mavex.repository.specification.ShipperSpecification;
 import com.medafrica.mavex.service.interfaces.ShipperService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +58,13 @@ public class ShipperServiceImpl implements ShipperService {
     @Transactional(readOnly = true)
     public Page<ShipperResponseDTO> list(Pageable pageable) {
         return shipperRepository.findAll(pageable).map(this::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ShipperResponseDTO> search(ShipperSearchCriteria criteria, Pageable pageable) {
+        return shipperRepository.findAll(ShipperSpecification.build(criteria), pageable)
+                .map(this::toResponse);
     }
 
     @Override
