@@ -6,10 +6,13 @@ import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
+import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,7 @@ public class EmailPersistenceService {
                 .status(EmailStatus.PENDING)
                 .emailTemplate(template)
                 .order(order)
+                .sentBy(currentUser())
                 .build();
         return emailLogRepository.save(log).getId();
     }
@@ -94,5 +98,13 @@ public class EmailPersistenceService {
                 .orElseThrow(() -> new EntityNotFoundException("EmailLog introuvable id=" + emailLogId));
         emailLog.markFailed(errorMessage);
         emailLogRepository.save(emailLog);
+    }
+
+    private User currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof User user) {
+            return user;
+        }
+        return null;
     }
 }

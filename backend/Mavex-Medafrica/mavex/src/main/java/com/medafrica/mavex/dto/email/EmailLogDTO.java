@@ -22,6 +22,7 @@ public class EmailLogDTO {
     private LocalDateTime clickedAt;
     private LocalDateTime bouncedAt;
     private String        bounceReason;
+    private String        sentByName;
 
     public static EmailLogDTO from(EmailLog log) {
         return EmailLogDTO.builder()
@@ -37,6 +38,7 @@ public class EmailLogDTO {
                 .clickedAt(log.getClickedAt())
                 .bouncedAt(log.getBouncedAt())
                 .bounceReason(log.getBounceReason())
+                .sentByName(log.getSentBy() != null ? log.getSentBy().getFullName() : null)
                 .build();
     }
 }

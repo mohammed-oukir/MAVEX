@@ -1,4 +1,4 @@
-export type PaymentGatewayType = 'STRIPE' | 'PAYPAL' | 'CMI';
+export type PaymentGatewayType = 'STRIPE' | 'PAYPAL' | 'CMI' | 'MANUEL';
 export type PaymentGatewayMode = 'TEST' | 'PRODUCTION';
 export type PaymentStatus = 'INITIATED' | 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'REFUNDED';
 

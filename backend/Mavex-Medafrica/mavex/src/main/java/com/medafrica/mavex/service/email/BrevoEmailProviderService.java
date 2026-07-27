@@ -39,7 +39,7 @@ public class BrevoEmailProviderService implements EmailProviderService {
 
     @Override
     public String send(String toEmail, String subject, String htmlBody,
-                       List<MultipartFile> attachments) throws Exception {
+                      List<MultipartFile> attachments) throws Exception {
 
         EmailProviderConfig config = configRepository.findByActiveTrue()
                 .orElseThrow(() -> new IllegalStateException("Aucun provider email actif en base."));

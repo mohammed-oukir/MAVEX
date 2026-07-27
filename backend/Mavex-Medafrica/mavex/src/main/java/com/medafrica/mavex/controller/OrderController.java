@@ -135,7 +135,7 @@ public class OrderController {
     public ResponseEntity<BulkEmailResult> bulkEmail(
             @RequestPart("request") BulkEmailRequest request,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
-        return ResponseEntity.ok(emailService.sendBulkEmails(request.getIds(), files));
+        return ResponseEntity.ok(emailService.sendBulkEmails(request.getIds()));
     }
 
     // ─────────── POST /api/orders/bulk/status ───────────

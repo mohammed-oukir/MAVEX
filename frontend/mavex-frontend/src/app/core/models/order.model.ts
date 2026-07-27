@@ -125,4 +125,5 @@ export interface EmailLogResponse {
   clickedAt?:   string | null;
   bouncedAt?:   string | null;
   bounceReason?: string | null;
+  sentByName?:  string | null;
 }

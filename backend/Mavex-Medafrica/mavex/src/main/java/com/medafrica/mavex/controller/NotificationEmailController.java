@@ -22,7 +22,7 @@ public class NotificationEmailController {
     public ResponseEntity<SendEmailResponse> sendPaymentEmail(
             @PathVariable Long id,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
-        return ResponseEntity.ok(emailService.sendPaymentEmail(id, files));
+        return ResponseEntity.ok(emailService.sendPaymentEmail(id));
     }
 
     @PostMapping(value = "/shipments/{id}/send-all", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -30,6 +30,6 @@ public class NotificationEmailController {
     public ResponseEntity<BulkEmailResult> sendAllPaymentEmails(
             @PathVariable Long id,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
-        return ResponseEntity.ok(emailService.sendAllPaymentEmails(id, files));
+        return ResponseEntity.ok(emailService.sendAllPaymentEmails(id));
     }
 }

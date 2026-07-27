@@ -2,8 +2,10 @@ package com.medafrica.mavex.model.email;
 
 import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.logistics.Order;
+import com.medafrica.mavex.model.security.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 /**
@@ -79,6 +81,14 @@ public class EmailLog {
 
     @Column(name = "bounce_reason", length = 100)
     private String bounceReason;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sent_by")
+    private User sentBy;
 
     public void markSent() {
         this.status = EmailStatus.SENT;

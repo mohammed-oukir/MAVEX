@@ -1,0 +1,186 @@
+<!-- ══════════════════════════════════════════════════════
+     PAGE HEADER
+     ══════════════════════════════════════════════════════ -->
+<div class="pc-page-header">
+  <div class="pc-page-title-wrap">
+    <div class="pc-page-icon" aria-hidden="true">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+        <line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="pc-page-title">Configuration Paiement</h1>
+      <p class="pc-page-sub">Choisissez et configurez le mode de paiement</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SKELETON
+     ══════════════════════════════════════════════════════ -->
+@if (loading()) {
+  <div class="pc-card">
+    <div class="pc-skeleton" style="width:200px;height:14px;margin-bottom:20px"></div>
+    <div class="pc-providers-grid">
+      <div class="pc-skeleton" style="height:110px;border-radius:12px"></div>
+      <div class="pc-skeleton" style="height:110px;border-radius:12px"></div>
+    </div>
+    <div class="pc-skeleton" style="width:160px;height:14px;margin:28px 0 16px"></div>
+    <div class="pc-skeleton" style="height:120px;border-radius:8px"></div>
+  </div>
+} @else {
+
+<!-- ══════════════════════════════════════════════════════
+     CARTES PROVIDERS
+     ══════════════════════════════════════════════════════ -->
+<div class="pc-card">
+
+  <div class="pc-providers-grid" role="radiogroup" aria-label="Sélection du mode de paiement">
+
+    <!-- Carte MANUEL -->
+    <button
+      type="button"
+      class="pc-provider-card"
+      [class.pc-provider-card--active]="selectedType() === 'MANUEL'"
+      [attr.aria-pressed]="selectedType() === 'MANUEL'"
+      (click)="selectProvider('MANUEL')"
+    >
+      @if (isManuelActive()) {
+        <span class="pc-badge-actif">ACTIF</span>
+      }
+      @if (selectedType() === 'MANUEL') {
+        <span class="pc-check-icon" aria-hidden="true">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="12" fill="#2563EB"/>
+            <polyline points="7 12 10.5 15.5 17 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      }
+      <div class="pc-provider-logo pc-provider-logo--manuel" aria-hidden="true">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="2" y="7" width="20" height="13" rx="2"/>
+          <path d="M2 10h20"/>
+          <path d="M12 3 2 7h20L12 3z"/>
+        </svg>
+      </div>
+      <div class="pc-provider-name">Virement manuel</div>
+      <div class="pc-provider-desc">RIB envoyé automatiquement par email</div>
+    </button>
+
+    <!-- Carte PAYPAL (désactivée) -->
+    <button
+      type="button"
+      class="pc-provider-card pc-provider-card--disabled"
+      disabled
+      aria-disabled="true"
+      aria-label="PayPal — Bientôt disponible"
+    >
+      <span class="pc-badge-soon">Bientôt disponible</span>
+      <div class="pc-provider-logo pc-provider-logo--paypal" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M7.5 20.5H4.8a.6.6 0 0 1-.59-.7l2.4-15.2A.9.9 0 0 1 7.5 4h6.4c2.9 0 4.9 1.6 4.5 4.3-.4 3-2.7 4.6-5.6 4.6H10l-.9 5.8a.9.9 0 0 1-.9.8h-.7z" fill="#003087"/>
+          <path d="M9.9 8.8h4.4c2.9 0 4.9 1.6 4.5 4.3-.4 3-2.7 4.6-5.6 4.6h-2.3l-.7 4.4a.9.9 0 0 1-.9.8H6.7a.6.6 0 0 1-.59-.7l1.5-9.7.4-2.6a.9.9 0 0 1 .89-1.1z" fill="#009cde"/>
+          <path d="M10.7 8.8 9.9 13.7h2.3c2.9 0 5.2-1.6 5.6-4.6.1-.4.1-.8 0-1.1-1 .5-2.2.8-3.6.8h-3.5z" fill="#012169"/>
+        </svg>
+      </div>
+      <div class="pc-provider-name">PayPal</div>
+      <div class="pc-provider-desc">Paiement en ligne par carte / compte PayPal</div>
+    </button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ZONE DE CONFIGURATION — MANUEL uniquement
+     ══════════════════════════════════════════════════════ -->
+@if (selectedType() === 'MANUEL') {
+  <div class="pc-card pc-config-card">
+
+    <div class="pc-config-header">
+      <h2 class="pc-config-title">Configuration — Virement manuel</h2>
+    </div>
+
+    <p style="font-size:13px;color:#6B7280;margin-bottom:16px">
+      Le fichier RIB (PDF) sera automatiquement joint aux emails de paiement envoyés aux clients.
+    </p>
+
+    <!-- Fichier actuel -->
+    @if (currentRib(); as rib) {
+      <div class="pc-current-rib">
+        <svg width="16" height="16" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
+        <div class="pc-current-rib-info">
+          <span class="pc-current-rib-name">{{ rib.ribFileName }}</span>
+          <span class="pc-current-rib-date">Ajouté le {{ rib.uploadedAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Zone drag & drop -->
+    <div
+      class="pc-drop-zone"
+      [class.pc-drop-zone--over]="ribDragOver()"
+      (dragover)="onRibDragOver($event)"
+      (dragleave)="onRibDragLeave()"
+      (drop)="onRibDrop($event)"
+      (click)="ribFileInput.click()"
+      role="button"
+      tabindex="0"
+      aria-label="Zone de dépôt du fichier RIB"
+      (keydown.enter)="ribFileInput.click()"
+      (keydown.space)="ribFileInput.click()">
+      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+      </svg>
+      <p class="pc-drop-label">Glisser-déposer ici ou <span class="pc-drop-link">cliquer</span></p>
+      <p class="pc-drop-hint">PDF uniquement — max 10 MB</p>
+      <input
+        #ribFileInput
+        type="file"
+        accept=".pdf"
+        style="display:none"
+        (change)="onRibFileInput($event)"
+        aria-hidden="true" />
+    </div>
+
+    <!-- Fichier sélectionné (en attente d'envoi) -->
+    @if (ribFile(); as f) {
+      <ul class="pc-file-list" aria-label="Nouveau fichier sélectionné">
+        <li class="pc-file-item">
+          <svg width="14" height="14" fill="none" stroke="#F97316" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          <span class="pc-file-name" [title]="f.name">{{ f.name }}</span>
+          <span class="pc-file-size">{{ (f.size / 1024 / 1024).toFixed(1) }} MB</span>
+          <button type="button" class="pc-file-remove" (click)="clearRibFile()" aria-label="Retirer le fichier">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </li>
+      </ul>
+    }
+
+    <!-- ══════════════════════════════════════════════════════
+         PIED DE FORMULAIRE — APPLIQUER
+         ══════════════════════════════════════════════════════ -->
+    <div class="pc-form-footer">
+      <button
+        type="button"
+        class="pc-btn-apply"
+        (click)="apply()"
+        [disabled]="saving()"
+      >
+        @if (saving()) {
+          <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+          Application…
+        } @else {
+          Appliquer et activer
+        }
+      </button>
+    </div>
+
+  </div>
+}
+
+} <!-- fin @else loading -->

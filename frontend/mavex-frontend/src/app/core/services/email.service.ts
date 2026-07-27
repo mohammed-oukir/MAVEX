@@ -20,9 +20,8 @@ export interface BulkEmailSummary {
 export class EmailService {
   private readonly http = inject(HttpClient);
 
-  sendToOrder(orderId: number, files: File[] = []): Observable<SendEmailResult> {
-    const form = this.buildForm(files);
-    return this.http.post<SendEmailResult>(`/api/emails/orders/${orderId}/send`, form);
+  sendToOrder(orderId: number): Observable<SendEmailResult> {
+    return this.http.post<SendEmailResult>(`/api/emails/orders/${orderId}/send`, new FormData());
   }
 
   sendToShipment(shipmentId: number, files: File[] = []): Observable<BulkEmailSummary> {
@@ -30,8 +29,8 @@ export class EmailService {
     return this.http.post<BulkEmailSummary>(`/api/emails/shipments/${shipmentId}/send-all`, form);
   }
 
-  sendBulkEmail(ids: number[], files: File[] = []): Observable<BulkEmailSummary> {
-    const form = this.buildForm(files);
+  sendBulkEmail(ids: number[]): Observable<BulkEmailSummary> {
+    const form = new FormData();
     form.append('request', new Blob([JSON.stringify({ ids })], { type: 'application/json' }));
     return this.http.post<BulkEmailSummary>(`/api/orders/bulk/email`, form);
   }

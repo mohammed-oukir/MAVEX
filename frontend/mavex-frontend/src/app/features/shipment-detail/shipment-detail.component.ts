@@ -91,23 +91,8 @@ export class ShipmentDetailComponent implements OnInit {
   sendingId  = signal<number | null>(null);
   sendingAll = signal(false);
 
-  /* ── Modal pièces jointes ─────────────────────────────── */
-  emailModalOpen      = signal(false);
-  emailModalOrderId   = signal<number | null>(null);   // null = "envoyer tous"
-  emailModalFiles     = signal<File[]>([]);
-  emailModalDragOver  = signal(false);
-  emailModalSending   = signal(false);
-
-  readonly ALLOWED_TYPES = [
-    'application/pdf',
-    'image/jpeg', 'image/png',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  ];
-  readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-  readonly MAX_FILES = 5;
+  /* ── Confirmation envoi groupé ─────────────────────────── */
+  sendAllConfirm = signal(false);
 
   /* ── Create order ─────────────────────────────────────── */
   creatingOrder = signal(false);
@@ -437,135 +422,51 @@ export class ShipmentDetailComponent implements OnInit {
 
   /* ── Emails ───────────────────────────────────────────── */
   sendEmail(orderId: number): void {
-    this.emailModalOrderId.set(orderId);
-    this.emailModalFiles.set([]);
-    this.emailModalOpen.set(true);
+    this.sendingId.set(orderId);
+    this.emailSvc.sendToOrder(orderId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.sendingId.set(null);
+        if (res.success) {
+          this.toast.success('Email envoyé.');
+        } else {
+          this.toast.error(res.message || 'Échec envoi email.');
+        }
+        this.reloadOrders();
+      },
+      error: err => {
+        this.sendingId.set(null);
+        this.toast.error(err?.error?.message || 'Erreur.');
+      },
+    });
   }
 
   sendAll(): void {
-    this.emailModalOrderId.set(null);
-    this.emailModalFiles.set([]);
-    this.emailModalOpen.set(true);
+    this.sendAllConfirm.set(true);
   }
 
-  closeEmailModal(): void {
-    this.emailModalOpen.set(false);
-    this.emailModalOrderId.set(null);
-    this.emailModalFiles.set([]);
-    this.emailModalDragOver.set(false);
-  }
+  closeSendAllConfirm(): void { this.sendAllConfirm.set(false); }
 
-  onEmailModalDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.emailModalDragOver.set(true);
-  }
-
-  onEmailModalDragLeave(): void {
-    this.emailModalDragOver.set(false);
-  }
-
-  onEmailModalDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.emailModalDragOver.set(false);
-    const files = Array.from(event.dataTransfer?.files ?? []);
-    this.addFiles(files);
-  }
-
-  onEmailModalFileInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const files = Array.from(input.files ?? []);
-    this.addFiles(files);
-    input.value = '';
-  }
-
-  private addFiles(newFiles: File[]): void {
-    const current = this.emailModalFiles();
-    const merged: File[] = [...current];
-    for (const f of newFiles) {
-      if (merged.length >= this.MAX_FILES) {
-        this.toast.error(`Maximum ${this.MAX_FILES} fichiers autorisés.`);
-        break;
-      }
-      if (!this.ALLOWED_TYPES.includes(f.type)) {
-        this.toast.error(`Type non autorisé : ${f.name}`);
-        continue;
-      }
-      if (f.size > this.MAX_FILE_SIZE) {
-        this.toast.error(`Fichier trop volumineux (max 10 MB) : ${f.name}`);
-        continue;
-      }
-      if (merged.some(x => x.name === f.name && x.size === f.size)) continue;
-      merged.push(f);
-    }
-    this.emailModalFiles.set(merged);
-  }
-
-  removeAttachment(index: number): void {
-    this.emailModalFiles.update(files => files.filter((_, i) => i !== index));
-  }
-
-  confirmSendEmail(): void {
-    const orderId  = this.emailModalOrderId();
+  executeSendAll(): void {
     const shipment = this.shipment();
-    const files    = this.emailModalFiles();
-    this.emailModalSending.set(true);
-
-    if (orderId !== null) {
-      this.sendingId.set(orderId);
-      this.emailSvc.sendToOrder(orderId, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: res => {
-          this.sendingId.set(null);
-          this.emailModalSending.set(false);
-          this.closeEmailModal();
-          if (res.success) {
-            this.toast.success('Email envoyé.');
-          } else {
-            this.toast.error(res.message || 'Échec envoi email.');
-          }
-          this.reloadOrders();
-        },
-        error: err => {
-          this.sendingId.set(null);
-          this.emailModalSending.set(false);
-          this.toast.error(err?.error?.message || 'Erreur.');
-        },
-      });
-    } else {
-      if (!shipment) return;
-      this.sendingAll.set(true);
-      this.emailSvc.sendToShipment(shipment.id, files).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: res => {
-          this.sendingAll.set(false);
-          this.emailModalSending.set(false);
-          this.closeEmailModal();
-          if (res.failed > 0) {
-            this.toast.error(`${res.sent}/${res.total} email(s) envoyé(s) — ${res.failed} échec(s).`);
-          } else {
-            this.toast.success(`${res.sent}/${res.total} email(s) envoyé(s).`);
-          }
-          this.reloadOrders();
-        },
-        error: err => {
-          this.sendingAll.set(false);
-          this.emailModalSending.set(false);
-          this.toast.error(err?.error?.message || 'Erreur.');
-        },
-      });
-    }
+    if (!shipment) return;
+    this.sendAllConfirm.set(false);
+    this.sendingAll.set(true);
+    this.emailSvc.sendToShipment(shipment.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.sendingAll.set(false);
+        if (res.failed > 0) {
+          this.toast.error(`${res.sent}/${res.total} email(s) envoyé(s) — ${res.failed} échec(s).`);
+        } else {
+          this.toast.success(`${res.sent}/${res.total} email(s) envoyé(s).`);
+        }
+        this.reloadOrders();
+      },
+      error: err => {
+        this.sendingAll.set(false);
+        this.toast.error(err?.error?.message || 'Erreur.');
+      },
+    });
   }
-
-  emailModalTitle = computed(() =>
-    this.emailModalOrderId() !== null ? 'Envoyer l\'email' : 'Envoyer à tous'
-  );
-
-  emailModalSubtitle = computed(() => {
-    const id = this.emailModalOrderId();
-    if (id !== null) {
-      const order = this.orders().find(o => o.id === id);
-      return order ? `${order.hawb} — ${order.clientFullName ?? ''}` : '';
-    }
-    return `${this.shipment()?.mawb ?? ''} — ${this.orders().length} client(s)`;
-  });
 
   /* ── Client autocomplete helpers ─────────────────────── */
   selectClient(c: ClientResponse): void {

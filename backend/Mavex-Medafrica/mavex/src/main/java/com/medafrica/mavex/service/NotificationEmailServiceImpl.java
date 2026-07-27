@@ -3,13 +3,22 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.dto.email.SendEmailResponse;
 import com.medafrica.mavex.dto.order.BulkEmailResult;
 import com.medafrica.mavex.model.email.EmailTemplate;
+import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
+import com.medafrica.mavex.model.payment.ManualPaymentConfig;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.ExchangeRateRepository;
+import com.medafrica.mavex.repository.ManualPaymentConfigRepository;
 import com.medafrica.mavex.repository.OrderRepository;
+import com.medafrica.mavex.repository.PaymentGatewayConfigRepository;
 import com.medafrica.mavex.service.email.EmailProviderResolver;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
+import com.medafrica.mavex.service.payment.ByteArrayMultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +44,8 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private final EmailProviderResolver    providerResolver;
     private final EmailPersistenceService  persistence;
     private final ExchangeRateRepository   exchangeRateRepository;
+    private final PaymentGatewayConfigRepository gatewayConfigRepository;
+    private final ManualPaymentConfigRepository  manualPaymentConfigRepository;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -44,25 +55,26 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     // ---------------------------------------------------------------
 
     @Override
-    public SendEmailResponse sendPaymentEmail(Long orderId, MultipartFile[] attachments) {
+    public SendEmailResponse sendPaymentEmail(Long orderId) {
         Optional<ExchangeRate> activeRate = exchangeRateRepository
             .findByIsActiveTrueAndFromCurrencyAndToCurrency("USD", "MAD");
         if (activeRate.isEmpty()) {
             log.warn("Aucun taux actif USD→MAD trouvé — lockedExchangeRate ne sera pas figé pour Order id={}", orderId);
-        }   
-        return doSendPaymentEmail(orderId, attachments, activeRate);
+        }
+        return doSendPaymentEmail(orderId, activeRate);
     }
 
-    private SendEmailResponse doSendPaymentEmail(Long orderId, MultipartFile[] attachments,
-                                                 Optional<ExchangeRate> activeRate) {
+    private SendEmailResponse doSendPaymentEmail(Long orderId, Optional<ExchangeRate> activeRate) {
 
         // 1. Lecture + préparation BDD (transaction propre dans EmailPersistenceService)
         Order order = persistence.loadAndPrepareOrder(orderId);
-            
+
+        String templateType = resolveTemplateType();
+
         EmailTemplate template = templateRepository
-                .findByType_NameAndActiveTrue("PAYMENT_INVOICE_WITH_AMOUNT")
+                .findByType_NameAndActiveTrue(templateType)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Aucun template email actif trouvé pour PAYMENT_INVOICE_WITH_AMOUNT. " +
+                        "Aucun template email actif trouvé pour " + templateType + ". " +
                         "Veuillez exécuter le script SQL d'initialisation."));
 
         Map<String, String> variables = buildVariables(order);
@@ -74,10 +86,12 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         Long emailLogId = persistence.createPendingLog(toEmail, subject, template, order.getId());
 
         try {
+            List<MultipartFile> attachments = resolveAttachments();
+
             // 3. Envoi via provider actif — hors transaction BDD intentionnellement
             String messageId = providerResolver.resolve().send(
                 toEmail, subject, htmlContent,
-                attachments != null ? List.of(attachments) : List.of()
+                attachments
             );
 
             // 4. Mise à jour BDD → SENT (recharge les entités fraîches par ID)
@@ -110,22 +124,22 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     }
 
     @Override
-    public BulkEmailResult sendAllPaymentEmails(Long shipmentId, MultipartFile[] attachments) {
+    public BulkEmailResult sendAllPaymentEmails(Long shipmentId) {
         List<Long> orderIds = orderRepository.findByShipmentId(shipmentId)
                 .stream().map(Order::getId).toList();
-        return executeBulk(orderIds, attachments);
+        return executeBulk(orderIds);
     }
 
     @Override
-    public BulkEmailResult sendBulkEmails(List<Long> orderIds, MultipartFile[] attachments) {
-        return executeBulk(orderIds, attachments);
+    public BulkEmailResult sendBulkEmails(List<Long> orderIds) {
+        return executeBulk(orderIds);
     }
 
     // ---------------------------------------------------------------
     // LOGIQUE BULK COMMUNE (évite la duplication)
     // ---------------------------------------------------------------
 
-    private BulkEmailResult executeBulk(List<Long> orderIds, MultipartFile[] attachments) {
+    private BulkEmailResult executeBulk(List<Long> orderIds) {
         Optional<ExchangeRate> activeRate = exchangeRateRepository
             .findByIsActiveTrueAndFromCurrencyAndToCurrency("USD", "MAD");
         if (activeRate.isEmpty()) {
@@ -134,7 +148,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
         int sent = 0, failed = 0;
         for (Long id : orderIds) {
             try {
-                SendEmailResponse result = doSendPaymentEmail(id, attachments, activeRate);
+                SendEmailResponse result = doSendPaymentEmail(id, activeRate);
                 if (result.isSuccess()) sent++;
                 else                    failed++;
             } catch (Exception e) {
@@ -147,6 +161,67 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
                 .sent(sent)
                 .failed(failed)
                 .build();
+    }
+
+    // ---------------------------------------------------------------
+    // SELECTION DYNAMIQUE DU TEMPLATE (selon le mode de paiement actif)
+    // ---------------------------------------------------------------
+
+    private String resolveTemplateType() {
+        Optional<PaymentGatewayType> activeType = gatewayConfigRepository.findByActiveTrue()
+                .map(config -> config.getType());
+
+        if (activeType.isEmpty()) {
+            log.warn("Aucun mode de paiement actif — utilisation du template PAYMENT_INVOICE_MANUELLE par défaut.");
+            return "PAYMENT_INVOICE_MANUELLE";
+        }
+
+        return activeType.get() == PaymentGatewayType.MANUEL
+                ? "PAYMENT_INVOICE_MANUELLE"
+                : "PAYMENT_INVOICE_ONLINE";
+    }
+
+    // ---------------------------------------------------------------
+    // PIECE JOINTE AUTOMATIQUE (RIB si mode MANUEL actif)
+    // ---------------------------------------------------------------
+
+    private List<MultipartFile> resolveAttachments() {
+        PaymentGatewayType activeType = gatewayConfigRepository.findByActiveTrue()
+                .map(config -> config.getType())
+                .orElse(null);
+
+        if (activeType != PaymentGatewayType.MANUEL) {
+            return List.of();
+        }
+
+        List<ManualPaymentConfig> configs = manualPaymentConfigRepository.findAll();
+        if (configs.isEmpty()) {
+            log.warn("Mode MANUEL actif mais aucun RIB configure — email envoye sans piece jointe.");
+            return List.of();
+        }
+
+        ManualPaymentConfig ribConfig = configs.get(0);
+        String filePath = ribConfig.getRibFilePath();
+        if (filePath == null || filePath.isBlank()) {
+            log.warn("Mode MANUEL actif mais chemin du RIB vide — email envoye sans piece jointe.");
+            return List.of();
+        }
+
+        try {
+            byte[] bytes = Files.readAllBytes(Path.of(filePath));
+            MultipartFile ribFile = new ByteArrayMultipartFile(
+                    "rib",
+                    ribConfig.getRibFileName(),
+                    "application/pdf",
+                    bytes
+            );
+            List<MultipartFile> attachments = new ArrayList<>();
+            attachments.add(ribFile);
+            return attachments;
+        } catch (IOException e) {
+            log.warn("Impossible de lire le fichier RIB sur disque ({}) — email envoye sans piece jointe.", filePath, e);
+            return List.of();
+        }
     }
 
     // ---------------------------------------------------------------

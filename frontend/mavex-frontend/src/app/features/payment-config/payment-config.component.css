@@ -1,0 +1,429 @@
+/* ══════════════════════════════════════════════════
+   PAGE HEADER
+   ══════════════════════════════════════════════════ */
+.pc-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pc-page-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pc-page-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #FFF7ED;
+  color: var(--mavex-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pc-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.pc-page-sub {
+  font-size: 13px;
+  color: var(--mavex-muted, #6B7280);
+  margin: 2px 0 0;
+}
+
+/* ══════════════════════════════════════════════════
+   CARD
+   ══════════════════════════════════════════════════ */
+.pc-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+.pc-config-card {
+  margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   GRILLE PROVIDERS
+   ══════════════════════════════════════════════════ */
+.pc-providers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ══════════════════════════════════════════════════
+   CARTE PROVIDER
+   ══════════════════════════════════════════════════ */
+.pc-provider-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 22px 16px;
+  background: #fff;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+  text-align: center;
+  min-height: 110px;
+  width: 100%;
+}
+
+.pc-provider-card:hover {
+  border-color: #93C5FD;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.08);
+}
+
+.pc-provider-card:focus-visible {
+  outline: 3px solid #2563EB;
+  outline-offset: 2px;
+}
+
+.pc-provider-card--active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+}
+
+/* ── Carte désactivée (PayPal) ── */
+.pc-provider-card--disabled {
+  cursor: not-allowed;
+  opacity: .6;
+  background: #F9FAFB;
+}
+
+.pc-provider-card--disabled:hover {
+  border-color: #E5E7EB;
+  box-shadow: none;
+}
+
+/* ── Badge ACTIF ── */
+.pc-badge-actif {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: #16A34A;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 20px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+
+/* ── Badge Bientôt disponible ── */
+.pc-badge-soon {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: #6B7280;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  padding: 2px 8px;
+  line-height: 1.4;
+}
+
+/* ── Coche bleue ── */
+.pc-check-icon {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Logo provider ── */
+.pc-provider-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pc-provider-logo--manuel {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.pc-provider-logo--paypal {
+  background: #F3F4F6;
+}
+
+/* ── Textes carte ── */
+.pc-provider-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.pc-provider-desc {
+  font-size: 11.5px;
+  color: #6B7280;
+  line-height: 1.4;
+}
+
+/* ══════════════════════════════════════════════════
+   EN-TÊTE DE CONFIG
+   ══════════════════════════════════════════════════ */
+.pc-config-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pc-config-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   FICHIER RIB ACTUEL
+   ══════════════════════════════════════════════════ */
+.pc-current-rib {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.pc-current-rib-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pc-current-rib-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pc-current-rib-date {
+  font-size: 11.5px;
+  color: #6B7280;
+}
+
+/* ══════════════════════════════════════════════════
+   DRAG & DROP
+   ══════════════════════════════════════════════════ */
+.pc-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  border: 2px dashed #D1D5DB;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  color: #6B7280;
+  transition: border-color .15s, background .15s;
+}
+
+.pc-drop-zone:hover,
+.pc-drop-zone:focus-visible {
+  border-color: #93C5FD;
+  background: #F9FAFB;
+}
+
+.pc-drop-zone--over {
+  border-color: #2563EB;
+  background: #EFF6FF;
+}
+
+.pc-drop-label {
+  font-size: 13.5px;
+  color: #374151;
+  margin: 0;
+}
+
+.pc-drop-link {
+  color: #2563EB;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.pc-drop-hint {
+  font-size: 11.5px;
+  color: #9CA3AF;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   LISTE FICHIER SÉLECTIONNÉ
+   ══════════════════════════════════════════════════ */
+.pc-file-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pc-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+}
+
+.pc-file-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pc-file-size {
+  font-size: 11.5px;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+.pc-file-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #9CA3AF;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+
+.pc-file-remove:hover {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+/* ══════════════════════════════════════════════════
+   PIED DE FORMULAIRE
+   ══════════════════════════════════════════════════ */
+.pc-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #F3F4F6;
+  flex-wrap: wrap;
+}
+
+/* ── Bouton Appliquer (orange) ── */
+.pc-btn-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--mavex-accent, #F97316);
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, box-shadow .15s;
+  box-shadow: 0 2px 8px rgba(249,115,22,.25);
+}
+
+.pc-btn-apply:hover:not(:disabled) {
+  background: var(--mavex-accent-dark, #EA580C);
+  box-shadow: 0 4px 12px rgba(249,115,22,.35);
+}
+
+.pc-btn-apply:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pc-btn-apply:focus-visible {
+  outline: 3px solid #F97316;
+  outline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   SKELETON
+   ══════════════════════════════════════════════════ */
+.pc-skeleton {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: pc-shimmer 1.4s infinite;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+@keyframes pc-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .pc-providers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pc-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pc-btn-apply {
+    width: 100%;
+    justify-content: center;
+  }
+}

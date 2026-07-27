@@ -120,6 +120,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/email-provider/email-provider.component').then(m => m.EmailProviderComponent),
       },
+      {
+        path: 'settings/payment-config',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/payment-config/payment-config.component').then(m => m.PaymentConfigComponent),
+      },
     ],
   },
 
