@@ -1,0 +1,183 @@
+<div class="eda-quota-banner"
+     [class.eda-quota-banner--green]="!loadingQuota() && quota()?.available && quotaLevel() === 'green'"
+     [class.eda-quota-banner--orange]="!loadingQuota() && quota()?.available && quotaLevel() === 'orange'"
+     [class.eda-quota-banner--red]="!loadingQuota() && quota()?.available && quotaLevel() === 'red'"
+     [class.eda-quota-banner--neutral]="loadingQuota() || quota()?.available === false">
+
+  <div class="eda-quota-icon">
+    <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+      <polyline points="22,6 12,13 2,6"/>
+    </svg>
+  </div>
+
+  @if (loadingQuota()) {
+    <div class="eda-quota-sk"></div>
+  } @else if (quota() && !quota()!.available) {
+    <div class="eda-quota-body">
+      <div class="eda-quota-title">Quota Brevo indisponible</div>
+      <div class="eda-quota-sub">{{ quota()!.errorMessage }}</div>
+    </div>
+  } @else if (quota()) {
+    <div class="eda-quota-body">
+      <div class="eda-quota-val">{{ quota()!.remainingCredits }} emails restants aujourd'hui</div>
+    </div>
+  }
+</div>
+
+<section>
+  <div class="eda-section-header">
+    <h2>Statistiques email</h2>
+
+    @if (auth.isAdmin()) {
+      <div class="eda-recompute-wrap">
+        @if (recomputeMessage(); as msg) {
+          <span class="eda-recompute-msg" [class.eda-recompute-msg--error]="msg.type === 'error'">{{ msg.text }}</span>
+        }
+        <button
+          type="button"
+          class="eda-recompute-btn"
+          [disabled]="isRecomputing()"
+          (click)="recomputeNow()"
+        >
+          {{ isRecomputing() ? 'Calcul en cours...' : 'Recalculer maintenant' }}
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (loadingStats()) {
+    <p>Chargement...</p>
+  } @else if (statsError()) {
+    <p>{{ statsError() }}</p>
+  } @else if (statsHistory()) {
+    <div class="eda-kpi-grid">
+      <div class="eda-kpi eda-kpi--orange">
+        <div class="eda-kpi-icon">📤</div>
+        <div class="eda-kpi-val">{{ animatedSent() }}</div>
+        <div class="eda-kpi-label">Emails envoyés</div>
+      </div>
+
+      <div class="eda-kpi eda-kpi--green">
+        <div class="eda-kpi-icon">✅</div>
+        <div class="eda-kpi-val">{{ statsHistory()!.summary.totalDelivered }}</div>
+        <div class="eda-kpi-label">Emails livrés</div>
+      </div>
+
+      <div class="eda-kpi eda-kpi--neutral">
+        <div class="eda-kpi-icon">👀</div>
+        <div class="eda-kpi-val">{{ statsHistory()!.summary.totalOpened }}</div>
+        <div class="eda-kpi-label">Emails ouverts</div>
+      </div>
+
+      <div class="eda-kpi eda-kpi--red">
+        <div class="eda-kpi-icon">⚠️</div>
+        <div class="eda-kpi-val">{{ statsHistory()!.summary.totalBounced }}</div>
+        <div class="eda-kpi-label">Bounced</div>
+      </div>
+
+      <div class="eda-kpi eda-kpi--green">
+        <div class="eda-kpi-icon">📈</div>
+        <div class="eda-kpi-val">{{ statsHistory()!.summary.deliveryRate }}%</div>
+        <div class="eda-kpi-label">Taux de livraison</div>
+      </div>
+
+      <div class="eda-kpi eda-kpi--neutral">
+        <div class="eda-kpi-icon">📊</div>
+        <div class="eda-kpi-val">{{ statsHistory()!.summary.openRate }}%</div>
+        <div class="eda-kpi-label">Taux d'ouverture</div>
+      </div>
+    </div>
+
+    <div class="eda-chart-panel">
+      <apx-chart
+        [series]="lineSeries()"
+        [chart]="lineChart"
+        [colors]="lineColors"
+        [stroke]="lineStroke"
+        [xaxis]="{ categories: lineCategories(), labels: lineXAxis.labels, axisBorder: lineXAxis.axisBorder, axisTicks: lineXAxis.axisTicks }"
+        [yaxis]="lineYAxis"
+        [grid]="lineGrid"
+        [legend]="lineLegend"
+        [tooltip]="lineTooltip"
+        [dataLabels]="lineDataLabels"
+      ></apx-chart>
+    </div>
+
+    <button type="button" class="eda-toggle-btn" (click)="toggleDetailTable()">
+      Voir le détail jour par jour {{ showDetailTable() ? '▴' : '▾' }}
+    </button>
+
+    @if (showDetailTable()) {
+      <div class="eda-detail-row">
+        <div class="eda-table-panel">
+          <table class="eda-table">
+            <thead>
+              <tr>
+                <th class="eda-col-date">Date</th>
+                <th class="eda-col-num">Envoyés</th>
+                <th class="eda-col-num">Livrés</th>
+                <th class="eda-col-num">Ouverts</th>
+                <th class="eda-col-num">Bounced</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (day of statsHistory()!.days; track day.date) {
+                <tr [class.eda-row--today]="isToday(day.date)">
+                  <td class="eda-col-date">{{ day.date }}</td>
+                  <td class="eda-col-num">{{ day.sent }}</td>
+                  <td class="eda-col-num">{{ day.delivered }}</td>
+                  <td class="eda-col-num">{{ day.opened }}</td>
+                  <td class="eda-col-num" [class.eda-bounced-alert]="day.bounced > 0">{{ day.bounced }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="eda-insights-panel">
+          <div class="eda-insights-title">Aperçu</div>
+
+          <div class="eda-insight-block">
+            <div class="eda-insight-label">Meilleur jour</div>
+            @if (bestDay(); as best) {
+              <div class="eda-insight-value">{{ best.date }} — {{ best.sent }} envoyés</div>
+            } @else {
+              <div class="eda-insight-value eda-insight-value--muted">Aucune activité sur la période</div>
+            }
+          </div>
+
+          <div class="eda-insight-block">
+            <div class="eda-insight-label">Moyenne quotidienne</div>
+            <div class="eda-insight-value">{{ dailyAverage() }} emails/jour</div>
+          </div>
+
+          <div class="eda-insight-block">
+            <div class="eda-insight-label">Alerte qualité</div>
+            @if (worstBounceDay(); as worst) {
+              <div class="eda-insight-value eda-insight-value--alert">
+                ⚠️ {{ worst.day.date }} : {{ worst.day.bounced }} emails bounced
+                @if (worst.otherDaysCount > 0) {
+                  <span class="eda-insight-sub">+{{ worst.otherDaysCount }} autre(s) jour(s) concerné(s)</span>
+                }
+              </div>
+            } @else {
+              <div class="eda-insight-value eda-insight-value--muted">Aucun email rejeté sur la période</div>
+            }
+          </div>
+
+          <div class="eda-insight-block">
+            <div class="eda-insight-label">Aujourd'hui</div>
+            @if (todaySummary(); as today) {
+              <div class="eda-insight-value">
+                {{ today.sent }} envoyés · {{ today.delivered }} livrés · {{ today.opened }} ouverts · {{ today.bounced }} bounced
+              </div>
+            } @else {
+              <div class="eda-insight-value eda-insight-value--muted">Pas de données pour aujourd'hui</div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+</section>

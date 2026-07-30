@@ -1,0 +1,415 @@
+/* ═══════════════════════════════════════════════════════════
+   KPI GRID — Analytics email
+   ═══════════════════════════════════════════════════════════ */
+.eda-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.eda-kpi {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 20px 20px 18px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.eda-kpi:hover {
+  border-color: #D1D5DB;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .06);
+}
+
+.eda-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-bottom: 14px;
+}
+
+.eda-kpi-val {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  color: #0C0C0E;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.eda-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+/* ── Accents de couleur ──────────────────────────────────── */
+.eda-kpi--orange .eda-kpi-icon  { background: #FFF7ED; color: #F97316; }
+.eda-kpi--green  .eda-kpi-icon  { background: #F0FDF4; color: #22C55E; }
+.eda-kpi--red    .eda-kpi-icon  { background: #FEF2F2; color: #EF4444; }
+.eda-kpi--neutral .eda-kpi-icon { background: #F3F4F6; color: #374151; }
+
+.eda-kpi--orange  { border-top: 3px solid #F97316; }
+.eda-kpi--green   { border-top: 3px solid #22C55E; }
+.eda-kpi--red     { border-top: 3px solid #EF4444; }
+.eda-kpi--neutral { border-top: 3px solid #9CA3AF; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1280px) {
+  .eda-kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1024px) {
+  .eda-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .eda-kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GRAPHIQUE — évolution des stats email
+   ═══════════════════════════════════════════════════════════ */
+.eda-chart-panel {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 16px 12px 8px;
+  margin-bottom: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOUTON TOGGLE — détail jour par jour
+   ═══════════════════════════════════════════════════════════ */
+.eda-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  color: #6B7280;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: border-color .15s, color .15s, box-shadow .15s;
+}
+.eda-toggle-btn:hover {
+  border-color: #F97316;
+  color: #F97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, .12);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BANDEAU QUOTA BREVO
+   ═══════════════════════════════════════════════════════════ */
+.eda-quota-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 24px 28px;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  margin-bottom: 24px;
+  transition: border-color .15s, background .15s;
+}
+
+.eda-quota-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eda-quota-body { flex: 1; min-width: 0; }
+
+.eda-quota-val {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.eda-quota-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.3;
+}
+
+.eda-quota-sub {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-top: 4px;
+}
+
+/* ── Variantes de couleur selon le seuil ─────────────────── */
+.eda-quota-banner--green {
+  border-color: #BBF7D0;
+  background: #F0FDF4;
+}
+.eda-quota-banner--green .eda-quota-icon { background: #DCFCE7; color: #22C55E; }
+.eda-quota-banner--green .eda-quota-val  { color: #15803D; }
+
+.eda-quota-banner--orange {
+  border-color: #FED7AA;
+  background: #FFF7ED;
+}
+.eda-quota-banner--orange .eda-quota-icon { background: #FFEDD5; color: #F97316; }
+.eda-quota-banner--orange .eda-quota-val  { color: #C2410C; }
+
+.eda-quota-banner--red {
+  border-color: #FECACA;
+  background: #FEF2F2;
+}
+.eda-quota-banner--red .eda-quota-icon { background: #FEE2E2; color: #EF4444; }
+.eda-quota-banner--red .eda-quota-val  { color: #B91C1C; }
+
+/* Indisponible / chargement — neutre, pas rouge (différent d'un quota bas) */
+.eda-quota-banner--neutral {
+  border-color: #E5E7EB;
+  background: #F9FAFB;
+}
+.eda-quota-banner--neutral .eda-quota-icon { background: #F3F4F6; color: #6B7280; }
+
+/* Skeleton pendant le chargement */
+.eda-quota-sk {
+  flex: 1;
+  height: 26px;
+  max-width: 260px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #F3F4F6 25%, #E9EAEC 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: eda-quota-wave 1.4s ease infinite;
+}
+@keyframes eda-quota-wave {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 640px) {
+  .eda-quota-banner { padding: 18px 20px; }
+  .eda-quota-val    { font-size: 20px; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER DE SECTION — titre + bouton recalcul
+   ═══════════════════════════════════════════════════════════ */
+.eda-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.eda-recompute-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eda-recompute-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  color: #6B7280;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s, color .15s, box-shadow .15s;
+}
+.eda-recompute-btn:hover:not(:disabled) {
+  border-color: #F97316;
+  color: #F97316;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, .12);
+}
+.eda-recompute-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.eda-recompute-msg {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #16A34A;
+  white-space: nowrap;
+  animation: eda-msg-fade .25s ease;
+}
+.eda-recompute-msg--error {
+  color: #EF4444;
+}
+
+@keyframes eda-msg-fade {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLEAU DÉTAIL JOUR PAR JOUR
+   ═══════════════════════════════════════════════════════════ */
+.eda-table-panel {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.eda-table {
+  width: auto;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.eda-table .eda-col-date { width: 130px; }
+.eda-table .eda-col-num  { width: 110px; }
+
+.eda-table thead th {
+  position: sticky;
+  top: 0;
+  background: #F9FAFB;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  padding: 12px 16px;
+  text-align: right;
+  white-space: nowrap;
+  z-index: 1;
+}
+.eda-table thead th.eda-col-date { text-align: left; }
+
+.eda-table tbody td {
+  padding: 11px 16px;
+  font-size: 13px;
+  color: #374151;
+  text-align: right;
+  border-top: 1px solid #F3F4F6;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+.eda-table tbody td.eda-col-date {
+  text-align: left;
+  font-weight: 500;
+  color: #0C0C0E;
+}
+
+.eda-table tbody tr:nth-child(even) { background: #FAFAFA; }
+.eda-table tbody tr:hover           { background: #F3F4F6; }
+
+.eda-table tbody tr:first-child td { border-top: none; }
+
+/* Ligne du jour actuel — accent orange */
+.eda-table tbody tr.eda-row--today {
+  background: #FFF7ED;
+  box-shadow: inset 3px 0 0 #F97316;
+}
+.eda-table tbody tr.eda-row--today:hover { background: #FFEDD5; }
+
+/* Bounced > 0 — alerte rouge */
+.eda-table tbody td.eda-bounced-alert {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RANGÉE TABLEAU + APERÇU
+   ═══════════════════════════════════════════════════════════ */
+.eda-detail-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.eda-detail-row .eda-table-panel {
+  flex-shrink: 0;
+}
+
+.eda-insights-panel {
+  flex: 1;
+  min-width: 260px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eda-insights-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #0C0C0E;
+}
+
+.eda-insight-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.eda-insight-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.eda-insight-value {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.eda-insight-value--muted {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.eda-insight-value--alert {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.eda-insight-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+
+@media (max-width: 1024px) {
+  .eda-detail-row { flex-direction: column; }
+  .eda-detail-row .eda-table-panel { width: 100%; }
+}

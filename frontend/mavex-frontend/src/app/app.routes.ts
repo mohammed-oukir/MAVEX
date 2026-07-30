@@ -109,6 +109,12 @@ export const routes: Routes = [
           import('./features/exchange-rates/exchange-rates.component').then(m => m.ExchangeRatesComponent),
       },
       {
+        path: 'dashboard-analytics',
+        canActivate: [permissionGuard('DASHBOARD')],
+        loadComponent: () =>
+          import('./features/dashboard-analytics/dashboard-analytics.component').then(m => m.DashboardAnalyticsComponent),
+      },
+      {
         path: 'settings/email-settings',
         canActivate: [adminGuard],
         loadComponent: () =>

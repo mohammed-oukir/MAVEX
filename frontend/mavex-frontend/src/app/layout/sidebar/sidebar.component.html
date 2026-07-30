@@ -28,6 +28,21 @@
       </a>
     }
 
+    @if (auth.isAdmin() || perm.hasAnyPermission('DASHBOARD')) {
+      <a
+        class="sb-item"
+        routerLink="/dashboard-analytics"
+        routerLinkActive="active"
+        aria-label="Analytics email"
+      >
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+          <polyline points="3 17 9 11 13 15 21 6"/>
+          <polyline points="15 6 21 6 21 12"/>
+        </svg>
+        Analytics email
+      </a>
+    }
+
     @if (auth.isAdmin() || perm.hasAnyPermission('SHIPMENTS')) {
       <a
         class="sb-item"

@@ -46,7 +46,7 @@
         type="text"
         [value]="formName()"
         (input)="formName.set($any($event.target).value)"
-        placeholder="Nom" />
+        />
       <div class="nt-modal-actions">
         <button type="button" class="nt-btn-save" (click)="save()">Save</button>
         <button type="button" class="nt-btn-cancel" (click)="cancel()">Cancel</button>

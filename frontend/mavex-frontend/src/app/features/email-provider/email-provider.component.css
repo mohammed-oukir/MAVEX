@@ -138,11 +138,13 @@
 }
 
 .ep-provider-logo--brevo {
-  background: #0B7B3E;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 800;
-  font-family: 'DM Sans', sans-serif;
+  background: #0B996E;
+}
+
+.ep-provider-logo--brevo img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
 }
 
 .ep-provider-logo--smtp {

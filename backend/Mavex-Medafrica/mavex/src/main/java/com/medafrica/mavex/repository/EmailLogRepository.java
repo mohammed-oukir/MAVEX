@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,5 +32,13 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
            "WHERE e2.order.id = e.order.id AND e2.status = :status)")
     List<EmailLog> findLastSentByOrderIds(@Param("orderIds") List<Long> orderIds,
                                             @Param("status") EmailStatus status);
+
+    long countBySentAtBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByDeliveredAtBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByOpenedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    long countByBouncedAtBetween(LocalDateTime start, LocalDateTime end);
 
 }
