@@ -153,23 +153,23 @@
           <th scope="col">
             <div class="cl-fi-wrap">
               <svg class="cl-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input class="cl-fi-input" [value]="fName()" (input)="setFilter('name', $any($event.target).value)" placeholder="Nom…" aria-label="Filtrer par nom" />
+              <input class="cl-fi-input" [value]="fName()" (input)="setFilter('name', $any($event.target).value)" aria-label="Filtrer par nom" />
             </div>
           </th>
           <th scope="col">
-            <input class="cl-fi-input" [value]="fEmail()" (input)="setFilter('email', $any($event.target).value)" placeholder="Email…" aria-label="Filtrer par email" />
+            <input class="cl-fi-input" [value]="fEmail()" (input)="setFilter('email', $any($event.target).value)" aria-label="Filtrer par email" />
           </th>
           <th scope="col">
-            <input class="cl-fi-input" [value]="fPhone()" (input)="setFilter('phone', $any($event.target).value)" placeholder="Tél…" aria-label="Filtrer par téléphone" />
+            <input class="cl-fi-input" [value]="fPhone()" (input)="setFilter('phone', $any($event.target).value)" aria-label="Filtrer par téléphone" />
           </th>
           <th scope="col">
-            <input class="cl-fi-input" [value]="fCity()" (input)="setFilter('city', $any($event.target).value)" placeholder="Ville…" aria-label="Filtrer par ville" />
+            <input class="cl-fi-input" [value]="fCity()" (input)="setFilter('city', $any($event.target).value)" aria-label="Filtrer par ville" />
           </th>
           <th scope="col">
-            <input class="cl-fi-input" [value]="fState()" (input)="setFilter('state', $any($event.target).value)" placeholder="NY…" aria-label="Filtrer par état" maxlength="2" style="width:56px" />
+            <input class="cl-fi-input" [value]="fState()" (input)="setFilter('state', $any($event.target).value)" aria-label="Filtrer par état" maxlength="2" style="width:56px" />
           </th>
           <th scope="col">
-            <input class="cl-fi-input" [value]="fCountry()" (input)="setFilter('country', $any($event.target).value)" placeholder="US…" aria-label="Filtrer par pays" maxlength="2" style="width:60px" />
+            <input class="cl-fi-input" [value]="fCountry()" (input)="setFilter('country', $any($event.target).value)" aria-label="Filtrer par pays" maxlength="2" style="width:60px" />
           </th>
           <th scope="col">
             <select class="cl-fi-select" [value]="fStatus()" (change)="setStatus($any($event.target).value)" aria-label="Filtrer par statut">
@@ -353,7 +353,7 @@
               <div class="nm-field">
                 <label for="clFullName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
                 <input id="clFullName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('fullName')"
-                  formControlName="fullName" placeholder="John Doe" autocomplete="name" />
+                  formControlName="fullName" autocomplete="name" />
                 @if (fieldInvalid('fullName')) {
                   <div class="nm-err-msg" role="alert">Nom obligatoire (min. 2 caractères).</div>
                 }
@@ -364,7 +364,7 @@
               <div class="nm-field">
                 <label for="clEmail" class="nm-label">Email <span class="nm-req">*</span></label>
                 <input id="clEmail" type="email" class="nm-input" [class.nm-err]="fieldInvalid('email')"
-                  formControlName="email" placeholder="john@example.com" autocomplete="email" />
+                  formControlName="email" autocomplete="email" />
                 @if (fieldInvalid('email')) {
                   <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
                 }
@@ -374,21 +374,21 @@
             <div class="col-12 col-md-6">
               <div class="nm-field">
                 <label for="clPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
-                <input id="clPhone" type="tel" class="nm-input" formControlName="phone" placeholder="+1 555 000 0000" autocomplete="tel" />
+                <input id="clPhone" type="tel" class="nm-input" formControlName="phone" autocomplete="tel" />
               </div>
             </div>
 
             <div class="col-12 col-md-6">
               <div class="nm-field">
                 <label for="clAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
-                <input id="clAddress" type="text" class="nm-input" formControlName="address" placeholder="123 Main St" autocomplete="street-address" />
+                <input id="clAddress" type="text" class="nm-input" formControlName="address" autocomplete="street-address" />
               </div>
             </div>
 
             <div class="col-12 col-md-5">
               <div class="nm-field">
                 <label for="clCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
-                <input id="clCity" type="text" class="nm-input" formControlName="city" placeholder="New York" autocomplete="address-level2" />
+                <input id="clCity" type="text" class="nm-input" formControlName="city" autocomplete="address-level2" />
               </div>
             </div>
 
@@ -396,7 +396,7 @@
               <div class="nm-field">
                 <label for="clState" class="nm-label">État <span class="nm-opt">optionnel</span></label>
                 <input id="clState" type="text" class="nm-input" [class.nm-err]="fieldInvalid('state')"
-                  formControlName="state" placeholder="NY" maxlength="2" style="text-transform:uppercase" autocomplete="address-level1" />
+                  formControlName="state" maxlength="2" style="text-transform:uppercase" autocomplete="address-level1" />
                 @if (fieldInvalid('state')) {
                   <div class="nm-err-msg" role="alert">2 lettres majuscules.</div>
                 }
@@ -406,7 +406,7 @@
             <div class="col-6 col-md-4">
               <div class="nm-field">
                 <label for="clZip" class="nm-label">Code postal <span class="nm-opt">optionnel</span></label>
-                <input id="clZip" type="text" class="nm-input" formControlName="zipCode" placeholder="10001" autocomplete="postal-code" />
+                <input id="clZip" type="text" class="nm-input" formControlName="zipCode" autocomplete="postal-code" />
               </div>
             </div>
 
@@ -414,7 +414,7 @@
               <div class="nm-field">
                 <label for="clCountry" class="nm-label">Pays <span class="nm-req">*</span></label>
                 <input id="clCountry" type="text" class="nm-input" [class.nm-err]="fieldInvalid('countryCode')"
-                  formControlName="countryCode" placeholder="US" maxlength="2" style="text-transform:uppercase" autocomplete="country" />
+                  formControlName="countryCode" maxlength="2" style="text-transform:uppercase" autocomplete="country" />
                 @if (fieldInvalid('countryCode')) {
                   <div class="nm-err-msg" role="alert">Code pays 2 lettres (ex: US, MA).</div>
                 }

@@ -79,7 +79,7 @@
   <div class="us-right-bar">
     <div class="us-search-wrap">
       <svg class="us-search-ico" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" class="us-search" placeholder="Chercher un membre…" [value]="searchQ()" (input)="setSearch($any($event.target).value)" aria-label="Rechercher" />
+      <input type="search" class="us-search" [value]="searchQ()" (input)="setSearch($any($event.target).value)" aria-label="Rechercher" />
     </div>
     <button type="button" class="us-add-btn" (click)="openCreate()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -235,7 +235,7 @@
               <div class="nm-field">
                 <label for="usFullName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
                 <input id="usFullName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('fullName')"
-                  formControlName="fullName" placeholder="Mohammed Alaoui" autocomplete="name" />
+                  formControlName="fullName" autocomplete="name" />
                 @if (fieldInvalid('fullName')) { <div class="nm-err-msg" role="alert">Nom obligatoire (min. 2 caractères).</div> }
               </div>
             </div>
@@ -244,7 +244,7 @@
               <div class="nm-field">
                 <label for="usEmail" class="nm-label">Adresse email <span class="nm-req">*</span></label>
                 <input id="usEmail" type="email" class="nm-input" [class.nm-err]="fieldInvalid('email')"
-                  formControlName="email" placeholder="membre@mavex.ma" autocomplete="email" />
+                  formControlName="email" autocomplete="email" />
                 @if (fieldInvalid('email')) { <div class="nm-err-msg" role="alert">Email valide obligatoire.</div> }
               </div>
             </div>
@@ -258,7 +258,7 @@
                 </label>
                 <div style="position:relative">
                   <input id="usPassword" [type]="showPwd() ? 'text' : 'password'" class="nm-input" [class.nm-err]="fieldInvalid('password')"
-                    formControlName="password" placeholder="Min. 8 caractères" autocomplete="new-password" style="padding-right:44px" />
+                    formControlName="password" autocomplete="new-password" style="padding-right:44px" />
                   <button type="button" class="us-pwd-toggle" (click)="toggleShowPwd()" [attr.aria-label]="showPwd() ? 'Masquer' : 'Afficher'">
                     @if (showPwd()) {
                       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>

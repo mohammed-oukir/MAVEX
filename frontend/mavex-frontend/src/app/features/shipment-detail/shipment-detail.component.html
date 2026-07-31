@@ -355,7 +355,7 @@
       <div class="sd-tools">
         <div class="sd-search-wrap">
           <svg class="sd-search-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" class="sd-search" placeholder="Rechercher…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Rechercher dans le manifeste" />
+          <input type="search" class="sd-search" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Rechercher dans le manifeste" />
         </div>
         <button type="button" class="sd-btn-ghost" appRequiresPermission module="ORDERS" action="EDIT" [disabled]="sendingAll()" (click)="sendAll()" aria-label="Envoyer tous les emails">
           @if (sendingAll()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
@@ -498,7 +498,7 @@
               <div class="col-md-6">
                 <div class="nm-field">
                   <label for="oHawb" class="nm-label">HAWB <span class="nm-req">Requis</span></label>
-                  <input id="oHawb" type="text" class="nm-input" [class.nm-err]="orderFieldInvalid('hawb')" formControlName="hawb" placeholder="ex : MX-2024-001-01" autocomplete="off" />
+                  <input id="oHawb" type="text" class="nm-input" [class.nm-err]="orderFieldInvalid('hawb')" formControlName="hawb" autocomplete="off" />
                   @if (orderFieldInvalid('hawb')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> HAWB obligatoire.</div> }
                 </div>
               </div>
@@ -520,7 +520,6 @@
                           [value]="clientSearch()"
                           (input)="onClientSearchInput($any($event.target).value)"
                           (focus)="showClientDropdown.set(true)"
-                          placeholder="Rechercher un client…"
                           autocomplete="off"
                           aria-autocomplete="list"
                           aria-haspopup="listbox"
@@ -563,7 +562,7 @@
                         <div class="col-12 col-md-6">
                           <label for="ncfName" class="nm-label">Nom complet <span class="nm-req">*</span></label>
                           <input id="ncfName" type="text" class="nm-input" [class.nm-err]="newClientFieldInvalid('fullName')"
-                            formControlName="fullName" placeholder="John Doe" autocomplete="off" />
+                            formControlName="fullName" autocomplete="off" />
                           @if (newClientFieldInvalid('fullName')) {
                             <div class="nm-err-msg" role="alert">Nom obligatoire.</div>
                           }
@@ -572,7 +571,7 @@
                         <div class="col-12 col-md-6">
                           <label for="ncfEmail" class="nm-label">Email <span class="nm-req">*</span></label>
                           <input id="ncfEmail" type="email" class="nm-input" [class.nm-err]="newClientFieldInvalid('email')"
-                            formControlName="email" placeholder="john@example.com" autocomplete="off" />
+                            formControlName="email" autocomplete="off" />
                           @if (newClientFieldInvalid('email')) {
                             <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
                           }
@@ -580,34 +579,34 @@
 
                         <div class="col-12 col-md-6">
                           <label for="ncfPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
-                          <input id="ncfPhone" type="tel" class="nm-input" formControlName="phone" placeholder="+212600000000" autocomplete="off" />
+                          <input id="ncfPhone" type="tel" class="nm-input" formControlName="phone" autocomplete="off" />
                         </div>
 
                         <div class="col-12 col-md-6">
                           <label for="ncfCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
-                          <input id="ncfCity" type="text" class="nm-input" formControlName="city" placeholder="Casablanca" autocomplete="off" />
+                          <input id="ncfCity" type="text" class="nm-input" formControlName="city" autocomplete="off" />
                         </div>
 
                         <div class="col-12">
                           <label for="ncfAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
-                          <input id="ncfAddress" type="text" class="nm-input" formControlName="address" placeholder="123 Rue Hassan II" autocomplete="off" />
+                          <input id="ncfAddress" type="text" class="nm-input" formControlName="address" autocomplete="off" />
                         </div>
 
                         <div class="col-6 col-md-4">
                           <label for="ncfState" class="nm-label">État <span class="nm-opt">optionnel</span></label>
                           <input id="ncfState" type="text" class="nm-input" formControlName="state"
-                            placeholder="CA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                            maxlength="2" style="text-transform:uppercase" autocomplete="off" />
                         </div>
 
                         <div class="col-6 col-md-4">
                           <label for="ncfZip" class="nm-label">Code postal <span class="nm-opt">optionnel</span></label>
-                          <input id="ncfZip" type="text" class="nm-input" formControlName="zipCode" placeholder="20000" autocomplete="off" />
+                          <input id="ncfZip" type="text" class="nm-input" formControlName="zipCode" autocomplete="off" />
                         </div>
 
                         <div class="col-12 col-md-4">
                           <label for="ncfCountry" class="nm-label">Pays <span class="nm-req">*</span></label>
                           <input id="ncfCountry" type="text" class="nm-input" [class.nm-err]="newClientFieldInvalid('countryCode')"
-                            formControlName="countryCode" placeholder="MA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                            formControlName="countryCode" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
                           @if (newClientFieldInvalid('countryCode')) {
                             <div class="nm-err-msg" role="alert">Code pays 2 lettres.</div>
                           }
@@ -634,32 +633,32 @@
               <div class="col-12">
                 <div class="nm-field">
                   <label for="oDesc" class="nm-label">Description <span class="nm-opt">optionnel</span></label>
-                  <input id="oDesc" type="text" class="nm-input" formControlName="goodsDescription" placeholder="ex : Electronics, textiles…" />
+                  <input id="oDesc" type="text" class="nm-input" formControlName="goodsDescription" />
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="nm-field">
                   <label for="oItems" class="nm-label">Nb articles <span class="nm-opt">optionnel</span></label>
-                  <input id="oItems" type="number" class="nm-input" formControlName="numberOfItems" min="1" placeholder="ex : 3" />
+                  <input id="oItems" type="number" class="nm-input" formControlName="numberOfItems" min="1" />
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="nm-field">
                   <label for="oWeight" class="nm-label">Poids (kg) <span class="nm-opt">optionnel</span></label>
-                  <input id="oWeight" type="number" class="nm-input" formControlName="shipmentWeight" min="0" step="0.01" placeholder="ex : 12.5" />
+                  <input id="oWeight" type="number" class="nm-input" formControlName="shipmentWeight" min="0" step="0.01" />
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="nm-field">
                   <label for="oHtsus" class="nm-label">Code HTSUS <span class="nm-opt">optionnel</span></label>
-                  <input id="oHtsus" type="text" class="nm-input" formControlName="htsusCode" placeholder="ex : 8471.30" />
+                  <input id="oHtsus" type="text" class="nm-input" formControlName="htsusCode" />
                 </div>
               </div>
               <div class="col-12 pt-1"><div class="nm-section">Valeurs douanières</div></div>
               <div class="col-md-5">
                 <div class="nm-field">
                   <label for="oCustomsVal" class="nm-label">Valeur customs <span class="nm-req">Requis</span></label>
-                  <input id="oCustomsVal" type="number" class="nm-input" [class.nm-err]="orderFieldInvalid('customsValue')" formControlName="customsValue" min="0.01" step="0.01" placeholder="ex : 500.00" />
+                  <input id="oCustomsVal" type="number" class="nm-input" [class.nm-err]="orderFieldInvalid('customsValue')" formControlName="customsValue" min="0.01" step="0.01" />
                   @if (orderFieldInvalid('customsValue')) { <div class="nm-err-msg" role="alert"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Valeur customs obligatoire (> 0).</div> }
                 </div>
               </div>
@@ -685,7 +684,7 @@
               <div class="col-md-4">
                 <div class="nm-field">
                   <label for="oBank" class="nm-label">Bank charges <span class="nm-opt">optionnel</span></label>
-                  <input id="oBank" type="number" class="nm-input" formControlName="bankCharges" min="0" step="0.01" placeholder="ex : 25.00" />
+                  <input id="oBank" type="number" class="nm-input" formControlName="bankCharges" min="0" step="0.01" />
                 </div>
               </div>
             </div>
@@ -750,7 +749,6 @@
                           [value]="editClientSearch()"
                           (input)="onEditClientSearchInput($any($event.target).value)"
                           (focus)="showEditClientDropdown.set(true)"
-                          placeholder="Rechercher un client…"
                           autocomplete="off"
                           aria-autocomplete="list"
                           aria-haspopup="listbox"
@@ -779,7 +777,7 @@
               <div class="col-12">
                 <div class="nm-field">
                   <label for="eDesc" class="nm-label">Description <span class="nm-opt">optionnel</span></label>
-                  <input id="eDesc" type="text" class="nm-input" formControlName="goodsDescription" placeholder="ex : Electronics…" />
+                  <input id="eDesc" type="text" class="nm-input" formControlName="goodsDescription" />
                 </div>
               </div>
               <div class="col-md-4">
@@ -891,7 +889,7 @@
           </div>
           <div class="nm-field" style="margin-top:16px">
             <label for="sNote" class="nm-label">Note <span class="nm-opt">optionnel</span></label>
-            <textarea id="sNote" class="sd-note" [value]="statusNote()" (input)="statusNote.set($any($event.target).value)" placeholder="Raison du changement…" rows="2"></textarea>
+            <textarea id="sNote" class="sd-note" [value]="statusNote()" (input)="statusNote.set($any($event.target).value)" rows="2"></textarea>
           </div>
         </div>
         <div class="nm-footer">
@@ -1007,7 +1005,7 @@
                   <label for="smawb" class="nm-label">MAWB <span class="nm-req">Requis</span></label>
                   <input id="smawb" type="text" class="nm-input"
                     [class.nm-err]="shipmentFieldInvalid('mawb')"
-                    formControlName="mawb" autocomplete="off" placeholder="ex : MX-2024-001" />
+                    formControlName="mawb" autocomplete="off" />
                   @if (shipmentFieldInvalid('mawb')) {
                     <div class="nm-err-msg" role="alert">
                       <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1063,19 +1061,19 @@
               <div class="col-12">
                 <div class="nm-field">
                   <label for="scarrier" class="nm-label">Carrier <span class="nm-opt">optionnel</span></label>
-                  <input id="scarrier" type="text" class="nm-input" formControlName="importingCarrier" placeholder="ex : Air France Cargo" />
+                  <input id="scarrier" type="text" class="nm-input" formControlName="importingCarrier" />
                 </div>
               </div>
               <div class="col-6">
                 <div class="nm-field">
                   <label for="smode" class="nm-label">Mode <span class="nm-opt">optionnel</span></label>
-                  <input id="smode" type="text" class="nm-input" formControlName="modeOfTransport" placeholder="ex : AIR" />
+                  <input id="smode" type="text" class="nm-input" formControlName="modeOfTransport" />
                 </div>
               </div>
               <div class="col-6">
                 <div class="nm-field">
                   <label for="sport" class="nm-label">Code port <span class="nm-opt">optionnel</span></label>
-                  <input id="sport" type="text" class="nm-input" formControlName="portCode" placeholder="ex : CDG" />
+                  <input id="sport" type="text" class="nm-input" formControlName="portCode" />
                 </div>
               </div>
 

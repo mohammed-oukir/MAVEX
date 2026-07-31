@@ -86,7 +86,6 @@
               class="lp-input"
               [class.invalid]="fieldInvalid(loginForm, 'email')"
               formControlName="email"
-              placeholder="you@company.com"
               autocomplete="email"
               autofocus
             />
@@ -113,7 +112,6 @@
                 class="lp-input lp-input-pwd"
                 [class.invalid]="fieldInvalid(loginForm, 'password')"
                 formControlName="password"
-                placeholder="••••••••"
                 autocomplete="current-password"
               />
               <button
@@ -204,7 +202,6 @@
                 class="lp-input"
                 [class.invalid]="fieldInvalid(forgotEmailForm, 'email')"
                 formControlName="email"
-                placeholder="you@company.com"
                 autocomplete="email"
               />
               @if (fieldInvalid(forgotEmailForm, 'email')) {
@@ -240,7 +237,6 @@
                 class="lp-input lp-otp"
                 [class.invalid]="fieldInvalid(otpForm, 'otp')"
                 formControlName="otp"
-                placeholder="— — — — — —"
                 maxlength="6"
                 autocomplete="one-time-code"
               />
@@ -274,7 +270,6 @@
                   class="lp-input lp-input-pwd"
                   [class.invalid]="fieldInvalid(resetForm, 'password')"
                   formControlName="password"
-                  placeholder="Minimum 8 caractères"
                   autocomplete="new-password"
                 />
                 <button
@@ -313,7 +308,6 @@
                 class="lp-input"
                 [class.invalid]="fieldInvalid(resetForm, 'password2')"
                 formControlName="password2"
-                placeholder="Répéter le mot de passe"
                 autocomplete="new-password"
               />
               @if (fieldInvalid(resetForm, 'password2')) {

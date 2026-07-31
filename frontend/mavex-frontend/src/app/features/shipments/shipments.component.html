@@ -483,7 +483,6 @@
                   class="nm-input"
                   [class.nm-err]="createFieldInvalid('mawb')"
                   formControlName="mawb"
-                  placeholder="ex : 147-44480365"
                   autocomplete="off"
                   aria-describedby="cMawbErr"
                   (input)="onMawbInput($any($event.target).value)"
@@ -546,7 +545,6 @@
                         [value]="shipperSearch()"
                         (input)="onShipperSearchInput($any($event.target).value)"
                         (focus)="showShipperDropdown.set(true)"
-                        placeholder="Rechercher un shipper…"
                         autocomplete="off" />
                     </div>
                   }
@@ -585,7 +583,7 @@
                       <div class="col-12">
                         <label for="nsfCompany" class="nm-label">Nom de la société <span class="nm-req">*</span></label>
                         <input id="nsfCompany" type="text" class="nm-input" [class.nm-err]="newShipperFieldInvalid('companyName')"
-                          formControlName="companyName" placeholder="PALAIS D'ART FES" autocomplete="off" />
+                          formControlName="companyName" autocomplete="off" />
                         @if (newShipperFieldInvalid('companyName')) {
                           <div class="nm-err-msg" role="alert">Nom de société obligatoire.</div>
                         }
@@ -594,13 +592,13 @@
                       <div class="col-12 col-md-6">
                         <label for="nsfContact" class="nm-label">Contact <span class="nm-opt">optionnel</span></label>
                         <input id="nsfContact" type="text" class="nm-input" formControlName="contactName"
-                          placeholder="Mohammed Alaoui" autocomplete="off" />
+                          autocomplete="off" />
                       </div>
 
                       <div class="col-12 col-md-6">
                         <label for="nsfEmail" class="nm-label">Email <span class="nm-req">*</span></label>
                         <input id="nsfEmail" type="email" class="nm-input" [class.nm-err]="newShipperFieldInvalid('email')"
-                          formControlName="email" placeholder="contact@société.ma" autocomplete="off" />
+                          formControlName="email" autocomplete="off" />
                         @if (newShipperFieldInvalid('email')) {
                           <div class="nm-err-msg" role="alert">Email valide obligatoire.</div>
                         }
@@ -609,25 +607,25 @@
                       <div class="col-12 col-md-6">
                         <label for="nsfPhone" class="nm-label">Téléphone <span class="nm-opt">optionnel</span></label>
                         <input id="nsfPhone" type="tel" class="nm-input" formControlName="phone"
-                          placeholder="+212 6 00 00 00 00" autocomplete="off" />
+                          autocomplete="off" />
                       </div>
 
                       <div class="col-12 col-md-6">
                         <label for="nsfCity" class="nm-label">Ville <span class="nm-opt">optionnel</span></label>
                         <input id="nsfCity" type="text" class="nm-input" formControlName="city"
-                          placeholder="Casablanca" autocomplete="off" />
+                          autocomplete="off" />
                       </div>
 
                       <div class="col-12 col-md-8">
                         <label for="nsfAddress" class="nm-label">Adresse <span class="nm-opt">optionnel</span></label>
                         <input id="nsfAddress" type="text" class="nm-input" formControlName="address"
-                          placeholder="123 Boulevard Hassan II" autocomplete="off" />
+                          autocomplete="off" />
                       </div>
 
                       <div class="col-12 col-md-4">
                         <label for="nsfCountry" class="nm-label">Pays <span class="nm-opt">optionnel</span></label>
                         <input id="nsfCountry" type="text" class="nm-input" formControlName="countryCode"
-                          placeholder="MA" maxlength="2" style="text-transform:uppercase" autocomplete="off" />
+                          maxlength="2" style="text-transform:uppercase" autocomplete="off" />
                       </div>
 
                     </div>
@@ -676,13 +674,13 @@
             <div class="col-6">
               <div class="nm-field">
                 <label for="cCarrier" class="nm-label">Carrier <span class="nm-opt">optionnel</span></label>
-                <input id="cCarrier" type="text" class="nm-input" formControlName="importingCarrier" placeholder="ex : Air France" />
+                <input id="cCarrier" type="text" class="nm-input" formControlName="importingCarrier" />
               </div>
             </div>
             <div class="col-6">
               <div class="nm-field">
                 <label for="cMode" class="nm-label">Mode <span class="nm-opt">optionnel</span></label>
-                <input id="cMode" type="text" class="nm-input" formControlName="modeOfTransport" placeholder="ex : AIR" />
+                <input id="cMode" type="text" class="nm-input" formControlName="modeOfTransport" />
               </div>
             </div>
 
@@ -690,7 +688,7 @@
             <div class="col-12">
               <div class="nm-field">
                 <label for="cPort" class="nm-label">Code port <span class="nm-opt">optionnel</span></label>
-                <input id="cPort" type="text" class="nm-input" formControlName="portCode" placeholder="ex : CDG" />
+                <input id="cPort" type="text" class="nm-input" formControlName="portCode" />
               </div>
             </div>
 
@@ -760,7 +758,6 @@
                   class="nm-input"
                   [class.nm-err]="editFieldInvalid('mawb')"
                   formControlName="mawb"
-                  placeholder="ex : MX-2024-001"
                   autocomplete="off"
                   aria-describedby="eMawbErr"
                 />
@@ -793,7 +790,6 @@
                         [value]="editShipperSearch()"
                         (input)="onEditShipperSearchInput($any($event.target).value)"
                         (focus)="showEditShipperDropdown.set(true)"
-                        placeholder="Rechercher un shipper…"
                         autocomplete="off" />
                       <button type="button" class="sp-combo-chevron-btn"
                         [class.open]="showEditShipperDropdown()"
@@ -851,20 +847,20 @@
             <div class="col-12">
               <div class="nm-field">
                 <label for="eCarrier" class="nm-label">Carrier <span class="nm-opt">optionnel</span></label>
-                <input id="eCarrier" type="text" class="nm-input" formControlName="importingCarrier" placeholder="ex : Air France Cargo" />
+                <input id="eCarrier" type="text" class="nm-input" formControlName="importingCarrier" />
               </div>
             </div>
 
             <div class="col-6">
               <div class="nm-field">
                 <label for="eMode" class="nm-label">Mode <span class="nm-opt">optionnel</span></label>
-                <input id="eMode" type="text" class="nm-input" formControlName="modeOfTransport" placeholder="ex : AIR" />
+                <input id="eMode" type="text" class="nm-input" formControlName="modeOfTransport" />
               </div>
             </div>
             <div class="col-6">
               <div class="nm-field">
                 <label for="ePort" class="nm-label">Code port <span class="nm-opt">optionnel</span></label>
-                <input id="ePort" type="text" class="nm-input" formControlName="portCode" placeholder="ex : CDG" />
+                <input id="ePort" type="text" class="nm-input" formControlName="portCode" />
               </div>
             </div>
 

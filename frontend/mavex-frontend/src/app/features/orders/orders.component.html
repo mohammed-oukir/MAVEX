@@ -800,7 +800,7 @@
                 <button type="button" class="eo-client-clear" (click)="clearEditClient()" aria-label="Changer de client">✕</button>
               </div>
             } @else {
-              <input type="text" class="eo-input" placeholder="Rechercher un client…"
+              <input type="text" class="eo-input"
                 [value]="editClientSearch()"
                 (input)="onEditClientSearchInput($any($event.target).value)"
                 (focus)="showEditClientDropdown.set(true)"

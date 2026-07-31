@@ -22,7 +22,7 @@
       <!-- Recherche -->
       <div class="al-search-wrap">
         <svg class="al-search-ico" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="al-search-input" [value]="fSearch()" (input)="fSearch.set($any($event.target).value)" placeholder="Rechercher…" aria-label="Rechercher une compagnie" />
+        <input class="al-search-input" [value]="fSearch()" (input)="fSearch.set($any($event.target).value)" aria-label="Rechercher une compagnie" />
       </div>
     </div>
 
@@ -150,7 +150,7 @@
               <div class="nm-field">
                 <label for="alPrefix" class="nm-label">Préfixe <span class="nm-req">*</span></label>
                 <input id="alPrefix" type="text" class="nm-input" [class.nm-err]="fieldInvalid('prefix')"
-                  formControlName="prefix" placeholder="147" maxlength="3" />
+                  formControlName="prefix" maxlength="3" />
                 @if (fieldInvalid('prefix')) {
                   <div class="nm-err-msg" role="alert">3 chiffres exactement (ex: 147).</div>
                 }
@@ -161,7 +161,7 @@
               <div class="nm-field">
                 <label for="alName" class="nm-label">Nom de la compagnie <span class="nm-req">*</span></label>
                 <input id="alName" type="text" class="nm-input" [class.nm-err]="fieldInvalid('name')"
-                  formControlName="name" placeholder="ex : Royal Air Maroc" />
+                  formControlName="name" />
                 @if (fieldInvalid('name')) {
                   <div class="nm-err-msg" role="alert">Nom obligatoire.</div>
                 }
@@ -172,7 +172,7 @@
               <div class="nm-field">
                 <label for="alIata" class="nm-label">Code IATA <span class="nm-opt">opt.</span></label>
                 <input id="alIata" type="text" class="nm-input" formControlName="iataCode"
-                  placeholder="AT" maxlength="2" style="text-transform:uppercase" />
+                  maxlength="2" style="text-transform:uppercase" />
               </div>
             </div>
 
@@ -180,7 +180,7 @@
               <div class="nm-field">
                 <label for="alIcao" class="nm-label">Code ICAO <span class="nm-opt">opt.</span></label>
                 <input id="alIcao" type="text" class="nm-input" formControlName="icaoCode"
-                  placeholder="RAM" maxlength="3" style="text-transform:uppercase" />
+                  maxlength="3" style="text-transform:uppercase" />
               </div>
             </div>
 
@@ -188,7 +188,7 @@
               <div class="nm-field">
                 <label for="alCountry" class="nm-label">Pays <span class="nm-opt">opt.</span></label>
                 <input id="alCountry" type="text" class="nm-input" formControlName="country"
-                  placeholder="ex : Maroc" />
+                  />
               </div>
             </div>
 

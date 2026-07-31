@@ -580,7 +580,7 @@
       </div>
       <div class="im-history-search ms-auto">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="im-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" class="im-search-input" placeholder="Rechercher fichier, MAWB…"
+        <input type="text" class="im-search-input"
           [value]="historyFilter()"
           (input)="historyFilter.set($any($event.target).value)"
           aria-label="Rechercher dans l'historique" />
@@ -771,7 +771,7 @@
           <p class="im-form-section-title">Expéditeur</p>
           <div class="row g-3 mb-3">
             <div class="col-6"><label class="form-label im-form-label" for="ef-sname">Nom société</label><input id="ef-sname" type="text" class="form-control form-control-sm" formControlName="senderName" /></div>
-            <div class="col-3"><label class="form-label im-form-label" for="ef-scountry">Pays</label><input id="ef-scountry" type="text" class="form-control form-control-sm" formControlName="senderCountry" placeholder="US, FR…" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-scountry">Pays</label><input id="ef-scountry" type="text" class="form-control form-control-sm" formControlName="senderCountry" /></div>
             <div class="col-3"><label class="form-label im-form-label" for="ef-sstate">État</label><input id="ef-sstate" type="text" class="form-control form-control-sm" formControlName="senderState" /></div>
             <div class="col-8"><label class="form-label im-form-label" for="ef-saddress">Adresse</label><input id="ef-saddress" type="text" class="form-control form-control-sm" formControlName="senderAddress" /></div>
             <div class="col-4"><label class="form-label im-form-label" for="ef-scity">Ville</label><input id="ef-scity" type="text" class="form-control form-control-sm" formControlName="senderCity" /></div>
@@ -787,7 +787,7 @@
                 [class.is-invalid]="editForm.get('receiverName')!.invalid && editForm.get('receiverName')!.touched" />
               <div class="invalid-feedback">Nom obligatoire</div>
             </div>
-            <div class="col-3"><label class="form-label im-form-label" for="ef-rcountry">Pays</label><input id="ef-rcountry" type="text" class="form-control form-control-sm" formControlName="receiverCountry" placeholder="MA, FR…" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-rcountry">Pays</label><input id="ef-rcountry" type="text" class="form-control form-control-sm" formControlName="receiverCountry" /></div>
             <div class="col-3"><label class="form-label im-form-label" for="ef-rstate">État</label><input id="ef-rstate" type="text" class="form-control form-control-sm" formControlName="receiverState" /></div>
             <div class="col-8"><label class="form-label im-form-label" for="ef-raddress">Adresse</label><input id="ef-raddress" type="text" class="form-control form-control-sm" formControlName="receiverAddress" /></div>
             <div class="col-4"><label class="form-label im-form-label" for="ef-rcity">Ville</label><input id="ef-rcity" type="text" class="form-control form-control-sm" formControlName="receiverCity" /></div>
@@ -818,7 +818,7 @@
                 [class.is-invalid]="editForm.get('customsValue')!.invalid && editForm.get('customsValue')!.touched" />
               <div class="invalid-feedback">Valeur &gt; 0 obligatoire</div>
             </div>
-            <div class="col-3"><label class="form-label im-form-label" for="ef-currency">Devise</label><input id="ef-currency" type="text" class="form-control form-control-sm" formControlName="customsCurrency" placeholder="USD, EUR…" /></div>
+            <div class="col-3"><label class="form-label im-form-label" for="ef-currency">Devise</label><input id="ef-currency" type="text" class="form-control form-control-sm" formControlName="customsCurrency" /></div>
             <div class="col-12"><label class="form-label im-form-label" for="ef-desc">Description</label><input id="ef-desc" type="text" class="form-control form-control-sm" formControlName="goodsDescription" /></div>
           </div>
         </form>
