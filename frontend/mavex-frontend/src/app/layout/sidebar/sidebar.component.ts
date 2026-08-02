@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { PermissionService } from '../../core/services/permission.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,7 +11,6 @@ import { PermissionService } from '../../core/services/permission.service';
 })
 export class SidebarComponent {
   protected readonly auth = inject(AuthService);
-  protected readonly perm = inject(PermissionService);
 
   logout(): void { this.auth.logout(); }
 }

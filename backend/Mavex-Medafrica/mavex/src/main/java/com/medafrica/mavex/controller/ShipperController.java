@@ -4,9 +4,6 @@ import com.medafrica.mavex.dto.ApiResponse;
 import com.medafrica.mavex.dto.shipper.ShipperRequestDTO;
 import com.medafrica.mavex.dto.shipper.ShipperResponseDTO;
 import com.medafrica.mavex.dto.shipper.ShipperSearchCriteria;
-import com.medafrica.mavex.model.enums.PermissionAction;
-import com.medafrica.mavex.model.enums.PermissionModule;
-import com.medafrica.mavex.security.annotation.RequiresPermission;
 import com.medafrica.mavex.service.interfaces.ShipperService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,20 +22,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/shippers")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+@PreAuthorize("hasRole('ADMIN')")
 public class ShipperController {
 
     private final ShipperService shipperService;
 
     @GetMapping
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.VIEW)
     public ResponseEntity<Page<ShipperResponseDTO>> list(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(shipperService.list(pageable));
     }
 
     @GetMapping("/search")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.VIEW)
     public ResponseEntity<Page<ShipperResponseDTO>> search(
             @RequestParam(required = false) String company,
             @RequestParam(required = false) String contact,
@@ -61,13 +56,11 @@ public class ShipperController {
     }
 
     @GetMapping("/{id}")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.VIEW)
     public ResponseEntity<ShipperResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(shipperService.getById(id));
     }
 
     @PostMapping
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.CREATE)
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> create(@Valid @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ApiResponse.<ShipperResponseDTO>builder()
@@ -78,7 +71,6 @@ public class ShipperController {
     }
 
     @PutMapping("/{id}")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> update(@PathVariable Long id,
                                                                   @Valid @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.ok(
@@ -90,7 +82,6 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> patch(@PathVariable Long id,
                                                                  @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.ok(
@@ -102,7 +93,6 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}/activate")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<Void>> activate(@PathVariable Long id) {
         shipperService.activate(id);
         return ResponseEntity.ok(
@@ -114,7 +104,6 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}/deactivate")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable Long id) {
         shipperService.deactivate(id);
         return ResponseEntity.ok(
@@ -126,7 +115,6 @@ public class ShipperController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.DELETE)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         shipperService.delete(id);
         return ResponseEntity.ok(
@@ -138,21 +126,18 @@ public class ShipperController {
     }
 
     @PostMapping("/bulk-delete")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.DELETE)
     public ResponseEntity<Map<String, Integer>> bulkDelete(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkDelete(body.get("ids"));
         return ResponseEntity.ok(Map.of("deleted", count));
     }
 
     @PostMapping("/bulk-activate")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<Map<String, Integer>> bulkActivate(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkActivate(body.get("ids"));
         return ResponseEntity.ok(Map.of("activated", count));
     }
 
     @PostMapping("/bulk-deactivate")
-    @RequiresPermission(module = PermissionModule.SHIPPERS, action = PermissionAction.EDIT)
     public ResponseEntity<Map<String, Integer>> bulkDeactivate(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkDeactivate(body.get("ids"));
         return ResponseEntity.ok(Map.of("deactivated", count));

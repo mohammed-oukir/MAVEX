@@ -4,13 +4,11 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { ApiResponse } from '../models/api.model';
 import { LoginResponse, ForgotPasswordRequest, ResetPasswordRequest } from '../models/auth.model';
-import { PermissionService } from '../services/permission.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http        = inject(HttpClient);
   private readonly router      = inject(Router);
-  private readonly permissions = inject(PermissionService);
 
   private readonly _token      = signal<string | null>(localStorage.getItem('accessToken'));
   private readonly _refresh    = signal<string | null>(localStorage.getItem('refreshToken'));
@@ -96,8 +94,6 @@ export class AuthService {
     localStorage.setItem('userFullName', data.fullName);
     localStorage.setItem('userRole',     data.role);
     localStorage.setItem('userId',       String(data.userId));
-    // Hydrate le signal de permissions dès le login (frontend display uniquement)
-    this.permissions.setPermissions(data.permissions, data.role === 'ADMIN');
   }
 
   private clearSession(): void {
@@ -107,7 +103,6 @@ export class AuthService {
     this._fullName.set(null);
     this._role.set(null);
     this._userId.set(null);
-    this.permissions.clearPermissions();
     localStorage.clear();
     this.router.navigate(['/login']);
   }

@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { PermissionService } from '../../core/services/permission.service';
 
 @Component({
   selector: 'app-forbidden',
@@ -198,14 +197,11 @@ import { PermissionService } from '../../core/services/permission.service';
 export class ForbiddenComponent {
   private readonly router = inject(Router);
   private readonly auth   = inject(AuthService);
-  private readonly perms  = inject(PermissionService);
 
-  readonly canAccessDashboard = computed(() =>
-    this.auth.isAdmin() || this.perms.canView('DASHBOARD'),
-  );
+  readonly canAccessDashboard = computed(() => this.auth.isAdmin());
 
   readonly noAccessAtAll = computed(() =>
-    !this.auth.isAdmin() && !this.canAccessDashboard(),
+    !this.auth.isAdmin(),
   );
 
   readonly canGoBack = computed(() => {

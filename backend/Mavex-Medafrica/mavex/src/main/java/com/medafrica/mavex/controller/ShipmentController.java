@@ -4,10 +4,7 @@ import com.medafrica.mavex.dto.shipment.DutyRateUpdateDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
-import com.medafrica.mavex.model.enums.PermissionAction;
-import com.medafrica.mavex.model.enums.PermissionModule;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
-import com.medafrica.mavex.security.annotation.RequiresPermission;
 import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,23 +28,20 @@ public class ShipmentController {
     private final ShipmentService shipmentService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> create(@Valid @RequestBody ShipmentRequestDTO req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(shipmentService.create(req));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.VIEW)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(shipmentService.getById(id));
     }
 
     // ─────────── GET /api/shipments — liste paginée, avec filtres par colonne ───────────
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.VIEW)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ShipmentResponseDTO>> list(
             @RequestParam(required = false) String mawb,
             @RequestParam(required = false) String shipper,
@@ -75,8 +69,7 @@ public class ShipmentController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.VIEW)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ShipmentResponseDTO>> listByStatus(
             @PathVariable ShipmentStatus status,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
@@ -84,8 +77,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.EDIT)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> update(
             @PathVariable Long id,
             @RequestBody ShipmentRequestDTO req) {
@@ -93,8 +85,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.EDIT)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody ShipmentStatusUpdateDTO req) {
@@ -102,8 +93,7 @@ public class ShipmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.EDIT)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> replace(
             @PathVariable Long id,
             @Valid @RequestBody ShipmentRequestDTO req) {
@@ -111,8 +101,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}/duty-rate")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.EDIT)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShipmentResponseDTO> updateDutyRate(
             @PathVariable Long id,
             @Valid @RequestBody DutyRateUpdateDTO req) {
@@ -120,8 +109,7 @@ public class ShipmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
-    @RequiresPermission(module = PermissionModule.SHIPMENTS, action = PermissionAction.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         shipmentService.delete(id);
         return ResponseEntity.noContent().build();

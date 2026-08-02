@@ -16,11 +16,10 @@ import { ExchangeRateService } from '../../core/services/exchange-rate.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderSearchParams, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
-import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-orders',
-  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule, RequiresPermissionDirective],
+  imports: [RouterLink, DatePipe, BadgeComponent, ReactiveFormsModule],
   templateUrl: './orders.component.html',
   styleUrl:    './orders.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

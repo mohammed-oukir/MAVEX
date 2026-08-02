@@ -13,7 +13,6 @@ import { ClientService }   from '../../core/services/client.service';
 import { EmailService }    from '../../core/services/email.service';
 import { ToastService }    from '../../core/services/toast.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
-import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 import { ShipmentResponse, ShipmentPatch, ShipmentStatus } from '../../core/models/shipment.model';
 import { ShipperResponse } from '../../core/models/shipper.model';
 import { OrderResponse, OrderRequest, OrderPatch, OrderStatus, OrderStatusUpdate } from '../../core/models/order.model';
@@ -34,7 +33,7 @@ interface OrderColumnFilters {
 
 @Component({
   selector: 'app-shipment-detail',
-  imports: [RouterLink, ReactiveFormsModule, BadgeComponent, RequiresPermissionDirective],
+  imports: [RouterLink, ReactiveFormsModule, BadgeComponent],
   templateUrl: './shipment-detail.component.html',
   styleUrl:    './shipment-detail.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

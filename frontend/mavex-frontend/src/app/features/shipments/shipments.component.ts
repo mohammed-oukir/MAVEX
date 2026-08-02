@@ -17,11 +17,10 @@ import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus } from
 import { ShipperResponse } from '../../core/models/shipper.model';
 import { OrderResponse }   from '../../core/models/order.model';
 import { Airline }         from '../../core/models/airline.model';
-import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-shipments',
-  imports: [RouterLink, ReactiveFormsModule, BadgeComponent, RequiresPermissionDirective],
+  imports: [RouterLink, ReactiveFormsModule, BadgeComponent],
   templateUrl: './shipments.component.html',
   styleUrl:    './shipments.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

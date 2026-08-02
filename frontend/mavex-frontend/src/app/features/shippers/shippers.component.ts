@@ -10,11 +10,10 @@ import { LayoutService }   from '../../core/services/layout.service';
 import { ShipperService }  from '../../core/services/shipper.service';
 import { ToastService }    from '../../core/services/toast.service';
 import { ShipperResponse, ShipperSearchCriteria } from '../../core/models/shipper.model';
-import { RequiresPermissionDirective } from '../../core/directives/requires-permission.directive';
 
 @Component({
   selector: 'app-shippers',
-  imports: [ReactiveFormsModule, DatePipe, RequiresPermissionDirective],
+  imports: [ReactiveFormsModule, DatePipe],
   templateUrl: './shippers.component.html',
   styleUrl: './shippers.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

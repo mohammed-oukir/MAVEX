@@ -137,12 +137,6 @@
     <version>1.0.5</version>
 </dependency>
 
-<!-- Spring AOP — requis pour @RequiresPermission -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-aop</artifactId>
-</dependency>
-
 <!-- Cache (Caffeine) — utilisé pour le quota Brevo -->
 <dependency>
     <groupId>org.springframework.boot</groupId>

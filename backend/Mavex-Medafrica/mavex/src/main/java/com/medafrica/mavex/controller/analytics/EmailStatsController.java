@@ -37,7 +37,7 @@ public class EmailStatsController {
 
     // GET /api/dashboard/stats?days=30
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EmailStatsHistoryResponse> getHistory(
             @RequestParam(required = false, defaultValue = "30") int days) {
         return ResponseEntity.ok(emailStatsService.getStatsHistory(days));

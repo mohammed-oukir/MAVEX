@@ -10,7 +10,7 @@
       <div class="sb-label">Principal</div>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('DASHBOARD')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/dashboard"
@@ -28,7 +28,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('DASHBOARD')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/dashboard-analytics"
@@ -43,7 +43,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('SHIPMENTS')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/shipments"
@@ -58,7 +58,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('ORDERS')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/orders"
@@ -80,7 +80,7 @@
       <div class="sb-label">Gestion</div>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('CLIENTS')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/clients"
@@ -97,7 +97,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('IMPORTS')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/imports"
@@ -113,7 +113,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('SHIPPERS')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/shippers"
@@ -145,7 +145,7 @@
       </a>
     }
 
-    @if (auth.isAdmin() || perm.hasAnyPermission('AIRLINES')) {
+    @if (auth.isAdmin()) {
       <a
         class="sb-item"
         routerLink="/airlines"

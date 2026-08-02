@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { adminGuard, authGuard, noAuthGuard } from './core/auth/auth.guard';
-import { permissionGuard } from './core/auth/permission.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -33,43 +32,43 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        canActivate: [permissionGuard('DASHBOARD')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'shipments',
-        canActivate: [permissionGuard('SHIPMENTS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/shipments/shipments.component').then(m => m.ShipmentsComponent),
       },
       {
         path: 'shipments/:id',
-        canActivate: [permissionGuard('SHIPMENTS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/shipment-detail/shipment-detail.component').then(m => m.ShipmentDetailComponent),
       },
       {
         path: 'orders',
-        canActivate: [permissionGuard('ORDERS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/orders/orders.component').then(m => m.OrdersComponent),
       },
       {
         path: 'imports',
-        canActivate: [permissionGuard('IMPORTS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/imports/imports.component').then(m => m.ImportsComponent),
       },
       {
         path: 'clients',
-        canActivate: [permissionGuard('CLIENTS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/clients/clients.component').then(m => m.ClientsComponent),
       },
       {
         path: 'shippers',
-        canActivate: [permissionGuard('SHIPPERS')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/shippers/shippers.component').then(m => m.ShippersComponent),
       },
@@ -81,7 +80,7 @@ export const routes: Routes = [
       },
       {
         path: 'airlines',
-        canActivate: [permissionGuard('AIRLINES')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/airlines/airlines.component').then(m => m.AirlinesComponent),
       },
@@ -90,12 +89,6 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/users/users.component').then(m => m.UsersComponent),
-      },
-      {
-        path: 'permissions',
-        canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./features/permissions/permissions.component').then(m => m.PermissionsComponent),
       },
       {
         path: 'profile',
@@ -110,7 +103,7 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard-analytics',
-        canActivate: [permissionGuard('DASHBOARD')],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/dashboard-analytics/dashboard-analytics.component').then(m => m.DashboardAnalyticsComponent),
       },
