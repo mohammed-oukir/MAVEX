@@ -174,7 +174,6 @@ export class PaymentConfigComponent implements OnInit {
         type: 'MANUEL',
         name: 'Paiement manuel (virement)',
         mode: 'PRODUCTION',
-        supportedCurrencies: 'USD',
       })
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({

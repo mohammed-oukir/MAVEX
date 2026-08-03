@@ -39,12 +39,8 @@ public class PaymentGatewayConfigService {
         PaymentGatewayConfig config = PaymentGatewayConfig.builder()
                 .type(request.getType())
                 .name(request.getName())
-                .apiKey(request.getApiKey())
-                .secretKey(request.getSecretKey())
-                .webhookSecret(request.getWebhookSecret())
                 .mode(request.getMode())
                 .active(false)
-                .supportedCurrencies(request.getSupportedCurrencies())
                 .description(request.getDescription())
                 .createdBy(currentUser())
                 .build();
@@ -60,11 +56,7 @@ public class PaymentGatewayConfigService {
 
         config.setType(request.getType());
         config.setName(request.getName());
-        config.setApiKey(request.getApiKey());
-        config.setSecretKey(request.getSecretKey());
-        config.setWebhookSecret(request.getWebhookSecret());
         config.setMode(request.getMode());
-        config.setSupportedCurrencies(request.getSupportedCurrencies());
         config.setDescription(request.getDescription());
 
         return toResponse(configRepository.save(config));
@@ -116,12 +108,8 @@ public class PaymentGatewayConfigService {
                 .id(config.getId())
                 .type(config.getType())
                 .name(config.getName())
-                .apiKeyMasked(GatewayConfigResponse.mask(config.getApiKey()))
-                .secretKeyMasked(GatewayConfigResponse.mask(config.getSecretKey()))
-                .webhookSecretSet(config.getWebhookSecret() != null && !config.getWebhookSecret().isBlank())
                 .mode(config.getMode())
                 .active(config.isActive())
-                .supportedCurrencies(config.getSupportedCurrencies())
                 .description(config.getDescription())
                 .createdAt(config.getCreatedAt())
                 .updatedAt(config.getUpdatedAt())

@@ -18,12 +18,8 @@ export interface GatewayConfigResponse {
   id: number;
   type: PaymentGatewayType;
   name: string;
-  apiKeyMasked?: string;
-  secretKeyMasked?: string;
-  webhookSecretSet: boolean;
   mode: PaymentGatewayMode;
   active: boolean;
-  supportedCurrencies?: string;
   description?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -32,10 +28,6 @@ export interface GatewayConfigResponse {
 export interface GatewayConfigRequest {
   type: PaymentGatewayType;
   name: string;
-  apiKey?: string;
-  secretKey?: string;
-  webhookSecret?: string;
   mode: PaymentGatewayMode;
-  supportedCurrencies?: string;
   description?: string;
 }
