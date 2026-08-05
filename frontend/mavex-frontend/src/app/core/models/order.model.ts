@@ -2,9 +2,7 @@ export type OrderStatus =
   | 'CREATED'
   | 'EMAIL_SENT'
   | 'EMAIL_OUTDATED'
-  | 'PENDING_PAYMENT'
   | 'PAID'
-  | 'IN_DELIVERY'
   | 'DELIVERED'
   | 'CANCELLED';
 

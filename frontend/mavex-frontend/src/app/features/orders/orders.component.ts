@@ -51,7 +51,6 @@ export class OrdersComponent implements OnInit {
   /* ── KPIs ─────────────────────────────────────────────── */
   kpiTotal   = signal(0);
   kpiNoEmail = signal(0);
-  kpiPending = signal(0);
   kpiPaid    = signal(0);
 
   /* ── Panneau de filtres ───────────────────────────────── */
@@ -183,13 +182,11 @@ export class OrdersComponent implements OnInit {
     forkJoin({
       all:     this.orderSvc.search({}, 0, 1),
       noEmail: this.orderSvc.search({ status: 'CREATED' }, 0, 1),
-      pending: this.orderSvc.search({ status: 'PENDING_PAYMENT' }, 0, 1),
       paid:    this.orderSvc.search({ status: 'PAID' }, 0, 1),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ all, noEmail, pending, paid }) => {
+      next: ({ all, noEmail, paid }) => {
         this.kpiTotal.set(all.totalElements);
         this.kpiNoEmail.set(noEmail.totalElements);
-        this.kpiPending.set(pending.totalElements);
         this.kpiPaid.set(paid.totalElements);
       },
     });
@@ -456,9 +453,7 @@ export class OrdersComponent implements OnInit {
       CREATED:         'or-row-created',
       EMAIL_SENT:      'or-row-email',
       EMAIL_OUTDATED:  'or-row-outdated',
-      PENDING_PAYMENT: 'or-row-pending',
       PAID:            'or-row-paid',
-      IN_DELIVERY:     'or-row-delivery',
       DELIVERED:       'or-row-delivered',
       CANCELLED:       'or-row-cancelled',
     };

@@ -9,6 +9,15 @@
   <!-- CARD -->
   <div class="pr-card">
 
+    @if (verifying()) {
+      <!-- Vérification en cours -->
+      <div class="pr-icon-wrap pr-icon-wrap--loading">
+        <span class="pr-spinner" aria-hidden="true"></span>
+      </div>
+      <h1 class="pr-title">Verifying Payment…</h1>
+      <p class="pr-message">Please wait while we confirm your payment with PayPal.</p>
+    } @else {
+
     <!-- Icône état -->
     <div class="pr-icon-wrap" [style.background]="config().bg" [style.color]="config().color">
 
@@ -43,6 +52,7 @@
 
     <!-- Message -->
     <p class="pr-message">{{ config().message }}</p>
+    }
 
     <!-- Séparateur -->
     <div class="pr-divider"></div>
@@ -53,15 +63,15 @@
         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
         <polyline points="22,6 12,13 2,6"/>
       </svg>
-      <span>Pour toute question : <strong>contact&#64;medafrica-logistics.com</strong></span>
+      <span>For any questions: <strong>contact&#64;medafrica-logistics.com</strong></span>
     </div>
 
   </div>
 
   <!-- FOOTER -->
   <footer class="pr-footer">
-    <p>Med Africa Logistics — Service client</p>
-    <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+    <p>Med Africa Logistics — Customer Service</p>
+    <p>This email was sent automatically, please do not reply.</p>
   </footer>
 
 </div>

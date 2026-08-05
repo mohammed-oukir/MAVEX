@@ -72,6 +72,9 @@ public class SecurityConfig {
                 // ── Webhooks Brevo : public (pas de JWT, token dans l'URL)
                 .requestMatchers("/webhooks/brevo/**").permitAll()
 
+                // ── Webhooks PayPal : public (pas de JWT, signature vérifiée via API PayPal)
+                .requestMatchers("/webhooks/paypal").permitAll()
+
                 // ── Swagger : public
                 .requestMatchers(
                     "/swagger-ui/**",

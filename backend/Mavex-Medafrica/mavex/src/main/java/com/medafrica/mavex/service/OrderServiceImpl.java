@@ -6,9 +6,12 @@ import com.medafrica.mavex.dto.order.OrderResponse;
 import com.medafrica.mavex.dto.order.OrderStatusUpdateRequest;
 import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.enums.PaymentGatewayType;
+import com.medafrica.mavex.model.enums.PaymentStatus;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.OrderStatusHistory;
 import com.medafrica.mavex.model.logistics.Shipment;
+import com.medafrica.mavex.model.payment.PaymentTransaction;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.model.email.EmailLog;
@@ -16,6 +19,7 @@ import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
+import com.medafrica.mavex.repository.PaymentTransactionRepository;
 import com.medafrica.mavex.repository.ShipmentRepository;
 import com.medafrica.mavex.repository.specification.OrderSpecification;
 import com.medafrica.mavex.service.interfaces.OrderService;
@@ -32,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,6 +51,7 @@ public class OrderServiceImpl implements OrderService {
     private final ShipmentRepository           shipmentRepository;
     private final ClientRepository             clientRepository;
     private final EmailLogRepository           emailLogRepository;
+    private final PaymentTransactionRepository transactionRepository;
 
     // ───────────────────────────── CREATE ─────────────────────────────
 
@@ -234,10 +240,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatusUpdateRequest request) {
         Order order = findOrThrow(id);
-        OrderStatus previous = order.getStatus();
-        order.setStatus(request.getNewStatus());
-        orderRepository.save(order);
-        recordHistory(order, previous, request.getNewStatus(), request.getNote(), getCurrentUser());
+        changeStatus(order, request.getNewStatus(), request.getNote(), getCurrentUser());
         return toResponse(order);
     }
 
@@ -247,10 +250,7 @@ public class OrderServiceImpl implements OrderService {
         for (Long id : ids) {
             try {
                 Order order = findOrThrow(id);
-                OrderStatus previous = order.getStatus();
-                order.setStatus(newStatus);
-                orderRepository.save(order);
-                recordHistory(order, previous, newStatus, note, getCurrentUser());
+                changeStatus(order, newStatus, note, getCurrentUser());
             } catch (Exception e) {
                 log.warn("bulkUpdateStatus — erreur order {} : {}", id, e.getMessage());
             }
@@ -261,10 +261,31 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateStatusSystem(Long orderId, OrderStatus newStatus, String note) {
         Order order = findOrThrow(orderId);
+        changeStatus(order, newStatus, note, null);
+    }
+
+    /**
+     * Logique centrale de changement de statut — utilisee par updateStatus(),
+     * bulkUpdateStatus() et updateStatusSystem().
+     * Cree automatiquement une PaymentTransaction si le statut passe manuellement a PAID.
+     */
+    private void changeStatus(Order order, OrderStatus newStatus, String note, User actor) {
         OrderStatus previous = order.getStatus();
         order.setStatus(newStatus);
         orderRepository.save(order);
-        recordHistory(order, previous, newStatus, note, null);
+        recordHistory(order, previous, newStatus, note, actor);
+
+        if (newStatus == OrderStatus.PAID && previous != OrderStatus.PAID) {
+            PaymentTransaction transaction = PaymentTransaction.builder()
+                    .gateway(PaymentGatewayType.MANUEL)
+                    .status(PaymentStatus.SUCCESS)
+                    .amount(order.getTotalAmount())
+                    .currency("USD")
+                    .paidAt(LocalDateTime.now())
+                    .order(order)
+                    .build();
+            transactionRepository.save(transaction);
+        }
     }
 
     // ─────────────────────── TOKEN DE PAIEMENT ─────────────────────────

@@ -346,6 +346,42 @@
 }
 
 /* ══════════════════════════════════════════════════
+   CHAMPS DE FORMULAIRE
+   ══════════════════════════════════════════════════ */
+.pc-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.pc-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.pc-form-input {
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.pc-form-input:focus-visible {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+}
+
+.pc-form-input::placeholder {
+  color: #9CA3AF;
+}
+
+/* ══════════════════════════════════════════════════
    PIED DE FORMULAIRE
    ══════════════════════════════════════════════════ */
 .pc-form-footer {

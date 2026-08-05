@@ -79,7 +79,7 @@ export class DashboardComponent implements OnInit {
      Montre OÙ les colis se bloquent dans le cycle de vie.
      Les statuts sont rangés dans l'ordre métier, pas par volume. */
   private readonly funnelOrder = [
-    'CREATED', 'EMAIL_SENT', 'PENDING_PAYMENT', 'PAID', 'IN_DELIVERY', 'DELIVERED',
+    'CREATED', 'EMAIL_SENT', 'PAID', 'DELIVERED',
   ];
 
   funnel = computed(() => {
@@ -183,8 +183,7 @@ export class DashboardComponent implements OnInit {
   fmtStatus(s: string): string {
     const map: Record<string, string> = {
       CREATED: 'Créé', EMAIL_SENT: 'Email envoyé',
-      PENDING_PAYMENT: 'En attente', PAID: 'Payé',
-      IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', CANCELLED: 'Annulé',
+      PAID: 'Payé', DELIVERED: 'Livré', CANCELLED: 'Annulé',
     };
     return map[s] ?? s;
   }
@@ -192,8 +191,7 @@ export class DashboardComponent implements OnInit {
   statusColor(s: string): string {
     const map: Record<string, string> = {
       CREATED: '#9CA3AF', EMAIL_SENT: '#3B82F6',
-      PENDING_PAYMENT: '#F59E0B', PAID: '#22C55E',
-      IN_DELIVERY: '#F97316', DELIVERED: '#10B981', CANCELLED: '#EF4444',
+      PAID: '#22C55E', DELIVERED: '#10B981', CANCELLED: '#EF4444',
     };
     return map[s] ?? '#9CA3AF';
   }

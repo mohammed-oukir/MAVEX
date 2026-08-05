@@ -411,8 +411,7 @@ export class ClientsComponent implements OnInit {
   orderStatusLabel(s: string): string {
     const m: Record<string, string> = {
       CREATED: 'Créé', EMAIL_SENT: 'Email envoyé',
-      PENDING_PAYMENT: 'En attente', PAID: 'Payé',
-      IN_DELIVERY: 'En livraison', DELIVERED: 'Livré', CANCELLED: 'Annulé',
+      PAID: 'Payé', DELIVERED: 'Livré', CANCELLED: 'Annulé',
     };
     return m[s] ?? s;
   }
@@ -420,8 +419,7 @@ export class ClientsComponent implements OnInit {
   orderStatusClass(s: string): string {
     const m: Record<string, string> = {
       CREATED: 'cl-os-created', EMAIL_SENT: 'cl-os-email',
-      PENDING_PAYMENT: 'cl-os-pending', PAID: 'cl-os-paid',
-      IN_DELIVERY: 'cl-os-delivery', DELIVERED: 'cl-os-delivered', CANCELLED: 'cl-os-cancelled',
+      PAID: 'cl-os-paid', DELIVERED: 'cl-os-delivered', CANCELLED: 'cl-os-cancelled',
     };
     return m[s] ?? '';
   }

@@ -9,6 +9,11 @@ export interface PaymentInitiateResponse {
   gateway: string;
 }
 
+export interface PaymentCaptureResponse {
+  success: boolean;
+  orderStatus: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PaymentPageService {
   private readonly http = inject(HttpClient);
@@ -21,5 +26,10 @@ export class PaymentPageService {
   /** Initie le paiement — retourne l'URL de redirection vers le gateway (public) */
   initiatePayment(token: string): Observable<PaymentInitiateResponse> {
     return this.http.post<PaymentInitiateResponse>(`/api/payments/pay/${token}/initiate`, {});
+  }
+
+  /** Confirme la capture du paiement PayPal après retour du client (public) */
+  capturePayment(paypalOrderId: string): Observable<PaymentCaptureResponse> {
+    return this.http.post<PaymentCaptureResponse>(`/api/payments/capture/${paypalOrderId}`, {});
   }
 }

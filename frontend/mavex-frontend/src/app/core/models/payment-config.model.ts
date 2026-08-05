@@ -6,3 +6,10 @@ export interface ManualPaymentConfigResponse {
   ribFileName: string;
   uploadedAt: string;
 }
+
+export interface PaypalConfigResponse {
+  clientId: string;
+  webhookId?: string;
+  mode: PaymentGatewayMode;
+  updatedAt?: string;
+}

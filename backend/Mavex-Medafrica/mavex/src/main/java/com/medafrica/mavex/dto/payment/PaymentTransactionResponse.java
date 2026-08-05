@@ -20,4 +20,9 @@ public class PaymentTransactionResponse {
     private String            ipAddress;
     private LocalDateTime     paidAt;
     private LocalDateTime     createdAt;
+
+    // Résumé de la commande liée — pour identification dans une UI de listing
+    private Long   orderId;
+    private String hawb;
+    private String clientFullName;
 }

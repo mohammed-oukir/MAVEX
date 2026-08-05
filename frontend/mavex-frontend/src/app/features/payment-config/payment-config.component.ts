@@ -12,10 +12,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../core/services/layout.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PaymentConfigService } from '../../core/services/payment-config.service';
+import { PaypalConfigService } from '../../core/services/paypal-config.service';
 import {
+  GatewayConfigRequest,
   GatewayConfigResponse,
   ManualPaymentConfigResponse,
+  PaypalConfigResponse,
   PaymentGatewayType,
+  PaymentGatewayMode,
 } from '../../core/models/payment-config.model';
 
 @Component({
@@ -30,20 +34,28 @@ export class PaymentConfigComponent implements OnInit {
   private readonly layout     = inject(LayoutService);
   private readonly toast      = inject(ToastService);
   private readonly svc        = inject(PaymentConfigService);
+  private readonly paypalSvc  = inject(PaypalConfigService);
   private readonly destroyRef = inject(DestroyRef);
 
   /* ── State ─────────────────────────────────────────────── */
-  configs      = signal<GatewayConfigResponse[]>([]);
-  currentRib   = signal<ManualPaymentConfigResponse | null>(null);
-  loading      = signal(true);
-  saving       = signal(false);
-  selectedType = signal<PaymentGatewayType>('MANUEL');
+  configs             = signal<GatewayConfigResponse[]>([]);
+  currentRib          = signal<ManualPaymentConfigResponse | null>(null);
+  currentPaypalConfig = signal<PaypalConfigResponse | null>(null);
+  loading             = signal(true);
+  saving              = signal(false);
+  selectedType        = signal<PaymentGatewayType>('MANUEL');
 
   /* ── Upload RIB ────────────────────────────────────────── */
   ribFile     = signal<File | null>(null);
   ribDragOver = signal(false);
 
   readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+  /* ── Formulaire PayPal ─────────────────────────────────── */
+  paypalClientId     = signal('');
+  paypalClientSecret = signal('');
+  paypalWebhookId    = signal('');
+  paypalMode         = signal<PaymentGatewayMode>('TEST');
 
   /* ── Derived ────────────────────────────────────────────── */
   activeConfig = computed(() =>
@@ -56,6 +68,14 @@ export class PaymentConfigComponent implements OnInit {
 
   isManuelActive = computed(() =>
     this.activeConfig()?.type === 'MANUEL'
+  );
+
+  paypalGatewayConfig = computed(() =>
+    this.configs().find(c => c.type === 'PAYPAL') ?? null
+  );
+
+  isPaypalActive = computed(() =>
+    this.activeConfig()?.type === 'PAYPAL'
   );
 
   /* ── Init ───────────────────────────────────────────────── */
@@ -86,11 +106,24 @@ export class PaymentConfigComponent implements OnInit {
         next: rib => this.currentRib.set(rib),
         error: () => this.currentRib.set(null),
       });
+
+    this.paypalSvc.getCurrentConfig()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: config => {
+          this.currentPaypalConfig.set(config);
+          if (config) {
+            this.paypalClientId.set(config.clientId);
+            this.paypalWebhookId.set(config.webhookId ?? '');
+            this.paypalMode.set(config.mode);
+          }
+        },
+        error: () => this.currentPaypalConfig.set(null),
+      });
   }
 
   /* ── Sélection d'une carte ──────────────────────────────── */
   selectProvider(type: PaymentGatewayType): void {
-    if (type === 'PAYPAL') return; // désactivée pour l'instant
     this.selectedType.set(type);
   }
 
@@ -137,6 +170,11 @@ export class PaymentConfigComponent implements OnInit {
 
   /* ── Appliquer et activer ───────────────────────────────── */
   apply(): void {
+    if (this.selectedType() === 'PAYPAL') {
+      this.applyPaypal();
+      return;
+    }
+
     this.saving.set(true);
     const file = this.ribFile();
 
@@ -159,9 +197,45 @@ export class PaymentConfigComponent implements OnInit {
     }
   }
 
-  private activateManuel(): void {
-    const existing = this.manuelConfig();
+  private applyPaypal(): void {
+    this.saving.set(true);
+    this.paypalSvc.saveConfig({
+      clientId:     this.paypalClientId(),
+      clientSecret: this.paypalClientSecret() || undefined,
+      webhookId:    this.paypalWebhookId() || undefined,
+      mode:         this.paypalMode(),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.paypalClientSecret.set('');
+          this.activatePaypalGateway();
+        },
+        error: err => {
+          this.saving.set(false);
+          this.toast.error(err?.error?.message || 'Erreur lors de l\'enregistrement de la configuration PayPal.');
+        },
+      });
+  }
 
+  private activateManuel(): void {
+    this.activateGateway(this.manuelConfig(), {
+      type: 'MANUEL',
+      name: 'Paiement manuel (virement)',
+      mode: 'PRODUCTION',
+    });
+  }
+
+  private activatePaypalGateway(): void {
+    this.activateGateway(this.paypalGatewayConfig(), {
+      type: 'PAYPAL',
+      name: 'PayPal',
+      mode: this.paypalMode(),
+    });
+  }
+
+  /** Active la config existante, ou la crée puis l'active (générique tous providers) */
+  private activateGateway(existing: GatewayConfigResponse | null, createRequest: GatewayConfigRequest): void {
     if (existing) {
       this.svc.activate(existing.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -170,11 +244,7 @@ export class PaymentConfigComponent implements OnInit {
           error: err => this.onActivateError(err),
         });
     } else {
-      this.svc.create({
-        type: 'MANUEL',
-        name: 'Paiement manuel (virement)',
-        mode: 'PRODUCTION',
-      })
+      this.svc.create(createRequest)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: created => {
@@ -192,7 +262,10 @@ export class PaymentConfigComponent implements OnInit {
 
   private onActivated(): void {
     this.saving.set(false);
-    this.toast.success('Paiement manuel activé avec succès.');
+    const message = this.selectedType() === 'PAYPAL'
+      ? 'PayPal activé avec succès.'
+      : 'Paiement manuel activé avec succès.';
+    this.toast.success(message);
     this.loadAll();
   }
 

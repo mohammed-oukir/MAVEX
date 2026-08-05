@@ -95,7 +95,7 @@ public class Order {
     @Column(name = "entered_value", precision = 12, scale = 2)
     private BigDecimal enteredValue;
 
-    /** CREATED -> EMAIL_SENT -> PENDING_PAYMENT -> PAID -> IN_DELIVERY -> DELIVERED */
+    /** CREATED -> EMAIL_SENT -> PAID -> DELIVERED (+ CANCELLED possible à tout moment) */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

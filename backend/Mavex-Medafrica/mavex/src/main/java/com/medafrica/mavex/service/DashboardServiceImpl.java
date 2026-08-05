@@ -25,13 +25,16 @@ public class DashboardServiceImpl {
     private static final DateTimeFormatter MONTH_FMT =
         DateTimeFormatter.ofPattern("MMM yyyy", Locale.FRENCH);
 
+    private static final List<OrderStatus> PENDING_STATUSES =
+        List.of(OrderStatus.CREATED, OrderStatus.EMAIL_SENT, OrderStatus.EMAIL_OUTDATED);
+
     @Transactional(readOnly = true)
     public DashboardKpiDTO getKpis() {
         long totalShipments  = shipmentRepository.count();
         long activeShipments = shipmentRepository.countByStatusNot(ShipmentStatus.CLOSED);
         long totalOrders     = orderRepository.count();
         long paidOrders      = orderRepository.countByStatus(OrderStatus.PAID);
-        long pendingOrders   = orderRepository.countByStatus(OrderStatus.PENDING_PAYMENT);
+        long pendingOrders   = orderRepository.countByStatusIn(PENDING_STATUSES);
         BigDecimal paidAmt   = orderRepository.sumPaidAmount();
         BigDecimal pendAmt   = orderRepository.sumPendingAmount();
 

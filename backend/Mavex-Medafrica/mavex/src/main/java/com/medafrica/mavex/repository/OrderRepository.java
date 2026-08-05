@@ -63,7 +63,7 @@ List<Order> findAllByHawbIn(List<String> hawbs);
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'PAID'")
     BigDecimal sumPaidAmount();
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'PENDING_PAYMENT'")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('CREATED', 'EMAIL_SENT', 'EMAIL_OUTDATED')")
     BigDecimal sumPendingAmount();
 
     @Query("SELECT YEAR(o.createdAt), MONTH(o.createdAt), SUM(o.totalAmount) " +
@@ -74,6 +74,8 @@ List<Order> findAllByHawbIn(List<String> hawbs);
 
     long countByStatus(OrderStatus status);
 
-    @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'PENDING_PAYMENT' AND o.updatedAt <= :threshold")
+    long countByStatusIn(List<OrderStatus> statuses);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status IN ('CREATED', 'EMAIL_SENT', 'EMAIL_OUTDATED') AND o.updatedAt <= :threshold")
     long countOverduePayments(@Param("threshold") LocalDateTime threshold);
 }

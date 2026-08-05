@@ -146,25 +146,11 @@
       @if (emailOutdatedCount() > 0) { <span class="sd-tab-pill sd-tab-pill-amber">{{ emailOutdatedCount() }}</span> }
     </button>
     <button type="button" class="sd-tab" role="tab"
-      [class.sd-tab-active]="statusFilter() === 'PENDING_PAYMENT'"
-      (click)="setStatusFilter('PENDING_PAYMENT')"
-      [attr.aria-selected]="statusFilter() === 'PENDING_PAYMENT'">
-      En attente
-      @if (pendingCount() > 0) { <span class="sd-tab-pill sd-tab-pill-amber">{{ pendingCount() }}</span> }
-    </button>
-    <button type="button" class="sd-tab" role="tab"
       [class.sd-tab-active]="statusFilter() === 'PAID'"
       (click)="setStatusFilter('PAID')"
       [attr.aria-selected]="statusFilter() === 'PAID'">
       Payé
       @if (paidCount() > 0) { <span class="sd-tab-pill sd-tab-pill-green">{{ paidCount() }}</span> }
-    </button>
-    <button type="button" class="sd-tab" role="tab"
-      [class.sd-tab-active]="statusFilter() === 'IN_DELIVERY'"
-      (click)="setStatusFilter('IN_DELIVERY')"
-      [attr.aria-selected]="statusFilter() === 'IN_DELIVERY'">
-      En livraison
-      @if (inDeliveryCount() > 0) { <span class="sd-tab-pill">{{ inDeliveryCount() }}</span> }
     </button>
     <button type="button" class="sd-tab" role="tab"
       [class.sd-tab-active]="statusFilter() === 'DELIVERED'"

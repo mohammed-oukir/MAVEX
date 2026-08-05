@@ -40,7 +40,7 @@ export class PaymentPageComponent implements OnInit {
             this.state.set('expired');
           } else {
             this.state.set('error');
-            this.errMsg.set(msg || 'Une erreur est survenue.');
+            this.errMsg.set(msg || 'An error occurred.');
           }
         },
       });
@@ -57,7 +57,7 @@ export class PaymentPageComponent implements OnInit {
         },
         error: err => {
           this.state.set('ready');
-          this.errMsg.set(err?.error?.message || 'Erreur lors de l\'initialisation du paiement.');
+          this.errMsg.set(err?.error?.message || 'Error initiating the payment.');
         },
       });
   }

@@ -12,6 +12,20 @@ export interface PaymentTransactionResponse {
   ipAddress?: string;
   paidAt?: string;
   createdAt?: string;
+  orderId?: number;
+  hawb?: string;
+  clientFullName?: string;
+}
+
+export interface PaymentTransactionSearchParams {
+  hawb?: string;
+  client?: string;
+  gateway?: PaymentGatewayType;
+  status?: PaymentStatus;
+  amountMin?: number;
+  amountMax?: number;
+  from?: string;
+  to?: string;
 }
 
 export interface GatewayConfigResponse {
