@@ -7,6 +7,7 @@ import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.finance.ExchangeRate;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.payment.ManualPaymentConfig;
+import com.medafrica.mavex.model.payment.PaymentTransaction;
 import com.medafrica.mavex.repository.EmailTemplateRepository;
 import com.medafrica.mavex.repository.ExchangeRateRepository;
 import com.medafrica.mavex.repository.ManualPaymentConfigRepository;
@@ -15,6 +16,7 @@ import com.medafrica.mavex.repository.PaymentGatewayConfigRepository;
 import com.medafrica.mavex.service.email.EmailProviderResolver;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import com.medafrica.mavex.service.payment.ByteArrayMultipartFile;
+import com.medafrica.mavex.service.payment.PaymentReceiptService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +48,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private final ExchangeRateRepository   exchangeRateRepository;
     private final PaymentGatewayConfigRepository gatewayConfigRepository;
     private final ManualPaymentConfigRepository  manualPaymentConfigRepository;
+    private final PaymentReceiptService    paymentReceiptService;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -133,6 +136,71 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     @Override
     public BulkEmailResult sendBulkEmails(List<Long> orderIds) {
         return executeBulk(orderIds);
+    }
+
+    // ---------------------------------------------------------------
+    // CONFIRMATION DE PAIEMENT + RECU PDF (best-effort — ne doit jamais
+    // faire échouer le flux appelant, ex: markSuccess() d'un paiement)
+    // ---------------------------------------------------------------
+
+    private static final String PAYMENT_CONFIRMED_TEMPLATE = "PAYMENT_CONFIRMED";
+
+    @Override
+    public void sendPaymentConfirmationEmail(Order order, PaymentTransaction transaction) {
+        try {
+            Optional<EmailTemplate> templateOpt = templateRepository
+                    .findByType_NameAndActiveTrue(PAYMENT_CONFIRMED_TEMPLATE);
+
+            if (templateOpt.isEmpty()) {
+                log.warn("Aucun template email actif trouvé pour {} — confirmation de paiement non envoyée (Order id={})",
+                        PAYMENT_CONFIRMED_TEMPLATE, order.getId());
+                return;
+            }
+            EmailTemplate template = templateOpt.get();
+
+            Map<String, String> variables = buildVariables(order);
+            String htmlContent = template.resolveHtml(variables);
+            String subject     = template.resolveSubject(variables);
+            String toEmail     = order.getClient().getEmail();
+
+            byte[] receiptPdf;
+            try {
+                receiptPdf = paymentReceiptService.generateReceipt(order, transaction);
+            } catch (Exception e) {
+                log.error("Échec génération du reçu PDF — confirmation de paiement non envoyée (Order id={}) : {}",
+                        order.getId(), e.getMessage(), e);
+                return;
+            }
+
+            Long emailLogId = persistence.createPendingLog(toEmail, subject, template, order.getId());
+
+            try {
+                MultipartFile receiptFile = new ByteArrayMultipartFile(
+                        "receipt",
+                        "receipt-" + order.getHawb() + ".pdf",
+                        "application/pdf",
+                        receiptPdf
+                );
+
+                String messageId = providerResolver.resolve().send(
+                        toEmail, subject, htmlContent, List.of(receiptFile)
+                );
+
+                persistence.markLogSuccess(emailLogId, messageId);
+
+                log.info("Email de confirmation de paiement envoyé → {} (Order HAWB={})", toEmail, order.getHawb());
+
+            } catch (Exception e) {
+                persistence.markLogFailed(emailLogId, e.getMessage());
+                log.error("Échec envoi email de confirmation de paiement → {} : {}", toEmail, e.getMessage());
+            }
+
+        } catch (Exception e) {
+            // Filet de sécurité ultime : cette méthode ne doit jamais remonter d'exception
+            // à l'appelant (markSuccess() d'un paiement réel ne doit jamais échouer à cause d'un email).
+            log.error("Erreur inattendue lors de l'envoi de la confirmation de paiement (Order id={}) : {}",
+                    order.getId(), e.getMessage(), e);
+        }
     }
 
     // ---------------------------------------------------------------

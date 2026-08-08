@@ -1,27 +1,303 @@
-<div class="pm-wip-wrapper">
+<!-- ══════════════════════════════════════════════════════════
+     KPI CARDS
+     ══════════════════════════════════════════════════════════ -->
+<div class="or-kpi-grid mb-4">
 
-  <div class="pm-wip-card">
-
-    <div class="pm-wip-icon" aria-hidden="true">
-      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
+  <button type="button" class="or-kpi-card" [class.or-kpi-active]="flStatus() === ''" (click)="setTab('')" aria-label="Toutes les transactions">
+    <div class="or-kpi-icon or-kpi-dark">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     </div>
-
-    <div class="pm-wip-badge">En cours de développement</div>
-
-    <h1 class="pm-wip-title">Module Paiements</h1>
-
-    <p class="pm-wip-desc">
-      Ce module est actuellement en cours de conception.<br>
-      Il sera disponible prochainement.
-    </p>
-
-    <div class="pm-wip-dots" aria-hidden="true">
-      <span></span><span></span><span></span>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiTotal() }}</div>
+      <div class="or-kpi-lbl">Total transactions</div>
     </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
 
+  <div class="or-kpi-card" aria-label="Total encaissé" style="cursor:default">
+    <div class="or-kpi-icon or-kpi-green-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ fmtAmount(kpiTotalCollected(), 'USD') }}</div>
+      <div class="or-kpi-lbl">Total encaissé</div>
+    </div>
   </div>
 
+  <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="flStatus() === 'SUCCESS'" (click)="setTab('SUCCESS')" aria-label="Réussis">
+    <div class="or-kpi-icon or-kpi-green-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiSuccess() }}</div>
+      <div class="or-kpi-lbl">Réussis</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-red" [class.or-kpi-active]="flStatus() === 'FAILED'" (click)="setTab('FAILED')" aria-label="Échoués">
+    <div class="or-kpi-icon or-kpi-red-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiFailed() }}</div>
+      <div class="or-kpi-lbl">Échoués</div>
+    </div>
+    @if (kpiFailed() > 0) { <div class="or-kpi-alert" aria-hidden="true">!</div> }
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-blue" [class.or-kpi-active]="flStatus() === 'INITIATED'" (click)="setTab('INITIATED')" aria-label="Initiés">
+    <div class="or-kpi-icon or-kpi-blue-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiInitiated() }}</div>
+      <div class="or-kpi-lbl">Initiés</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     FILTRES
+     ══════════════════════════════════════════════════════════ -->
+<div class="sp-filters">
+
+  <div class="sp-filters-head">
+    <div class="sp-filters-title">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      <span>Filters</span>
+    </div>
+    <button type="button" class="sp-filters-toggle"
+      (click)="filtersCollapsed.set(!filtersCollapsed())"
+      [attr.aria-expanded]="!filtersCollapsed()"
+      aria-controls="pm-filters-body"
+      [attr.aria-label]="filtersCollapsed() ? 'Agrandir les filtres' : 'Réduire les filtres'">
+      @if (filtersCollapsed()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      } @else {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      }
+    </button>
+  </div>
+
+  @if (!filtersCollapsed()) {
+    <div class="sp-filters-body" id="pm-filters-body">
+
+      <div class="sp-filters-grid">
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fp-hawb">HAWB</label>
+          <input id="fp-hawb" type="text" class="sp-field-input"
+            [value]="flHawb()" (input)="flHawb.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fp-client">Client</label>
+          <input id="fp-client" type="text" class="sp-field-input"
+            [value]="flClient()" (input)="flClient.set($any($event.target).value)" />
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fp-gateway">Gateway</label>
+          <select id="fp-gateway" class="sp-field-input"
+            [value]="flGateway()" (change)="flGateway.set($any($event.target).value)">
+            <option value="">Tous</option>
+            <option value="MANUEL">Manuel</option>
+            <option value="PAYPAL">PayPal</option>
+          </select>
+        </div>
+
+        <div class="sp-field">
+          <label class="sp-field-label" for="fp-status">Statut</label>
+          <select id="fp-status" class="sp-field-input"
+            [value]="flStatus()" (change)="flStatus.set($any($event.target).value)">
+            <option value="">Tous</option>
+            <option value="INITIATED">Initié</option>
+            <option value="SUCCESS">Réussi</option>
+            <option value="FAILED">Échoué</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="sp-filters-advanced">
+        <button type="button" class="sp-advanced-link"
+          (click)="advancedFiltersOpen.set(!advancedFiltersOpen())"
+          [attr.aria-expanded]="advancedFiltersOpen()"
+          aria-controls="pm-advanced-grid">
+          Advanced filters
+          <svg class="sp-advanced-chevron" [class.open]="advancedFiltersOpen()"
+            width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+      </div>
+
+      @if (advancedFiltersOpen()) {
+        <div class="sp-filters-grid sp-filters-grid-advanced" id="pm-advanced-grid">
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fp-amount-min">Montant min</label>
+            <input id="fp-amount-min" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flAmountMin()" (input)="flAmountMin.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fp-amount-max">Montant max</label>
+            <input id="fp-amount-max" type="number" min="0" step="0.01" class="sp-field-input"
+              [value]="flAmountMax()" (input)="flAmountMax.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fp-from">Date — du</label>
+            <input id="fp-from" type="date" class="sp-field-input"
+              [value]="flFrom()" (input)="flFrom.set($any($event.target).value)" />
+          </div>
+
+          <div class="sp-field">
+            <label class="sp-field-label" for="fp-to">Date — au</label>
+            <input id="fp-to" type="date" class="sp-field-input"
+              [value]="flTo()" (input)="flTo.set($any($event.target).value)" />
+          </div>
+
+        </div>
+      }
+
+      <div class="sp-filters-actions">
+        <button type="button" class="sp-btn sp-btn-reset" (click)="clearFilters()">Reset</button>
+        <button type="button" class="sp-btn sp-btn-search" (click)="onSearchClick()">Search</button>
+      </div>
+
+    </div>
+  }
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ONGLETS
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body p-0">
+    <div class="or-filter-bar">
+      <span class="or-total-badge ms-auto">{{ total() }} résultat(s)</span>
+    </div>
+
+    <div class="or-tab-bar" role="tablist">
+      <button type="button" class="or-tab" [class.or-tab-active]="flStatus() === ''" (click)="setTab('')" role="tab">Tous</button>
+      <button type="button" class="or-tab or-tab-green" [class.or-tab-active]="flStatus() === 'SUCCESS'" (click)="setTab('SUCCESS')" role="tab">
+        Réussis @if (kpiSuccess() > 0) { <span class="or-tab-pill or-tab-pill-green">{{ kpiSuccess() }}</span> }
+      </button>
+      <button type="button" class="or-tab or-tab-red" [class.or-tab-active]="flStatus() === 'FAILED'" (click)="setTab('FAILED')" role="tab">
+        Échoués @if (kpiFailed() > 0) { <span class="or-tab-pill">{{ kpiFailed() }}</span> }
+      </button>
+      <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="flStatus() === 'INITIATED'" (click)="setTab('INITIATED')" role="tab">
+        Initiés @if (kpiInitiated() > 0) { <span class="or-tab-pill or-tab-pill-blue">{{ kpiInitiated() }}</span> }
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TABLE
+     ══════════════════════════════════════════════════════════ -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table or-table align-middle mb-0" aria-label="Liste des transactions">
+      <thead>
+        <tr class="or-thead">
+          <th scope="col">HAWB</th>
+          <th scope="col">Client</th>
+          <th scope="col">Mode</th>
+          <th scope="col" class="text-end">Montant</th>
+          <th scope="col">Statut</th>
+          <th scope="col">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <tr>
+              @for (j of [100,140,80,90,80,110]; track $index) {
+                <td><div class="or-sk" [style.width.px]="j"></div></td>
+              }
+            </tr>
+          }
+        } @else if (transactions().length === 0) {
+          <tr>
+            <td colspan="6" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="or-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucune transaction trouvée</p>
+                  @if (hasFilters()) {
+                    <p class="text-muted mb-2" style="font-size:13px">Essayez de modifier vos filtres</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Effacer les filtres</button>
+                  } @else {
+                    <p class="text-muted mb-0" style="font-size:13px">Aucun paiement n'a encore été effectué</p>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (t of transactions(); track t.id) {
+            <tr class="or-row">
+              <td>
+                @if (t.hawb) {
+                  <a [routerLink]="['/orders']" [queryParams]="{ hawb: t.hawb }" class="or-hawb-btn">{{ t.hawb }}</a>
+                } @else {
+                  <span>—</span>
+                }
+              </td>
+              <td>
+                <div class="or-client-name">{{ t.clientFullName || '—' }}</div>
+              </td>
+              <td><app-badge [status]="t.gateway" /></td>
+              <td class="text-end">
+                <span class="or-total-amount">{{ fmtAmount(t.amount, t.currency) }}</span>
+              </td>
+              <td><app-badge [status]="t.status" /></td>
+              <td>{{ (t.createdAt | date:'dd/MM/yyyy à HH:mm') ?? '—' }}</td>
+            </tr>
+          }
+        }
+
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > 0) {
+    <div class="or-pagination">
+      <div class="d-flex align-items-center gap-1">
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(0)" aria-label="Première page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pagesArray(); track p) {
+          <button type="button" class="or-pg-btn" [class.or-pg-active]="p === page()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(totalPages() - 1)" aria-label="Dernière page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        </button>
+      </div>
+      <select class="or-pg-select" [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)" aria-label="Lignes par page">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  }
 </div>

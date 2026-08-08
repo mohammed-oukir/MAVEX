@@ -430,12 +430,14 @@
                 <td>
                   <div class="sd-actions">
                     <!-- Email -->
-                    <button type="button" class="sd-act email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer email" [attr.aria-label]="'Email ' + o.hawb">
-                      @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
-                      @else {
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                      }
-                    </button>
+                    @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED') {
+                      <button type="button" class="sd-act email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer email" [attr.aria-label]="'Email ' + o.hawb">
+                        @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
+                        @else {
+                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        }
+                      </button>
+                    }
                     <!-- Statut -->
                     <button type="button" class="sd-act status" (click)="openStatusModal(o)" title="Changer le statut" [attr.aria-label]="'Statut ' + o.hawb">
                       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>

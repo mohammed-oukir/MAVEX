@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, DestroyRef, OnInit,
   computed, inject, signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe }   from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin }   from 'rxjs';
@@ -33,6 +33,7 @@ export class OrdersComponent implements OnInit {
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly erSvc      = inject(ExchangeRateService);
+  private readonly route      = inject(ActivatedRoute);
 
   /* ── Data ─────────────────────────────────────────────── */
   orders  = signal<OrderResponse[]>([]);
@@ -137,6 +138,11 @@ export class OrdersComponent implements OnInit {
   /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
     this.layout.setPage('Orders');
+
+    const hawbParam = this.route.snapshot.queryParamMap.get('hawb');
+    if (hawbParam) {
+      this.flHawb.set(hawbParam);
+    }
 
     this.loadKpis();
     this.loadOrders();

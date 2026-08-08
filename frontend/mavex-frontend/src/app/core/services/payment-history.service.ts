@@ -23,4 +23,8 @@ export class PaymentHistoryService {
     if (params.to)                 p = p.set('to', params.to);
     return this.http.get<Page<PaymentTransactionResponse>>('/api/payments', { params: p });
   }
+
+  getTotalCollected(): Observable<number> {
+    return this.http.get<number>('/api/payments/total-collected');
+  }
 }

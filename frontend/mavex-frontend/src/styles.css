@@ -89,6 +89,9 @@ html.im-modal-open body { overflow: hidden; }
 .bs-cancelled       { background: #FEF2F2; color: #DC2626; }
 .bs-active          { background: #D1FAE5; color: #065F46; }
 .bs-inactive        { background: #FEE2E2; color: #991B1B; }
+.bs-initiated       { background: #EFF6FF; color: #3B82F6; }
+.bs-manuel          { background: #F3F4F6; color: #6B7280; }
+.bs-paypal          { background: #EFF6FF; color: #003087; }
 
 /* ── Table refinements ───────────────────────────────────── */
 .table > thead > tr > th {

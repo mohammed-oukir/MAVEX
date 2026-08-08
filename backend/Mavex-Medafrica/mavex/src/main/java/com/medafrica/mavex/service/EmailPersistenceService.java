@@ -100,6 +100,29 @@ public class EmailPersistenceService {
         emailLogRepository.save(emailLog);
     }
 
+    /**
+     * Marque un EmailLog comme envoyé, sans toucher à l'Order (statut, taux figé...).
+     * Utilisé pour les emails "annexes" (ex: confirmation de paiement) qui ne doivent
+     * pas rejouer la logique métier de doSendPaymentEmail().
+     */
+    @Transactional
+    public void markLogSuccess(Long emailLogId, String messageId) {
+        EmailLog emailLog = emailLogRepository.findById(emailLogId)
+                .orElseThrow(() -> new EntityNotFoundException("EmailLog introuvable id=" + emailLogId));
+        emailLog.markSent();
+        if (messageId != null) emailLog.setMessageId(messageId);
+        emailLogRepository.save(emailLog);
+    }
+
+    /**
+     * Marque un EmailLog comme échoué, sans toucher à l'Order.
+     * Alias sémantique de markFailed(), pour la même raison que markLogSuccess().
+     */
+    @Transactional
+    public void markLogFailed(Long emailLogId, String errorMessage) {
+        markFailed(emailLogId, errorMessage);
+    }
+
     private User currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.getPrincipal() instanceof User user) {

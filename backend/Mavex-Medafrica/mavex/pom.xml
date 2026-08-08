@@ -61,14 +61,12 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!-- 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
--->
-		
-		
+
+
 <!-- JJWT (recommandé) -->
 
 <dependency>
@@ -145,6 +143,18 @@
 <dependency>
     <groupId>com.github.ben-manes.caffeine</groupId>
     <artifactId>caffeine</artifactId>
+</dependency>
+
+<!-- openhtmltopdf — génération de reçus PDF à partir de HTML/CSS -->
+<dependency>
+    <groupId>com.openhtmltopdf</groupId>
+    <artifactId>openhtmltopdf-core</artifactId>
+    <version>1.0.10</version>
+</dependency>
+<dependency>
+    <groupId>com.openhtmltopdf</groupId>
+    <artifactId>openhtmltopdf-pdfbox</artifactId>
+    <version>1.0.10</version>
 </dependency>
 
 	</dependencies>

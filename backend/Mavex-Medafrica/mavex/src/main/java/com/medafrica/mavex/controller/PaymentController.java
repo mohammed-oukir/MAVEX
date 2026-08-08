@@ -64,14 +64,17 @@ public class PaymentController {
         PaypalOrderResult result = paypalPaymentService.createOrder(
                 order.getId().toString(), order.getTotalAmount(), "USD");
 
-        PaymentTransaction transaction = PaymentTransaction.builder()
-                .gateway(PaymentGatewayType.PAYPAL)
-                .gatewayRef(result.paypalOrderId())
-                .amount(order.getTotalAmount())
-                .currency("USD")
-                .order(order)
-                .ipAddress(request.getRemoteAddr())
-                .build();
+        PaymentTransaction transaction = transactionRepository
+                .findByOrderIdAndStatus(order.getId(), PaymentStatus.INITIATED)
+                .orElseGet(() -> PaymentTransaction.builder()
+                        .gateway(PaymentGatewayType.PAYPAL)
+                        .order(order)
+                        .ipAddress(request.getRemoteAddr())
+                        .build());
+
+        transaction.setGatewayRef(result.paypalOrderId());
+        transaction.setAmount(order.getTotalAmount());
+        transaction.setCurrency("USD");
         transaction = transactionRepository.save(transaction);
 
         return PaymentInitiateResponse.builder()

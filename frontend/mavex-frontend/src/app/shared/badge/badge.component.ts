@@ -17,6 +17,9 @@ const STATUS_MAP: Record<string, string> = {
   PROCESSING:      'bs-processing',
   CLOSED:          'bs-closed',
   CANCELLED:       'bs-cancelled',
+  INITIATED:       'bs-initiated',
+  MANUEL:          'bs-manuel',
+  PAYPAL:          'bs-paypal',
 };
 
 const LABEL_MAP: Record<string, string> = {
@@ -36,6 +39,9 @@ const LABEL_MAP: Record<string, string> = {
   FAILED:          'Échoué',
   SKIPPED:         'Ignoré',
   CANCELLED:       'Annulé',
+  INITIATED:       'Initié',
+  MANUEL:          'Manuel',
+  PAYPAL:          'PayPal',
 };
 
 @Component({

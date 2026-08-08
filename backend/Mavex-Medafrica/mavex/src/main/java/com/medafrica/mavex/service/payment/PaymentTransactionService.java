@@ -9,6 +9,7 @@ import com.medafrica.mavex.model.payment.PaymentTransaction;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.PaymentTransactionRepository;
 import com.medafrica.mavex.repository.specification.PaymentTransactionSpecification;
+import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class PaymentTransactionService {
 
     private final PaymentTransactionRepository transactionRepository;
     private final OrderRepository              orderRepository;
+    private final NotificationEmailService     notificationEmailService;
 
     // ─────────── Marque une transaction/commande comme payée (idempotent) ───────────
     @Transactional
@@ -45,6 +47,13 @@ public class PaymentTransactionService {
         orderRepository.save(order);
         log.info("Transaction id={} marquée SUCCESS pour la première fois, order id={} passé à PAID",
                 transaction.getId(), order.getId());
+
+        // Confirmation email + reçu PDF — uniquement pour PayPal (paiement en ligne,
+        // statut fiable). Jamais pour MANUEL : le passage à PAID y est une action
+        // humaine, potentiellement corrigible/erronée, donc pas de confirmation auto.
+        if (transaction.getGateway() == PaymentGatewayType.PAYPAL) {
+            notificationEmailService.sendPaymentConfirmationEmail(order, transaction);
+        }
     }
 
     // ─────────── Recherche paginée avec filtres ───────────
