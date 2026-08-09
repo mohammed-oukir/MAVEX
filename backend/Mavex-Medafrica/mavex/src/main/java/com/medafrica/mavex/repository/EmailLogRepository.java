@@ -22,6 +22,9 @@ public interface EmailLogRepository extends JpaRepository<EmailLog, Long> {
 
     Optional<EmailLog> findTopByOrderIdAndStatusOrderBySentAtDesc(Long orderId, EmailStatus status);
 
+    boolean existsByOrder_IdAndEmailTemplate_Type_NameAndStatus(
+            Long orderId, String templateTypeName, EmailStatus status);
+
     /**
      * Équivalent groupé de findTopByOrderIdAndStatusOrderBySentAtDesc appelée en boucle :
      * pour chaque orderId de la liste, ne retourne que l'EmailLog avec le sentAt maximum

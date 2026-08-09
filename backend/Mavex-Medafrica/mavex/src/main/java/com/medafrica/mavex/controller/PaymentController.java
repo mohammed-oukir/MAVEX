@@ -4,6 +4,7 @@ import com.medafrica.mavex.dto.payment.PaymentCaptureResponse;
 import com.medafrica.mavex.dto.payment.PaymentInitiateResponse;
 import com.medafrica.mavex.dto.payment.PaymentTransactionResponse;
 import com.medafrica.mavex.dto.payment.PaypalOrderResult;
+import com.medafrica.mavex.dto.payment.ReceiptSendResponse;
 import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.enums.PaymentStatus;
 import com.medafrica.mavex.model.logistics.Order;
@@ -129,5 +130,16 @@ public class PaymentController {
     @PreAuthorize("hasRole('ADMIN')")
     public BigDecimal getTotalCollected() {
         return paymentTransactionService.getTotalCollected();
+    }
+
+    // ─────────── POST /api/payments/{transactionId}/send-receipt (ADMIN uniquement) ───────────
+    @PostMapping("/{transactionId}/send-receipt")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ReceiptSendResponse sendReceipt(@PathVariable Long transactionId) {
+        paymentTransactionService.sendManualReceipt(transactionId);
+        return ReceiptSendResponse.builder()
+                .success(true)
+                .message("Reçu envoyé avec succès.")
+                .build();
     }
 }

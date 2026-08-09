@@ -238,3 +238,18 @@ select.sp-field-input { cursor: pointer; }
 .sp-btn-reset:hover { background: #F9FAFB; border-color: #D1D5DB; }
 .sp-btn-search { background: var(--mavex-accent); border: 1px solid var(--mavex-accent); color: #FFF; }
 .sp-btn-search:hover { background: var(--mavex-accent-dark); border-color: var(--mavex-accent-dark); }
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION BUTTONS (dupliqué : le CSS Angular est scopé par composant)
+   ═══════════════════════════════════════════════════════════ */
+.or-act-btn {
+  width: 28px; height: 28px; padding: 0;
+  border: 0.5px solid #E5E7EB; border-radius: 6px;
+  background: transparent; color: #6B7280;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.or-act-btn:disabled { opacity: .5; cursor: not-allowed; }
+.or-act-btn:hover:not(:disabled) { background: #F3F4F6; }
+.or-act-receipt { color: var(--mavex-accent); border-color: #FED7AA; }
+.or-act-receipt:hover:not(:disabled) { background: #FFF7ED; border-color: var(--mavex-accent); color: var(--mavex-accent-dark); }

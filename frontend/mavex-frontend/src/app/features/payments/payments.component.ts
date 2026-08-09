@@ -8,6 +8,7 @@ import { forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../core/services/layout.service';
 import { PaymentHistoryService } from '../../core/services/payment-history.service';
+import { ToastService } from '../../core/services/toast.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import {
   PaymentTransactionResponse, PaymentTransactionSearchParams,
@@ -24,6 +25,7 @@ import {
 export class PaymentsComponent implements OnInit {
   private readonly layout     = inject(LayoutService);
   private readonly svc        = inject(PaymentHistoryService);
+  private readonly toast      = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
   /* ── Data ─────────────────────────────────────────────── */
@@ -32,6 +34,9 @@ export class PaymentsComponent implements OnInit {
   page     = signal(0);
   loading  = signal(true);
   pageSize = signal(20);
+
+  /* ── Envoi manuel du reçu (gateway MANUEL) ───────────────── */
+  sendingReceiptId = signal<number | null>(null);
 
   /* ── KPIs ─────────────────────────────────────────────── */
   kpiTotal          = signal(0);
@@ -145,5 +150,27 @@ export class PaymentsComponent implements OnInit {
     if (n == null) return '—';
     const cur = currency ?? 'USD';
     return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ' + cur;
+  }
+
+  /* ── Envoi manuel du reçu ─────────────────────────────────── */
+  sendReceipt(transaction: PaymentTransactionResponse): void {
+    this.sendingReceiptId.set(transaction.id);
+    this.svc.sendReceipt(transaction.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: res => {
+          this.sendingReceiptId.set(null);
+          if (res.success) {
+            this.toast.success(res.message || 'Reçu envoyé avec succès.');
+            this.loadTransactions();
+          } else {
+            this.toast.error(res.message || 'Échec de l\'envoi du reçu.');
+          }
+        },
+        error: err => {
+          this.sendingReceiptId.set(null);
+          this.toast.error(err?.error?.message || 'Erreur lors de l\'envoi du reçu.');
+        },
+      });
   }
 }

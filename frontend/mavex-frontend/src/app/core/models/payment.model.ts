@@ -15,6 +15,12 @@ export interface PaymentTransactionResponse {
   orderId?: number;
   hawb?: string;
   clientFullName?: string;
+  receiptSent: boolean;
+}
+
+export interface ReceiptSendResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface PaymentTransactionSearchParams {

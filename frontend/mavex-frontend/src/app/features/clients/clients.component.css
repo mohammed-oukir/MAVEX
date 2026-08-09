@@ -139,7 +139,7 @@
 }
 
 .cl-bulk-count {
-  display: flex; align-items: center; gap-6px; gap: 6px;
+  display: flex; align-items: center; gap: 6px;
   font-size: 13px; font-weight: 700; color: #C2410C;
 }
 

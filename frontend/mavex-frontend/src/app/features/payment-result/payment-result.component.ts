@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { PaymentPageService } from '../../core/services/payment-page.service';
 
 type ResultType = 'success' | 'error' | 'cancelled';
@@ -18,7 +18,7 @@ interface ResultConfig {
 
 @Component({
   selector: 'app-payment-result',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './payment-result.component.html',
   styleUrl: './payment-result.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

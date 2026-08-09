@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
-import { PaymentTransactionResponse, PaymentTransactionSearchParams } from '../models/payment.model';
+import { PaymentTransactionResponse, PaymentTransactionSearchParams, ReceiptSendResponse } from '../models/payment.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentHistoryService {
@@ -26,5 +26,10 @@ export class PaymentHistoryService {
 
   getTotalCollected(): Observable<number> {
     return this.http.get<number>('/api/payments/total-collected');
+  }
+
+  sendReceipt(transactionId: number): Observable<ReceiptSendResponse> {
+    return this.http.post<ReceiptSendResponse>(
+      `/api/payments/${transactionId}/send-receipt`, {});
   }
 }

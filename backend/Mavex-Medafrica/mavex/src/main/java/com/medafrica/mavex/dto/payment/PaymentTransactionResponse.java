@@ -25,4 +25,9 @@ public class PaymentTransactionResponse {
     private Long   orderId;
     private String hawb;
     private String clientFullName;
+
+    // true si un email PAYMENT_CONFIRMED a déjà été envoyé avec succès pour cette
+    // commande — pertinent uniquement pour gateway=MANUEL (PayPal l'envoie déjà
+    // automatiquement dans markSuccess()).
+    private boolean receiptSent;
 }

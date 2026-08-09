@@ -18,6 +18,8 @@ public interface NotificationEmailService {
     /**
      * Envoie l'email de confirmation de paiement avec le reçu PDF en pièce jointe.
      * Best-effort : ne doit jamais lever d'exception vers l'appelant (voir impl.).
+     * @return true si l'email a réellement été envoyé avec succès, false dans tous
+     *         les cas d'échec (template absent, PDF échoué, envoi échoué).
      */
-    void sendPaymentConfirmationEmail(Order order, PaymentTransaction transaction);
+    boolean sendPaymentConfirmationEmail(Order order, PaymentTransaction transaction);
 }

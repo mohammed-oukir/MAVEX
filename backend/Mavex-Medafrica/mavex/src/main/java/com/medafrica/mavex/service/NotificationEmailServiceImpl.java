@@ -146,7 +146,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
     private static final String PAYMENT_CONFIRMED_TEMPLATE = "PAYMENT_CONFIRMED";
 
     @Override
-    public void sendPaymentConfirmationEmail(Order order, PaymentTransaction transaction) {
+    public boolean sendPaymentConfirmationEmail(Order order, PaymentTransaction transaction) {
         try {
             Optional<EmailTemplate> templateOpt = templateRepository
                     .findByType_NameAndActiveTrue(PAYMENT_CONFIRMED_TEMPLATE);
@@ -154,7 +154,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             if (templateOpt.isEmpty()) {
                 log.warn("Aucun template email actif trouvé pour {} — confirmation de paiement non envoyée (Order id={})",
                         PAYMENT_CONFIRMED_TEMPLATE, order.getId());
-                return;
+                return false;
             }
             EmailTemplate template = templateOpt.get();
 
@@ -169,7 +169,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             } catch (Exception e) {
                 log.error("Échec génération du reçu PDF — confirmation de paiement non envoyée (Order id={}) : {}",
                         order.getId(), e.getMessage(), e);
-                return;
+                return false;
             }
 
             Long emailLogId = persistence.createPendingLog(toEmail, subject, template, order.getId());
@@ -189,10 +189,12 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
                 persistence.markLogSuccess(emailLogId, messageId);
 
                 log.info("Email de confirmation de paiement envoyé → {} (Order HAWB={})", toEmail, order.getHawb());
+                return true;
 
             } catch (Exception e) {
                 persistence.markLogFailed(emailLogId, e.getMessage());
                 log.error("Échec envoi email de confirmation de paiement → {} : {}", toEmail, e.getMessage());
+                return false;
             }
 
         } catch (Exception e) {
@@ -200,6 +202,7 @@ public class NotificationEmailServiceImpl implements NotificationEmailService {
             // à l'appelant (markSuccess() d'un paiement réel ne doit jamais échouer à cause d'un email).
             log.error("Erreur inattendue lors de l'envoi de la confirmation de paiement (Order id={}) : {}",
                     order.getId(), e.getMessage(), e);
+            return false;
         }
     }
 

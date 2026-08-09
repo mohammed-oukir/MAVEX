@@ -1,15 +1,18 @@
 package com.medafrica.mavex.service.payment;
 
 import com.medafrica.mavex.dto.payment.PaymentTransactionResponse;
+import com.medafrica.mavex.model.enums.EmailStatus;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.enums.PaymentStatus;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.payment.PaymentTransaction;
+import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.PaymentTransactionRepository;
 import com.medafrica.mavex.repository.specification.PaymentTransactionSpecification;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +33,7 @@ public class PaymentTransactionService {
     private final PaymentTransactionRepository transactionRepository;
     private final OrderRepository              orderRepository;
     private final NotificationEmailService     notificationEmailService;
+    private final EmailLogRepository           emailLogRepository;
 
     // ─────────── Marque une transaction/commande comme payée (idempotent) ───────────
     @Transactional
@@ -52,6 +56,8 @@ public class PaymentTransactionService {
         // statut fiable). Jamais pour MANUEL : le passage à PAID y est une action
         // humaine, potentiellement corrigible/erronée, donc pas de confirmation auto.
         if (transaction.getGateway() == PaymentGatewayType.PAYPAL) {
+            // Valeur de retour ignorée : comportement best-effort inchangé, l'échec
+            // éventuel est déjà loggé en interne par sendPaymentConfirmationEmail().
             notificationEmailService.sendPaymentConfirmationEmail(order, transaction);
         }
     }
@@ -85,12 +91,50 @@ public class PaymentTransactionService {
                 .hawb(order != null ? order.getHawb() : null)
                 .clientFullName(order != null && order.getClient() != null
                         ? order.getClient().getFullName() : null)
+                .receiptSent(isReceiptSent(t, order))
                 .build();
+    }
+
+    private boolean isReceiptSent(PaymentTransaction t, Order order) {
+        if (t.getGateway() != PaymentGatewayType.MANUEL || order == null) {
+            return false;
+        }
+        return emailLogRepository.existsByOrder_IdAndEmailTemplate_Type_NameAndStatus(
+                order.getId(), "PAYMENT_CONFIRMED", EmailStatus.SENT);
     }
 
     // ─────────── Total encaissé (toutes transactions SUCCESS) ───────────
     @Transactional(readOnly = true)
     public BigDecimal getTotalCollected() {
         return transactionRepository.sumSuccessAmount();
+    }
+
+    // ─────────── Envoi manuel du reçu de confirmation (gateway MANUEL uniquement) ───────────
+    @Transactional
+    public void sendManualReceipt(Long transactionId) {
+        PaymentTransaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Transaction introuvable id=" + transactionId));
+
+        if (transaction.getGateway() != PaymentGatewayType.MANUEL) {
+            throw new IllegalStateException(
+                    "L'envoi manuel du reçu n'est disponible que pour les paiements MANUEL (gateway actuel : "
+                    + transaction.getGateway() + ").");
+        }
+        if (transaction.getStatus() != PaymentStatus.SUCCESS) {
+            throw new IllegalStateException(
+                    "Impossible d'envoyer le reçu : la transaction id=" + transactionId
+                    + " n'est pas au statut SUCCESS (statut actuel : " + transaction.getStatus() + ").");
+        }
+
+        boolean sent = notificationEmailService.sendPaymentConfirmationEmail(
+                transaction.getOrder(), transaction);
+
+        if (!sent) {
+            throw new IllegalStateException("L'envoi de l'email a échoué, vérifiez les logs.");
+        }
+
+        log.info("Reçu de confirmation envoyé manuellement pour transaction id={} (order id={})",
+                transactionId, transaction.getOrder() != null ? transaction.getOrder().getId() : null);
     }
 }
