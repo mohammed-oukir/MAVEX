@@ -63,7 +63,7 @@
         class="sb-item"
         routerLink="/orders"
         routerLinkActive="active"
-        aria-label="Orders"
+        aria-label="Haws"
       >
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -72,7 +72,7 @@
           <line x1="16" y1="17" x2="8" y2="17"/>
           <polyline points="10 9 9 9 8 9"/>
         </svg>
-        Orders
+        Haws
       </a>
     }
 
@@ -190,18 +190,18 @@
         </svg>
         Utilisateurs
       </a>
-      <a
-        class="sb-item"
-        routerLink="/permissions"
-        routerLinkActive="active"
-        aria-label="Permissions"
+      <span
+        class="sb-item sb-item--disabled"
+        aria-label="Permissions (bientôt disponible)"
+        aria-disabled="true"
       >
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
         Permissions
-      </a>
+        <span class="sb-badge">Bientôt</span>
+      </span>
       <a
         class="sb-item"
         routerLink="/settings/email-settings"

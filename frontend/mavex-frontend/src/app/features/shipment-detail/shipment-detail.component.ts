@@ -357,7 +357,6 @@ export class ShipmentDetailComponent implements OnInit {
     this.shipSvc.getById(sid).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: s => {
         this.shipment.set(s);
-        this.layout.setPage(s.mawb);
         this.dutyRateInput.set(Math.round((s.dutyRate ?? 0) * 10000) / 100);
         this.loading.set(false);
       },

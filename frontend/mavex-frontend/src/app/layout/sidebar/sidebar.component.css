@@ -112,6 +112,33 @@
   color: #E87A30;
 }
 
+/* Disabled item (feature not yet available) */
+.sb-item--disabled {
+  cursor: not-allowed;
+  color: rgba(255, 255, 255, .3);
+}
+.sb-item--disabled svg { color: rgba(255, 255, 255, .22); }
+.sb-item--disabled:hover {
+  background: transparent;
+  color: rgba(255, 255, 255, .3);
+}
+.sb-item--disabled:hover svg { color: rgba(255, 255, 255, .22); }
+
+/* "Coming soon" badge */
+.sb-badge {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .45);
+  background: rgba(255, 255, 255, .08);
+  border: 0.5px solid rgba(255, 255, 255, .12);
+  border-radius: 5px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+
 /* Left-edge active indicator */
 .sb-item.active::before {
   content: '';
