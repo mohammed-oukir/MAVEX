@@ -16,6 +16,8 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
 
     Optional<PaymentTransaction> findByOrderIdAndStatus(Long orderId, PaymentStatus status);
 
+    boolean existsByOrder_IdAndStatus(Long orderId, PaymentStatus status);
+
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM PaymentTransaction t WHERE t.status = 'SUCCESS'")
     BigDecimal sumSuccessAmount();
 }

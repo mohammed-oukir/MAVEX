@@ -270,6 +270,10 @@ public class OrderServiceImpl implements OrderService {
      * Cree automatiquement une PaymentTransaction si le statut passe manuellement a PAID.
      */
     private void changeStatus(Order order, OrderStatus newStatus, String note, User actor) {
+        if (transactionRepository.existsByOrder_IdAndStatus(order.getId(), PaymentStatus.SUCCESS)) {
+            throw new IllegalStateException("Cette commande a déjà été payée. Le statut ne peut plus être modifié.");
+        }
+
         OrderStatus previous = order.getStatus();
         order.setStatus(newStatus);
         orderRepository.save(order);

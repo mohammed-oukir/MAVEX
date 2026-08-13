@@ -198,6 +198,7 @@ export class ShipmentDetailComponent implements OnInit {
   selectedNewStatus   = signal<OrderStatus | null>(null);
   statusNote          = signal('');
   changingStatus      = signal(false);
+  confirmingPaidChange = signal(false);
 
   /* ── Delete order ─────────────────────────────────────── */
   deleteOrderId = signal<number | null>(null);
@@ -625,19 +626,30 @@ export class ShipmentDetailComponent implements OnInit {
     this.changingStatusOrder.set(o);
     this.selectedNewStatus.set(null);
     this.statusNote.set('');
+    this.confirmingPaidChange.set(false);
   }
-  closeStatusModal(): void { this.changingStatusOrder.set(null); }
+  closeStatusModal(): void {
+    this.changingStatusOrder.set(null);
+    this.confirmingPaidChange.set(false);
+  }
+
+  cancelPaidConfirm(): void { this.confirmingPaidChange.set(false); }
 
   confirmStatusChange(): void {
     const o      = this.changingStatusOrder();
     const status = this.selectedNewStatus();
     if (!o || !status) return;
+    if (status === 'PAID' && !this.confirmingPaidChange()) {
+      this.confirmingPaidChange.set(true);
+      return;
+    }
     this.changingStatus.set(true);
     const req: OrderStatusUpdate = { newStatus: status, note: this.statusNote() || undefined };
     this.orderSvc.updateStatus(o.id, req).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.changingStatus.set(false);
         this.changingStatusOrder.set(null);
+        this.confirmingPaidChange.set(false);
         this.toast.success('Statut mis à jour.');
         this.reloadOrders();
       },

@@ -48,6 +48,9 @@ export class ImportsComponent implements OnInit {
   editingRow = signal<ImportPreviewRow | null>(null);
   revalidating = signal(false);
 
+  /* ── Suppression d'une ligne ──────────────────────────────── */
+  deletingRow = signal<ImportPreviewRow | null>(null);
+
   editForm = new FormGroup({
     mawb:               new FormControl('',   [Validators.required]),
     hawb:               new FormControl('',   [Validators.required]),
@@ -285,6 +288,50 @@ export class ImportsComponent implements OnInit {
         error: () => {
           this.revalidating.set(false);
           this.toast.error('Impossible de revalider la ligne — vérifiez votre connexion et réessayez.');
+        },
+      });
+  }
+
+  /* ── Suppression d'une ligne ──────────────────────────────── */
+  confirmRowDelete(row: ImportPreviewRow): void {
+    this.lockScroll();
+    this.deletingRow.set(row);
+  }
+
+  cancelRowDelete(): void {
+    this.unlockScroll();
+    this.deletingRow.set(null);
+  }
+
+  executeRowDelete(): void {
+    const target = this.deletingRow();
+    if (!target) return;
+
+    const candidateRows = this.previewRows().filter(r => r.rowNumber !== target.rowNumber);
+
+    // Plus aucune ligne : pas besoin d'aller-retour serveur, rien à revalider.
+    if (candidateRows.length === 0) {
+      this.previewRows.set([]);
+      this.unlockScroll();
+      this.deletingRow.set(null);
+      this.toast.success('Ligne supprimée.');
+      return;
+    }
+
+    this.revalidating.set(true);
+    this.importSvc.revalidate({ rows: candidateRows })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.previewRows.set(res.rows);
+          this.revalidating.set(false);
+          this.unlockScroll();
+          this.deletingRow.set(null);
+          this.toast.success('Ligne supprimée.');
+        },
+        error: () => {
+          this.revalidating.set(false);
+          this.toast.error('Impossible de supprimer la ligne — vérifiez votre connexion et réessayez.');
         },
       });
   }

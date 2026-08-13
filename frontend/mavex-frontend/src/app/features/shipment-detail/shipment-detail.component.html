@@ -891,6 +891,35 @@
     </div>
   }
 
+  <!-- ============================================================
+       MODAL — Confirmation paiement manuel (PAID)
+       ============================================================ -->
+  @if (confirmingPaidChange()) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="paidConfirmTitle" (click)="cancelPaidConfirm()">
+      <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+        <div class="nm-header">
+          <div class="nm-icon blue" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.5 12.5l2 2 4-4.5"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="paidConfirmTitle" class="nm-title">Confirm manual payment</h2>
+            <p class="nm-sub">This action is final — once confirmed, this order's status can no longer be changed. Are you sure you have verified the payment was received?</p>
+          </div>
+          <button type="button" class="nm-close" (click)="cancelPaidConfirm()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="cancelPaidConfirm()">Cancel</button>
+          <button type="button" class="nm-btn-primary" [disabled]="changingStatus()" (click)="confirmStatusChange()">
+            @if (changingStatus()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Mise à jour… }
+            @else { <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Yes, confirm payment }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
 
   <!-- ============================================================
        MODAL — Supprimer Order
