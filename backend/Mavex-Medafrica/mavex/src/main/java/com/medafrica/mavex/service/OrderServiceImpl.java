@@ -1,5 +1,6 @@
 package com.medafrica.mavex.service;
 
+import com.medafrica.mavex.dto.order.BulkStatusResult;
 import com.medafrica.mavex.dto.order.OrderPatchRequest;
 import com.medafrica.mavex.dto.order.OrderRequest;
 import com.medafrica.mavex.dto.order.OrderResponse;
@@ -254,15 +255,23 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note) {
+    public BulkStatusResult bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note) {
+        int succeeded = 0, failed = 0;
         for (Long id : ids) {
             try {
                 Order order = findOrThrow(id);
                 changeStatus(order, newStatus, note, getCurrentUser());
+                succeeded++;
             } catch (Exception e) {
+                failed++;
                 log.warn("bulkUpdateStatus — erreur order {} : {}", id, e.getMessage());
             }
         }
+        return BulkStatusResult.builder()
+                .total(ids.size())
+                .succeeded(succeeded)
+                .failed(failed)
+                .build();
     }
 
     @Override

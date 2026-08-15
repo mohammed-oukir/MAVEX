@@ -1,5 +1,6 @@
 package com.medafrica.mavex.service.interfaces;
 
+import com.medafrica.mavex.dto.order.BulkStatusResult;
 import com.medafrica.mavex.dto.order.OrderPatchRequest;
 import com.medafrica.mavex.dto.order.OrderRequest;
 import com.medafrica.mavex.dto.order.OrderResponse;
@@ -50,7 +51,7 @@ public interface OrderService {
     void updateStatusSystem(Long orderId, OrderStatus newStatus, String note);
 
     /** Met à jour le statut de plusieurs orders en une transaction */
-    void bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note);
+    BulkStatusResult bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note);
 
     OrderResponse generatePaymentToken(Long id);
 

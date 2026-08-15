@@ -276,10 +276,12 @@ export class OrdersComponent implements OnInit {
     this.bulkLoading.set(true);
     this.bulkConfirm.set(null);
     this.orderSvc.bulkStatus(ids, 'PAID', 'Paiement enregistré en masse').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
+      next: (r) => {
         this.bulkLoading.set(false);
         this.clearSelection();
-        this.toast.success(`${ids.length} order(s) marqués comme payés.`);
+        const msg = `${r.succeeded}/${r.total} order(s) marqués comme payés${r.failed > 0 ? ` — ${r.failed} échec(s)` : ''}.`;
+        if (r.failed > 0) this.toast.error(msg);
+        else              this.toast.success(msg);
         this.loadOrders(); this.loadKpis();
       },
       error: () => { this.bulkLoading.set(false); this.toast.error('Erreur lors de la mise à jour.'); },

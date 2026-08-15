@@ -43,6 +43,10 @@ public class EmailPersistenceService {
             throw new IllegalStateException("Le client n'a pas d'adresse email.");
         }
 
+        if (order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalStateException("Impossible d'envoyer un email de paiement : cette commande est déjà payée ou livrée.");
+        }
+
         if (!order.isTokenValid()) {
             order.generatePaymentToken();
             orderRepository.save(order);

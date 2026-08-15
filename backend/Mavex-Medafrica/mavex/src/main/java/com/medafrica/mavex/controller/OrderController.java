@@ -128,9 +128,8 @@ public class OrderController {
     // ─────────── POST /api/orders/bulk/status ───────────
     @PostMapping("/bulk/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> bulkStatus(@RequestBody BulkStatusRequest request) {
-        orderService.bulkUpdateStatus(request.getIds(), request.getNewStatus(), request.getNote());
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<BulkStatusResult> bulkStatus(@RequestBody BulkStatusRequest request) {
+        return ResponseEntity.ok(orderService.bulkUpdateStatus(request.getIds(), request.getNewStatus(), request.getNote()));
     }
 
     // ─────────── POST /api/orders/{id}/payment-token ───────────

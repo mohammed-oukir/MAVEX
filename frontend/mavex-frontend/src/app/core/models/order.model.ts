@@ -108,6 +108,12 @@ export interface BulkEmailResult {
   failed: number;
 }
 
+export interface BulkStatusResult {
+  total:     number;
+  succeeded: number;
+  failed:    number;
+}
+
 export type EmailLogStatus = 'PENDING' | 'SENT' | 'FAILED' | 'RETRYING';
 
 export interface EmailLogResponse {
