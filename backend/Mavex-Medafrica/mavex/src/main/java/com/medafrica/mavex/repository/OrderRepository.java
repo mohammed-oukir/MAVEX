@@ -42,6 +42,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 List<Order> findAllByHawbIn(List<String> hawbs);
  long countByClientId(Long clientId);
 
+    boolean existsByIdInAndStatusIn(List<Long> ids, List<OrderStatus> statuses);
+
 
 
 

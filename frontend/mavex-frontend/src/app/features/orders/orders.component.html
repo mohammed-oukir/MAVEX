@@ -397,9 +397,11 @@
                   <button type="button" class="or-act-btn or-act-view" (click)="openDetail(o)" title="Voir le détail" aria-label="Détail">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
-                  <button type="button" class="or-act-btn or-act-edit" (click)="openEditOrder(o)" title="Modifier" aria-label="Modifier">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
+                  @if (o.status !== 'PAID') {
+                    <button type="button" class="or-act-btn or-act-edit" (click)="openEditOrder(o)" title="Modifier" aria-label="Modifier">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  }
                   @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED') {
                     <button type="button" class="or-act-btn or-act-email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer l'email" [attr.aria-label]="'Envoyer email à ' + o.clientFullName">
                       @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }

@@ -428,7 +428,7 @@ export class OrdersComponent implements OnInit {
         this.deleting.set(false); this.deleteId.set(null);
         this.toast.success('Order supprimé.'); this.loadOrders(); this.loadKpis();
       },
-      error: () => { this.deleting.set(false); this.toast.error('Erreur.'); },
+      error: (err) => { this.deleting.set(false); this.toast.error(err?.error?.message || 'Erreur.'); },
     });
   }
 

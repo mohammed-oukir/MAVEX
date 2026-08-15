@@ -3,6 +3,7 @@ package com.medafrica.mavex.service;
 import com.medafrica.mavex.model.imports.ImportLog;
 import com.medafrica.mavex.model.imports.ImportRowLog;
 import com.medafrica.mavex.model.logistics.Order;
+import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.repository.*;
 import com.medafrica.mavex.service.interfaces.ImportDeleteService;
 import jakarta.persistence.EntityNotFoundException;
@@ -57,6 +58,14 @@ public class ImportDeleteServiceImpl implements ImportDeleteService {
             .filter(o -> o.getClient() != null)
             .map(o -> o.getClient().getId())
             .collect(Collectors.toSet());
+
+        if (!ordersToDelete.isEmpty()) {
+            List<Long> orderIds = ordersToDelete.stream().map(Order::getId).collect(Collectors.toList());
+            if (orderRepository.existsByIdInAndStatusIn(orderIds,
+                    List.of(OrderStatus.EMAIL_SENT, OrderStatus.EMAIL_OUTDATED, OrderStatus.PAID, OrderStatus.DELIVERED))) {
+                throw new IllegalStateException("Impossible de supprimer cet import : au moins une commande a déjà reçu un email ou a été payée.");
+            }
+        }
 
         if (!ordersToDelete.isEmpty()) {
             for (Order order : ordersToDelete) {

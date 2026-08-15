@@ -416,7 +416,7 @@ export class ImportsComponent implements OnInit {
         this.deleting.set(false); this.deleteId.set(null);
         this.toast.success('Import supprimé.'); this.loadHistory();
       },
-      error: () => { this.unlockScroll(); this.deleting.set(false); this.toast.error('Erreur.'); },
+      error: (err) => { this.unlockScroll(); this.deleting.set(false); this.toast.error(err?.error?.message || 'Erreur.'); },
     });
   }
 

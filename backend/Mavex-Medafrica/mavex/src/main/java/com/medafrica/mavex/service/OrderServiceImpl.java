@@ -155,6 +155,10 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse update(Long id, OrderRequest request) {
         Order order = findOrThrow(id);
 
+        if (order.getStatus() == OrderStatus.PAID) {
+            throw new IllegalStateException("Impossible de modifier cette commande : elle a déjà été payée.");
+        }
+
         if (!order.getHawb().equals(request.getHawb()) && orderRepository.existsByHawb(request.getHawb())) {
             throw new IllegalArgumentException("Un order avec le HAWB '" + request.getHawb() + "' existe déjà.");
         }
@@ -190,6 +194,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderResponse patch(Long id, OrderPatchRequest request) {
         Order order = findOrThrow(id);
+
+        if (order.getStatus() == OrderStatus.PAID) {
+            throw new IllegalStateException("Impossible de modifier cette commande : elle a déjà été payée.");
+        }
 
         if (request.getHawb() != null
                 && !request.getHawb().equals(order.getHawb())
@@ -320,6 +328,9 @@ public class OrderServiceImpl implements OrderService {
     public void delete(Long id) {
         if (!orderRepository.existsById(id)) {
             throw new EntityNotFoundException("Order introuvable id=" + id);
+        }
+        if (transactionRepository.existsByOrder_Id(id)) {
+            throw new IllegalStateException("Impossible de supprimer cette commande : une tentative de paiement y est associée.");
         }
         emailLogRepository.deleteByOrderId(id);
         historyRepository.deleteByOrderId(id);

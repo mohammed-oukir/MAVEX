@@ -4,6 +4,7 @@ import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
 import com.medafrica.mavex.model.actor.Shipper;
+import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
@@ -37,6 +38,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final OrderRepository              orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final EmailLogRepository           emailLogRepository;
+    private final PaymentTransactionRepository transactionRepository;
 
     @Override
     @Transactional
@@ -161,13 +163,16 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipmentRepository.save(shipment);
 
         List<Order> orders = orderRepository.findByShipmentId(id);
-        for (Order order : orders) {
+        List<Order> updatableOrders = orders.stream()
+                .filter(order -> order.getStatus() != OrderStatus.PAID)
+                .collect(Collectors.toList());
+        for (Order order : updatableOrders) {
             order.setDutyRate(rate);
         }
-        orderRepository.saveAll(orders);
+        orderRepository.saveAll(updatableOrders);
 
         log.info("Taux mis à jour shipment {} → {}% ({} orders recalculés)",
-                id, rate.multiply(new BigDecimal("100")), orders.size());
+                id, rate.multiply(new BigDecimal("100")), updatableOrders.size());
         return toResponse(shipment);
     }
 
@@ -178,6 +183,13 @@ public class ShipmentServiceImpl implements ShipmentService {
 
         List<Order> orders = orderRepository.findByShipmentId(id);
         log.info("Suppression shipment {} ({}) — {} orders liés", id, shipment.getMawb(), orders.size());
+
+        if (!orders.isEmpty()) {
+            List<Long> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
+            if (transactionRepository.existsByOrder_IdIn(orderIds)) {
+                throw new IllegalStateException("Impossible de supprimer cet envoi : au moins une commande a une tentative de paiement associée.");
+            }
+        }
 
         for (Order order : orders) {
             emailLogRepository.deleteByOrderId(order.getId());

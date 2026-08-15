@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 public interface PaymentTransactionRepository extends JpaRepository<PaymentTransaction, Long>,
@@ -17,6 +18,10 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
     Optional<PaymentTransaction> findByOrderIdAndStatus(Long orderId, PaymentStatus status);
 
     boolean existsByOrder_IdAndStatus(Long orderId, PaymentStatus status);
+
+    boolean existsByOrder_Id(Long orderId);
+
+    boolean existsByOrder_IdIn(List<Long> orderIds);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM PaymentTransaction t WHERE t.status = 'SUCCESS'")
     BigDecimal sumSuccessAmount();
