@@ -6,6 +6,7 @@ import com.medafrica.mavex.dto.order.OrderRequest;
 import com.medafrica.mavex.dto.order.OrderResponse;
 import com.medafrica.mavex.dto.order.OrderStatusUpdateRequest;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.logistics.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -41,6 +42,26 @@ public interface OrderService {
     List<OrderResponse> getByShipment(Long shipmentId);
 
     List<OrderResponse> getByClient(Long clientId);
+
+    /** Recherche avec filtres par colonne, sans pagination — renvoie toutes les lignes filtrées (pour export). */
+    List<Order> searchAll(
+            String hawb,
+            String client,
+            String clientEmail,
+            String shipmentSearch,
+            Double shipmentWeight,
+            Double customsValue,
+            Double totalAmount,
+            Double dutyRate,
+            String customsCurrency,
+            OrderStatus status,
+            Long shipmentId,
+            LocalDate from,
+            LocalDate to
+    );
+
+    /** Récupère plusieurs orders par leurs ids (pour export d'une sélection). */
+    List<Order> findAllByIds(List<Long> ids);
 
     OrderResponse update(Long id, OrderRequest request);
 

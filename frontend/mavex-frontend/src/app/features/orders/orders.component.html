@@ -234,6 +234,43 @@
 }
 
 
+<!-- ══════════════════════════════════════════════════════════
+     EXPORT
+     ══════════════════════════════════════════════════════════ -->
+<div class="or-export-row">
+  <div class="or-export-wrap" [class.or-export-open]="exportOpen()">
+    <button type="button" class="or-export-btn" (click)="exportOpen.set(!exportOpen())"
+      [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
+      aria-label="Exporter">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Exporter
+    </button>
+
+    @if (exportOpen()) {
+      <div class="or-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
+      <div class="or-export-dropdown" role="menu" aria-label="Options d'export">
+        <button type="button" class="or-export-item" role="menuitem" (click)="exportPdf()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Exporter en PDF
+        </button>
+        <button type="button" class="or-export-item" role="menuitem" (click)="exportExcel()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Exporter en Excel
+        </button>
+        <button type="button" class="or-export-item" role="menuitem" (click)="exportSelection()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Exporter la sélection (Excel)
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+
 <!-- ── Bandeau conversion devise ──────────────────────────── -->
 <div class="or-rate-bar">
   <div class="or-rate-controls">

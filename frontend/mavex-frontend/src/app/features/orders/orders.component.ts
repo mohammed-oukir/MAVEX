@@ -82,6 +82,9 @@ export class OrdersComponent implements OnInit {
   bulkConfirm = signal<'email' | 'paid' | null>(null);
   lastBulkResult = signal<BulkEmailResult | null>(null);
 
+  /* ── Export ───────────────────────────────────────────── */
+  exportOpen = signal(false);
+
   /* ── Modals ───────────────────────────────────────────── */
   detail   = signal<OrderResponse | null>(null);
   deleteId = signal<number | null>(null);
@@ -225,6 +228,52 @@ export class OrdersComponent implements OnInit {
     this.flTo.set('');
     this.page.set(0);
     this.loadOrders();
+  }
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportPdf(): void {
+    this.exportOpen.set(false);
+    this.orderSvc.exportPdf(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes.pdf'),
+        error: () => this.toast.error('Erreur lors de l\'export PDF.'),
+      });
+  }
+
+  exportExcel(): void {
+    this.exportOpen.set(false);
+    this.orderSvc.exportExcel(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export Excel.'),
+      });
+  }
+
+  exportSelection(): void {
+    if (this.selectedIds().size === 0) {
+      this.toast.error('Veuillez sélectionner au moins une commande.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.orderSvc.exportExcelSelection(Array.from(this.selectedIds()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes_selection.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export de la sélection.'),
+      });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   /* ── Sélection ────────────────────────────────────────── */

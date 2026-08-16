@@ -3,7 +3,9 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.email.EmailLogDTO;
 import com.medafrica.mavex.dto.order.*;
 import com.medafrica.mavex.model.enums.OrderStatus;
+import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.repository.EmailLogRepository;
+import com.medafrica.mavex.service.export.TableExportService;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import com.medafrica.mavex.service.interfaces.OrderService;
 import jakarta.validation.Valid;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,6 +35,7 @@ public class OrderController {
     private final OrderService            orderService;
     private final NotificationEmailService emailService;
     private final EmailLogRepository      emailLogRepository;
+    private final TableExportService      exportService;
 
     // ─────────── POST /api/orders ───────────
     @PostMapping
@@ -62,6 +67,131 @@ public class OrderController {
                 hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
                 totalAmount, dutyRate, customsCurrency, status, shipmentId,
                 from, to, pageable));
+    }
+
+    // ─────────── GET /api/orders/export/pdf — export PDF des orders filtrés ───────────
+    @GetMapping("/export/pdf")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportPdf(
+            @RequestParam(required = false) String hawb,
+            @RequestParam(required = false) String client,
+            @RequestParam(required = false) String clientEmail,
+            @RequestParam(required = false) String shipmentSearch,
+            @RequestParam(required = false) Double shipmentWeight,
+            @RequestParam(required = false) Double customsValue,
+            @RequestParam(required = false) Double totalAmount,
+            @RequestParam(required = false) Double dutyRate,
+            @RequestParam(required = false) String customsCurrency,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long shipmentId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+
+        List<List<String>> rows = buildExportRows(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
+
+        byte[] bytes = exportService.generatePdf("Liste des commandes", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"commandes.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(bytes);
+    }
+
+    // ─────────── GET /api/orders/export/excel — export Excel des orders filtrés ───────────
+    @GetMapping("/export/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportExcel(
+            @RequestParam(required = false) String hawb,
+            @RequestParam(required = false) String client,
+            @RequestParam(required = false) String clientEmail,
+            @RequestParam(required = false) String shipmentSearch,
+            @RequestParam(required = false) Double shipmentWeight,
+            @RequestParam(required = false) Double customsValue,
+            @RequestParam(required = false) Double totalAmount,
+            @RequestParam(required = false) Double dutyRate,
+            @RequestParam(required = false) String customsCurrency,
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long shipmentId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+
+        List<List<String>> rows = buildExportRows(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
+
+        byte[] bytes = exportService.generateExcel("Orders", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"commandes.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    // ─────────── POST /api/orders/export/excel/selection — export Excel d'une sélection d'ids ───────────
+    @PostMapping("/export/excel/selection")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportExcelSelection(@RequestBody ExportSelectionRequest request) {
+        if (request.getIds() == null || request.getIds().isEmpty()) {
+            throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
+        }
+
+        List<Order> orders = orderService.findAllByIds(request.getIds());
+        List<List<String>> rows = rowsFromOrders(orders);
+
+        byte[] bytes = exportService.generateExcel("Orders (sélection)", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"commandes_selection.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    private static final List<String> EXPORT_HEADERS =
+            List.of("HAWB", "Client", "Shipment", "Poids", "Valeur", "Total dû", "Statut");
+
+    private List<List<String>> buildExportRows(
+            String hawb, String client, String clientEmail, String shipmentSearch,
+            Double shipmentWeight, Double customsValue, Double totalAmount, Double dutyRate,
+            String customsCurrency, OrderStatus status, Long shipmentId,
+            LocalDate from, LocalDate to) {
+
+        List<Order> orders = orderService.searchAll(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
+
+        return rowsFromOrders(orders);
+    }
+
+    private List<List<String>> rowsFromOrders(List<Order> orders) {
+        List<List<String>> rows = new ArrayList<>();
+        for (Order o : orders) {
+            String clientName = o.getClient() != null ? o.getClient().getFullName() : "";
+            String mawb       = o.getShipment() != null ? o.getShipment().getMawb() : "";
+            String weight      = o.getShipmentWeight() != null ? o.getShipmentWeight().toString() : "";
+            String currency    = o.getCustomsCurrency() != null ? o.getCustomsCurrency() : "";
+            String customsVal  = o.getCustomsValue() != null
+                    ? o.getCustomsValue().toString() + " " + currency
+                    : "";
+            String totalVal    = o.getTotalAmount() != null
+                    ? o.getTotalAmount().toString() + " " + currency
+                    : "";
+            String statusName  = o.getStatus() != null ? o.getStatus().name() : "";
+
+            rows.add(List.of(
+                    o.getHawb() != null ? o.getHawb() : "",
+                    clientName != null ? clientName : "",
+                    mawb != null ? mawb : "",
+                    weight,
+                    customsVal,
+                    totalVal,
+                    statusName
+            ));
+        }
+        return rows;
     }
 
     // ─────────── GET /api/orders/{id} ───────────

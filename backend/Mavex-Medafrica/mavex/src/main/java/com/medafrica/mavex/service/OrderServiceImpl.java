@@ -133,6 +133,26 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Order> searchAll(String hawb, String client, String clientEmail,
+                                  String shipmentSearch,
+                                  Double shipmentWeight, Double customsValue,
+                                  Double totalAmount, Double dutyRate,
+                                  String customsCurrency, OrderStatus status,
+                                  Long shipmentId, LocalDate from, LocalDate to) {
+        Specification<Order> spec = OrderSpecification.build(
+                hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
+                totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
+        return orderRepository.findAll(spec, Pageable.unpaged()).getContent();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> findAllByIds(List<Long> ids) {
+        return orderRepository.findAllById(ids);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<OrderResponse> getByShipment(Long shipmentId) {
         List<Order> orders = orderRepository.findByShipmentIdWithRelations(shipmentId);
         Map<Long, EmailLog> lastSentByOrderId = lastSentEmailLogsByOrders(orders);

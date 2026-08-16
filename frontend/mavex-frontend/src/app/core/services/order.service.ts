@@ -12,10 +12,29 @@ export class OrderService {
   private readonly http = inject(HttpClient);
 
   search(params: OrderSearchParams = {}, page = 0, size = 20): Observable<Page<OrderResponse>> {
-    let p = new HttpParams()
+    const p = this.buildSearchParams(params)
       .set('page', page)
       .set('size', size)
       .set('sort', 'createdAt,desc');
+    return this.http.get<Page<OrderResponse>>('/api/orders', { params: p });
+  }
+
+  exportPdf(params: OrderSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/orders/export/pdf', { params: p, responseType: 'blob' });
+  }
+
+  exportExcel(params: OrderSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/orders/export/excel', { params: p, responseType: 'blob' });
+  }
+
+  exportExcelSelection(ids: number[]): Observable<Blob> {
+    return this.http.post('/api/orders/export/excel/selection', { ids }, { responseType: 'blob' });
+  }
+
+  private buildSearchParams(params: OrderSearchParams): HttpParams {
+    let p = new HttpParams();
     if (params.hawb)            p = p.set('hawb', params.hawb);
     if (params.client)          p = p.set('client', params.client);
     if (params.clientEmail)     p = p.set('clientEmail', params.clientEmail);
@@ -29,7 +48,7 @@ export class OrderService {
     if (params.shipmentId) p = p.set('shipmentId', params.shipmentId);
     if (params.from)       p = p.set('from', params.from);
     if (params.to)         p = p.set('to', params.to);
-    return this.http.get<Page<OrderResponse>>('/api/orders', { params: p });
+    return p;
   }
 
   getById(id: number): Observable<OrderResponse> {
