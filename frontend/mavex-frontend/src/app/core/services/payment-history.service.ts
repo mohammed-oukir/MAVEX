@@ -9,10 +9,29 @@ export class PaymentHistoryService {
   private readonly http = inject(HttpClient);
 
   search(params: PaymentTransactionSearchParams = {}, page = 0, size = 20): Observable<Page<PaymentTransactionResponse>> {
-    let p = new HttpParams()
+    const p = this.buildSearchParams(params)
       .set('page', page)
       .set('size', size)
       .set('sort', 'createdAt,desc');
+    return this.http.get<Page<PaymentTransactionResponse>>('/api/payments', { params: p });
+  }
+
+  exportPdf(params: PaymentTransactionSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/payments/export/pdf', { params: p, responseType: 'blob' });
+  }
+
+  exportExcel(params: PaymentTransactionSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/payments/export/excel', { params: p, responseType: 'blob' });
+  }
+
+  exportExcelSelection(ids: number[]): Observable<Blob> {
+    return this.http.post('/api/payments/export/excel/selection', { ids }, { responseType: 'blob' });
+  }
+
+  private buildSearchParams(params: PaymentTransactionSearchParams): HttpParams {
+    let p = new HttpParams();
     if (params.hawb)               p = p.set('hawb', params.hawb);
     if (params.client)             p = p.set('client', params.client);
     if (params.gateway)            p = p.set('gateway', params.gateway);
@@ -21,7 +40,7 @@ export class PaymentHistoryService {
     if (params.amountMax != null)  p = p.set('amountMax', params.amountMax);
     if (params.from)               p = p.set('from', params.from);
     if (params.to)                 p = p.set('to', params.to);
-    return this.http.get<Page<PaymentTransactionResponse>>('/api/payments', { params: p });
+    return p;
   }
 
   getTotalCollected(): Observable<number> {

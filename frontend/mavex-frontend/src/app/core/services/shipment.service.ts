@@ -22,10 +22,29 @@ export class ShipmentService {
   private readonly http = inject(HttpClient);
 
   search(params: ShipmentSearchParams = {}, page = 0, size = 15): Observable<Page<ShipmentResponse>> {
-    let p = new HttpParams()
+    const p = this.buildSearchParams(params)
       .set('page', page)
       .set('size', size)
       .set('sort', 'createdAt,desc');
+    return this.http.get<Page<ShipmentResponse>>('/api/shipments', { params: p });
+  }
+
+  exportPdf(params: ShipmentSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/shipments/export/pdf', { params: p, responseType: 'blob' });
+  }
+
+  exportExcel(params: ShipmentSearchParams = {}): Observable<Blob> {
+    const p = this.buildSearchParams(params);
+    return this.http.get('/api/shipments/export/excel', { params: p, responseType: 'blob' });
+  }
+
+  exportExcelSelection(ids: number[]): Observable<Blob> {
+    return this.http.post('/api/shipments/export/excel/selection', { ids }, { responseType: 'blob' });
+  }
+
+  private buildSearchParams(params: ShipmentSearchParams): HttpParams {
+    let p = new HttpParams();
     if (params.mawb)       p = p.set('mawb', params.mawb);
     if (params.shipper)    p = p.set('shipper', params.shipper);
     if (params.importFrom) p = p.set('importFrom', params.importFrom);
@@ -36,7 +55,7 @@ export class ShipmentService {
     if (params.dutyRateMin != null) p = p.set('dutyRateMin', params.dutyRateMin);
     if (params.dutyRateMax != null) p = p.set('dutyRateMax', params.dutyRateMax);
     if (params.status)     p = p.set('status', params.status);
-    return this.http.get<Page<ShipmentResponse>>('/api/shipments', { params: p });
+    return p;
   }
 
   getAll(page = 0, size = 15, sort = 'createdAt,desc'): Observable<Page<ShipmentResponse>> {

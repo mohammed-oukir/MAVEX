@@ -513,7 +513,7 @@
                   <div class="cl-order-row">
                     <div class="cl-order-hawb">{{ o.hawb }}</div>
                     <div class="cl-order-desc">{{ o.goodsDescription || '—' }}</div>
-                    <div class="cl-order-amount">{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</div>
+                    <div class="cl-order-amount">{{ o.totalAmount != null ? o.totalAmount.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD' : '—' }}</div>
                     <span [class]="'cl-os-badge ' + orderStatusClass(o.status)">{{ orderStatusLabel(o.status) }}</span>
                   </div>
                 }

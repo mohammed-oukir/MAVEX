@@ -105,6 +105,38 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Shipment> searchAll(String mawb, String shipperCompanyName,
+                                     LocalDate importFrom, LocalDate importTo,
+                                     String carrier, String mode, Integer totalOrders,
+                                     Double dutyRateMin, Double dutyRateMax,
+                                     ShipmentStatus status) {
+        Specification<Shipment> spec = ShipmentSpecification.build(
+                mawb, shipperCompanyName, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status);
+        return shipmentRepository.findAll(spec, Pageable.unpaged()).getContent();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countOrdersByShipmentIds(List<Long> shipmentIds) {
+        if (shipmentIds.isEmpty()) {
+            return Map.of();
+        }
+        return orderRepository.countByShipmentIds(shipmentIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (Long) row[1]
+                ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Shipment> findAllByIds(List<Long> ids) {
+        return shipmentRepository.findAllById(ids);
+    }
+
+    @Override
     @Transactional
     public ShipmentResponseDTO update(Long id, ShipmentRequestDTO req) {
         Shipment shipment = findOrThrow(id);
@@ -217,14 +249,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         List<Long> shipmentIds = page.getContent().stream()
                 .map(Shipment::getId)
                 .toList();
-        if (shipmentIds.isEmpty()) {
-            return Map.of();
-        }
-        return orderRepository.countByShipmentIds(shipmentIds).stream()
-                .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> (Long) row[1]
-                ));
+        return countOrdersByShipmentIds(shipmentIds);
     }
 
     private ShipmentResponseDTO toResponse(Shipment s) {

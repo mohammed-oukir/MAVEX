@@ -33,6 +33,14 @@ export class OrderService {
     return this.http.post('/api/orders/export/excel/selection', { ids }, { responseType: 'blob' });
   }
 
+  exportDetailPdf(ids: number[]): Observable<Blob> {
+    return this.http.post('/api/orders/export/detail/pdf', { ids }, { responseType: 'blob' });
+  }
+
+  exportDetailExcel(ids: number[]): Observable<Blob> {
+    return this.http.post('/api/orders/export/detail/excel', { ids }, { responseType: 'blob' });
+  }
+
   private buildSearchParams(params: OrderSearchParams): HttpParams {
     let p = new HttpParams();
     if (params.hawb)            p = p.set('hawb', params.hawb);

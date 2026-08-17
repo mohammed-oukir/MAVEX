@@ -23,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +149,85 @@ public class OrderController {
                 .contentType(MediaType.parseMediaType(
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(bytes);
+    }
+
+    // ─────────── POST /api/orders/export/detail/pdf — export PDF détaillé d'une sélection d'ids ───────────
+    @PostMapping("/export/detail/pdf")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportDetailPdf(@RequestBody ExportSelectionRequest request) {
+        if (request.getIds() == null || request.getIds().isEmpty()) {
+            throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
+        }
+
+        List<Order> orders = orderService.findAllByIds(request.getIds());
+        List<List<String>> rows = rowsFromOrdersDetail(orders);
+
+        byte[] bytes = exportService.generatePdf("Commandes du shipment", EXPORT_DETAIL_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"commandes_shipment.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(bytes);
+    }
+
+    // ─────────── POST /api/orders/export/detail/excel — export Excel détaillé d'une sélection d'ids ───────────
+    @PostMapping("/export/detail/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportDetailExcel(@RequestBody ExportSelectionRequest request) {
+        if (request.getIds() == null || request.getIds().isEmpty()) {
+            throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
+        }
+
+        List<Order> orders = orderService.findAllByIds(request.getIds());
+        List<List<String>> rows = rowsFromOrdersDetail(orders);
+
+        byte[] bytes = exportService.generateExcel("Orders", EXPORT_DETAIL_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"commandes_shipment.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    private static final List<String> EXPORT_DETAIL_HEADERS =
+            List.of("HAWB", "Client", "Shipper", "Description", "Poids", "Items",
+                    "Customs", "Devise", "Duty%", "Total", "Statut");
+
+    private List<List<String>> rowsFromOrdersDetail(List<Order> orders) {
+        List<List<String>> rows = new ArrayList<>();
+        for (Order o : orders) {
+            String clientName = o.getClient() != null ? o.getClient().getFullName() : "";
+            String shipperName = (o.getShipment() != null && o.getShipment().getShipper() != null)
+                    ? o.getShipment().getShipper().getCompanyName()
+                    : "";
+            String weight = o.getShipmentWeight() != null ? o.getShipmentWeight().toString() : "";
+            String items  = o.getNumberOfItems() != null ? o.getNumberOfItems().toString() : "";
+            String currency = o.getCustomsCurrency() != null ? o.getCustomsCurrency() : "";
+            String customsVal = o.getCustomsValue() != null ? o.getCustomsValue().toString() : "";
+            String dutyVal = o.getDutyRate() != null
+                    ? o.getDutyRate().multiply(BigDecimal.valueOf(100)) + "%"
+                    : "";
+            String totalVal = o.getTotalAmount() != null
+                    ? o.getTotalAmount().toString() + " " + currency
+                    : "";
+            String statusName = o.getStatus() != null ? o.getStatus().name() : "";
+
+            rows.add(List.of(
+                    o.getHawb() != null ? o.getHawb() : "",
+                    clientName != null ? clientName : "",
+                    shipperName != null ? shipperName : "",
+                    o.getGoodsDescription() != null ? o.getGoodsDescription() : "",
+                    weight,
+                    items,
+                    customsVal,
+                    currency,
+                    dutyVal,
+                    totalVal,
+                    statusName
+            ));
+        }
+        return rows;
     }
 
     private static final List<String> EXPORT_HEADERS =

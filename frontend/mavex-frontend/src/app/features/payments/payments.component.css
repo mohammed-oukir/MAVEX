@@ -253,3 +253,71 @@ select.sp-field-input { cursor: pointer; }
 .or-act-btn:hover:not(:disabled) { background: #F3F4F6; }
 .or-act-receipt { color: var(--mavex-accent); border-color: #FED7AA; }
 .or-act-receipt:hover:not(:disabled) { background: #FFF7ED; border-color: var(--mavex-accent); color: var(--mavex-accent-dark); }
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT
+   ═══════════════════════════════════════════════════════════ */
+.or-export-wrap { position: relative; }
+
+.or-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  background: #fff;
+  color: #374151;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.or-export-btn:hover              { border-color: var(--mavex-accent); color: var(--mavex-accent); background: #FFF7ED; }
+.or-export-open .or-export-btn    { border-color: var(--mavex-accent); color: var(--mavex-accent); background: #FFF7ED; }
+.or-export-btn:focus-visible      { outline: 2px solid var(--mavex-accent); outline-offset: 2px; }
+
+.or-export-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
+.or-export-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.1);
+  z-index: 200;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.or-export-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s, color .12s;
+}
+.or-export-item:hover {
+  background: #FFF7ED;
+  color: var(--mavex-accent);
+}
+.or-export-item + .or-export-item {
+  border-top: 1px solid #F3F4F6;
+}

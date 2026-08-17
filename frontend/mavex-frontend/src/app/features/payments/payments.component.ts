@@ -35,6 +35,15 @@ export class PaymentsComponent implements OnInit {
   loading  = signal(true);
   pageSize = signal(20);
 
+  /* ── Sélection bulk ───────────────────────────────────── */
+  selectedIds  = signal<Set<number>>(new Set());
+  someSelected = computed(() => this.selectedIds().size > 0);
+  allSelected  = computed(() => this.transactions().length > 0 && this.selectedIds().size === this.transactions().length);
+  selCount     = computed(() => this.selectedIds().size);
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportOpen = signal(false);
+
   /* ── Envoi manuel du reçu (gateway MANUEL) ───────────────── */
   sendingReceiptId = signal<number | null>(null);
 
@@ -149,7 +158,71 @@ export class PaymentsComponent implements OnInit {
   fmtAmount(n?: number | null, currency?: string | null): string {
     if (n == null) return '—';
     const cur = currency ?? 'USD';
-    return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ' + cur;
+    return n.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + cur;
+  }
+
+  /* ── Sélection ────────────────────────────────────────── */
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }
+
+  toggleAll(): void {
+    this.allSelected()
+      ? this.selectedIds.set(new Set())
+      : this.selectedIds.set(new Set(this.transactions().map(t => t.id)));
+  }
+
+  isSelected(id: number): boolean { return this.selectedIds().has(id); }
+  clearSelection(): void          { this.selectedIds.set(new Set()); }
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportPdf(): void {
+    this.exportOpen.set(false);
+    this.svc.exportPdf(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'transactions.pdf'),
+        error: () => this.toast.error('Erreur lors de l\'export PDF.'),
+      });
+  }
+
+  exportExcel(): void {
+    this.exportOpen.set(false);
+    this.svc.exportExcel(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'transactions.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export Excel.'),
+      });
+  }
+
+  exportSelection(): void {
+    if (this.selectedIds().size === 0) {
+      this.toast.error('Veuillez sélectionner au moins une transaction.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.svc.exportExcelSelection(Array.from(this.selectedIds()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'transactions_selection.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export de la sélection.'),
+      });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   /* ── Envoi manuel du reçu ─────────────────────────────────── */

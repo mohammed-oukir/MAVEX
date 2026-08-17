@@ -1,10 +1,13 @@
 package com.medafrica.mavex.controller;
 
 import com.medafrica.mavex.dto.shipment.DutyRateUpdateDTO;
+import com.medafrica.mavex.dto.shipment.ExportSelectionRequest;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
+import com.medafrica.mavex.model.logistics.Shipment;
+import com.medafrica.mavex.service.export.TableExportService;
 import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +16,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/shipments")
@@ -26,6 +36,7 @@ import java.time.LocalDate;
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
+    private final TableExportService exportService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -66,6 +77,128 @@ public class ShipmentController {
         return ResponseEntity.ok(shipmentService.search(
                 mawb, shipper, importFrom, importTo, carrier, mode,
                 totalOrders, dutyRateMin, dutyRateMax, status, pageable));
+    }
+
+    // ─────────── GET /api/shipments/export/pdf — export PDF des shipments filtrés ───────────
+    @GetMapping("/export/pdf")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportPdf(
+            @RequestParam(required = false) String mawb,
+            @RequestParam(required = false) String shipper,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importTo,
+            @RequestParam(required = false) String carrier,
+            @RequestParam(required = false) String mode,
+            @RequestParam(required = false) Integer totalOrders,
+            @RequestParam(required = false) Double dutyRateMin,
+            @RequestParam(required = false) Double dutyRateMax,
+            @RequestParam(required = false) ShipmentStatus status) {
+
+        List<List<String>> rows = buildExportRows(
+                mawb, shipper, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status);
+
+        byte[] bytes = exportService.generatePdf("Liste des shipments", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"shipments.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(bytes);
+    }
+
+    // ─────────── GET /api/shipments/export/excel — export Excel des shipments filtrés ───────────
+    @GetMapping("/export/excel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportExcel(
+            @RequestParam(required = false) String mawb,
+            @RequestParam(required = false) String shipper,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate importTo,
+            @RequestParam(required = false) String carrier,
+            @RequestParam(required = false) String mode,
+            @RequestParam(required = false) Integer totalOrders,
+            @RequestParam(required = false) Double dutyRateMin,
+            @RequestParam(required = false) Double dutyRateMax,
+            @RequestParam(required = false) ShipmentStatus status) {
+
+        List<List<String>> rows = buildExportRows(
+                mawb, shipper, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status);
+
+        byte[] bytes = exportService.generateExcel("Shipments", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"shipments.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    // ─────────── POST /api/shipments/export/excel/selection — export Excel d'une sélection d'ids ───────────
+    @PostMapping("/export/excel/selection")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<byte[]> exportExcelSelection(@RequestBody ExportSelectionRequest request) {
+        if (request.getIds() == null || request.getIds().isEmpty()) {
+            throw new IllegalArgumentException("Veuillez sélectionner au moins un envoi.");
+        }
+
+        List<Shipment> shipments = shipmentService.findAllByIds(request.getIds());
+        List<Long> ids = shipments.stream().map(Shipment::getId).toList();
+        Map<Long, Long> orderCounts = shipmentService.countOrdersByShipmentIds(ids);
+        List<List<String>> rows = rowsFromShipments(shipments, orderCounts);
+
+        byte[] bytes = exportService.generateExcel("Shipments (sélection)", EXPORT_HEADERS, rows);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"shipments_selection.xlsx\"")
+                .contentType(MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(bytes);
+    }
+
+    private static final List<String> EXPORT_HEADERS =
+            List.of("MAWB", "Date arrivée", "Carrier", "Mode", "Orders", "Duty", "Statut");
+
+    private static final DateTimeFormatter EXPORT_DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    private List<List<String>> buildExportRows(
+            String mawb, String shipper, LocalDate importFrom, LocalDate importTo,
+            String carrier, String mode, Integer totalOrders,
+            Double dutyRateMin, Double dutyRateMax, ShipmentStatus status) {
+
+        List<Shipment> shipments = shipmentService.searchAll(
+                mawb, shipper, importFrom, importTo, carrier, mode,
+                totalOrders, dutyRateMin, dutyRateMax, status);
+
+        List<Long> ids = shipments.stream().map(Shipment::getId).toList();
+        Map<Long, Long> orderCounts = shipmentService.countOrdersByShipmentIds(ids);
+
+        return rowsFromShipments(shipments, orderCounts);
+    }
+
+    private List<List<String>> rowsFromShipments(List<Shipment> shipments, Map<Long, Long> orderCounts) {
+        List<List<String>> rows = new ArrayList<>();
+        for (Shipment s : shipments) {
+            String importDate = s.getImportDate() != null ? s.getImportDate().format(EXPORT_DATE_FMT) : "";
+            String carrierVal = s.getImportingCarrier() != null ? s.getImportingCarrier() : "";
+            String modeVal    = s.getModeOfTransport() != null ? s.getModeOfTransport() : "";
+            long   ordersCount = orderCounts.getOrDefault(s.getId(), 0L);
+            String dutyVal     = s.getDutyRate() != null
+                    ? s.getDutyRate().multiply(BigDecimal.valueOf(100)) + "%"
+                    : "";
+            String statusName  = s.getStatus() != null ? s.getStatus().name() : "";
+
+            rows.add(List.of(
+                    s.getMawb() != null ? s.getMawb() : "",
+                    importDate,
+                    carrierVal,
+                    modeVal,
+                    String.valueOf(ordersCount),
+                    dutyVal,
+                    statusName
+            ));
+        }
+        return rows;
     }
 
     @GetMapping("/status/{status}")

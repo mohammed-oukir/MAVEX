@@ -384,7 +384,7 @@
               <td class="text-end or-num">{{ fmtWeight(o.shipmentWeight) }}</td>
 
               <td class="text-end or-num">
-                {{ o.customsValue?.toLocaleString('fr-FR') ?? '—' }}
+                {{ o.customsValue?.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) ?? '—' }}
                 @if (o.customsCurrency) { <span class="or-currency">{{ o.customsCurrency }}</span> }
               </td>
 
@@ -602,7 +602,7 @@
           <div class="col-12">
             <p class="or-detail-section">Calcul financier</p>
             <div class="or-finance-grid">
-              <div class="or-finance-row"><span>Valeur douanière</span><span class="fw-semibold">{{ o.customsValue?.toLocaleString('fr-FR') ?? '—' }} {{ o.customsCurrency }}</span></div>
+              <div class="or-finance-row"><span>Valeur douanière</span><span class="fw-semibold">{{ o.customsValue?.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) ?? '—' }} {{ o.customsCurrency }}</span></div>
               <div class="or-finance-row"><span>Taux de douane</span><span>× {{ fmtDuty(o.dutyRate) }}</span></div>
               <div class="or-finance-row"><span>Montant droits</span><span>{{ fmtAmount(o.dutyAmount, o.customsCurrency) }}</span></div>
               @if (o.bankCharges) { <div class="or-finance-row"><span>Frais bancaires</span><span>+ {{ fmtAmount(o.bankCharges, o.customsCurrency) }}</span></div> }
@@ -623,7 +623,7 @@
                 </div>
                 <div class="or-finance-row">
                   <span>Équivalent MAD</span>
-                  <span class="fw-semibold">{{ o.lockedAmountMAD?.toLocaleString('fr-FR', {maximumFractionDigits:0}) }} {{ o.lockedToCurrency }}</span>
+                  <span class="fw-semibold">{{ o.lockedAmountMAD?.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) }} {{ o.lockedToCurrency }}</span>
                 </div>
                 <div class="or-finance-row">
                   <span>Date de gel</span>

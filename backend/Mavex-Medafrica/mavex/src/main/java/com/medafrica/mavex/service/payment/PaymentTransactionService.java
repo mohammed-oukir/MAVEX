@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -73,6 +74,23 @@ public class PaymentTransactionService {
                 hawb, client, gateway, status, amountMin, amountMax, from, to);
 
         return transactionRepository.findAll(spec, pageable).map(this::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentTransaction> searchAll(String hawb, String client,
+            PaymentGatewayType gateway, PaymentStatus status,
+            BigDecimal amountMin, BigDecimal amountMax,
+            LocalDate from, LocalDate to) {
+
+        Specification<PaymentTransaction> spec = PaymentTransactionSpecification.build(
+                hawb, client, gateway, status, amountMin, amountMax, from, to);
+
+        return transactionRepository.findAll(spec, Pageable.unpaged()).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentTransaction> findAllByIds(List<Long> ids) {
+        return transactionRepository.findAllById(ids);
     }
 
     private PaymentTransactionResponse toResponse(PaymentTransaction t) {

@@ -492,7 +492,7 @@ export class OrdersComponent implements OnInit {
   fmtAmount(n?: number | null, currency?: string | null): string {
     if (n == null) return '—';
     const cur = currency ?? 'MAD';
-    return n.toLocaleString('fr-MA', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ' + cur;
+    return n.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ' + cur;
   }
 
   fmtWeight(n?: number | null): string {

@@ -49,6 +49,15 @@ export class ShipmentsComponent implements OnInit {
   shippers     = signal<ShipperResponse[]>([]);
   loading      = signal(true);
 
+  /* ── Sélection bulk ───────────────────────────────────── */
+  selectedIds  = signal<Set<number>>(new Set());
+  someSelected = computed(() => this.selectedIds().size > 0);
+  allSelected  = computed(() => this.shipments().length > 0 && this.selectedIds().size === this.shipments().length);
+  selCount     = computed(() => this.selectedIds().size);
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportOpen = signal(false);
+
   /* ── Panneau de filtres ───────────────────────────────── */
   filtersCollapsed = signal(false);
   flMawb        = signal('');
@@ -303,6 +312,70 @@ export class ShipmentsComponent implements OnInit {
   isExpanded(id: number):        boolean         { return this.expandedOrders().has(id); }
   isLoadingExpand(id: number):   boolean         { return this.loadingOrders().has(id); }
   getExpandedOrders(id: number): OrderResponse[] { return this.expandedOrders().get(id) ?? []; }
+
+  /* ── Sélection ────────────────────────────────────────── */
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }
+
+  toggleAll(): void {
+    this.allSelected()
+      ? this.selectedIds.set(new Set())
+      : this.selectedIds.set(new Set(this.shipments().map(s => s.id)));
+  }
+
+  isSelected(id: number): boolean { return this.selectedIds().has(id); }
+  clearSelection(): void          { this.selectedIds.set(new Set()); }
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportPdf(): void {
+    this.exportOpen.set(false);
+    this.shipSvc.exportPdf(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'shipments.pdf'),
+        error: () => this.toast.error('Erreur lors de l\'export PDF.'),
+      });
+  }
+
+  exportExcel(): void {
+    this.exportOpen.set(false);
+    this.shipSvc.exportExcel(this.buildParams())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'shipments.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export Excel.'),
+      });
+  }
+
+  exportSelection(): void {
+    if (this.selectedIds().size === 0) {
+      this.toast.error('Veuillez sélectionner au moins un envoi.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.shipSvc.exportExcelSelection(Array.from(this.selectedIds()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'shipments_selection.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export de la sélection.'),
+      });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
   /* ── Mini formulaire nouveau shipper ─────────────────── */
   showNewShipperForm  = signal(false);

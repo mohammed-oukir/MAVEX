@@ -339,9 +339,35 @@
     <div class="sd-section-hd">
       <span class="sd-section-title">Manifeste — {{ filteredOrders().length }} ordre(s)</span>
       <div class="sd-tools">
-        <div class="sd-search-wrap">
-          <svg class="sd-search-icon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="search" class="sd-search" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Rechercher dans le manifeste" />
+        <div class="sd-export-wrap" [class.sd-export-open]="exportOpen()">
+          <button type="button" class="sd-export-btn" (click)="exportOpen.set(!exportOpen())"
+            [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
+            aria-label="Exporter">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exporter
+          </button>
+
+          @if (exportOpen()) {
+            <div class="sd-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
+            <div class="sd-export-dropdown" role="menu" aria-label="Options d'export">
+              <button type="button" class="sd-export-item" role="menuitem" (click)="exportAll()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Exporter tout (PDF)
+              </button>
+              <button type="button" class="sd-export-item" role="menuitem" (click)="exportAllExcel()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Exporter tout (Excel)
+              </button>
+              <button type="button" class="sd-export-item" role="menuitem" (click)="exportSelection()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Exporter la sélection (Excel)
+              </button>
+            </div>
+          }
         </div>
         <button type="button" class="sd-btn-ghost" [disabled]="sendingAll()" (click)="sendAll()" aria-label="Envoyer tous les emails">
           @if (sendingAll()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
@@ -362,7 +388,7 @@
           <line x1="9" y1="12" x2="15" y2="12"/>
           <line x1="9" y1="16" x2="13" y2="16"/>
         </svg>
-        @if (search() || hasColumnFilters() || statusFilter()) {
+        @if (hasColumnFilters() || statusFilter()) {
           <p>Aucun ordre correspond à la recherche.</p>
         } @else {
           <p>Ce shipment n'a pas encore d'orders.</p>
@@ -377,6 +403,9 @@
         <table class="table sd-table mb-0" aria-label="Manifeste du shipment">
           <thead>
             <tr>
+              <th scope="col" style="width:36px;text-align:center">
+                <input type="checkbox" class="form-check-input" [checked]="allSelected()" (change)="toggleAll()" aria-label="Sélectionner tout" />
+              </th>
               <th scope="col">HAWB</th>
               <th scope="col">Client</th>
               <th scope="col">Shipper</th>
@@ -394,6 +423,9 @@
           <tbody>
             @for (o of filteredOrders(); track o.id) {
               <tr>
+                <td style="text-align:center">
+                  <input type="checkbox" class="form-check-input" [checked]="isSelected(o.id)" (change)="toggleSelect(o.id)" [attr.aria-label]="'Sélectionner ' + o.hawb" />
+                </td>
                 <td>
                   <div class="sd-hawb-cell">
                     <span class="sd-hawb">{{ o.hawb }}</span>
@@ -422,7 +454,7 @@
                   <strong>{{ o.totalAmount != null ? o.totalAmount + ' ' + (o.customsCurrency || 'USD') : '—' }}</strong>
                   @if (o.lockedAmountMAD != null) {
                     <div style="font-size:11px;color:#9CA3AF;margin-top:2px">
-                      ≈ {{ o.lockedAmountMAD!.toLocaleString('fr-FR', {maximumFractionDigits:0}) }} {{ o.lockedToCurrency }}
+                      ≈ {{ o.lockedAmountMAD!.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) }} {{ o.lockedToCurrency }}
                     </div>
                   }
                 </td>
@@ -971,18 +1003,22 @@
           </div>
           <div style="flex:1;min-width:0">
             <h2 id="sendAllTitle" class="nm-title">Envoyer à tous</h2>
-            <p class="nm-sub">{{ shipment()?.mawb ?? '' }} — {{ orders().length }} client(s)</p>
+            <p class="nm-sub">{{ shipment()?.mawb ?? '' }} — {{ eligibleForEmailCount() }} client(s) éligible(s)</p>
           </div>
           <button type="button" class="nm-close" (click)="closeSendAllConfirm()" aria-label="Fermer">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
         <div class="nm-body">
-          <p class="nm-alert">Les {{ orders().length }} clients de ce shipment recevront un email de paiement.</p>
+          @if (eligibleForEmailCount() === orders().length) {
+            <p class="nm-alert">Les {{ orders().length }} clients de ce shipment recevront un email de paiement.</p>
+          } @else {
+            <p class="nm-alert">{{ eligibleForEmailCount() }} client(s) sur {{ orders().length }} recevront un email de paiement. Les autres commandes sont déjà payées ou livrées et seront ignorées.</p>
+          }
         </div>
         <div class="nm-footer">
           <button type="button" class="nm-btn-cancel" (click)="closeSendAllConfirm()">Annuler</button>
-          <button type="button" class="nm-btn-primary" [disabled]="sendingAll()" (click)="executeSendAll()">
+          <button type="button" class="nm-btn-primary" [disabled]="sendingAll() || eligibleForEmailCount() === 0" (click)="executeSendAll()">
             @if (sendingAll()) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> Envoi… }
             @else { Confirmer }
           </button>

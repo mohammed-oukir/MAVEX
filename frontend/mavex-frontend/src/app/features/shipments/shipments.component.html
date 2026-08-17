@@ -206,6 +206,37 @@
 <!-- ── Total ───────────────────────────────────────────────── -->
 <div class="sp-toolbar">
   <span class="sp-total">{{ total() }} shipment(s)</span>
+
+  <div class="sp-export-wrap" [class.sp-export-open]="exportOpen()">
+    <button type="button" class="sp-export-btn" (click)="exportOpen.set(!exportOpen())"
+      [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
+      aria-label="Exporter">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Exporter
+    </button>
+
+    @if (exportOpen()) {
+      <div class="sp-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
+      <div class="sp-export-dropdown" role="menu" aria-label="Options d'export">
+        <button type="button" class="sp-export-item" role="menuitem" (click)="exportPdf()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Exporter en PDF
+        </button>
+        <button type="button" class="sp-export-item" role="menuitem" (click)="exportExcel()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Exporter en Excel
+        </button>
+        <button type="button" class="sp-export-item" role="menuitem" (click)="exportSelection()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Exporter la sélection (Excel)
+        </button>
+      </div>
+    }
+  </div>
 </div>
 
 <!-- ── Table ───────────────────────────────────────────────── -->
@@ -214,6 +245,9 @@
     <table class="table sp-table mb-0" aria-label="Liste des shipments">
       <thead>
         <tr>
+          <th scope="col" style="width:36px;text-align:center">
+            <input type="checkbox" class="form-check-input" [checked]="allSelected()" (change)="toggleAll()" aria-label="Sélectionner tout" />
+          </th>
           <th scope="col" style="width:44px"></th>
           <th scope="col">MAWB</th>
           <th scope="col">Date arrivée</th>
@@ -230,6 +264,7 @@
         @if (loading()) {
           @for (i of [1,2,3,4,5,6,7,8]; track i) {
             <tr>
+              <td><div class="sk-row" style="width:20px;height:20px;border-radius:4px"></div></td>
               <td><div class="sk-row" style="width:26px;height:26px;border-radius:6px"></div></td>
               <td><div class="sk-row" style="width:88%"></div></td>
               <td><div class="sk-row" style="width:70%"></div></td>
@@ -244,7 +279,7 @@
 
         } @else if (shipments().length === 0) {
           <tr>
-            <td colspan="9" style="padding:0;border:none">
+            <td colspan="10" style="padding:0;border:none">
               <div class="sp-empty">
                 <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -271,6 +306,11 @@
               tabindex="0"
               [attr.aria-label]="'Shipment ' + s.mawb"
             >
+              <!-- Checkbox sélection -->
+              <td (click)="$event.stopPropagation()" style="text-align:center">
+                <input type="checkbox" class="form-check-input" [checked]="isSelected(s.id)" (change)="toggleSelect(s.id)" [attr.aria-label]="'Sélectionner ' + s.mawb" />
+              </td>
+
               <!-- Expand chevron -->
               <td (click)="$event.stopPropagation()">
                 <button
@@ -391,7 +431,7 @@
                                 <td>{{ o.companyName || '—' }}</td>
                                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" [title]="o.goodsDescription || ''">{{ o.goodsDescription || '—' }}</td>
                                 <td>{{ o.shipmentWeight != null ? o.shipmentWeight + ' kg' : '—' }}</td>
-                                <td><strong>{{ o.totalAmount != null ? o.totalAmount + ' USD' : '—' }}</strong></td>
+                                <td><strong>{{ o.totalAmount != null ? o.totalAmount.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD' : '—' }}</strong></td>
 
                                 <td><app-badge [status]="o.status" /></td>
                               </tr>

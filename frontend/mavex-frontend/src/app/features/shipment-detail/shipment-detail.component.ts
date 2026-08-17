@@ -57,7 +57,6 @@ export class ShipmentDetailComponent implements OnInit {
   clients   = signal<ClientResponse[]>([]);
   shippers  = signal<ShipperResponse[]>([]);
   loading   = signal(true);
-  search    = signal('');
   statusFilter = signal('');
 
   /* ── Panneau de filtres par colonne (100% local, aucun HTTP) ─── */
@@ -216,7 +215,6 @@ export class ShipmentDetailComponent implements OnInit {
 
   /* ── Computed ─────────────────────────────────────────── */
   filteredOrders = computed(() => {
-    const q  = this.search().toLowerCase().trim();
     const st = this.statusFilter();
     const f  = this.appliedFilters();
 
@@ -224,19 +222,7 @@ export class ShipmentDetailComponent implements OnInit {
       // 1. Statut (onglets)
       if (st && o.status !== st) return false;
 
-      // 2. Recherche globale
-      if (q) {
-        const matchQ =
-          o.hawb?.toLowerCase().includes(q) ||
-          o.clientFullName?.toLowerCase().includes(q) ||
-          o.goodsDescription?.toLowerCase().includes(q) ||
-          o.clientEmail?.toLowerCase().includes(q) ||
-          o.clientCity?.toLowerCase().includes(q) ||
-          o.htsusCode?.toLowerCase().includes(q);
-        if (!matchQ) return false;
-      }
-
-      // 3. Filtres par colonne
+      // 2. Filtres par colonne
       if (f.hawb   && !o.hawb?.toLowerCase().includes(f.hawb))             return false;
       if (f.client && !o.clientFullName?.toLowerCase().includes(f.client)) return false;
       if (f.desc   && !o.goodsDescription?.toLowerCase().includes(f.desc)) return false;
@@ -258,6 +244,32 @@ export class ShipmentDetailComponent implements OnInit {
   hasColumnFilters = computed(() =>
     Object.values(this.appliedFilters()).some(v => v !== undefined)
   );
+
+  /* ── Sélection bulk (basée sur filteredOrders, pas orders) ──── */
+  selectedIds  = signal<Set<number>>(new Set());
+  someSelected = computed(() => this.selectedIds().size > 0);
+  allSelected  = computed(() => this.filteredOrders().length > 0 && this.selectedIds().size === this.filteredOrders().length);
+  selCount     = computed(() => this.selectedIds().size);
+
+  toggleSelect(id: number): void {
+    this.selectedIds.update(s => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  }
+
+  toggleAll(): void {
+    this.allSelected()
+      ? this.selectedIds.set(new Set())
+      : this.selectedIds.set(new Set(this.filteredOrders().map(o => o.id)));
+  }
+
+  isSelected(id: number): boolean { return this.selectedIds().has(id); }
+  clearSelection(): void          { this.selectedIds.set(new Set()); }
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportOpen = signal(false);
 
   /* ── Panneau de filtres ───────────────────────────────── */
   onFiltersSearch(): void {
@@ -297,6 +309,11 @@ export class ShipmentDetailComponent implements OnInit {
   deliveredCount     = computed(() => this.orders().filter(o => o.status === 'DELIVERED').length);
   emailOutdatedCount = computed(() => this.orders().filter(o => o.status === 'EMAIL_OUTDATED').length);
   cancelledCount     = computed(() => this.orders().filter(o => o.status === 'CANCELLED').length);
+  eligibleForEmailCount = computed(() =>
+    this.orders().filter(o =>
+      o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED'
+    ).length
+  );
 
   /* ── Financial totals ─────────────────────────────────── */
   totalWeight  = computed(() => Math.round(this.orders().reduce((s, o) => s + (o.shipmentWeight ?? 0), 0) * 100) / 100);
@@ -770,5 +787,61 @@ export class ShipmentDetailComponent implements OnInit {
     const date = new Date(d);
     if (isNaN(date.getTime())) return d;
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  /* ── Export ───────────────────────────────────────────── */
+  exportAll(): void {
+    const ids = this.filteredOrders().map(o => o.id);
+    if (ids.length === 0) {
+      this.toast.error('Aucune commande à exporter.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.orderSvc.exportDetailPdf(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes_shipment.pdf'),
+        error: () => this.toast.error('Erreur lors de l\'export PDF.'),
+      });
+  }
+
+  exportAllExcel(): void {
+    const ids = this.filteredOrders().map(o => o.id);
+    if (ids.length === 0) {
+      this.toast.error('Aucune commande à exporter.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.orderSvc.exportDetailExcel(ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes_shipment.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export Excel.'),
+      });
+  }
+
+  exportSelection(): void {
+    if (this.selectedIds().size === 0) {
+      this.toast.error('Veuillez sélectionner au moins une commande.');
+      return;
+    }
+    this.exportOpen.set(false);
+    this.orderSvc.exportDetailExcel(Array.from(this.selectedIds()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => this.triggerDownload(blob, 'commandes_selection.xlsx'),
+        error: () => this.toast.error('Erreur lors de l\'export de la sélection.'),
+      });
+  }
+
+  private triggerDownload(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 }

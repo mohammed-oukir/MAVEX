@@ -137,7 +137,7 @@ export class DashboardComponent implements OnInit {
   };
   readonly areaStroke: ApexStroke = { curve: 'smooth', width: 2.5, colors: ['#F97316'] };
   readonly areaGrid: ApexGrid  = { borderColor: '#F3F4F6', strokeDashArray: 4, xaxis: { lines: { show: false } } };
-  readonly areaTooltip: ApexTooltip = { theme: 'light', y: { formatter: (v: number) => v.toLocaleString('fr-FR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }) } };
+  readonly areaTooltip: ApexTooltip = { theme: 'light', y: { formatter: (v: number) => v.toLocaleString('fr-FR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }) } };
   readonly areaColors = ['#F97316'];
   readonly areaDataLabels: ApexDataLabels = { enabled: false };
 
@@ -164,10 +164,10 @@ export class DashboardComponent implements OnInit {
 
   /* ── Helpers ──────────────────────────────────────────── */
   fmtUsd(n: number): string {
-    if (n === 0) return '$0';
-    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
-    if (n >= 1_000) return '$' + (n / 1_000).toFixed(1) + 'k';
-    return '$' + n.toFixed(0);
+    if (n === 0) return '0 USD';
+    if (n >= 1_000_000) return (n / 1_000_000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'M USD';
+    if (n >= 1_000) return (n / 1_000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'k USD';
+    return n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' USD';
   }
 
   fmtDuty(rate?: number | null): string {
