@@ -10,6 +10,8 @@ import { LayoutService }  from '../../core/services/layout.service';
 import { ClientService }  from '../../core/services/client.service';
 import { OrderService }   from '../../core/services/order.service';
 import { ToastService }   from '../../core/services/toast.service';
+import { AuthService }    from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { ClientResponse, ClientSearchCriteria } from '../../core/models/client.model';
 import { OrderResponse }  from '../../core/models/order.model';
 import { BadgeComponent } from '../../shared/badge/badge.component';
@@ -28,6 +30,8 @@ export class ClientsComponent implements OnInit {
   private readonly toast      = inject(ToastService);
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data (recherche paginée côté serveur) ─────────── */
   pageItems      = signal<ClientResponse[]>([]);
@@ -422,5 +426,22 @@ export class ClientsComponent implements OnInit {
       PAID: 'cl-os-paid', DELIVERED: 'cl-os-delivered', CANCELLED: 'cl-os-cancelled',
     };
     return m[s] ?? '';
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canCreate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('CLIENTS', 'CREATE');
+  }
+
+  canUpdate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('CLIENTS', 'UPDATE');
+  }
+
+  canDelete(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('CLIENTS', 'DELETE');
+  }
+
+  canBulkActions(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('CLIENTS', 'BULK_ACTIONS');
   }
 }

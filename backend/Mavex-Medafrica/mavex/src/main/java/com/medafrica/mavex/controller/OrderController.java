@@ -40,14 +40,14 @@ public class OrderController {
 
     // ─────────── POST /api/orders ───────────
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','CREATE')")
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
     }
 
     // ─────────── GET /api/orders — recherche paginée avec filtres ───────────
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW')")
     public ResponseEntity<Page<OrderResponse>> search(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -72,7 +72,7 @@ public class OrderController {
 
     // ─────────── GET /api/orders/export/pdf — export PDF des orders filtrés ───────────
     @GetMapping("/export/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','EXPORT')")
     public ResponseEntity<byte[]> exportPdf(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -102,7 +102,7 @@ public class OrderController {
 
     // ─────────── GET /api/orders/export/excel — export Excel des orders filtrés ───────────
     @GetMapping("/export/excel")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','EXPORT')")
     public ResponseEntity<byte[]> exportExcel(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -133,7 +133,7 @@ public class OrderController {
 
     // ─────────── POST /api/orders/export/excel/selection — export Excel d'une sélection d'ids ───────────
     @PostMapping("/export/excel/selection")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','EXPORT')")
     public ResponseEntity<byte[]> exportExcelSelection(@RequestBody ExportSelectionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
             throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
@@ -153,7 +153,7 @@ public class OrderController {
 
     // ─────────── POST /api/orders/export/detail/pdf — export PDF détaillé d'une sélection d'ids ───────────
     @PostMapping("/export/detail/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','EXPORT')")
     public ResponseEntity<byte[]> exportDetailPdf(@RequestBody ExportSelectionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
             throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
@@ -172,7 +172,7 @@ public class OrderController {
 
     // ─────────── POST /api/orders/export/detail/excel — export Excel détaillé d'une sélection d'ids ───────────
     @PostMapping("/export/detail/excel")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','EXPORT')")
     public ResponseEntity<byte[]> exportDetailExcel(@RequestBody ExportSelectionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
             throw new IllegalArgumentException("Veuillez sélectionner au moins une commande.");
@@ -276,35 +276,35 @@ public class OrderController {
 
     // ─────────── GET /api/orders/{id} ───────────
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW')")
     public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getById(id));
     }
 
     // ─────────── GET /api/orders/hawb/{hawb} ───────────
     @GetMapping("/hawb/{hawb}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW')")
     public ResponseEntity<OrderResponse> getByHawb(@PathVariable String hawb) {
         return ResponseEntity.ok(orderService.getByHawb(hawb));
     }
 
     // ─────────── GET /api/orders/shipment/{shipmentId} ───────────
     @GetMapping("/shipment/{shipmentId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW')")
     public ResponseEntity<List<OrderResponse>> getByShipment(@PathVariable Long shipmentId) {
         return ResponseEntity.ok(orderService.getByShipment(shipmentId));
     }
 
     // ─────────── GET /api/orders/client/{clientId} ───────────
     @GetMapping("/client/{clientId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW')")
     public ResponseEntity<List<OrderResponse>> getByClient(@PathVariable Long clientId) {
         return ResponseEntity.ok(orderService.getByClient(clientId));
     }
 
     // ─────────── PUT /api/orders/{id} ───────────
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','UPDATE')")
     public ResponseEntity<OrderResponse> update(@PathVariable Long id,
                                                 @Valid @RequestBody OrderRequest request) {
         return ResponseEntity.ok(orderService.update(id, request));
@@ -312,7 +312,7 @@ public class OrderController {
 
     // ─────────── PATCH /api/orders/{id} ───────────
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','UPDATE')")
     public ResponseEntity<OrderResponse> patch(@PathVariable Long id,
                                                @Valid @RequestBody OrderPatchRequest request) {
         return ResponseEntity.ok(orderService.patch(id, request));
@@ -320,7 +320,7 @@ public class OrderController {
 
     // ─────────── PATCH /api/orders/{id}/status ───────────
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','CHANGE_STATUS')")
     public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id,
                                                       @Valid @RequestBody OrderStatusUpdateRequest request) {
         return ResponseEntity.ok(orderService.updateStatus(id, request));
@@ -328,7 +328,7 @@ public class OrderController {
 
     // ─────────── POST /api/orders/bulk/email ───────────
     @PostMapping(value = "/bulk/email", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','BULK_SEND_EMAIL')")
     public ResponseEntity<BulkEmailResult> bulkEmail(
             @RequestPart("request") BulkEmailRequest request,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
@@ -337,14 +337,14 @@ public class OrderController {
 
     // ─────────── POST /api/orders/bulk/status ───────────
     @PostMapping("/bulk/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','BULK_CHANGE_STATUS')")
     public ResponseEntity<BulkStatusResult> bulkStatus(@RequestBody BulkStatusRequest request) {
         return ResponseEntity.ok(orderService.bulkUpdateStatus(request.getIds(), request.getNewStatus(), request.getNote()));
     }
 
     // ─────────── POST /api/orders/{id}/payment-token ───────────
     @PostMapping("/{id}/payment-token")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','GENERATE_PAYMENT_LINK')")
     public ResponseEntity<OrderResponse> generatePaymentToken(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.generatePaymentToken(id));
     }
@@ -357,7 +357,7 @@ public class OrderController {
 
     // ─────────── GET /api/orders/{id}/email-logs ───────────
     @GetMapping("/{id}/email-logs")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','VIEW_EMAIL_LOGS')")
     public ResponseEntity<List<EmailLogDTO>> getEmailLogs(@PathVariable Long id) {
         List<EmailLogDTO> logs = emailLogRepository.findByOrderId(id)
                 .stream()
@@ -368,7 +368,7 @@ public class OrderController {
 
     // ─────────── DELETE /api/orders/{id} ───────────
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','DELETE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         orderService.delete(id);
         return ResponseEntity.noContent().build();

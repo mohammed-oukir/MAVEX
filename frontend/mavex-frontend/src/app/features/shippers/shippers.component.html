@@ -60,10 +60,12 @@
         </button>
       }
     </div>
-    <button type="button" class="sh-new-btn" (click)="openCreate()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nouveau shipper
-    </button>
+    @if (canCreate()) {
+      <button type="button" class="sh-new-btn" (click)="openCreate()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau shipper
+      </button>
+    }
   </div>
 
   @if (selectedCount() > 0) {
@@ -73,20 +75,22 @@
         {{ selectedCount() }} sélectionné(s)
       </span>
       <div class="d-flex gap-2">
-        <button type="button" class="sh-bulk-btn sh-bulk-activate" [disabled]="bulkActing()" (click)="executeBulkActivate()">
-          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
-          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
-          Activer
-        </button>
-        <button type="button" class="sh-bulk-btn sh-bulk-deactivate" [disabled]="bulkActing()" (click)="executeBulkDeactivate()">
-          @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
-          @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
-          Désactiver
-        </button>
-        <button type="button" class="sh-bulk-btn sh-bulk-delete" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          Supprimer
-        </button>
+        @if (canBulkActions()) {
+          <button type="button" class="sh-bulk-btn sh-bulk-activate" [disabled]="bulkActing()" (click)="executeBulkActivate()">
+            @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+            @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+            Activer
+          </button>
+          <button type="button" class="sh-bulk-btn sh-bulk-deactivate" [disabled]="bulkActing()" (click)="executeBulkDeactivate()">
+            @if (bulkActing()) { <span class="spinner-border" style="width:11px;height:11px;border-width:1.5px" aria-hidden="true"></span> }
+            @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg> }
+            Désactiver
+          </button>
+          <button type="button" class="sh-bulk-btn sh-bulk-delete" [disabled]="bulkActing()" (click)="openBulkDeleteConfirm()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Supprimer
+          </button>
+        }
         <button type="button" class="sh-bulk-btn sh-bulk-cancel" (click)="clearSelection()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           Annuler
@@ -210,23 +214,29 @@
 
               <td>
                 <div class="sh-actions">
-                  <button type="button" class="sh-act sh-act-edit" (click)="openEdit(s)" title="Modifier" aria-label="Modifier">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button type="button" class="sh-act" [class.sh-act-activate]="!s.active" [class.sh-act-deactivate]="s.active"
-                    [disabled]="toggling() === s.id" (click)="toggleActive(s)"
-                    [title]="s.active ? 'Désactiver' : 'Activer'" [attr.aria-label]="s.active ? 'Désactiver' : 'Activer'">
-                    @if (toggling() === s.id) {
-                      <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
-                    } @else if (s.active) {
-                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    } @else {
-                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                    }
-                  </button>
-                  <button type="button" class="sh-act sh-act-del" (click)="confirmDelete(s.id)" title="Supprimer" aria-label="Supprimer">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                  </button>
+                  @if (canUpdate()) {
+                    <button type="button" class="sh-act sh-act-edit" (click)="openEdit(s)" title="Modifier" aria-label="Modifier">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  }
+                  @if (canActivateDeactivate()) {
+                    <button type="button" class="sh-act" [class.sh-act-activate]="!s.active" [class.sh-act-deactivate]="s.active"
+                      [disabled]="toggling() === s.id" (click)="toggleActive(s)"
+                      [title]="s.active ? 'Désactiver' : 'Activer'" [attr.aria-label]="s.active ? 'Désactiver' : 'Activer'">
+                      @if (toggling() === s.id) {
+                        <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
+                      } @else if (s.active) {
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                      } @else {
+                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                      }
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button type="button" class="sh-act sh-act-del" (click)="confirmDelete(s.id)" title="Supprimer" aria-label="Supprimer">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

@@ -7,6 +7,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService }  from '../../core/services/layout.service';
 import { AirlineService } from '../../core/services/airline.service';
 import { ToastService }   from '../../core/services/toast.service';
+import { AuthService }    from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { Airline }        from '../../core/models/airline.model';
 
 @Component({
@@ -22,6 +24,8 @@ export class AirlinesComponent implements OnInit {
   private readonly toast       = inject(ToastService);
   private readonly fb          = inject(FormBuilder);
   private readonly destroyRef  = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data ─────────────────────────────────────────── */
   allAirlines = signal<Airline[]>([]);
@@ -149,5 +153,17 @@ export class AirlinesComponent implements OnInit {
 
   modeLabel(mode: string | undefined): string {
     return mode === 'CARGO' ? 'Cargo' : 'Passagers';
+  }
+
+  canCreate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('AIRLINES', 'CREATE');
+  }
+
+  canUpdate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('AIRLINES', 'UPDATE');
+  }
+
+  canDelete(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('AIRLINES', 'DELETE');
   }
 }

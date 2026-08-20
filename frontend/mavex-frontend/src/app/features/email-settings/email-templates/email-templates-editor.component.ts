@@ -8,6 +8,8 @@ import grapesjs, { Editor } from 'grapesjs';
 import gjsNewsletter from 'grapesjs-preset-newsletter';
 import { EmailTemplateService } from '../../../core/services/email-template.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { MyPermissionsService } from '../../../core/services/my-permissions.service';
 import { EmailTemplate } from '../../../core/models/email-template.model';
 
 @Component({
@@ -23,6 +25,8 @@ export class EmailTemplatesEditorComponent implements AfterViewInit, OnDestroy {
   private readonly service = inject(EmailTemplateService);
   private readonly toast   = inject(ToastService);
   private readonly destroy = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   readonly typeName = signal<string>('');
   readonly template  = signal<EmailTemplate | null>(null);
@@ -163,6 +167,20 @@ export class EmailTemplatesEditorComponent implements AfterViewInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/settings/email-settings']);
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canCreateTemplate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('EMAIL_SETTINGS', 'CREATE_TEMPLATE');
+  }
+
+  canUpdateTemplate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('EMAIL_SETTINGS', 'UPDATE_TEMPLATE');
+  }
+
+  /** Le bouton Sauvegarder couvre create() OU update() selon si un template existe déjà pour ce type. */
+  canSave(): boolean {
+    return this.template()?.id ? this.canUpdateTemplate() : this.canCreateTemplate();
   }
 
   ngOnDestroy(): void {

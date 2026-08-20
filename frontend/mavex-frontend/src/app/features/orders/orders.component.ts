@@ -13,6 +13,8 @@ import { ClientService }       from '../../core/services/client.service';
 import { EmailService }        from '../../core/services/email.service';
 import { ToastService }        from '../../core/services/toast.service';
 import { ExchangeRateService } from '../../core/services/exchange-rate.service';
+import { AuthService }         from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderSearchParams, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
@@ -34,6 +36,8 @@ export class OrdersComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly erSvc      = inject(ExchangeRateService);
   private readonly route      = inject(ActivatedRoute);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data ─────────────────────────────────────────────── */
   orders  = signal<OrderResponse[]>([]);
@@ -561,5 +565,34 @@ export class OrdersComponent implements OnInit {
     if (hours < 24) return `il y a ${hours}h`;
     if (days  < 7)  return `il y a ${days}j`;
     return `il y a ${weeks}sem`;
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canUpdateOrder(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'UPDATE');
+  }
+
+  canDeleteOrder(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'DELETE');
+  }
+
+  canSendEmail(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'SEND_EMAIL');
+  }
+
+  canBulkSendEmail(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'BULK_SEND_EMAIL');
+  }
+
+  canBulkChangeStatus(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'BULK_CHANGE_STATUS');
+  }
+
+  canExportOrders(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'EXPORT');
+  }
+
+  canViewEmailLogs(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'VIEW_EMAIL_LOGS');
   }
 }

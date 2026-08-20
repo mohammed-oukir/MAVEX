@@ -9,6 +9,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService } from '../../core/services/layout.service';
 import { PaymentHistoryService } from '../../core/services/payment-history.service';
 import { ToastService } from '../../core/services/toast.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 import {
   PaymentTransactionResponse, PaymentTransactionSearchParams,
@@ -27,6 +29,8 @@ export class PaymentsComponent implements OnInit {
   private readonly svc        = inject(PaymentHistoryService);
   private readonly toast      = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data ─────────────────────────────────────────────── */
   transactions = signal<PaymentTransactionResponse[]>([]);
@@ -245,5 +249,18 @@ export class PaymentsComponent implements OnInit {
           this.toast.error(err?.error?.message || 'Erreur lors de l\'envoi du reçu.');
         },
       });
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canView(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('PAYMENTS', 'VIEW');
+  }
+
+  canExport(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('PAYMENTS', 'EXPORT');
+  }
+
+  canSendReceipt(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('PAYMENTS', 'SEND_RECEIPT');
   }
 }

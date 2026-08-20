@@ -10,7 +10,7 @@
       <div class="sb-label">Principal</div>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('DASHBOARD'))) {
       <a
         class="sb-item"
         routerLink="/dashboard"
@@ -28,7 +28,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('DASHBOARD_ANALYTICS'))) {
       <a
         class="sb-item"
         routerLink="/dashboard-analytics"
@@ -43,7 +43,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('SHIPMENTS'))) {
       <a
         class="sb-item"
         routerLink="/shipments"
@@ -58,7 +58,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('ORDERS'))) {
       <a
         class="sb-item"
         routerLink="/orders"
@@ -80,7 +80,7 @@
       <div class="sb-label">Gestion</div>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('CLIENTS'))) {
       <a
         class="sb-item"
         routerLink="/clients"
@@ -97,7 +97,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('IMPORTS'))) {
       <a
         class="sb-item"
         routerLink="/imports"
@@ -113,7 +113,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('SHIPPERS'))) {
       <a
         class="sb-item"
         routerLink="/shippers"
@@ -130,7 +130,7 @@
       </a>
     }
 
-    @if (!auth.isComptable()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('PAYMENTS'))) {
       <a
         class="sb-item"
         routerLink="/payments"
@@ -145,7 +145,7 @@
       </a>
     }
 
-    @if (auth.isAdmin()) {
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('AIRLINES'))) {
       <a
         class="sb-item"
         routerLink="/airlines"
@@ -190,29 +190,17 @@
         </svg>
         Utilisateurs
       </a>
-      <span
-        class="sb-item sb-item--disabled"
-        aria-label="Permissions (bientôt disponible)"
-        aria-disabled="true"
+      <a
+        class="sb-item"
+        routerLink="/agent-permissions"
+        routerLinkActive="active"
+        aria-label="Permissions"
       >
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
         Permissions
-        <span class="sb-badge">Bientôt</span>
-      </span>
-      <a
-        class="sb-item"
-        routerLink="/settings/email-settings"
-        routerLinkActive="active"
-        aria-label="Email Settings"
-      >
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-        Email Settings
       </a>
       <a
         class="sb-item"
@@ -239,6 +227,21 @@
           <line x1="1" y1="10" x2="23" y2="10"/>
         </svg>
         Configuration Paiement
+      </a>
+    }
+
+    @if (auth.isAdmin() || (auth.isAgent() && myPermissions.hasAnyPermissionInModule('EMAIL_SETTINGS'))) {
+      <a
+        class="sb-item"
+        routerLink="/settings/email-settings"
+        routerLinkActive="active"
+        aria-label="Email Settings"
+      >
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Email Settings
       </a>
     }
 

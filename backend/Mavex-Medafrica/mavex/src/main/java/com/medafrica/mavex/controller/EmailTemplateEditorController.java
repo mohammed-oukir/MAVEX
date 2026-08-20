@@ -21,7 +21,7 @@ public class EmailTemplateEditorController {
     // Liste tous les NotificationTypeEntity — ceux sans ligne en base ont id=null
     // ─────────────────────────────────────────────────────────────────
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','VIEW_TEMPLATES')")
     public ResponseEntity<List<EmailTemplateDTO>> getAll() {
         return ResponseEntity.ok(editorService.listAll());
     }
@@ -33,7 +33,7 @@ public class EmailTemplateEditorController {
     // Exemple : GET /api/email-templates/PAYMENT_INVOICE_WITH_AMOUNT
     // ─────────────────────────────────────────────────────────────────
     @GetMapping("/{type}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','VIEW_TEMPLATES')")
     public ResponseEntity<EmailTemplateDTO> getByType(@PathVariable String type) {
         return ResponseEntity.ok(editorService.getByType(type));
     }
@@ -44,7 +44,7 @@ public class EmailTemplateEditorController {
     // Reconstruit htmlContent et sauvegarde en base
     // ─────────────────────────────────────────────────────────────────
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','UPDATE_TEMPLATE')")
     public ResponseEntity<EmailTemplateDTO> update(
             @PathVariable Long id,
             @RequestBody EmailTemplateDTO dto) {
@@ -56,7 +56,7 @@ public class EmailTemplateEditorController {
     // Crée un nouveau template pour un type sans ligne en base
     // ─────────────────────────────────────────────────────────────────
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','CREATE_TEMPLATE')")
     public ResponseEntity<EmailTemplateDTO> create(@RequestBody EmailTemplateDTO dto) {
         return ResponseEntity.ok(editorService.create(dto));
     }

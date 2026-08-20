@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/imports")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class ImportController {
 
     private final ExcelImportService  excelImportService;
@@ -31,6 +30,7 @@ public class ImportController {
     private final ImportDeleteService importDeleteService;
 
     @PostMapping(value = "/manifest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','CONFIRM')")
     public ResponseEntity<ImportLogResponse> importManifest(
             @RequestParam("file") MultipartFile file) throws Exception {
         if (file.isEmpty()) return ResponseEntity.badRequest().build();
@@ -42,22 +42,26 @@ public class ImportController {
     }
 
     @GetMapping
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','VIEW')")
     public ResponseEntity<Page<ImportLogResponse>> list(
             @PageableDefault(size = 20, sort = "importedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(importLogService.list(pageable));
     }
 
     @GetMapping("/stats")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','VIEW')")
     public ResponseEntity<ImportStatsResponse> getStats() {
         return ResponseEntity.ok(importLogService.getStats());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','VIEW')")
     public ResponseEntity<ImportLogResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(importLogService.getById(id));
     }
 
     @PostMapping(value = "/preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','PREPARE')")
     public ResponseEntity<ImportPreviewResponse> previewManifest(
             @RequestParam("file") MultipartFile file) throws Exception {
         if (file.isEmpty()) return ResponseEntity.badRequest().build();
@@ -65,18 +69,21 @@ public class ImportController {
     }
 
     @PostMapping("/revalidate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','PREPARE')")
     public ResponseEntity<ImportPreviewResponse> revalidate(
             @RequestBody ImportRevalidateRequest request) {
         return ResponseEntity.ok(excelImportService.revalidate(request.getRows()));
     }
 
     @PostMapping("/confirm")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','CONFIRM')")
     public ResponseEntity<ImportLogResponse> confirmImport(
             @RequestBody ImportConfirmRequest request) throws Exception {
         return ResponseEntity.ok(excelImportService.confirmImport(request));
     }
 
     @GetMapping("/template")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','VIEW')")
     public ResponseEntity<byte[]> downloadTemplate() throws Exception {
         byte[] bytes = excelImportService.generateTemplate();
         return ResponseEntity.ok()
@@ -88,7 +95,7 @@ public class ImportController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('IMPORTS','DELETE')")
     public ResponseEntity<Void> deleteImport(@PathVariable Long id) {
         importDeleteService.deleteImport(id);
         return ResponseEntity.noContent().build();

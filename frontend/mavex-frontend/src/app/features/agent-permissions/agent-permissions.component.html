@@ -1,0 +1,291 @@
+<div class="ap-page">
+
+  <!-- ═══════════════════════════════════════════════
+       COLONNE GAUCHE — liste des agents
+       ═══════════════════════════════════════════════ -->
+  <aside class="ap-sidebar">
+    <div class="ap-sidebar-hd">
+      <h2 class="ap-sidebar-title">Agents</h2>
+      <span class="ap-sidebar-count">{{ agents().length }}</span>
+    </div>
+
+    <div class="ap-search">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Rechercher un agent"
+        [value]="searchQ()"
+        (input)="searchQ.set($any($event.target).value)"
+        aria-label="Rechercher un agent"
+      />
+    </div>
+
+    <div class="ap-agent-list">
+      @if (loadingAgents()) {
+        @for (i of [1,2,3,4]; track i) {
+          <div class="ap-agent-item ap-agent-item--sk">
+            <div class="sk-row" style="width:36px;height:36px;border-radius:50%"></div>
+            <div style="flex:1">
+              <div class="sk-row" style="width:70%;margin-bottom:6px"></div>
+              <div class="sk-row" style="width:40%;height:10px"></div>
+            </div>
+          </div>
+        }
+      } @else if (agents().length === 0) {
+        <div class="ap-empty">
+          <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <p>Aucun agent pour l'instant</p>
+          <span>Créez un utilisateur avec le rôle Agent pour commencer.</span>
+        </div>
+      } @else if (filteredAgents().length === 0) {
+        <div class="ap-empty">
+          <p>Aucun résultat pour « {{ searchQ() }} »</p>
+        </div>
+      } @else {
+        @for (agent of filteredAgents(); track agent.id) {
+          <button
+            type="button"
+            class="ap-agent-item"
+            [class.ap-agent-item--active]="selectedAgent()?.id === agent.id"
+            (click)="selectAgent(agent)"
+          >
+            <div class="ap-avatar" aria-hidden="true">{{ initials(agent.fullName) }}</div>
+            <div class="ap-agent-info">
+              <span class="ap-agent-name">{{ agent.fullName }}</span>
+              <span class="ap-agent-role">Agent</span>
+            </div>
+          </button>
+        }
+      }
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════
+       COLONNE DROITE — permissions de l'agent sélectionné
+       ═══════════════════════════════════════════════ -->
+  <section class="ap-main">
+    @if (!selectedAgent()) {
+      <div class="ap-placeholder">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <p>Sélectionnez un agent à gauche</p>
+        <span>pour consulter et modifier ses permissions</span>
+      </div>
+    } @else {
+      <!-- ── En-tête ─────────────────────────────────────── -->
+      <div class="ap-main-hd">
+        <div class="ap-main-hd-left">
+          <div class="ap-avatar ap-avatar--lg" aria-hidden="true">{{ initials(selectedAgent()!.fullName) }}</div>
+          <div>
+            <h1 class="ap-main-title">{{ selectedAgent()!.fullName }}</h1>
+            @if (!permissionsLoading()) {
+              <p class="ap-main-sub">{{ activeCount() }} / {{ totalPermissionsCount() }} permissions actives</p>
+            }
+          </div>
+        </div>
+        <div class="ap-main-hd-actions">
+          <button type="button" class="ap-btn-ghost" (click)="openHistory()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Historique
+          </button>
+          <button
+            type="button"
+            class="ap-btn-primary"
+            [disabled]="!hasUnsavedChanges() || saving()"
+            (click)="save()"
+          >
+            @if (saving()) {
+              <span class="ap-spinner" aria-hidden="true"></span>
+              Enregistrement…
+            } @else {
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Enregistrer
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Bandeau modifications non enregistrées ──────── -->
+      @if (hasUnsavedChanges()) {
+        <div class="ap-banner">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Modifications non enregistrées
+        </div>
+      }
+
+      <!-- ── Accordéons par module ────────────────────────── -->
+      <div class="ap-modules">
+        @if (permissionsLoading() || catalogLoading()) {
+          @for (i of [1,2,3]; track i) {
+            <div class="ap-module ap-module--sk">
+              <div class="sk-row" style="width:100%;height:52px;border-radius:10px"></div>
+            </div>
+          }
+        } @else {
+          @for (group of moduleGroups(); track group.module) {
+            <div class="ap-module">
+              <div class="ap-module-hd">
+                <button
+                  type="button"
+                  class="ap-module-toggle"
+                  (click)="toggleModule(group.module)"
+                  [attr.aria-expanded]="isModuleOpen(group.module)"
+                >
+                  <svg class="ap-module-chevron" [class.ap-module-chevron--open]="isModuleOpen(group.module)"
+                       width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+
+                  <span class="ap-module-icon" [attr.data-icon]="group.icon" aria-hidden="true">
+                    @switch (group.icon) {
+                      @case ('home') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                      }
+                      @case ('truck') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                      }
+                      @case ('package') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                      }
+                      @case ('users') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      }
+                      @case ('send') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      }
+                      @case ('plane') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 0-1.3.4l-.7.7c-.4.4-.3 1.1.2 1.4l5.9 3.6-2.3 2.3-3.4-.5c-.4 0-.7.1-1 .4l-.5.5c-.4.4-.4 1 0 1.4l2.6 2.6 2.6 2.6c.4.4 1 .4 1.4 0l.5-.5c.3-.3.4-.6.4-1l-.5-3.4 2.3-2.3 3.6 5.9c.3.5 1 .6 1.4.2l.7-.7c.4-.3.5-.8.4-1.3z"/></svg>
+                      }
+                      @case ('upload') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      }
+                      @case ('file-text') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                      }
+                      @case ('mail') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      }
+                      @case ('bar-chart') {
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                      }
+                    }
+                  </span>
+
+                  <span class="ap-module-label">{{ group.label }}</span>
+                  <span class="ap-module-count">{{ moduleActiveCount(group) }}/{{ group.permissions.length }} actives</span>
+                </button>
+
+                <button type="button" class="ap-module-toggle-all" (click)="toggleAllInModule(group)">
+                  {{ isModuleFullyChecked(group) ? 'Tout décocher' : 'Tout cocher' }}
+                </button>
+              </div>
+
+              @if (isModuleOpen(group.module)) {
+                <div class="ap-module-body">
+                  @for (perm of group.permissions; track perm.id) {
+                    <label class="ap-perm-row">
+                      <input
+                        type="checkbox"
+                        [checked]="isChecked(perm.id)"
+                        (change)="togglePermission(perm.id)"
+                      />
+                      <span class="ap-perm-checkbox" aria-hidden="true">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                      </span>
+                      <span class="ap-perm-text">
+                        <span class="ap-perm-label">{{ perm.label }}</span>
+                        @if (perm.contextNote) {
+                          <span class="ap-perm-note">{{ perm.contextNote }}</span>
+                        }
+                      </span>
+                    </label>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       PANNEAU LATÉRAL — historique
+       ═══════════════════════════════════════════════ -->
+  @if (showHistory()) {
+    <div class="ap-drawer-overlay" (click)="closeHistory()">
+      <aside class="ap-drawer" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Historique des permissions">
+        <div class="ap-drawer-hd">
+          <h2 class="ap-drawer-title">Historique — {{ selectedAgent()?.fullName }}</h2>
+          <button type="button" class="nm-close" (click)="closeHistory()" aria-label="Fermer">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="ap-drawer-body">
+          @if (historyLoading()) {
+            @for (i of [1,2,3,4]; track i) {
+              <div class="sk-row" style="width:100%;height:44px;border-radius:8px;margin-bottom:10px"></div>
+            }
+          } @else if (history().length === 0) {
+            <div class="ap-empty">
+              <p>Aucune action enregistrée pour cet agent.</p>
+            </div>
+          } @else {
+            @for (entry of history(); track entry.id) {
+              <div class="ap-history-row">
+                <span class="ap-history-badge" [class.ap-history-badge--granted]="entry.actionType === 'GRANTED'"
+                                                 [class.ap-history-badge--revoked]="entry.actionType === 'REVOKED'">
+                  {{ entry.actionType === 'GRANTED' ? 'Accordée' : 'Retirée' }}
+                </span>
+                <div class="ap-history-body">
+                  <span class="ap-history-label">{{ entry.permissionLabel }}</span>
+                  <span class="ap-history-meta">{{ entry.performedByName }} · {{ entry.performedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════
+       MODAL — confirmation de changement d'agent
+       ═══════════════════════════════════════════════ -->
+  @if (pendingAgentSwitch(); as next) {
+    <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="switchTitle" (click)="cancelAgentSwitch()">
+      <div class="modal" style="max-width:420px" (click)="$event.stopPropagation()">
+        <div class="nm-header">
+          <div class="nm-icon red" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <h2 id="switchTitle" class="nm-title">Modifications non enregistrées</h2>
+            <p class="nm-sub">
+              Vous avez des changements en attente pour {{ selectedAgent()?.fullName }}.
+              Passer à {{ next.fullName }} les annulera.
+            </p>
+          </div>
+        </div>
+        <div class="nm-footer">
+          <button type="button" class="nm-btn-cancel" (click)="cancelAgentSwitch()">Annuler</button>
+          <button type="button" class="nm-btn-danger" (click)="confirmAgentSwitch()">Continuer sans enregistrer</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

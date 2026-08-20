@@ -22,18 +22,19 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/shippers")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class ShipperController {
 
     private final ShipperService shipperService;
 
     @GetMapping
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','VIEW')")
     public ResponseEntity<Page<ShipperResponseDTO>> list(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(shipperService.list(pageable));
     }
 
     @GetMapping("/search")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','VIEW')")
     public ResponseEntity<Page<ShipperResponseDTO>> search(
             @RequestParam(required = false) String company,
             @RequestParam(required = false) String contact,
@@ -56,11 +57,13 @@ public class ShipperController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','VIEW')")
     public ResponseEntity<ShipperResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(shipperService.getById(id));
     }
 
     @PostMapping
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','CREATE')")
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> create(@Valid @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ApiResponse.<ShipperResponseDTO>builder()
@@ -71,6 +74,7 @@ public class ShipperController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','UPDATE')")
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> update(@PathVariable Long id,
                                                                   @Valid @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.ok(
@@ -82,6 +86,7 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','UPDATE')")
     public ResponseEntity<ApiResponse<ShipperResponseDTO>> patch(@PathVariable Long id,
                                                                  @RequestBody ShipperRequestDTO dto) {
         return ResponseEntity.ok(
@@ -93,6 +98,7 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}/activate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','ACTIVATE_DEACTIVATE')")
     public ResponseEntity<ApiResponse<Void>> activate(@PathVariable Long id) {
         shipperService.activate(id);
         return ResponseEntity.ok(
@@ -104,6 +110,7 @@ public class ShipperController {
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','ACTIVATE_DEACTIVATE')")
     public ResponseEntity<ApiResponse<Void>> deactivate(@PathVariable Long id) {
         shipperService.deactivate(id);
         return ResponseEntity.ok(
@@ -115,6 +122,7 @@ public class ShipperController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','DELETE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         shipperService.delete(id);
         return ResponseEntity.ok(
@@ -126,18 +134,21 @@ public class ShipperController {
     }
 
     @PostMapping("/bulk-delete")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkDelete(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkDelete(body.get("ids"));
         return ResponseEntity.ok(Map.of("deleted", count));
     }
 
     @PostMapping("/bulk-activate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkActivate(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkActivate(body.get("ids"));
         return ResponseEntity.ok(Map.of("activated", count));
     }
 
     @PostMapping("/bulk-deactivate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPPERS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkDeactivate(@RequestBody Map<String, List<Long>> body) {
         int count = shipperService.bulkDeactivate(body.get("ids"));
         return ResponseEntity.ok(Map.of("deactivated", count));

@@ -9,6 +9,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LayoutService }   from '../../core/services/layout.service';
 import { ImportService }   from '../../core/services/import.service';
 import { ToastService }    from '../../core/services/toast.service';
+import { AuthService }     from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
 import {
   ImportLogResponse, ImportPreviewResponse, ImportPreviewRow, ImportStatsResponse,
@@ -26,6 +28,8 @@ export class ImportsComponent implements OnInit {
   private readonly importSvc  = inject(ImportService);
   private readonly toast      = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Upload ───────────────────────────────────────────────── */
   dragOver     = signal(false);
@@ -459,5 +463,22 @@ export class ImportsComponent implements OnInit {
     if (bytes < 1024)    return `${bytes} B`;
     if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / 1048576).toFixed(1)} MB`;
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canView(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('IMPORTS', 'VIEW');
+  }
+
+  canPrepare(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('IMPORTS', 'PREPARE');
+  }
+
+  canConfirmImport(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('IMPORTS', 'CONFIRM');
+  }
+
+  canDeleteImport(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('IMPORTS', 'DELETE');
   }
 }

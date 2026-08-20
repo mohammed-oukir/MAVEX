@@ -117,9 +117,9 @@ public class PaymentController {
                 .build();
     }
 
-    // ─────────── GET /api/payments — recherche paginée avec filtres (ADMIN uniquement) ───────────
+    // ─────────── GET /api/payments — recherche paginée avec filtres ───────────
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','VIEW')")
     public Page<PaymentTransactionResponse> search(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -135,16 +135,16 @@ public class PaymentController {
                 hawb, client, gateway, status, amountMin, amountMax, from, to, pageable);
     }
 
-    // ─────────── GET /api/payments/total-collected (ADMIN uniquement) ───────────
+    // ─────────── GET /api/payments/total-collected ───────────
     @GetMapping("/total-collected")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','VIEW')")
     public BigDecimal getTotalCollected() {
         return paymentTransactionService.getTotalCollected();
     }
 
-    // ─────────── POST /api/payments/{transactionId}/send-receipt (ADMIN uniquement) ───────────
+    // ─────────── POST /api/payments/{transactionId}/send-receipt ───────────
     @PostMapping("/{transactionId}/send-receipt")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','SEND_RECEIPT')")
     public ReceiptSendResponse sendReceipt(@PathVariable Long transactionId) {
         paymentTransactionService.sendManualReceipt(transactionId);
         return ReceiptSendResponse.builder()
@@ -155,7 +155,7 @@ public class PaymentController {
 
     // ─────────── GET /api/payments/export/pdf — export PDF des transactions filtrées ───────────
     @GetMapping("/export/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportPdf(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -180,7 +180,7 @@ public class PaymentController {
 
     // ─────────── GET /api/payments/export/excel — export Excel des transactions filtrées ───────────
     @GetMapping("/export/excel")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportExcel(
             @RequestParam(required = false) String hawb,
             @RequestParam(required = false) String client,
@@ -206,7 +206,7 @@ public class PaymentController {
 
     // ─────────── POST /api/payments/export/excel/selection — export Excel d'une sélection d'ids ───────────
     @PostMapping("/export/excel/selection")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('PAYMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportExcelSelection(@RequestBody ExportSelectionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
             throw new IllegalArgumentException("Veuillez sélectionner au moins une transaction.");

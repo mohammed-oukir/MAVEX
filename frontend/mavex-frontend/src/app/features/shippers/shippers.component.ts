@@ -9,6 +9,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { LayoutService }   from '../../core/services/layout.service';
 import { ShipperService }  from '../../core/services/shipper.service';
 import { ToastService }    from '../../core/services/toast.service';
+import { AuthService }     from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { ShipperResponse, ShipperSearchCriteria } from '../../core/models/shipper.model';
 
 @Component({
@@ -24,6 +26,8 @@ export class ShippersComponent implements OnInit {
   private readonly toast      = inject(ToastService);
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data (recherche paginée côté serveur) ─────────── */
   pageItems      = signal<ShipperResponse[]>([]);
@@ -363,6 +367,27 @@ export class ShippersComponent implements OnInit {
   /* ── Helpers ──────────────────────────────────────── */
   getInitials(name: string): string {
     return name.split(' ').slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase();
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canCreate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPPERS', 'CREATE');
+  }
+
+  canUpdate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPPERS', 'UPDATE');
+  }
+
+  canDelete(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPPERS', 'DELETE');
+  }
+
+  canActivateDeactivate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPPERS', 'ACTIVATE_DEACTIVATE');
+  }
+
+  canBulkActions(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPPERS', 'BULK_ACTIONS');
   }
 
 }

@@ -12,6 +12,8 @@ import { OrderService }    from '../../core/services/order.service';
 import { ClientService }   from '../../core/services/client.service';
 import { EmailService }    from '../../core/services/email.service';
 import { ToastService }    from '../../core/services/toast.service';
+import { AuthService }     from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
 import { ShipmentResponse, ShipmentPatch, ShipmentStatus } from '../../core/models/shipment.model';
 import { ShipperResponse } from '../../core/models/shipper.model';
@@ -50,6 +52,8 @@ export class ShipmentDetailComponent implements OnInit {
   private readonly toast      = inject(ToastService);
   private readonly fb         = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Data ─────────────────────────────────────────────── */
   shipment  = signal<ShipmentResponse | null>(null);
@@ -764,6 +768,44 @@ export class ShipmentDetailComponent implements OnInit {
   shipmentFieldInvalid(name: string): boolean {
     const c = this.shipmentEditForm.get(name);
     return !!(c?.invalid && c?.touched);
+  }
+
+  /* ── Permissions (Shipment uniquement — pas les Orders) ──── */
+  canUpdateShipment(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'UPDATE');
+  }
+
+  canUpdateDutyRate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'UPDATE_DUTY_RATE');
+  }
+
+  /* ── Permissions (Orders rattachés à ce shipment) ────────── */
+  canCreateOrder(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'CREATE');
+  }
+
+  canUpdateOrder(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'UPDATE');
+  }
+
+  canDeleteOrder(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'DELETE');
+  }
+
+  canChangeOrderStatus(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'CHANGE_STATUS');
+  }
+
+  canSendEmail(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'SEND_EMAIL');
+  }
+
+  canBulkSendEmail(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'BULK_SEND_EMAIL');
+  }
+
+  canExportOrders(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('ORDERS', 'EXPORT');
   }
 
   /* ── Clipboard ────────────────────────────────────────── */

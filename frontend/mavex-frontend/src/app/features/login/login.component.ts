@@ -3,6 +3,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 
 type Tab  = 'login' | 'forgot';
 type Step = 1 | 2 | 3;
@@ -15,9 +16,10 @@ type Step = 1 | 2 | 3;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  private readonly fb     = inject(FormBuilder);
-  private readonly auth   = inject(AuthService);
-  private readonly router = inject(Router);
+  private readonly fb            = inject(FormBuilder);
+  private readonly auth          = inject(AuthService);
+  private readonly router        = inject(Router);
+  private readonly myPermissions = inject(MyPermissionsService);
 
   tab          = signal<Tab>('login');
   step         = signal<Step>(1);
@@ -62,8 +64,20 @@ export class LoginComponent {
     this.auth.login(email!, password!).subscribe({
       next: () => {
         const role = this.auth.currentUser().role;
-        const dest = role === 'COMPTABLE' ? '/exchange-rates' : '/dashboard';
-        this.router.navigate([dest]);
+
+        if (role !== 'AGENT') {
+          const dest = role === 'COMPTABLE' ? '/exchange-rates' : '/dashboard';
+          this.router.navigate([dest]);
+          return;
+        }
+
+        // Pour un AGENT, attend la fin du chargement des permissions
+        // (succès ou échec) avant de naviguer vers /home, accessible
+        // à tout utilisateur connecté sans dépendre d'une permission.
+        this.myPermissions.loadMyPermissions().subscribe({
+          next: () => this.router.navigate(['/home']),
+          error: () => this.router.navigate(['/home']),
+        });
       },
       error: err => {
         this.loading.set(false);

@@ -39,20 +39,20 @@ public class ShipmentController {
     private final TableExportService exportService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','CREATE')")
     public ResponseEntity<ShipmentResponseDTO> create(@Valid @RequestBody ShipmentRequestDTO req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(shipmentService.create(req));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
     public ResponseEntity<ShipmentResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(shipmentService.getById(id));
     }
 
     // ─────────── GET /api/shipments — liste paginée, avec filtres par colonne ───────────
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
     public ResponseEntity<Page<ShipmentResponseDTO>> list(
             @RequestParam(required = false) String mawb,
             @RequestParam(required = false) String shipper,
@@ -81,7 +81,7 @@ public class ShipmentController {
 
     // ─────────── GET /api/shipments/export/pdf — export PDF des shipments filtrés ───────────
     @GetMapping("/export/pdf")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportPdf(
             @RequestParam(required = false) String mawb,
             @RequestParam(required = false) String shipper,
@@ -108,7 +108,7 @@ public class ShipmentController {
 
     // ─────────── GET /api/shipments/export/excel — export Excel des shipments filtrés ───────────
     @GetMapping("/export/excel")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportExcel(
             @RequestParam(required = false) String mawb,
             @RequestParam(required = false) String shipper,
@@ -136,7 +136,7 @@ public class ShipmentController {
 
     // ─────────── POST /api/shipments/export/excel/selection — export Excel d'une sélection d'ids ───────────
     @PostMapping("/export/excel/selection")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','EXPORT')")
     public ResponseEntity<byte[]> exportExcelSelection(@RequestBody ExportSelectionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
             throw new IllegalArgumentException("Veuillez sélectionner au moins un envoi.");
@@ -202,7 +202,7 @@ public class ShipmentController {
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
     public ResponseEntity<Page<ShipmentResponseDTO>> listByStatus(
             @PathVariable ShipmentStatus status,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
@@ -210,7 +210,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','UPDATE')")
     public ResponseEntity<ShipmentResponseDTO> update(
             @PathVariable Long id,
             @RequestBody ShipmentRequestDTO req) {
@@ -218,7 +218,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','CHANGE_STATUS')")
     public ResponseEntity<ShipmentResponseDTO> updateStatus(
             @PathVariable Long id,
             @Valid @RequestBody ShipmentStatusUpdateDTO req) {
@@ -226,7 +226,7 @@ public class ShipmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','UPDATE')")
     public ResponseEntity<ShipmentResponseDTO> replace(
             @PathVariable Long id,
             @Valid @RequestBody ShipmentRequestDTO req) {
@@ -234,7 +234,7 @@ public class ShipmentController {
     }
 
     @PatchMapping("/{id}/duty-rate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','UPDATE_DUTY_RATE')")
     public ResponseEntity<ShipmentResponseDTO> updateDutyRate(
             @PathVariable Long id,
             @Valid @RequestBody DutyRateUpdateDTO req) {
@@ -242,7 +242,7 @@ public class ShipmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','DELETE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         shipmentService.delete(id);
         return ResponseEntity.noContent().build();

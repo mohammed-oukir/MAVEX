@@ -18,7 +18,7 @@ public class NotificationEmailController {
     private final NotificationEmailService emailService;
 
     @PostMapping(value = "/orders/{id}/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','SEND_EMAIL')")
     public ResponseEntity<SendEmailResponse> sendPaymentEmail(
             @PathVariable Long id,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {
@@ -26,7 +26,7 @@ public class NotificationEmailController {
     }
 
     @PostMapping(value = "/shipments/{id}/send-all", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('ORDERS','BULK_SEND_EMAIL')")
     public ResponseEntity<BulkEmailResult> sendAllPaymentEmails(
             @PathVariable Long id,
             @RequestParam(value = "files", required = false) MultipartFile[] files) {

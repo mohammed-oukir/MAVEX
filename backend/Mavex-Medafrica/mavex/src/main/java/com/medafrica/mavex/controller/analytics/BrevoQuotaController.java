@@ -18,7 +18,7 @@ public class BrevoQuotaController {
 
     // GET /api/dashboard/quota
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('DASHBOARD_ANALYTICS','VIEW')")
     public ResponseEntity<BrevoQuotaResponse> getQuota() {
         return ResponseEntity.ok(brevoAccountService.getEmailQuota());
     }

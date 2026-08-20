@@ -187,12 +187,14 @@
                 </svg>
                 Retirer
               </button>
-              <button type="button" class="im-btn-analyse" (click)="analyseFile()">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                Analyser le fichier
-              </button>
+              @if (canPrepare()) {
+                <button type="button" class="im-btn-analyse" (click)="analyseFile()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  Analyser le fichier
+                </button>
+              }
             </div>
           </div>
         }
@@ -265,14 +267,16 @@
       Les informations expéditeur, la description et la devise sont facultatives — des valeurs par défaut sont appliquées automatiquement si elles sont absentes.
     </p>
 
-    <button type="button" class="im-tpl-btn im-help-tpl-btn" (click)="downloadTemplate()">
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Télécharger le template
-    </button>
+    @if (canView()) {
+      <button type="button" class="im-tpl-btn im-help-tpl-btn" (click)="downloadTemplate()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Télécharger le template
+      </button>
+    }
   </div>
 
 </div>
@@ -379,14 +383,16 @@
               </td>
               <td class="text-end">
                 <div class="d-flex gap-1 justify-content-end">
-                  <button type="button" class="btn btn-sm im-act-btn im-act-edit"
-                    (click)="openEdit(row)" aria-label="Corriger cette ligne">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </button>
-                  <button type="button" class="btn btn-sm im-act-btn im-act-del"
-                    (click)="confirmRowDelete(row)" aria-label="Supprimer cette ligne">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                  </button>
+                  @if (canPrepare()) {
+                    <button type="button" class="btn btn-sm im-act-btn im-act-edit"
+                      (click)="openEdit(row)" aria-label="Corriger cette ligne">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button type="button" class="btn btn-sm im-act-btn im-act-del"
+                      (click)="confirmRowDelete(row)" aria-label="Supprimer cette ligne">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                  }
                 </div>
               </td>
             </tr>
@@ -405,17 +411,19 @@
         } @else if (invalidRows().length > 0 && validRows().length === 0) {
           <p class="text-danger mb-0" style="font-size:13px">Toutes les lignes sont invalides. Corrigez-les avant de confirmer.</p>
         }
-        <button type="button" class="btn btn-success px-4 ms-auto"
-          [disabled]="!canConfirm() || confirming()"
-          (click)="confirmImport()">
-          @if (confirming()) {
-            <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
-            Import en cours…
-          } @else {
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><polyline points="20 6 9 17 4 12"/></svg>
-            Confirmer l'import ({{ validRows().length }} ligne(s))
-          }
-        </button>
+        @if (canConfirmImport()) {
+          <button type="button" class="btn btn-success px-4 ms-auto"
+            [disabled]="!canConfirm() || confirming()"
+            (click)="confirmImport()">
+            @if (confirming()) {
+              <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span>
+              Import en cours…
+            } @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="me-2"><polyline points="20 6 9 17 4 12"/></svg>
+              Confirmer l'import ({{ validRows().length }} ligne(s))
+            }
+          </button>
+        }
       </div>
       @if (invalidRows().length > 0 && validRows().length > 0) {
         <p class="text-muted mb-0 mt-2" style="font-size:12px">
@@ -687,14 +695,18 @@
               <td class="text-muted" style="font-size:12px;white-space:nowrap">{{ imp.importedAt | date:'dd/MM/yy HH:mm' }}</td>
               <td class="text-end">
                 <div class="d-flex gap-1 justify-content-end">
-                  <button type="button" class="btn btn-sm im-act-btn im-act-view"
-                    (click)="openDetail(imp.id)" title="Voir le détail" aria-label="Détail">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  </button>
-                  <button type="button" class="btn btn-sm im-act-btn im-act-del"
-                    (click)="confirmDelete(imp.id)" title="Supprimer" aria-label="Supprimer">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                  </button>
+                  @if (canView()) {
+                    <button type="button" class="btn btn-sm im-act-btn im-act-view"
+                      (click)="openDetail(imp.id)" title="Voir le détail" aria-label="Détail">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  }
+                  @if (canDeleteImport()) {
+                    <button type="button" class="btn btn-sm im-act-btn im-act-del"
+                      (click)="confirmDelete(imp.id)" title="Supprimer" aria-label="Supprimer">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

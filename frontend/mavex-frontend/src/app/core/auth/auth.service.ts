@@ -1,14 +1,16 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { ApiResponse } from '../models/api.model';
 import { LoginResponse, ForgotPasswordRequest, ResetPasswordRequest } from '../models/auth.model';
+import { MyPermissionsService } from '../services/my-permissions.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http        = inject(HttpClient);
-  private readonly router      = inject(Router);
+  private readonly http          = inject(HttpClient);
+  private readonly router        = inject(Router);
+  private readonly injector      = inject(Injector);
 
   private readonly _token      = signal<string | null>(localStorage.getItem('accessToken'));
   private readonly _refresh    = signal<string | null>(localStorage.getItem('refreshToken'));
@@ -47,6 +49,7 @@ export class AuthService {
   getToken(): string | null        { return this._token(); }
   getRefreshToken(): string | null { return this._refresh(); }
   isAdmin(): boolean               { return this._role() === 'ADMIN'; }
+  isAgent(): boolean               { return this._role() === 'AGENT'; }
   isComptable(): boolean           { return this._role() === 'COMPTABLE'; }
   currentEmail(): string | null    { return this._email(); }
   currentUserId(): number | null   { return this._userId(); }
@@ -104,6 +107,7 @@ export class AuthService {
     this._role.set(null);
     this._userId.set(null);
     localStorage.clear();
+    this.injector.get(MyPermissionsService).clear();
     this.router.navigate(['/login']);
   }
 }

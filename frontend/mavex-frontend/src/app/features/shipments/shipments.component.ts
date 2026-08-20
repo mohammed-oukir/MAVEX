@@ -12,6 +12,8 @@ import { ShipperService }  from '../../core/services/shipper.service';
 import { OrderService }    from '../../core/services/order.service';
 import { ToastService }    from '../../core/services/toast.service';
 import { AirlineService }  from '../../core/services/airline.service';
+import { AuthService }     from '../../core/auth/auth.service';
+import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent }  from '../../shared/badge/badge.component';
 import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus } from '../../core/models/shipment.model';
 import { ShipperResponse } from '../../core/models/shipper.model';
@@ -38,6 +40,8 @@ export class ShipmentsComponent implements OnInit {
   private readonly airlineSvc  = inject(AirlineService);
   private readonly fb          = inject(FormBuilder);
   private readonly destroyRef  = inject(DestroyRef);
+  protected readonly auth          = inject(AuthService);
+  protected readonly myPermissions = inject(MyPermissionsService);
 
   /* ── Airline detection ────────────────────────────────── */
   detectedAirline = signal<Airline | null>(null);
@@ -170,10 +174,10 @@ export class ShipmentsComponent implements OnInit {
 
   /* ── Lifecycle ────────────────────────────────────────── */
   ngOnInit(): void {
-    this.layout.setPage('Shipments', {
+    this.layout.setPage('Shipments', this.canCreate() ? {
       label:   'Nouveau Shipment',
       onClick: () => this.openCreate(),
-    });
+    } : undefined);
     this.loadShipments();
     this.loadKpis();
     this.loadShippers();
@@ -646,5 +650,22 @@ export class ShipmentsComponent implements OnInit {
         this.toast.error(err?.error?.message || 'Erreur.');
       },
     });
+  }
+
+  /* ── Permissions ──────────────────────────────────── */
+  canCreate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'CREATE');
+  }
+
+  canUpdate(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'UPDATE');
+  }
+
+  canDelete(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'DELETE');
+  }
+
+  canExport(): boolean {
+    return this.auth.isAdmin() || this.myPermissions.hasPermission('SHIPMENTS', 'EXPORT');
   }
 }

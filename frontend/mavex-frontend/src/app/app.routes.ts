@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard, authGuard, noAuthGuard } from './core/auth/auth.guard';
+import { moduleAccessGuard } from './core/auth/module-access.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -13,7 +14,8 @@ export const routes: Routes = [
 
   {
     path: 'settings/email-templates/:type',
-    canActivate: [adminGuard],
+    canActivate: [moduleAccessGuard],
+    data: { module: 'EMAIL_SETTINGS' },
     loadComponent: () =>
       import('./features/email-settings/email-templates/email-templates-editor.component').then(m => m.EmailTemplatesEditorComponent),
   },
@@ -32,43 +34,56 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'DASHBOARD' },
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },
       {
+        path: 'home',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/welcome/welcome.component').then(m => m.WelcomeComponent),
+      },
+      {
         path: 'shipments',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'SHIPMENTS' },
         loadComponent: () =>
           import('./features/shipments/shipments.component').then(m => m.ShipmentsComponent),
       },
       {
         path: 'shipments/:id',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'SHIPMENTS' },
         loadComponent: () =>
           import('./features/shipment-detail/shipment-detail.component').then(m => m.ShipmentDetailComponent),
       },
       {
         path: 'orders',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'ORDERS' },
         loadComponent: () =>
           import('./features/orders/orders.component').then(m => m.OrdersComponent),
       },
       {
         path: 'imports',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'IMPORTS' },
         loadComponent: () =>
           import('./features/imports/imports.component').then(m => m.ImportsComponent),
       },
       {
         path: 'clients',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'CLIENTS' },
         loadComponent: () =>
           import('./features/clients/clients.component').then(m => m.ClientsComponent),
       },
       {
         path: 'shippers',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'SHIPPERS' },
         loadComponent: () =>
           import('./features/shippers/shippers.component').then(m => m.ShippersComponent),
       },
@@ -80,7 +95,8 @@ export const routes: Routes = [
       },
       {
         path: 'airlines',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'AIRLINES' },
         loadComponent: () =>
           import('./features/airlines/airlines.component').then(m => m.AirlinesComponent),
       },
@@ -89,6 +105,12 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./features/users/users.component').then(m => m.UsersComponent),
+      },
+      {
+        path: 'agent-permissions',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/agent-permissions/agent-permissions.component').then(m => m.AgentPermissionsComponent),
       },
       {
         path: 'profile',
@@ -103,13 +125,15 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard-analytics',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'DASHBOARD_ANALYTICS' },
         loadComponent: () =>
           import('./features/dashboard-analytics/dashboard-analytics.component').then(m => m.DashboardAnalyticsComponent),
       },
       {
         path: 'settings/email-settings',
-        canActivate: [adminGuard],
+        canActivate: [moduleAccessGuard],
+        data: { module: 'EMAIL_SETTINGS' },
         loadComponent: () =>
           import('./features/email-settings/email-settings.component').then(m => m.EmailSettingsComponent),
       },

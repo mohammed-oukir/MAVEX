@@ -18,13 +18,13 @@ public class NotificationTypeController {
     private final NotificationTypeService notificationTypeService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','VIEW_NOTIFICATION_TYPES')")
     public ResponseEntity<List<NotificationTypeDTO>> getAll() {
         return ResponseEntity.ok(notificationTypeService.getAll());
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','CREATE_NOTIFICATION_TYPE')")
     public ResponseEntity<?> create(@RequestBody Map<String, String> body) {
         String name = body.get("name");
         if (name == null || name.isBlank()) {
@@ -34,7 +34,7 @@ public class NotificationTypeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','UPDATE_NOTIFICATION_TYPE')")
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
@@ -46,7 +46,7 @@ public class NotificationTypeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('EMAIL_SETTINGS','DELETE_NOTIFICATION_TYPE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         notificationTypeService.delete(id);
         return ResponseEntity.noContent().build();

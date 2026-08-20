@@ -2,9 +2,11 @@
   <div class="ete-topbar">
     <button class="ete-btn-back" (click)="goBack()">← Retour</button>
     <span class="ete-type-name">{{ typeName() }}</span>
-    <button class="ete-btn-save" (click)="save()" [disabled]="saving()">
-      {{ saving() ? 'Sauvegarde...' : '💾 Sauvegarder' }}
-    </button>
+    @if (canSave()) {
+      <button class="ete-btn-save" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Sauvegarde...' : '💾 Sauvegarder' }}
+      </button>
+    }
   </div>
   <div class="ete-toolbar" id="toolbar-container"></div>
   <div class="ete-body">

@@ -14,15 +14,17 @@
     <div class="or-kpi-chevron" aria-hidden="true">›</div>
   </button>
 
-  <div class="or-kpi-card" aria-label="Total encaissé" style="cursor:default">
-    <div class="or-kpi-icon or-kpi-green-icon">
-      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+  @if (canView()) {
+    <div class="or-kpi-card" aria-label="Total encaissé" style="cursor:default">
+      <div class="or-kpi-icon or-kpi-green-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="or-kpi-body">
+        <div class="or-kpi-num">{{ fmtAmount(kpiTotalCollected(), 'USD') }}</div>
+        <div class="or-kpi-lbl">Total encaissé</div>
+      </div>
     </div>
-    <div class="or-kpi-body">
-      <div class="or-kpi-num">{{ fmtAmount(kpiTotalCollected(), 'USD') }}</div>
-      <div class="or-kpi-lbl">Total encaissé</div>
-    </div>
-  </div>
+  }
 
   <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="flStatus() === 'SUCCESS'" (click)="setTab('SUCCESS')" aria-label="Réussis">
     <div class="or-kpi-icon or-kpi-green-icon">
@@ -185,36 +187,38 @@
     <div class="or-filter-bar">
       <span class="or-total-badge ms-auto">{{ total() }} résultat(s)</span>
 
-      <div class="or-export-wrap" [class.or-export-open]="exportOpen()">
-        <button type="button" class="or-export-btn" (click)="exportOpen.set(!exportOpen())"
-          [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
-          aria-label="Exporter">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Exporter
-        </button>
+      @if (canExport()) {
+        <div class="or-export-wrap" [class.or-export-open]="exportOpen()">
+          <button type="button" class="or-export-btn" (click)="exportOpen.set(!exportOpen())"
+            [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
+            aria-label="Exporter">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Exporter
+          </button>
 
-        @if (exportOpen()) {
-          <div class="or-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
-          <div class="or-export-dropdown" role="menu" aria-label="Options d'export">
-            <button type="button" class="or-export-item" role="menuitem" (click)="exportPdf()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Exporter en PDF
-            </button>
-            <button type="button" class="or-export-item" role="menuitem" (click)="exportExcel()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Exporter en Excel
-            </button>
-            <button type="button" class="or-export-item" role="menuitem" (click)="exportSelection()">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-              Exporter la sélection (Excel)
-            </button>
-          </div>
-        }
-      </div>
+          @if (exportOpen()) {
+            <div class="or-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
+            <div class="or-export-dropdown" role="menu" aria-label="Options d'export">
+              <button type="button" class="or-export-item" role="menuitem" (click)="exportPdf()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Exporter en PDF
+              </button>
+              <button type="button" class="or-export-item" role="menuitem" (click)="exportExcel()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Exporter en Excel
+              </button>
+              <button type="button" class="or-export-item" role="menuitem" (click)="exportSelection()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Exporter la sélection (Excel)
+              </button>
+            </div>
+          }
+        </div>
+      }
     </div>
 
     <div class="or-tab-bar" role="tablist">
@@ -304,29 +308,35 @@
               <td><app-badge [status]="t.status" /></td>
               <td>
                 @if (t.gateway === 'MANUEL' && t.status === 'SUCCESS') {
-                  @if (!t.receiptSent) {
-                    <button type="button" class="or-act-btn or-act-receipt"
-                      [disabled]="sendingReceiptId() === t.id"
-                      (click)="sendReceipt(t)" title="Send invoice" [attr.aria-label]="'Send invoice for ' + (t.hawb ?? t.id)">
-                      @if (sendingReceiptId() === t.id) {
-                        <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
-                      } @else {
-                        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                      }
-                    </button>
-                  } @else {
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="text-success" style="font-size:12px;font-weight:600">✓ Sent</span>
-                      <button type="button" class="btn btn-sm btn-link p-0"
+                  @if (canSendReceipt()) {
+                    @if (!t.receiptSent) {
+                      <button type="button" class="or-act-btn or-act-receipt"
                         [disabled]="sendingReceiptId() === t.id"
-                        (click)="sendReceipt(t)">
+                        (click)="sendReceipt(t)" title="Send invoice" [attr.aria-label]="'Send invoice for ' + (t.hawb ?? t.id)">
                         @if (sendingReceiptId() === t.id) {
-                          <span class="spinner-border spinner-border-sm" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
+                          <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
                         } @else {
-                          Resend
+                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                         }
                       </button>
-                    </div>
+                    } @else {
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="text-success" style="font-size:12px;font-weight:600">✓ Sent</span>
+                        <button type="button" class="btn btn-sm btn-link p-0"
+                          [disabled]="sendingReceiptId() === t.id"
+                          (click)="sendReceipt(t)">
+                          @if (sendingReceiptId() === t.id) {
+                            <span class="spinner-border spinner-border-sm" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span>
+                          } @else {
+                            Resend
+                          }
+                        </button>
+                      </div>
+                    }
+                  } @else if (t.receiptSent) {
+                    <span class="text-success" style="font-size:12px;font-weight:600">✓ Sent</span>
+                  } @else {
+                    <span>—</span>
                   }
                 } @else {
                   <span>—</span>

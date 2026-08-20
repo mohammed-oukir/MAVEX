@@ -218,14 +218,18 @@
       <strong>{{ selCount() }}</strong> order(s) sélectionné(s)
     </div>
     <div class="or-bulk-actions">
-      <button type="button" class="or-bulk-btn or-bulk-email" [disabled]="bulkLoading()" (click)="openBulkConfirm('email')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Envoyer emails ({{ selCount() }})
-      </button>
-      <button type="button" class="or-bulk-btn or-bulk-paid" [disabled]="bulkLoading()" (click)="openBulkConfirm('paid')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        Marquer payés ({{ selCount() }})
-      </button>
+      @if (canBulkSendEmail()) {
+        <button type="button" class="or-bulk-btn or-bulk-email" [disabled]="bulkLoading()" (click)="openBulkConfirm('email')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Envoyer emails ({{ selCount() }})
+        </button>
+      }
+      @if (canBulkChangeStatus()) {
+        <button type="button" class="or-bulk-btn or-bulk-paid" [disabled]="bulkLoading()" (click)="openBulkConfirm('paid')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Marquer payés ({{ selCount() }})
+        </button>
+      }
       <button type="button" class="or-bulk-clear" (click)="clearSelection()" aria-label="Désélectionner">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -239,33 +243,35 @@
      ══════════════════════════════════════════════════════════ -->
 <div class="or-export-row">
   <div class="or-export-wrap" [class.or-export-open]="exportOpen()">
-    <button type="button" class="or-export-btn" (click)="exportOpen.set(!exportOpen())"
-      [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
-      aria-label="Exporter">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Exporter
-    </button>
+    @if (canExportOrders()) {
+      <button type="button" class="or-export-btn" (click)="exportOpen.set(!exportOpen())"
+        [attr.aria-expanded]="exportOpen()" aria-haspopup="true" title="Exporter"
+        aria-label="Exporter">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter
+      </button>
 
-    @if (exportOpen()) {
-      <div class="or-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
-      <div class="or-export-dropdown" role="menu" aria-label="Options d'export">
-        <button type="button" class="or-export-item" role="menuitem" (click)="exportPdf()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Exporter en PDF
-        </button>
-        <button type="button" class="or-export-item" role="menuitem" (click)="exportExcel()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Exporter en Excel
-        </button>
-        <button type="button" class="or-export-item" role="menuitem" (click)="exportSelection()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Exporter la sélection (Excel)
-        </button>
-      </div>
+      @if (exportOpen()) {
+        <div class="or-export-backdrop" (click)="exportOpen.set(false)" aria-hidden="true"></div>
+        <div class="or-export-dropdown" role="menu" aria-label="Options d'export">
+          <button type="button" class="or-export-item" role="menuitem" (click)="exportPdf()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exporter en PDF
+          </button>
+          <button type="button" class="or-export-item" role="menuitem" (click)="exportExcel()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exporter en Excel
+          </button>
+          <button type="button" class="or-export-item" role="menuitem" (click)="exportSelection()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Exporter la sélection (Excel)
+          </button>
+        </div>
+      }
     }
   </div>
 </div>
@@ -434,20 +440,22 @@
                   <button type="button" class="or-act-btn or-act-view" (click)="openDetail(o)" title="Voir le détail" aria-label="Détail">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
-                  @if (o.status !== 'PAID') {
+                  @if (o.status !== 'PAID' && canUpdateOrder()) {
                     <button type="button" class="or-act-btn or-act-edit" (click)="openEditOrder(o)" title="Modifier" aria-label="Modifier">
                       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
                   }
-                  @if (o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED') {
+                  @if ((o.status === 'CREATED' || o.status === 'EMAIL_SENT' || o.status === 'EMAIL_OUTDATED') && canSendEmail()) {
                     <button type="button" class="or-act-btn or-act-email" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id)" title="Envoyer l'email" [attr.aria-label]="'Envoyer email à ' + o.clientFullName">
                       @if (sendingId() === o.id) { <span class="spinner-border" style="width:10px;height:10px;border-width:1.5px" aria-hidden="true"></span> }
                       @else { <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> }
                     </button>
                   }
-                  <button type="button" class="or-act-btn or-act-del" (click)="confirmDelete(o.id)" title="Supprimer" aria-label="Supprimer">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                  </button>
+                  @if (canDeleteOrder()) {
+                    <button type="button" class="or-act-btn or-act-del" (click)="confirmDelete(o.id)" title="Supprimer" aria-label="Supprimer">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    </button>
+                  }
                 </div>
               </td>
             </tr>
@@ -647,10 +655,12 @@
                   Aucun email envoyé
                 </div>
               }
-              <button type="button" class="or-history-btn" (click)="closeDetail(); openEmailHistory(o)">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Historique
-              </button>
+              @if (canViewEmailLogs()) {
+                <button type="button" class="or-history-btn" (click)="closeDetail(); openEmailHistory(o)">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Historique
+                </button>
+              }
             </div>
             @if (o.status === 'EMAIL_OUTDATED') {
               <div class="or-email-outdated-warn">
@@ -664,7 +674,7 @@
 
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
-        @if (o.status !== 'PAID' && o.status !== 'DELIVERED') {
+        @if (o.status !== 'PAID' && o.status !== 'DELIVERED' && canSendEmail()) {
           <button type="button" class="nm-btn-primary" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id); closeDetail()">
             @if (sendingId() === o.id) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> }
             Envoyer l'email

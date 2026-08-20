@@ -24,22 +24,24 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/clients")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class ClientController {
 
     private final ClientService clientService;
 
     @GetMapping
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','VIEW')")
     public ResponseEntity<List<ClientResponseDTO>> getAll() {
         return ResponseEntity.ok(clientService.findAll());
     }
 
     @GetMapping("/active")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','VIEW')")
     public ResponseEntity<List<ClientResponseDTO>> getAllActive() {
         return ResponseEntity.ok(clientService.findAllActive());
     }
 
     @GetMapping("/search")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','VIEW')")
     public ResponseEntity<Page<ClientResponseDTO>> search(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
@@ -66,46 +68,54 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','VIEW')")
     public ResponseEntity<ClientResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(clientService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','CREATE')")
     public ResponseEntity<ClientResponseDTO> create(@Valid @RequestBody ClientRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientService.create(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','UPDATE')")
     public ResponseEntity<ClientResponseDTO> update(@PathVariable Long id,
                                                     @Valid @RequestBody ClientRequestDTO dto) {
         return ResponseEntity.ok(clientService.update(id, dto));
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','UPDATE')")
     public ResponseEntity<ClientResponseDTO> patch(@PathVariable Long id,
                                                    @Valid @RequestBody ClientPatchRequest dto) {
         return ResponseEntity.ok(clientService.patch(id, dto));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','DELETE')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         clientService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/bulk-delete")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkDelete(@Valid @RequestBody BulkActionRequest req) {
         int count = clientService.bulkDelete(req);
         return ResponseEntity.ok(Map.of("deleted", count));
     }
 
     @PostMapping("/bulk-activate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkActivate(@Valid @RequestBody BulkActionRequest req) {
         int count = clientService.bulkActivate(req);
         return ResponseEntity.ok(Map.of("activated", count));
     }
 
     @PostMapping("/bulk-deactivate")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','BULK_ACTIONS')")
     public ResponseEntity<Map<String, Integer>> bulkDeactivate(@Valid @RequestBody BulkActionRequest req) {
         int count = clientService.bulkDeactivate(req);
         return ResponseEntity.ok(Map.of("deactivated", count));
