@@ -69,8 +69,6 @@ public interface OrderService {
 
     OrderResponse updateStatus(Long id, OrderStatusUpdateRequest request);
 
-    void updateStatusSystem(Long orderId, OrderStatus newStatus, String note);
-
     /** Met à jour le statut de plusieurs orders en une transaction */
     BulkStatusResult bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note);
 

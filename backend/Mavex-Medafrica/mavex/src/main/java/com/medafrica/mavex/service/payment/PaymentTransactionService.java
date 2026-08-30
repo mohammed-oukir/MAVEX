@@ -11,6 +11,7 @@ import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.PaymentTransactionRepository;
 import com.medafrica.mavex.repository.specification.PaymentTransactionSpecification;
+import com.medafrica.mavex.service.ShipmentStatusService;
 import com.medafrica.mavex.service.interfaces.NotificationEmailService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class PaymentTransactionService {
     private final OrderRepository              orderRepository;
     private final NotificationEmailService     notificationEmailService;
     private final EmailLogRepository           emailLogRepository;
+    private final ShipmentStatusService        shipmentStatusService;
 
     // ─────────── Marque une transaction/commande comme payée (idempotent) ───────────
     @Transactional
@@ -50,6 +52,9 @@ public class PaymentTransactionService {
         Order order = transaction.getOrder();
         order.setStatus(OrderStatus.PAID);
         orderRepository.save(order);
+        if (order.getShipment() != null) {
+            shipmentStatusService.recalculate(order.getShipment().getId());
+        }
         log.info("Transaction id={} marquée SUCCESS pour la première fois, order id={} passé à PAID",
                 transaction.getId(), order.getId());
 

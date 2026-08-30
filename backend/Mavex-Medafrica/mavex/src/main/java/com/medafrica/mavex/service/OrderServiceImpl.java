@@ -38,8 +38,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
     private final ClientRepository             clientRepository;
     private final EmailLogRepository           emailLogRepository;
     private final PaymentTransactionRepository transactionRepository;
+    private final ShipmentStatusService        shipmentStatusService;
 
     // ───────────────────────────── CREATE ─────────────────────────────
 
@@ -92,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order saved = orderRepository.save(order);
         recordHistory(saved, null, OrderStatus.CREATED, "Création de l'order", getCurrentUser());
+        shipmentStatusService.recalculate(shipment.getId());
 
         return toResponse(saved);
     }
@@ -270,6 +274,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse updateStatus(Long id, OrderStatusUpdateRequest request) {
         Order order = findOrThrow(id);
         changeStatus(order, request.getNewStatus(), request.getNote(), getCurrentUser());
+        if (order.getShipment() != null) {
+            shipmentStatusService.recalculate(order.getShipment().getId());
+        }
         return toResponse(order);
     }
 
@@ -277,15 +284,22 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public BulkStatusResult bulkUpdateStatus(List<Long> ids, OrderStatus newStatus, String note) {
         int succeeded = 0, failed = 0;
+        Set<Long> shipmentIds = new HashSet<>();
         for (Long id : ids) {
             try {
                 Order order = findOrThrow(id);
                 changeStatus(order, newStatus, note, getCurrentUser());
                 succeeded++;
+                if (order.getShipment() != null) {
+                    shipmentIds.add(order.getShipment().getId());
+                }
             } catch (Exception e) {
                 failed++;
                 log.warn("bulkUpdateStatus — erreur order {} : {}", id, e.getMessage());
             }
+        }
+        for (Long shipmentId : shipmentIds) {
+            shipmentStatusService.recalculate(shipmentId);
         }
         return BulkStatusResult.builder()
                 .total(ids.size())
@@ -294,16 +308,9 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-    @Override
-    @Transactional
-    public void updateStatusSystem(Long orderId, OrderStatus newStatus, String note) {
-        Order order = findOrThrow(orderId);
-        changeStatus(order, newStatus, note, null);
-    }
-
     /**
      * Logique centrale de changement de statut — utilisee par updateStatus(),
-     * bulkUpdateStatus() et updateStatusSystem().
+     * bulkUpdateStatus().
      * Cree automatiquement une PaymentTransaction si le statut passe manuellement a PAID.
      */
     private void changeStatus(Order order, OrderStatus newStatus, String note, User actor) {
@@ -355,15 +362,20 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!orderRepository.existsById(id)) {
-            throw new EntityNotFoundException("Order introuvable id=" + id);
-        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Order introuvable id=" + id));
         if (transactionRepository.existsByOrder_Id(id)) {
             throw new IllegalStateException("Impossible de supprimer cette commande : une tentative de paiement y est associée.");
         }
+        Long shipmentId = order.getShipment() != null ? order.getShipment().getId() : null;
+
         emailLogRepository.deleteByOrderId(id);
         historyRepository.deleteByOrderId(id);
         orderRepository.deleteById(id);
+
+        if (shipmentId != null) {
+            shipmentStatusService.recalculate(shipmentId);
+        }
     }
 
     // ───────────────────────────── HELPERS ────────────────────────────

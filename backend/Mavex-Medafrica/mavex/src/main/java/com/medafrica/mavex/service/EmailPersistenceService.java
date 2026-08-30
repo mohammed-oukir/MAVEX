@@ -33,6 +33,7 @@ public class EmailPersistenceService {
 
     private final OrderRepository    orderRepository;
     private final EmailLogRepository emailLogRepository;
+    private final ShipmentStatusService shipmentStatusService;
 
     @Transactional
     public Order loadAndPrepareOrder(Long orderId) {
@@ -94,6 +95,9 @@ public class EmailPersistenceService {
             order.setLockedToCurrency(r.getToCurrency());
         });
         orderRepository.save(order);
+        if (order.getShipment() != null) {
+            shipmentStatusService.recalculate(order.getShipment().getId());
+        }
     }
 
     @Transactional

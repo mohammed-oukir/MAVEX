@@ -35,7 +35,7 @@ public class Order {
 
     /** Colonne Excel "Connote #" ex: 013090009953 */
     @Column(unique = true, nullable = false)
-    private String hawb;
+    private String hawb; 
 
     /** Colonne Excel "Goods Description" ex: 2 Handmade carpets */
     @Column(name = "goods_description")
