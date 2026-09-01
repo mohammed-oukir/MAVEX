@@ -157,13 +157,6 @@
       @if (paidCount() > 0) { <span class="sd-tab-pill sd-tab-pill-green">{{ paidCount() }}</span> }
     </button>
     <button type="button" class="sd-tab" role="tab"
-      [class.sd-tab-active]="statusFilter() === 'DELIVERED'"
-      (click)="setStatusFilter('DELIVERED')"
-      [attr.aria-selected]="statusFilter() === 'DELIVERED'">
-      Livré
-      @if (deliveredCount() > 0) { <span class="sd-tab-pill sd-tab-pill-green">{{ deliveredCount() }}</span> }
-    </button>
-    <button type="button" class="sd-tab" role="tab"
       [class.sd-tab-active]="statusFilter() === 'CANCELLED'"
       (click)="setStatusFilter('CANCELLED')"
       [attr.aria-selected]="statusFilter() === 'CANCELLED'">

@@ -62,7 +62,7 @@ public class ImportDeleteServiceImpl implements ImportDeleteService {
         if (!ordersToDelete.isEmpty()) {
             List<Long> orderIds = ordersToDelete.stream().map(Order::getId).collect(Collectors.toList());
             if (orderRepository.existsByIdInAndStatusIn(orderIds,
-                    List.of(OrderStatus.EMAIL_SENT, OrderStatus.EMAIL_OUTDATED, OrderStatus.PAID, OrderStatus.DELIVERED))) {
+                    List.of(OrderStatus.EMAIL_SENT, OrderStatus.EMAIL_OUTDATED, OrderStatus.PAID))) {
                 throw new IllegalStateException("Impossible de supprimer cet import : au moins une commande a déjà reçu un email ou a été payée.");
             }
         }

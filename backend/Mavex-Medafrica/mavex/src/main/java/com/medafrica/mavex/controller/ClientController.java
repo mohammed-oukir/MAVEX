@@ -5,6 +5,7 @@ import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
 import com.medafrica.mavex.dto.client.ClientSearchCriteria;
+import com.medafrica.mavex.dto.client.ClientStatsResponse;
 import com.medafrica.mavex.service.interfaces.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +66,12 @@ public class ClientController {
                 .dateTo(dateTo)
                 .build();
         return ResponseEntity.ok(clientService.search(criteria, pageable));
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('CLIENTS','VIEW')")
+    public ResponseEntity<ClientStatsResponse> getStats() {
+        return ResponseEntity.ok(clientService.getStats());
     }
 
     @GetMapping("/{id}")

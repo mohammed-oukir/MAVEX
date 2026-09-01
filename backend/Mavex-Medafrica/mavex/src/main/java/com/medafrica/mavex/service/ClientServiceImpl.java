@@ -5,6 +5,7 @@ import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
 import com.medafrica.mavex.dto.client.ClientSearchCriteria;
+import com.medafrica.mavex.dto.client.ClientStatsResponse;
 import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.country.Country;
 import com.medafrica.mavex.model.enums.OrderStatus;
@@ -22,6 +23,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,24 @@ public class ClientServiceImpl implements ClientService {
     public Page<ClientResponseDTO> search(ClientSearchCriteria criteria, Pageable pageable) {
         return clientRepository.findAll(ClientSpecification.build(criteria), pageable)
                 .map(this::toResponseDTO);
+    }
+
+    @Override
+    public ClientStatsResponse getStats() {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
+
+        long total    = clientRepository.count();
+        long active   = clientRepository.countByActiveTrue();
+        long inactive = clientRepository.countByActiveFalse();
+        long newThisMonth = clientRepository.countByCreatedAtBetween(startOfMonth, startOfNextMonth);
+
+        return ClientStatsResponse.builder()
+                .totalClients(total)
+                .activeClients(active)
+                .inactiveClients(inactive)
+                .newThisMonth(newThisMonth)
+                .build();
     }
 
     @Override

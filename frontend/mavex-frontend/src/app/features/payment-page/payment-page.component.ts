@@ -32,7 +32,7 @@ export class PaymentPageComponent implements OnInit {
       .subscribe({
         next: o => {
           this.order.set(o);
-          this.state.set(o.status === 'PAID' || o.status === 'DELIVERED' ? 'paid' : 'ready');
+          this.state.set(o.status === 'PAID' ? 'paid' : 'ready');
         },
         error: err => {
           const msg: string = err?.error?.message ?? '';

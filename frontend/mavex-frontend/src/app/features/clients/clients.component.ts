@@ -12,7 +12,7 @@ import { OrderService }   from '../../core/services/order.service';
 import { ToastService }   from '../../core/services/toast.service';
 import { AuthService }    from '../../core/auth/auth.service';
 import { MyPermissionsService } from '../../core/services/my-permissions.service';
-import { ClientResponse, ClientSearchCriteria } from '../../core/models/client.model';
+import { ClientResponse, ClientSearchCriteria, ClientStats } from '../../core/models/client.model';
 import { OrderResponse }  from '../../core/models/order.model';
 import { BadgeComponent } from '../../shared/badge/badge.component';
 
@@ -39,10 +39,10 @@ export class ClientsComponent implements OnInit {
   totalPages     = signal(0);
   loading        = signal(true);
   page           = signal(0);
-  readonly pageSize = 15;
+  pageSize       = signal(15);
 
-  /* ── Data KPIs (liste complète, indépendante de la pagination) ── */
-  allClients = signal<ClientResponse[]>([]);
+  /* ── Data KPIs (comptages calculés côté serveur) ── */
+  clientStats = signal<ClientStats | null>(null);
 
   /* ── Column filters ───────────────────────────────── */
   fName      = signal('');
@@ -56,17 +56,10 @@ export class ClientsComponent implements OnInit {
   fDateTo    = signal('');
 
   /* ── KPIs ─────────────────────────────────────────── */
-  kpiTotal    = computed(() => this.allClients().length);
-  kpiActive   = computed(() => this.allClients().filter(c => c.active).length);
-  kpiInactive = computed(() => this.allClients().filter(c => !c.active).length);
-  kpiMonth    = computed(() => {
-    const now = new Date();
-    return this.allClients().filter(c => {
-      if (!c.createdAt) return false;
-      const d = new Date(c.createdAt);
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    }).length;
-  });
+  kpiTotal    = computed(() => this.clientStats()?.totalClients ?? 0);
+  kpiActive   = computed(() => this.clientStats()?.activeClients ?? 0);
+  kpiInactive = computed(() => this.clientStats()?.inactiveClients ?? 0);
+  kpiMonth    = computed(() => this.clientStats()?.newThisMonth ?? 0);
 
   /* ── Critères combinés → déclenchent la recherche serveur ── */
   private readonly searchParams = computed(() => ({
@@ -82,6 +75,7 @@ export class ClientsComponent implements OnInit {
       dateTo:   this.fDateTo(),
     } satisfies ClientSearchCriteria,
     page: this.page(),
+    size: this.pageSize(),
   }));
 
   /* ── Observable des critères — créé en champ de classe (contexte d'injection
@@ -139,9 +133,9 @@ export class ClientsComponent implements OnInit {
       .pipe(
         debounceTime(300),
         distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-        switchMap(({ criteria, page }) => {
+        switchMap(({ criteria, page, size }) => {
           this.loading.set(true);
-          return this.clientSvc.search(criteria, page, this.pageSize);
+          return this.clientSvc.search(criteria, page, size);
         }),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -156,21 +150,21 @@ export class ClientsComponent implements OnInit {
       });
   }
 
-  /* ── Load KPIs (liste complète, indépendante des filtres/pagination) ── */
+  /* ── Load KPIs (comptages serveur, indépendants des filtres/pagination) ── */
   private loadKpiData(): void {
-    this.clientSvc.getAll()
+    this.clientSvc.getStats()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: clients => this.allClients.set(clients),
+        next: stats => this.clientStats.set(stats),
         error: () => {},
       });
   }
 
   /* ── Rafraîchit la page courante après une mutation (create/edit/delete/…) ── */
   private reloadCurrentPage(): void {
-    const { criteria, page } = this.searchParams();
+    const { criteria, page, size } = this.searchParams();
     this.loading.set(true);
-    this.clientSvc.search(criteria, page, this.pageSize)
+    this.clientSvc.search(criteria, page, size)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => {
@@ -402,6 +396,7 @@ export class ClientsComponent implements OnInit {
   /* ── Pagination ───────────────────────────────────── */
   goToPage(p: number): void { this.page.set(p); }
   pages(): number[]         { return Array.from({ length: this.totalPages() }, (_, i) => i); }
+  onPageSizeChange(size: number): void { this.pageSize.set(size); this.page.set(0); }
 
   /* ── Helpers ──────────────────────────────────────── */
   getInitials(name: string): string {
@@ -415,7 +410,7 @@ export class ClientsComponent implements OnInit {
   orderStatusLabel(s: string): string {
     const m: Record<string, string> = {
       CREATED: 'Créé', EMAIL_SENT: 'Email envoyé',
-      PAID: 'Payé', DELIVERED: 'Livré', CANCELLED: 'Annulé',
+      PAID: 'Payé', CANCELLED: 'Annulé',
     };
     return m[s] ?? s;
   }
@@ -423,7 +418,7 @@ export class ClientsComponent implements OnInit {
   orderStatusClass(s: string): string {
     const m: Record<string, string> = {
       CREATED: 'cl-os-created', EMAIL_SENT: 'cl-os-email',
-      PAID: 'cl-os-paid', DELIVERED: 'cl-os-delivered', CANCELLED: 'cl-os-cancelled',
+      PAID: 'cl-os-paid', CANCELLED: 'cl-os-cancelled',
     };
     return m[s] ?? '';
   }

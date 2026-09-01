@@ -14,6 +14,17 @@
     <div class="or-kpi-chevron" aria-hidden="true">›</div>
   </button>
 
+  <button type="button" class="or-kpi-card or-kpi-blue" [class.or-kpi-active]="flStatus() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" aria-label="Email envoyé">
+    <div class="or-kpi-icon or-kpi-blue-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiEmailSent() }}</div>
+      <div class="or-kpi-lbl">Email envoyé</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
+  </button>
+
   <button type="button" class="or-kpi-card or-kpi-amber" [class.or-kpi-active]="flStatus() === 'CREATED'" (click)="setTab('CREATED')" aria-label="Email non envoyé">
     <div class="or-kpi-icon or-kpi-amber-icon">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -23,6 +34,17 @@
       <div class="or-kpi-lbl">Email non envoyé</div>
     </div>
     @if (kpiNoEmail() > 0) { <div class="or-kpi-alert" aria-hidden="true">!</div> }
+  </button>
+
+  <button type="button" class="or-kpi-card or-kpi-slate" [class.or-kpi-active]="flStatus() === 'EMAIL_OUTDATED'" (click)="setTab('EMAIL_OUTDATED')" aria-label="Email obsolète">
+    <div class="or-kpi-icon or-kpi-slate-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="or-kpi-body">
+      <div class="or-kpi-num">{{ kpiEmailOutdated() }}</div>
+      <div class="or-kpi-lbl">Email obsolète</div>
+    </div>
+    <div class="or-kpi-chevron" aria-hidden="true">›</div>
   </button>
 
   <button type="button" class="or-kpi-card or-kpi-green" [class.or-kpi-active]="flStatus() === 'PAID'" (click)="setTab('PAID')" aria-label="Payés">
@@ -103,7 +125,6 @@
             <option value="EMAIL_SENT">Email envoyé</option>
             <option value="EMAIL_OUTDATED">Email obsolète</option>
             <option value="PAID">Payé</option>
-            <option value="DELIVERED">Livré</option>
             <option value="CANCELLED">Annulé</option>
           </select>
         </div>
@@ -202,7 +223,6 @@
       <button type="button" class="or-tab or-tab-blue" [class.or-tab-active]="flStatus() === 'EMAIL_SENT'" (click)="setTab('EMAIL_SENT')" role="tab">Email envoyé</button>
       <button type="button" class="or-tab or-tab-orange" [class.or-tab-active]="flStatus() === 'EMAIL_OUTDATED'" (click)="setTab('EMAIL_OUTDATED')" role="tab">Email obsolète</button>
       <button type="button" class="or-tab or-tab-green" [class.or-tab-active]="flStatus() === 'PAID'" (click)="setTab('PAID')" role="tab">Payés</button>
-      <button type="button" class="or-tab" [class.or-tab-active]="flStatus() === 'DELIVERED'" (click)="setTab('DELIVERED')" role="tab">Livrés</button>
     </div>
   </div>
 </div>
@@ -674,7 +694,7 @@
 
       <div class="nm-footer">
         <button type="button" class="nm-btn-cancel" (click)="closeDetail()">Fermer</button>
-        @if (o.status !== 'PAID' && o.status !== 'DELIVERED' && canSendEmail()) {
+        @if (o.status !== 'PAID' && canSendEmail()) {
           <button type="button" class="nm-btn-primary" [disabled]="sendingId() === o.id" (click)="sendEmail(o.id); closeDetail()">
             @if (sendingId() === o.id) { <span class="spinner-border" style="width:13px;height:13px;border-width:2px" aria-hidden="true"></span> }
             Envoyer l'email

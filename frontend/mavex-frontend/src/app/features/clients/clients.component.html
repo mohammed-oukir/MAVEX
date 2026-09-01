@@ -305,20 +305,28 @@
   </div>
 
   <!-- Pagination -->
-  @if (totalPages() > 1) {
+  @if (total() > 0) {
     <div class="cl-pagination">
       <span class="cl-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ total() }} résultats</span>
-      <div class="d-flex gap-1">
-        <button type="button" class="cl-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        @for (p of pages(); track p) {
-          <button type="button" class="cl-pg-btn" [class.cl-pg-active]="p === page()" (click)="goToPage(p)" [attr.aria-current]="p === page() ? 'page' : null">{{ p + 1 }}</button>
-        }
-        <button type="button" class="cl-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
+      @if (totalPages() > 1) {
+        <div class="d-flex gap-1">
+          <button type="button" class="cl-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          @for (p of pages(); track p) {
+            <button type="button" class="cl-pg-btn" [class.cl-pg-active]="p === page()" (click)="goToPage(p)" [attr.aria-current]="p === page() ? 'page' : null">{{ p + 1 }}</button>
+          }
+          <button type="button" class="cl-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      }
+      <select class="cl-pg-select" [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)" aria-label="Lignes par page">
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
     </div>
   }
 </div>

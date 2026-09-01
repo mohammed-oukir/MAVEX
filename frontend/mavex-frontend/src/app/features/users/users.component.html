@@ -58,34 +58,16 @@
      TOOLBAR — filtres + bouton add
      ══════════════════════════════════════════════════════════ -->
 <div class="us-toolbar mb-4">
-  <div class="us-filter-group" role="group" aria-label="Filtrer par rôle">
-    <button type="button" class="us-filter-btn" [class.us-filter-active]="roleFilter() === 'ALL'" (click)="setRole('ALL')">
-      Tous <span class="us-filter-count">{{ statTotal() }}</span>
+  @if (hasFilters()) {
+    <button type="button" class="us-clear-btn" (click)="clearFilters()">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Effacer filtres
     </button>
-    <button type="button" class="us-filter-btn us-fb-admin" [class.us-filter-active]="roleFilter() === 'ADMIN'" (click)="setRole('ADMIN')">
-      Admins <span class="us-filter-count">{{ statAdmins() }}</span>
-    </button>
-    <button type="button" class="us-filter-btn us-fb-agent" [class.us-filter-active]="roleFilter() === 'AGENT'" (click)="setRole('AGENT')">
-      Agents <span class="us-filter-count">{{ statAgents() }}</span>
-    </button>
-    <button type="button" class="us-filter-btn us-fb-comptable" [class.us-filter-active]="roleFilter() === 'COMPTABLE'" (click)="setRole('COMPTABLE')">
-      Comptables <span class="us-filter-count">{{ statComptables() }}</span>
-    </button>
-    <button type="button" class="us-filter-btn us-fb-inactive" [class.us-filter-active]="roleFilter() === 'INACTIVE'" (click)="setRole('INACTIVE')">
-      Inactifs <span class="us-filter-count">{{ statTotal() - statActive() }}</span>
-    </button>
-  </div>
-
-  <div class="us-right-bar">
-    <div class="us-search-wrap">
-      <svg class="us-search-ico" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="search" class="us-search" [value]="searchQ()" (input)="setSearch($any($event.target).value)" aria-label="Rechercher" />
-    </div>
-    <button type="button" class="us-add-btn" (click)="openCreate()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Ajouter un membre
-    </button>
-  </div>
+  }
+  <button type="button" class="us-add-btn" (click)="openCreate()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Ajouter un membre
+  </button>
 </div>
 
 
@@ -109,7 +91,7 @@
     }
   </div>
 
-} @else if (filtered().length === 0) {
+} @else if (pageItems().length === 0) {
   <div class="us-empty">
     <div class="us-empty-icon" aria-hidden="true">
       <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -123,28 +105,59 @@
   <div class="us-table-wrap">
     <table class="us-table" aria-label="Liste des membres">
       <thead>
-        <tr>
-          <th scope="col">Utilisateur</th>
+        <tr class="us-thead">
+          <th scope="col">Nom</th>
+          <th scope="col">Email</th>
           <th scope="col">Rôle</th>
           <th scope="col">Statut</th>
           <th scope="col">Membre depuis</th>
           <th scope="col" class="us-th-actions">Actions</th>
         </tr>
+
+        <!-- Filter row -->
+        <tr class="us-filter-tr" aria-label="Filtres par colonne">
+          <th scope="col">
+            <div class="us-fi-wrap">
+              <svg class="us-fi-ico" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="us-fi-input" [value]="searchName()" (input)="setSearchName($any($event.target).value)" aria-label="Filtrer par nom" />
+            </div>
+          </th>
+          <th scope="col">
+            <input class="us-fi-input" [value]="searchEmail()" (input)="setSearchEmail($any($event.target).value)" aria-label="Filtrer par email" />
+          </th>
+          <th scope="col">
+            <select class="us-fi-select" [value]="roleFilter()" (change)="setRole($any($event.target).value)" aria-label="Filtrer par rôle">
+              <option value="ALL">Tous</option>
+              <option value="ADMIN">Admin</option>
+              <option value="AGENT">Agent</option>
+              <option value="COMPTABLE">Comptable</option>
+            </select>
+          </th>
+          <th scope="col">
+            <select class="us-fi-select" [value]="statusFilter()" (change)="setStatus($any($event.target).value)" aria-label="Filtrer par statut">
+              <option value="all">Tous</option>
+              <option value="active">Actif</option>
+              <option value="inactive">Inactif</option>
+            </select>
+          </th>
+          <th scope="col"></th>
+          <th scope="col"></th>
+        </tr>
       </thead>
       <tbody>
-        @for (u of filtered(); track u.id) {
+        @for (u of pageItems(); track u.id) {
           <tr [class.us-row-inactive]="!u.active">
 
-            <!-- Utilisateur -->
+            <!-- Nom -->
             <td class="us-td-user">
               <div class="us-avatar" [attr.aria-label]="u.fullName">
                 {{ getInitials(u.fullName) }}
               </div>
-              <div>
-                <div class="us-td-name">{{ u.fullName }}</div>
-                <div class="us-td-email">{{ u.email }}</div>
-              </div>
+              <div class="us-td-name">{{ u.fullName }}</div>
             </td>
+
+            <!-- Email -->
+            <td class="us-td-email">{{ u.email }}</td>
 
             <!-- Rôle -->
             <td>
@@ -202,6 +215,32 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  @if (totalElements() > 0) {
+    <div class="us-pagination">
+      <span class="us-pg-info">Page {{ page() + 1 }} / {{ totalPages() }} — {{ totalElements() }} résultats</span>
+      @if (totalPages() > 1) {
+        <div class="d-flex gap-1">
+          <button type="button" class="us-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          @for (p of pages(); track p) {
+            <button type="button" class="us-pg-btn" [class.us-pg-active]="p === page()" (click)="goToPage(p)" [attr.aria-current]="p === page() ? 'page' : null">{{ p + 1 }}</button>
+          }
+          <button type="button" class="us-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      }
+      <select class="us-pg-select" [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)" aria-label="Lignes par page">
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+      </select>
+    </div>
+  }
 }
 
 
@@ -210,7 +249,7 @@
      ══════════════════════════════════════════════════════════ -->
 @if (formMode()) {
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="us-form-title" (click)="closeForm()">
-    <div class="modal" style="max-width:480px" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()">
 
       <div class="nm-header">
         <div [class]="formMode() === 'create' ? 'nm-icon orange' : 'nm-icon blue'" aria-hidden="true">
@@ -273,6 +312,19 @@
 
             <div class="col-12">
               <div class="nm-field">
+                <label for="usConfirmPassword" class="nm-label">
+                  Confirmer le mot de passe
+                  @if (formMode() === 'create') { <span class="nm-req">*</span> }
+                  @else if (form.get('password')!.value) { <span class="nm-opt">confirmez le nouveau mot de passe</span> }
+                </label>
+                <input id="usConfirmPassword" [type]="showPwd() ? 'text' : 'password'" class="nm-input" [class.nm-err]="passwordMismatch()"
+                  formControlName="confirmPassword" autocomplete="new-password" />
+                @if (passwordMismatch()) { <div class="nm-err-msg" role="alert">Les mots de passe ne correspondent pas.</div> }
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="nm-field">
                 <label class="nm-label">Rôle <span class="nm-req">*</span></label>
                 <div class="us-role-picker">
                   <label class="us-role-option" [class.us-role-selected-agent]="form.get('role')!.value === 'AGENT'">
@@ -280,7 +332,7 @@
                     <div class="us-role-opt-icon us-roi-agent">
                       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </div>
-                    <div>
+                    <div class="us-role-opt-text">
                       <div class="us-role-opt-title">Agent</div>
                       <div class="us-role-opt-desc">Accès opérationnel</div>
                     </div>
@@ -290,7 +342,7 @@
                     <div class="us-role-opt-icon us-roi-admin">
                       <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                     </div>
-                    <div>
+                    <div class="us-role-opt-text">
                       <div class="us-role-opt-title">Admin</div>
                       <div class="us-role-opt-desc">Accès complet</div>
                     </div>
@@ -300,7 +352,7 @@
                     <div class="us-role-opt-icon us-roi-comptable">
                       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     </div>
-                    <div>
+                    <div class="us-role-opt-text">
                       <div class="us-role-opt-title">Comptable</div>
                       <div class="us-role-opt-desc">Accès financier</div>
                     </div>

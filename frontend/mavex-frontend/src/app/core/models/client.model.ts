@@ -51,3 +51,10 @@ export interface ClientSearchCriteria {
   dateFrom?: string; // YYYY-MM-DD
   dateTo?: string;   // YYYY-MM-DD
 }
+
+export interface ClientStats {
+  totalClients: number;
+  activeClients: number;
+  inactiveClients: number;
+  newThisMonth: number;
+}

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
-import { ClientResponse, ClientRequest, ClientPatch, ClientSearchCriteria } from '../models/client.model';
+import { ClientResponse, ClientRequest, ClientPatch, ClientSearchCriteria, ClientStats } from '../models/client.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClientService {
@@ -27,6 +27,10 @@ export class ClientService {
 
   getAll(): Observable<ClientResponse[]> {
     return this.http.get<ClientResponse[]>('/api/clients');
+  }
+
+  getStats(): Observable<ClientStats> {
+    return this.http.get<ClientStats>('/api/clients/stats');
   }
 
   getAllActive(): Observable<ClientResponse[]> {

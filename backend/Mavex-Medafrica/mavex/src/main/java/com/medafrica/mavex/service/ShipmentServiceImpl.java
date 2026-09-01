@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -114,7 +116,8 @@ public class ShipmentServiceImpl implements ShipmentService {
         Specification<Shipment> spec = ShipmentSpecification.build(
                 mawb, shipperCompanyName, importFrom, importTo, carrier, mode,
                 totalOrders, dutyRateMin, dutyRateMax, status);
-        return shipmentRepository.findAll(spec, Pageable.unpaged()).getContent();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        return shipmentRepository.findAll(spec, sort);
     }
 
     @Override
@@ -133,7 +136,12 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     @Transactional(readOnly = true)
     public List<Shipment> findAllByIds(List<Long> ids) {
-        return shipmentRepository.findAllById(ids);
+        Map<Long, Shipment> byId = shipmentRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(Shipment::getId, s -> s));
+        return ids.stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override

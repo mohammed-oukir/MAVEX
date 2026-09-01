@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -146,13 +148,19 @@ public class OrderServiceImpl implements OrderService {
         Specification<Order> spec = OrderSpecification.build(
                 hawb, client, clientEmail, shipmentSearch, shipmentWeight, customsValue,
                 totalAmount, dutyRate, customsCurrency, status, shipmentId, from, to);
-        return orderRepository.findAll(spec, Pageable.unpaged()).getContent();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        return orderRepository.findAll(spec, sort);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Order> findAllByIds(List<Long> ids) {
-        return orderRepository.findAllById(ids);
+        Map<Long, Order> byId = orderRepository.findAllById(ids).stream()
+                .collect(Collectors.toMap(Order::getId, o -> o));
+        return ids.stream()
+                .map(byId::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override

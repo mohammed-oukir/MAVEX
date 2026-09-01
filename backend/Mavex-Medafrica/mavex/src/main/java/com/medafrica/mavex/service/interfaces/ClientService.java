@@ -5,6 +5,7 @@ import com.medafrica.mavex.dto.client.ClientPatchRequest;
 import com.medafrica.mavex.dto.client.ClientRequestDTO;
 import com.medafrica.mavex.dto.client.ClientResponseDTO;
 import com.medafrica.mavex.dto.client.ClientSearchCriteria;
+import com.medafrica.mavex.dto.client.ClientStatsResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,6 +18,8 @@ public interface ClientService {
     List<ClientResponseDTO> findAllActive();
 
     Page<ClientResponseDTO> search(ClientSearchCriteria criteria, Pageable pageable);
+
+    ClientStatsResponse getStats();
 
     ClientResponseDTO findById(Long id);
 

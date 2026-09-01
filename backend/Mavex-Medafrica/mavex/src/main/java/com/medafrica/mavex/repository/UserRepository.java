@@ -3,12 +3,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.medafrica.mavex.model.enums.UserRole;
 import com.medafrica.mavex.model.security.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     List<User> findAllByActiveTrue();
     List<User> findAllByRoleAndActiveTrue(UserRole role);
+
+    long countByActiveTrue();
+    long countByActiveFalse();
+    long countByRole(UserRole role);
 }

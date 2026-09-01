@@ -3,7 +3,6 @@ export type OrderStatus =
   | 'EMAIL_SENT'
   | 'EMAIL_OUTDATED'
   | 'PAID'
-  | 'DELIVERED'
   | 'CANCELLED';
 
 export interface OrderResponse {

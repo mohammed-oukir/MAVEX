@@ -57,6 +57,8 @@ export class OrdersComponent implements OnInit {
   kpiTotal   = signal(0);
   kpiNoEmail = signal(0);
   kpiPaid    = signal(0);
+  kpiEmailOutdated = signal(0);
+  kpiEmailSent = signal(0);
 
   /* ── Panneau de filtres ───────────────────────────────── */
   filtersCollapsed    = signal(false);
@@ -193,14 +195,18 @@ export class OrdersComponent implements OnInit {
 
   private loadKpis(): void {
     forkJoin({
-      all:     this.orderSvc.search({}, 0, 1),
-      noEmail: this.orderSvc.search({ status: 'CREATED' }, 0, 1),
-      paid:    this.orderSvc.search({ status: 'PAID' }, 0, 1),
+      all:       this.orderSvc.search({}, 0, 1),
+      noEmail:   this.orderSvc.search({ status: 'CREATED' }, 0, 1),
+      paid:      this.orderSvc.search({ status: 'PAID' }, 0, 1),
+      emailSent: this.orderSvc.search({ status: 'EMAIL_SENT' }, 0, 1),
+      outdated:  this.orderSvc.search({ status: 'EMAIL_OUTDATED' }, 0, 1),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ all, noEmail, paid }) => {
+      next: ({ all, noEmail, paid, emailSent, outdated }) => {
         this.kpiTotal.set(all.totalElements);
         this.kpiNoEmail.set(noEmail.totalElements);
         this.kpiPaid.set(paid.totalElements);
+        this.kpiEmailSent.set(emailSent.totalElements);
+        this.kpiEmailOutdated.set(outdated.totalElements);
       },
     });
   }
@@ -515,7 +521,6 @@ export class OrdersComponent implements OnInit {
       EMAIL_SENT:      'or-row-email',
       EMAIL_OUTDATED:  'or-row-outdated',
       PAID:            'or-row-paid',
-      DELIVERED:       'or-row-delivered',
       CANCELLED:       'or-row-cancelled',
     };
     return map[s] ?? '';

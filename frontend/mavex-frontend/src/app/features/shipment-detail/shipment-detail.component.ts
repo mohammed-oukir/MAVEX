@@ -213,7 +213,6 @@ export class ShipmentDetailComponent implements OnInit {
     { value: 'EMAIL_SENT',       label: 'Email envoyé',           color: '#3B82F6', bg: '#EFF6FF' },
     { value: 'EMAIL_OUTDATED',   label: 'Email obsolète',         color: '#F97316', bg: '#FFF7ED' },
     { value: 'PAID',             label: 'Payé',                   color: '#22C55E', bg: '#F0FDF4' },
-    { value: 'DELIVERED',        label: 'Livré',                  color: '#22C55E', bg: '#F0FDF4' },
     { value: 'CANCELLED',        label: 'Annulé',                 color: '#EF4444', bg: '#FEF2F2' },
   ];
 
@@ -310,7 +309,6 @@ export class ShipmentDetailComponent implements OnInit {
   createdCount    = computed(() => this.orders().filter(o => o.status === 'CREATED').length);
   emailCount      = computed(() => this.orders().filter(o => o.status === 'EMAIL_SENT').length);
   paidCount       = computed(() => this.orders().filter(o => o.status === 'PAID').length);
-  deliveredCount     = computed(() => this.orders().filter(o => o.status === 'DELIVERED').length);
   emailOutdatedCount = computed(() => this.orders().filter(o => o.status === 'EMAIL_OUTDATED').length);
   cancelledCount     = computed(() => this.orders().filter(o => o.status === 'CANCELLED').length);
   eligibleForEmailCount = computed(() =>

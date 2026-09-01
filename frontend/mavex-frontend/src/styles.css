@@ -79,7 +79,6 @@ html.im-modal-open body { overflow: hidden; }
 .bs-pending         { background: #FFFBEB; color: #F59E0B; }
 .bs-pending_payment { background: #FFFBEB; color: #F59E0B; }
 .bs-in_delivery     { background: #FFFBEB; color: #F59E0B; }
-.bs-delivered       { background: #F0FDF4; color: #22C55E; }
 .bs-success         { background: #F0FDF4; color: #22C55E; }
 .bs-partial         { background: #FFF7ED; color: #F97316; }
 .bs-failed          { background: #FEF2F2; color: #EF4444; }

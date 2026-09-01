@@ -53,37 +53,69 @@
   } @else if (statsHistory()) {
     <div class="eda-kpi-grid">
       <div class="eda-kpi eda-kpi--orange">
-        <div class="eda-kpi-icon">📤</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ animatedSent() }}</div>
         <div class="eda-kpi-label">Emails envoyés</div>
       </div>
 
       <div class="eda-kpi eda-kpi--green">
-        <div class="eda-kpi-icon">✅</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ statsHistory()!.summary.totalDelivered }}</div>
         <div class="eda-kpi-label">Emails livrés</div>
       </div>
 
       <div class="eda-kpi eda-kpi--neutral">
-        <div class="eda-kpi-icon">👀</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ statsHistory()!.summary.totalOpened }}</div>
         <div class="eda-kpi-label">Emails ouverts</div>
       </div>
 
       <div class="eda-kpi eda-kpi--red">
-        <div class="eda-kpi-icon">⚠️</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ statsHistory()!.summary.totalBounced }}</div>
         <div class="eda-kpi-label">Bounced</div>
       </div>
 
       <div class="eda-kpi eda-kpi--green">
-        <div class="eda-kpi-icon">📈</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ statsHistory()!.summary.deliveryRate }}%</div>
         <div class="eda-kpi-label">Taux de livraison</div>
       </div>
 
       <div class="eda-kpi eda-kpi--neutral">
-        <div class="eda-kpi-icon">📊</div>
+        <div class="eda-kpi-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="12" y1="20" x2="12" y2="10"/>
+            <line x1="18" y1="20" x2="18" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="16"/>
+          </svg>
+        </div>
         <div class="eda-kpi-val">{{ statsHistory()!.summary.openRate }}%</div>
         <div class="eda-kpi-label">Taux d'ouverture</div>
       </div>
@@ -156,7 +188,12 @@
             <div class="eda-insight-label">Alerte qualité</div>
             @if (worstBounceDay(); as worst) {
               <div class="eda-insight-value eda-insight-value--alert">
-                ⚠️ {{ worst.day.date }} : {{ worst.day.bounced }} emails bounced
+                <svg class="eda-insight-alert-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                {{ worst.day.date }} : {{ worst.day.bounced }} emails bounced
                 @if (worst.otherDaysCount > 0) {
                   <span class="eda-insight-sub">+{{ worst.otherDaysCount }} autre(s) jour(s) concerné(s)</span>
                 }

@@ -331,6 +331,16 @@
   box-shadow: 0 2px 8px rgba(249,115,22,.4);
 }
 
+.cl-pg-select {
+  height: 34px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 9px;
+  padding: 0 8px;
+  font-size: 12.5px;
+  color: #374151;
+  cursor: pointer;
+}
+
 /* ═══════════════════════════════════════════════════════════
    DETAIL MODAL
    ═══════════════════════════════════════════════════════════ */
@@ -385,5 +395,4 @@
 .cl-os-pending   { background: #FFFBEB; color: #D97706; }
 .cl-os-paid      { background: #F0FDF4; color: #16A34A; }
 .cl-os-delivery  { background: #FFFBEB; color: #D97706; }
-.cl-os-delivered { background: #F0FDF4; color: #16A34A; }
 .cl-os-cancelled { background: #FEF2F2; color: #B91C1C; }

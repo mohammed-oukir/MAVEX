@@ -16,3 +16,19 @@ export interface UserRequest {
   password?: string;
   role: UserRole;
 }
+
+export interface UserSearchCriteria {
+  fullName?: string;
+  email?: string;
+  role?: UserRole;
+  status?: 'all' | 'active' | 'inactive';
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  adminCount: number;
+  agentCount: number;
+  comptableCount: number;
+}

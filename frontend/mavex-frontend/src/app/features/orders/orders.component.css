@@ -117,9 +117,10 @@
    ═══════════════════════════════════════════════════════════ */
 .or-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
 }
+@media (max-width: 1280px) { .or-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 992px) { .or-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 576px) { .or-kpi-grid { grid-template-columns: 1fr; } }
 
@@ -136,6 +137,7 @@
   box-shadow: 0 4px 20px rgba(249,115,22,.15);
   transform: translateY(-2px);
 }
+
 .or-kpi-card.or-kpi-active {
   border-color: currentColor;
   box-shadow: 0 4px 20px rgba(0,0,0,.12);
@@ -320,7 +322,6 @@
 .or-row-pending   td:first-child { border-left: 3px solid #F59E0B; }
 .or-row-paid      td:first-child { border-left: 3px solid #22C55E; }
 .or-row-delivery  td:first-child { border-left: 3px solid #F59E0B; }
-.or-row-delivered td:first-child { border-left: 3px solid #22C55E; }
 .or-row-cancelled td:first-child { border-left: 3px solid #EF4444; opacity: .7; }
 
 .or-row-selected { background: #FFF7ED !important; }

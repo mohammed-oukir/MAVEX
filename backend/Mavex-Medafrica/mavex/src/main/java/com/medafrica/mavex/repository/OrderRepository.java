@@ -31,7 +31,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
            "LEFT JOIN FETCH o.client " +
            "LEFT JOIN FETCH o.shipment s " +
            "LEFT JOIN FETCH s.shipper " +
-           "WHERE o.shipment.id = :shipmentId")
+           "WHERE o.shipment.id = :shipmentId " +
+           "ORDER BY o.id DESC")
     List<Order> findByShipmentIdWithRelations(@Param("shipmentId") Long shipmentId);
 
     List<Order> findByClientId(Long clientId);

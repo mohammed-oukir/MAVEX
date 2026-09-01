@@ -1,5 +1,6 @@
 package com.medafrica.mavex.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,12 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
     List<Client> findByActiveTrue();
 
     List<Client> findAllByOrderByCreatedAtDesc();
+
+    long countByActiveTrue();
+
+    long countByActiveFalse();
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }
 
 

@@ -2,11 +2,17 @@ package com.medafrica.mavex.service;
 
 import com.medafrica.mavex.dto.user.UserRequestDTO;
 import com.medafrica.mavex.dto.user.UserResponseDTO;
+import com.medafrica.mavex.dto.user.UserSearchCriteria;
+import com.medafrica.mavex.dto.user.UserStatsResponse;
+import com.medafrica.mavex.model.enums.UserRole;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.UserRepository;
+import com.medafrica.mavex.repository.specification.UserSpecification;
 import com.medafrica.mavex.service.interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +35,31 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<UserResponseDTO> search(UserSearchCriteria criteria, Pageable pageable) {
+        return userRepository.findAll(UserSpecification.build(criteria), pageable)
+                .map(this::toResponseDTO);
+    }
+
+    @Override
+    public UserStatsResponse getStats() {
+        long total      = userRepository.count();
+        long active     = userRepository.countByActiveTrue();
+        long inactive   = userRepository.countByActiveFalse();
+        long admins     = userRepository.countByRole(UserRole.ADMIN);
+        long agents     = userRepository.countByRole(UserRole.AGENT);
+        long comptables = userRepository.countByRole(UserRole.COMPTABLE);
+
+        return UserStatsResponse.builder()
+                .totalUsers(total)
+                .activeUsers(active)
+                .inactiveUsers(inactive)
+                .adminCount(admins)
+                .agentCount(agents)
+                .comptableCount(comptables)
+                .build();
     }
 
     @Override

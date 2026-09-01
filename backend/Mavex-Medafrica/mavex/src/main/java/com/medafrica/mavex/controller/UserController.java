@@ -3,10 +3,17 @@ package com.medafrica.mavex.controller;
 import com.medafrica.mavex.dto.ApiResponse;
 import com.medafrica.mavex.dto.user.UserRequestDTO;
 import com.medafrica.mavex.dto.user.UserResponseDTO;
+import com.medafrica.mavex.dto.user.UserSearchCriteria;
+import com.medafrica.mavex.dto.user.UserStatsResponse;
+import com.medafrica.mavex.model.enums.UserRole;
 import com.medafrica.mavex.service.interfaces.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +33,29 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getAll() {
         return ResponseEntity.ok(userService.findAll());
+    }
+
+    /** GET /api/users/search */
+    @GetMapping("/search")
+    public ResponseEntity<Page<UserResponseDTO>> search(
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) UserRole role,
+            @RequestParam(required = false) String status,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        UserSearchCriteria criteria = UserSearchCriteria.builder()
+                .fullName(fullName)
+                .email(email)
+                .role(role)
+                .status(status)
+                .build();
+        return ResponseEntity.ok(userService.search(criteria, pageable));
+    }
+
+    /** GET /api/users/stats */
+    @GetMapping("/stats")
+    public ResponseEntity<UserStatsResponse> getStats() {
+        return ResponseEntity.ok(userService.getStats());
     }
 
     /** GET /api/users/{id} */

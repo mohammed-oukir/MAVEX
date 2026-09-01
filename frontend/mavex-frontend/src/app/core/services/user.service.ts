@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { UserResponse, UserRequest } from '../models/user.model';
-import { ApiResponse } from '../models/api.model';
+import { UserResponse, UserRequest, UserSearchCriteria, UserStats } from '../models/user.model';
+import { ApiResponse, Page } from '../models/api.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -10,6 +10,22 @@ export class UserService {
 
   getAll(): Observable<UserResponse[]> {
     return this.http.get<UserResponse[]>('/api/users');
+  }
+
+  search(criteria: UserSearchCriteria = {}, page = 0, size = 20): Observable<Page<UserResponse>> {
+    let p = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    if (criteria.fullName) p = p.set('fullName', criteria.fullName);
+    if (criteria.email)    p = p.set('email', criteria.email);
+    if (criteria.role)     p = p.set('role', criteria.role);
+    if (criteria.status && criteria.status !== 'all') p = p.set('status', criteria.status);
+    return this.http.get<Page<UserResponse>>('/api/users/search', { params: p });
+  }
+
+  getStats(): Observable<UserStats> {
+    return this.http.get<UserStats>('/api/users/stats');
   }
 
   getById(id: number): Observable<UserResponse> {
