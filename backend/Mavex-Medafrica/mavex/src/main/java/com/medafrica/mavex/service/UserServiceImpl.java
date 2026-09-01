@@ -8,6 +8,7 @@ import com.medafrica.mavex.model.enums.UserRole;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.UserRepository;
 import com.medafrica.mavex.repository.specification.UserSpecification;
+import com.medafrica.mavex.security.repository.RefreshTokenRepository;
 import com.medafrica.mavex.service.interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository  userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public List<UserResponseDTO> findAll() {
@@ -98,8 +101,12 @@ public class UserServiceImpl implements UserService {
 
         user.setFullName(dto.getFullName());
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole());
+        if (dto.getPassword() != null) {
+            user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+            user.setPasswordChangedAt(LocalDateTime.now());
+            refreshTokenRepository.revokeAllByUserId(user.getId());
+        }
 
         return toResponseDTO(userRepository.save(user));
     }
@@ -119,7 +126,11 @@ public class UserServiceImpl implements UserService {
             user.setEmail(dto.getEmail());
         }
 
-        if (dto.getPassword() != null) user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getPassword() != null) {
+            user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+            user.setPasswordChangedAt(LocalDateTime.now());
+            refreshTokenRepository.revokeAllByUserId(user.getId());
+        }
         if (dto.getRole()     != null) user.setRole(dto.getRole());
 
         return toResponseDTO(userRepository.save(user));

@@ -136,6 +136,7 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
         user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
+        user.setPasswordChangedAt(LocalDateTime.now());
         userRepository.save(user);
 
         // Révoquer tous les refresh tokens actifs (sécurité)

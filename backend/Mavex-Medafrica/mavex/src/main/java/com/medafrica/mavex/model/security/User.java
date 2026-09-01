@@ -49,4 +49,8 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /** Date du dernier changement de mot de passe. Null = jamais changé depuis la création (aucune restriction appliquée). */
+    @Column(name = "password_changed_at")
+    private LocalDateTime passwordChangedAt;
 }
