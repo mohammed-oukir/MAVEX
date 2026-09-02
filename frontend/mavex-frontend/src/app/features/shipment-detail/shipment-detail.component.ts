@@ -85,6 +85,9 @@ export class ShipmentDetailComponent implements OnInit {
   dutyRateInput = signal(0);
   savingDuty    = signal(false);
 
+  /* ── Duty history menu ───────────────────────────────── */
+  dutyHistoryMenuOpen = signal(false);
+
   /* ── Edit shipment ───────────────────────────────────── */
   editingShipment = signal(false);
   savingShipment  = signal(false);

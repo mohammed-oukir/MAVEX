@@ -1,15 +1,19 @@
 package com.medafrica.mavex.service;
 
+import com.medafrica.mavex.dto.shipment.DutyChangeHistoryResponse;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
 import com.medafrica.mavex.model.actor.Shipper;
+import com.medafrica.mavex.model.enums.DutyChangeEntityType;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.enums.ShipmentStatus;
+import com.medafrica.mavex.model.logistics.DutyChangeHistory;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.Shipment;
 import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.*;
+import com.medafrica.mavex.repository.specification.DutyChangeHistorySpecification;
 import com.medafrica.mavex.repository.specification.ShipmentSpecification;
 import com.medafrica.mavex.service.interfaces.ShipmentService;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,6 +45,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final EmailLogRepository           emailLogRepository;
     private final PaymentTransactionRepository transactionRepository;
+    private final DutyChangeHistoryRepository  dutyChangeHistoryRepository;
 
     @Override
     @Transactional
@@ -199,8 +204,19 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Transactional
     public ShipmentResponseDTO updateDutyRate(Long id, BigDecimal rate) {
         Shipment shipment = findOrThrow(id);
+        BigDecimal oldRate = shipment.getDutyRate() != null ? shipment.getDutyRate() : BigDecimal.ZERO;
         shipment.setDutyRate(rate);
         shipmentRepository.save(shipment);
+
+        if (oldRate.compareTo(rate) != 0) {
+            dutyChangeHistoryRepository.save(DutyChangeHistory.builder()
+                    .entityType(DutyChangeEntityType.SHIPMENT)
+                    .shipment(shipment)
+                    .oldDutyRate(oldRate)
+                    .newDutyRate(rate)
+                    .changedBy(currentUser())
+                    .build());
+        }
 
         List<Order> orders = orderRepository.findByShipmentId(id);
         List<Order> updatableOrders = orders.stream()
@@ -214,6 +230,28 @@ public class ShipmentServiceImpl implements ShipmentService {
         log.info("Taux mis à jour shipment {} → {}% ({} orders recalculés)",
                 id, rate.multiply(new BigDecimal("100")), updatableOrders.size());
         return toResponse(shipment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DutyChangeHistoryResponse> getShipmentDutyHistory(
+            Long shipmentId, String changedByName, LocalDate from, LocalDate to, Pageable pageable) {
+        findOrThrow(shipmentId);
+        Specification<DutyChangeHistory> spec =
+                DutyChangeHistorySpecification.forShipment(shipmentId, changedByName, from, to);
+        return dutyChangeHistoryRepository.findAll(spec, pageable)
+                .map(DutyChangeHistoryResponse::from);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DutyChangeHistoryResponse> getOrderDutyHistoryForShipment(
+            Long shipmentId, String hawb, String changedByName, LocalDate from, LocalDate to, Pageable pageable) {
+        findOrThrow(shipmentId);
+        Specification<DutyChangeHistory> spec =
+                DutyChangeHistorySpecification.forShipmentOrders(shipmentId, hawb, changedByName, from, to);
+        return dutyChangeHistoryRepository.findAll(spec, pageable)
+                .map(DutyChangeHistoryResponse::from);
     }
 
     @Override

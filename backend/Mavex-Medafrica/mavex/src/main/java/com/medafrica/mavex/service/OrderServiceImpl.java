@@ -9,6 +9,8 @@ import com.medafrica.mavex.model.actor.Client;
 import com.medafrica.mavex.model.enums.OrderStatus;
 import com.medafrica.mavex.model.enums.PaymentGatewayType;
 import com.medafrica.mavex.model.enums.PaymentStatus;
+import com.medafrica.mavex.model.enums.DutyChangeEntityType;
+import com.medafrica.mavex.model.logistics.DutyChangeHistory;
 import com.medafrica.mavex.model.logistics.Order;
 import com.medafrica.mavex.model.logistics.OrderStatusHistory;
 import com.medafrica.mavex.model.logistics.Shipment;
@@ -17,6 +19,7 @@ import com.medafrica.mavex.model.security.User;
 import com.medafrica.mavex.repository.ClientRepository;
 import com.medafrica.mavex.model.email.EmailLog;
 import com.medafrica.mavex.model.enums.EmailStatus;
+import com.medafrica.mavex.repository.DutyChangeHistoryRepository;
 import com.medafrica.mavex.repository.EmailLogRepository;
 import com.medafrica.mavex.repository.OrderRepository;
 import com.medafrica.mavex.repository.OrderStatusHistoryRepository;
@@ -58,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
     private final EmailLogRepository           emailLogRepository;
     private final PaymentTransactionRepository transactionRepository;
     private final ShipmentStatusService        shipmentStatusService;
+    private final DutyChangeHistoryRepository  dutyChangeHistoryRepository;
 
     // ───────────────────────────── CREATE ─────────────────────────────
 
@@ -202,6 +206,8 @@ public class OrderServiceImpl implements OrderService {
         Client client = clientRepository.findById(request.getClientId())
                 .orElseThrow(() -> new EntityNotFoundException("Client introuvable id=" + request.getClientId()));
 
+        BigDecimal oldDutyRate = order.getDutyRate();
+
         order.setHawb(request.getHawb());
         order.setGoodsDescription(request.getGoodsDescription());
         order.setHtsusCode(request.getHtsusCode());
@@ -218,7 +224,9 @@ public class OrderServiceImpl implements OrderService {
         order.setShipment(shipment);
         order.setClient(client);
 
-        return toResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        recordDutyChange(saved, oldDutyRate, request.getDutyRate());
+        return toResponse(saved);
     }
 
     // ─────────────────────── PATCH ────────────────────────────────────
@@ -237,6 +245,8 @@ public class OrderServiceImpl implements OrderService {
                 && orderRepository.existsByHawb(request.getHawb())) {
             throw new IllegalArgumentException("Un order avec le HAWB '" + request.getHawb() + "' existe déjà.");
         }
+
+        BigDecimal oldDutyRate = order.getDutyRate();
 
         if (request.getHawb()             != null) order.setHawb(request.getHawb());
         if (request.getGoodsDescription() != null) order.setGoodsDescription(request.getGoodsDescription());
@@ -272,7 +282,9 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        return toResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        recordDutyChange(saved, oldDutyRate, request.getDutyRate());
+        return toResponse(saved);
     }
 
     // ─────────────────────── CHANGEMENT DE STATUT ─────────────────────
@@ -411,6 +423,28 @@ public class OrderServiceImpl implements OrderService {
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return (principal instanceof User u) ? u : null;
+    }
+
+    /**
+     * Enregistre une ligne d'historique ORDER si le dutyRate a reellement change.
+     * requestedRate == null signifie que le champ n'etait pas fourni dans la requete
+     * (PUT ou PATCH) : dans ce cas aucune ligne n'est creee.
+     */
+    private void recordDutyChange(Order order, BigDecimal oldDutyRate, BigDecimal requestedRate) {
+        if (requestedRate == null) {
+            return;
+        }
+        BigDecimal previous = oldDutyRate != null ? oldDutyRate : BigDecimal.ZERO;
+        if (previous.compareTo(requestedRate) == 0) {
+            return;
+        }
+        dutyChangeHistoryRepository.save(DutyChangeHistory.builder()
+                .entityType(DutyChangeEntityType.ORDER)
+                .order(order)
+                .oldDutyRate(previous)
+                .newDutyRate(requestedRate)
+                .changedBy(getCurrentUser())
+                .build());
     }
 
     private void recordHistory(Order order, OrderStatus from, OrderStatus to, String note, User changedBy) {

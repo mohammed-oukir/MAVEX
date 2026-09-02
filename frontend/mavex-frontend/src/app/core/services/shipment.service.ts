@@ -2,7 +2,20 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Page } from '../models/api.model';
-import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus, ShipmentStatusUpdate, DutyRateUpdate } from '../models/shipment.model';
+import { ShipmentResponse, ShipmentRequest, ShipmentPatch, ShipmentStatus, ShipmentStatusUpdate, DutyRateUpdate, DutyChangeHistoryResponse } from '../models/shipment.model';
+
+export interface DutyHistoryShipmentParams {
+  changedByName?: string;
+  from?: string;
+  to?: string;
+}
+
+export interface DutyHistoryOrdersParams {
+  hawb?: string;
+  changedByName?: string;
+  from?: string;
+  to?: string;
+}
 
 export interface ShipmentSearchParams {
   mawb?:         string;
@@ -86,6 +99,29 @@ export class ShipmentService {
 
   updateDutyRate(id: number, update: DutyRateUpdate): Observable<ShipmentResponse> {
     return this.http.patch<ShipmentResponse>(`/api/shipments/${id}/duty-rate`, update);
+  }
+
+  getShipmentDutyHistory(
+    shipmentId: number, params: DutyHistoryShipmentParams = {}, page = 0, size = 20
+  ): Observable<Page<DutyChangeHistoryResponse>> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (params.changedByName) p = p.set('changedByName', params.changedByName);
+    if (params.from)          p = p.set('from', params.from);
+    if (params.to)            p = p.set('to', params.to);
+    return this.http.get<Page<DutyChangeHistoryResponse>>(
+      `/api/shipments/${shipmentId}/duty-history/shipment`, { params: p });
+  }
+
+  getOrderDutyHistory(
+    shipmentId: number, params: DutyHistoryOrdersParams = {}, page = 0, size = 20
+  ): Observable<Page<DutyChangeHistoryResponse>> {
+    let p = new HttpParams().set('page', page).set('size', size);
+    if (params.hawb)           p = p.set('hawb', params.hawb);
+    if (params.changedByName)  p = p.set('changedByName', params.changedByName);
+    if (params.from)           p = p.set('from', params.from);
+    if (params.to)             p = p.set('to', params.to);
+    return this.http.get<Page<DutyChangeHistoryResponse>>(
+      `/api/shipments/${shipmentId}/duty-history/orders`, { params: p });
   }
 
   delete(id: number): Observable<void> {

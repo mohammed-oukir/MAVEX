@@ -1,5 +1,6 @@
 package com.medafrica.mavex.service.interfaces;
 
+import com.medafrica.mavex.dto.shipment.DutyChangeHistoryResponse;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentResponseDTO;
 import com.medafrica.mavex.dto.shipment.ShipmentStatusUpdateDTO;
@@ -64,6 +65,14 @@ public interface ShipmentService {
     ShipmentResponseDTO replace(Long id, ShipmentRequestDTO req);
 
     ShipmentResponseDTO updateDutyRate(Long id, BigDecimal rate);
+
+    /** Historique des changements de duty rate faits directement sur ce Shipment. */
+    Page<DutyChangeHistoryResponse> getShipmentDutyHistory(
+            Long shipmentId, String changedByName, LocalDate from, LocalDate to, Pageable pageable);
+
+    /** Historique des changements de duty rate faits sur les Orders de ce Shipment. */
+    Page<DutyChangeHistoryResponse> getOrderDutyHistoryForShipment(
+            Long shipmentId, String hawb, String changedByName, LocalDate from, LocalDate to, Pageable pageable);
 
     void delete(Long id);
 }

@@ -1,5 +1,6 @@
 package com.medafrica.mavex.controller;
 
+import com.medafrica.mavex.dto.shipment.DutyChangeHistoryResponse;
 import com.medafrica.mavex.dto.shipment.DutyRateUpdateDTO;
 import com.medafrica.mavex.dto.shipment.ExportSelectionRequest;
 import com.medafrica.mavex.dto.shipment.ShipmentRequestDTO;
@@ -48,6 +49,31 @@ public class ShipmentController {
     @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
     public ResponseEntity<ShipmentResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(shipmentService.getById(id));
+    }
+
+    // ─────────── GET /api/shipments/{id}/duty-history/shipment — historique SHIPMENT ───────────
+    @GetMapping("/{id}/duty-history/shipment")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
+    public ResponseEntity<Page<DutyChangeHistoryResponse>> getShipmentDutyHistory(
+            @PathVariable Long id,
+            @RequestParam(required = false) String changedByName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @PageableDefault(size = 20, sort = "changedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(shipmentService.getShipmentDutyHistory(id, changedByName, from, to, pageable));
+    }
+
+    // ─────────── GET /api/shipments/{id}/duty-history/orders — historique ORDER (tous les orders du shipment) ───────────
+    @GetMapping("/{id}/duty-history/orders")
+    @PreAuthorize("@permissionEvaluatorService.hasPermission('SHIPMENTS','VIEW')")
+    public ResponseEntity<Page<DutyChangeHistoryResponse>> getOrderDutyHistory(
+            @PathVariable Long id,
+            @RequestParam(required = false) String hawb,
+            @RequestParam(required = false) String changedByName,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @PageableDefault(size = 20, sort = "changedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(shipmentService.getOrderDutyHistoryForShipment(id, hawb, changedByName, from, to, pageable));
     }
 
     // ─────────── GET /api/shipments — liste paginée, avec filtres par colonne ───────────

@@ -60,6 +60,20 @@ export const routes: Routes = [
           import('./features/shipment-detail/shipment-detail.component').then(m => m.ShipmentDetailComponent),
       },
       {
+        path: 'shipments/:id/duty-history/shipment',
+        canActivate: [moduleAccessGuard],
+        data: { module: 'SHIPMENTS' },
+        loadComponent: () =>
+          import('./features/duty-history/duty-history-shipment.component').then(m => m.DutyHistoryShipmentComponent),
+      },
+      {
+        path: 'shipments/:id/duty-history/orders',
+        canActivate: [moduleAccessGuard],
+        data: { module: 'SHIPMENTS' },
+        loadComponent: () =>
+          import('./features/duty-history/duty-history-orders.component').then(m => m.DutyHistoryOrdersComponent),
+      },
+      {
         path: 'orders',
         canActivate: [moduleAccessGuard],
         data: { module: 'ORDERS' },

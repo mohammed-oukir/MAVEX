@@ -1,0 +1,148 @@
+<a [routerLink]="['/shipments', shipmentId()]" class="dh-back">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+  Retour au shipment
+</a>
+
+<h1 class="dh-title">Historique duty — Shipment</h1>
+
+<!-- ── Panneau de filtres ──────────────────────────────────── -->
+<div class="sp-filters">
+  <div class="sp-filters-head">
+    <div class="sp-filters-title">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+      <span>Filters</span>
+    </div>
+    <button type="button" class="sp-filters-toggle"
+      (click)="filtersCollapsed.set(!filtersCollapsed())"
+      [attr.aria-expanded]="!filtersCollapsed()"
+      aria-controls="dhs-filters-body"
+      [attr.aria-label]="filtersCollapsed() ? 'Agrandir les filtres' : 'Réduire les filtres'">
+      @if (filtersCollapsed()) {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      } @else {
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      }
+    </button>
+  </div>
+
+  @if (!filtersCollapsed()) {
+    <div class="sp-filters-body" id="dhs-filters-body">
+      <div class="sp-filters-grid">
+        <div class="sp-field">
+          <label class="sp-field-label" for="dhs-name">Nom</label>
+          <input id="dhs-name" type="text" class="sp-field-input"
+            [value]="flChangedByName()" (input)="flChangedByName.set($any($event.target).value)" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-field-label" for="dhs-from">Date — du</label>
+          <input id="dhs-from" type="date" class="sp-field-input"
+            [value]="flFrom()" (input)="flFrom.set($any($event.target).value)" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-field-label" for="dhs-to">Date — au</label>
+          <input id="dhs-to" type="date" class="sp-field-input"
+            [value]="flTo()" (input)="flTo.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="sp-filters-actions">
+        <button type="button" class="sp-btn sp-btn-reset" (click)="clearFilters()">Reset</button>
+        <button type="button" class="sp-btn sp-btn-search" (click)="onSearchClick()">Search</button>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ── Total ────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body p-0">
+    <div class="or-filter-bar">
+      <span class="or-total-badge ms-auto">{{ total() }} résultat(s)</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Table ────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm dh-table-card">
+  <div class="table-responsive">
+    <table class="table or-table align-middle mb-0" aria-label="Historique duty rate du shipment">
+      <thead>
+        <tr class="or-thead">
+          <th scope="col">Nom</th>
+          <th scope="col">Date</th>
+          <th scope="col" class="text-end">Ancien</th>
+          <th scope="col" class="text-end">Nouveau</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (i of [1,2,3,4,5]; track i) {
+            <tr>
+              @for (j of [140,120,80,80]; track $index) {
+                <td><div class="or-sk" [style.width.px]="j"></div></td>
+              }
+            </tr>
+          }
+        } @else if (history().length === 0) {
+          <tr>
+            <td colspan="4" class="py-5 text-center">
+              <div class="d-flex flex-column align-items-center gap-3">
+                <div class="or-empty-icon" aria-hidden="true">
+                  <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                  <p class="fw-semibold mb-1">Aucun changement trouvé</p>
+                  @if (hasFilters()) {
+                    <p class="text-muted mb-2" style="font-size:13px">Essayez de modifier vos filtres</p>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="clearFilters()">Effacer les filtres</button>
+                  } @else {
+                    <p class="text-muted mb-0" style="font-size:13px">Aucune modification du duty rate n'a encore été enregistrée pour ce shipment.</p>
+                  }
+                </div>
+              </div>
+            </td>
+          </tr>
+        } @else {
+          @for (h of history(); track h.id) {
+            <tr class="or-row">
+              <td>{{ h.changedByName || '—' }}</td>
+              <td>{{ h.changedAt | date:'dd/MM/yyyy à HH:mm' }}</td>
+              <td class="text-end or-num">{{ fmtDuty(h.oldDutyRate) }}</td>
+              <td class="text-end or-num">{{ fmtDuty(h.newDutyRate) }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (total() > 0) {
+    <div class="or-pagination">
+      <div class="d-flex align-items-center gap-1">
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(0)" aria-label="Première page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <button type="button" class="or-pg-btn" [disabled]="page() === 0" (click)="goToPage(page() - 1)" aria-label="Précédent">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pagesArray(); track p) {
+          <button type="button" class="or-pg-btn" [class.or-pg-active]="p === page()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(page() + 1)" aria-label="Suivant">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <button type="button" class="or-pg-btn" [disabled]="page() === totalPages() - 1" (click)="goToPage(totalPages() - 1)" aria-label="Dernière page">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+        </button>
+      </div>
+      <select class="or-pg-select" [value]="pageSize()" (change)="onPageSizeChange(+$any($event.target).value)" aria-label="Lignes par page">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  }
+</div>

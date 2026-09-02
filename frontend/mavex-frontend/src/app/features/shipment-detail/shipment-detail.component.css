@@ -253,6 +253,7 @@
    INFO PANEL
    ===================================================== */
 .sd-panel { background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
+.sd-panel-top { display: flex; justify-content: flex-end; margin-bottom: 16px; }
 .sd-grid  { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 18px 24px; }
 .sd-key   { font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
 .sd-val   { font-size: 14px; color: #111827; font-weight: 500; }
@@ -269,6 +270,72 @@
 .sd-duty-btn:disabled { opacity: .5; cursor: not-allowed; }
 .sd-duty-cancel { height: 32px; padding: 0 10px; border: 1px solid #E5E7EB; border-radius: 7px; background: #fff; color: #6B7280; font-size: 12px; cursor: pointer; transition: border-color .15s; }
 .sd-duty-cancel:hover { border-color: #9CA3AF; }
+
+.sd-duty-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12.5px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: #6B7280;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.sd-duty-history-btn:hover               { border-color: #F97316; color: #F97316; background: #FFF7ED; }
+.sd-duty-menu-open .sd-duty-history-btn  { border-color: #F97316; color: #F97316; background: #FFF7ED; }
+
+/* ── Menu historique duty (dropdown, même pattern que sd-export-*) ── */
+.sd-duty-menu-wrap { position: relative; display: inline-flex; }
+
+.sd-duty-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+
+.sd-duty-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 160px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.05), 0 10px 30px rgba(0,0,0,.1);
+  z-index: 200;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sd-duty-menu-item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s, color .12s;
+}
+.sd-duty-menu-item:hover {
+  background: #FFF7ED;
+  color: #F97316;
+  text-decoration: none;
+}
+.sd-duty-menu-item + .sd-duty-menu-item {
+  border-top: 1px solid #F3F4F6;
+}
 
 /* =====================================================
    STATUS TABS

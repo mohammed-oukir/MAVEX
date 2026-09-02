@@ -52,3 +52,17 @@ export interface ShipmentStatusUpdate {
 export interface DutyRateUpdate {
   dutyRate: number;
 }
+
+export type DutyChangeEntityType = 'SHIPMENT' | 'ORDER';
+
+export interface DutyChangeHistoryResponse {
+  id: number;
+  entityType: DutyChangeEntityType;
+  shipmentId?: number;
+  orderId?: number;
+  orderHawb?: string;
+  oldDutyRate: number;
+  newDutyRate: number;
+  changedByName?: string;
+  changedAt: string;
+}

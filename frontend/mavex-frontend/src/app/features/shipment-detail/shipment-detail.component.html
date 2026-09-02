@@ -68,6 +68,21 @@
 
   <!-- Info panel -->
   <div class="sd-panel">
+    <div class="sd-panel-top">
+      <div class="sd-duty-menu-wrap" [class.sd-duty-menu-open]="dutyHistoryMenuOpen()">
+        <button type="button" class="sd-duty-history-btn" (click)="dutyHistoryMenuOpen.set(!dutyHistoryMenuOpen())"
+          [attr.aria-expanded]="dutyHistoryMenuOpen()" aria-haspopup="true" aria-label="Historique duty">
+          Historique Duty
+        </button>
+        @if (dutyHistoryMenuOpen()) {
+          <div class="sd-duty-menu-backdrop" (click)="dutyHistoryMenuOpen.set(false)" aria-hidden="true"></div>
+          <div class="sd-duty-menu-dropdown" role="menu" aria-label="Historique duty">
+            <a [routerLink]="['/shipments', shipment()!.id, 'duty-history', 'shipment']" class="sd-duty-menu-item" role="menuitem" (click)="dutyHistoryMenuOpen.set(false)">Shipment</a>
+            <a [routerLink]="['/shipments', shipment()!.id, 'duty-history', 'orders']" class="sd-duty-menu-item" role="menuitem" (click)="dutyHistoryMenuOpen.set(false)">Ordre</a>
+          </div>
+        }
+      </div>
+    </div>
     <div class="sd-grid">
       <div>
         <div class="sd-key">Carrier</div>
