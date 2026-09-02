@@ -16,7 +16,7 @@ import { ExchangeRateService } from '../../core/services/exchange-rate.service';
 import { AuthService }         from '../../core/auth/auth.service';
 import { MyPermissionsService } from '../../core/services/my-permissions.service';
 import { BadgeComponent } from '../../shared/badge/badge.component';
-import { BulkEmailResult, EmailLogResponse, OrderPatch, OrderResponse, OrderSearchParams, OrderStatus } from '../../core/models/order.model';
+import { BulkEmailResult, EmailLogResponse, ORDER_STATUSES, OrderPatch, OrderResponse, OrderSearchParams, OrderStatus } from '../../core/models/order.model';
 import { ClientResponse } from '../../core/models/client.model';
 
 @Component({
@@ -59,10 +59,15 @@ export class OrdersComponent implements OnInit {
   kpiPaid    = signal(0);
   kpiEmailOutdated = signal(0);
   kpiEmailSent = signal(0);
+  kpiCancelled = signal(0);
 
   /* ── Panneau de filtres ───────────────────────────────── */
   filtersCollapsed    = signal(false);
   advancedFiltersOpen = signal(false);
+
+  /* ── Statuts (source unique) ─────────────────────────── */
+  readonly orderStatuses = ORDER_STATUSES;
+
   flHawb         = signal('');
   flClient       = signal('');
   flClientEmail  = signal('');
@@ -203,13 +208,15 @@ export class OrdersComponent implements OnInit {
       paid:      this.orderSvc.search({ status: 'PAID' }, 0, 1),
       emailSent: this.orderSvc.search({ status: 'EMAIL_SENT' }, 0, 1),
       outdated:  this.orderSvc.search({ status: 'EMAIL_OUTDATED' }, 0, 1),
+      cancelled: this.orderSvc.search({ status: 'CANCELLED' }, 0, 1),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ all, noEmail, paid, emailSent, outdated }) => {
+      next: ({ all, noEmail, paid, emailSent, outdated, cancelled }) => {
         this.kpiTotal.set(all.totalElements);
         this.kpiNoEmail.set(noEmail.totalElements);
         this.kpiPaid.set(paid.totalElements);
         this.kpiEmailSent.set(emailSent.totalElements);
         this.kpiEmailOutdated.set(outdated.totalElements);
+        this.kpiCancelled.set(cancelled.totalElements);
       },
     });
   }

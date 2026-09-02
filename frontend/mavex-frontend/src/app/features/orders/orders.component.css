@@ -117,12 +117,9 @@
    ═══════════════════════════════════════════════════════════ */
 .or-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
 }
-@media (max-width: 1280px) { .or-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 992px) { .or-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 576px) { .or-kpi-grid { grid-template-columns: 1fr; } }
 
 .or-kpi-card {
   display: flex; align-items: center; gap: 16px;
@@ -145,6 +142,7 @@
 .or-kpi-card.or-kpi-amber.or-kpi-active { border-color: #F59E0B; }
 .or-kpi-card.or-kpi-blue.or-kpi-active  { border-color: #3B82F6; }
 .or-kpi-card.or-kpi-green.or-kpi-active { border-color: #22C55E; }
+.or-kpi-card.or-kpi-red.or-kpi-active   { border-color: #EF4444; }
 
 .or-kpi-icon {
   width: 44px; height: 44px; border-radius: 10px;
@@ -154,6 +152,7 @@
 .or-kpi-amber-icon  { background: #FEF9C3; color: #92400E; }
 .or-kpi-blue-icon   { background: #EFF6FF; color: #2563EB; }
 .or-kpi-green-icon  { background: #F0FDF4; color: #16A34A; }
+.or-kpi-red-icon    { background: #FEF2F2; color: #DC2626; }
 
 .or-kpi-body { flex: 1; min-width: 0; }
 .or-kpi-num  { font-family: 'Inter Tight', sans-serif; font-weight: 800; font-size: 26px; line-height: 1; color: #0C0C0E; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }

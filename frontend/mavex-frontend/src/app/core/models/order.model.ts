@@ -5,6 +5,27 @@ export type OrderStatus =
   | 'PAID'
   | 'CANCELLED';
 
+export interface OrderStatusOption {
+  value: OrderStatus;
+  label: string;
+  color?: string;
+  bg?: string;
+}
+
+/**
+ * Source unique des statuts Order pour le frontend (libellés FR, couleurs).
+ * Couleurs/bg repris de shipment-detail.component.ts (statusOptions).
+ * Les 5 valeurs reflètent l'enum backend OrderStatus.java — toute évolution
+ * de l'enum backend doit être répercutée ici manuellement.
+ */
+export const ORDER_STATUSES: ReadonlyArray<OrderStatusOption> = [
+  { value: 'CREATED',        label: 'Créé',            color: '#6B7280', bg: '#F3F4F6' },
+  { value: 'EMAIL_SENT',     label: 'Email envoyé',    color: '#3B82F6', bg: '#EFF6FF' },
+  { value: 'EMAIL_OUTDATED', label: 'Email obsolète',  color: '#F97316', bg: '#FFF7ED' },
+  { value: 'PAID',           label: 'Payé',            color: '#22C55E', bg: '#F0FDF4' },
+  { value: 'CANCELLED',      label: 'Annulé',          color: '#EF4444', bg: '#FEF2F2' },
+];
+
 export interface OrderResponse {
   id:               number;
   hawb:             string;
