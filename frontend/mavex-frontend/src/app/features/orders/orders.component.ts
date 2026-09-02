@@ -96,6 +96,9 @@ export class OrdersComponent implements OnInit {
   deleteId = signal<number | null>(null);
   deleting = signal(false);
 
+  /* ── Description (modal détail) ───────────────────────── */
+  descExpanded = signal<boolean>(false);
+
   /* ── Historique emails ────────────────────────────────── */
   emailHistory      = signal<EmailLogResponse[]>([]);
   emailHistoryOrder = signal<OrderResponse | null>(null);
@@ -456,7 +459,13 @@ export class OrdersComponent implements OnInit {
 
   /* ── Detail ───────────────────────────────────────────── */
   openDetail(o: OrderResponse): void { this.detail.set(o); }
-  closeDetail(): void                { this.detail.set(null); }
+  closeDetail(): void                { this.detail.set(null); this.descExpanded.set(false); }
+
+  toggleDescription(): void { this.descExpanded.update(v => !v); }
+
+  isDescriptionLong(text: string | null | undefined): boolean {
+    return !!text && text.length > 150;
+  }
 
   /* ── Historique emails ────────────────────────────────── */
   openEmailHistory(o: OrderResponse): void {

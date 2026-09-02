@@ -624,7 +624,17 @@
               @else { <span>—</span> }
             </div>
             <div class="or-detail-item"><span>Expéditeur</span><span>{{ o.companyName || '—' }}</span></div>
-            <div class="or-detail-item"><span>Description</span><span>{{ o.goodsDescription || '—' }}</span></div>
+            <div class="or-detail-item or-detail-item--desc">
+              <span>Description</span>
+              <span>
+                <span class="or-detail-desc" [class.expanded]="descExpanded()">{{ o.goodsDescription || '—' }}</span>
+                @if (isDescriptionLong(o.goodsDescription)) {
+                  <button type="button" class="or-desc-toggle" (click)="toggleDescription()">
+                    {{ descExpanded() ? 'Voir moins' : 'Voir plus' }}
+                  </button>
+                }
+              </span>
+            </div>
             <div class="or-detail-item"><span>Poids</span><span>{{ fmtWeight(o.shipmentWeight) }}</span></div>
           </div>
           <div class="col-12">
